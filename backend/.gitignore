@@ -1,0 +1,39 @@
+env/
+__pycache__/
+.env
+.venv/
+.env.example
+.env.prod
+.env.dev
+
+# Database
+db.sqlite3
+
+# Media files
+media/
+
+# Static files
+static/
+
+# Logs
+*.log
+
+# IDE / OS
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Tests / coverage
+.coverage
+htmlcov/
+.pytest_cache/

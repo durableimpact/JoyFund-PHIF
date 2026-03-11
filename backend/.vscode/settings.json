@@ -1,0 +1,9 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "dpkg": true,
+        "/^cd \"/home/ivantom/Desktop/Code/Projects/durable impact/JoyFund-PHIF/backend\" && python manage\\.py check 2>&1$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
