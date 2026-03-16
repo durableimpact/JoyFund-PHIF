@@ -38,8 +38,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # API endpoints
+    path('auth/', include('drf_social_oauth2.urls', namespace='drf')),
     path('api/accounts/', include('accounts.urls')),
+    path('api/beneficiaries/', include('beneficiaries.urls')),
     path('api/campaigns/', include('campaigns.urls')),
+    path('api/hospitals/', include('hospitals.urls')),
     path('api/vouchers/', include('vouchers.urls')),
 
     # API documentation
