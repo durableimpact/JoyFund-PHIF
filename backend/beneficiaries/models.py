@@ -9,12 +9,18 @@ class Gender(models.TextChoices):
     FEMALE = 'FEMALE', 'Female'
     OTHER = 'OTHER', 'Other'
 
+class BeneficiaryCategory(models.TextChoices):
+    MATERNAL = 'MATERNAL', 'Pregnant Woman'
+    ELDERLY = 'ELDERLY', 'Elderly'
+    OTHER = 'OTHER', 'Other'
+
 class Beneficiary(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
     full_name = models.CharField(max_length=255)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=20, choices=Gender.choices, default=Gender.OTHER)
+    category = models.CharField(max_length=20, choices=BeneficiaryCategory.choices, default=BeneficiaryCategory.OTHER)
     
     phone = models.CharField(max_length=15)
     email = models.EmailField(null=True, blank=True)
