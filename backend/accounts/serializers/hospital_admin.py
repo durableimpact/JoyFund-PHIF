@@ -37,6 +37,15 @@ class HospitalAdminCreateSerializer(NationalIDInputMixin, serializers.Serializer
     front_national_id_image = serializers.ImageField()
     back_national_id_image = serializers.ImageField()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from hospitals.models import Hospital
+        self.fields['hospital'] = serializers.PrimaryKeyRelatedField(
+            queryset=Hospital.objects.all(),
+            required=False,
+            allow_null=True,
+        )
+
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError("Username already taken.")
@@ -82,6 +91,7 @@ class HospitalAdminCreateSerializer(NationalIDInputMixin, serializers.Serializer
 class HospitalAdminDetailSerializer(serializers.ModelSerializer):
     user = UserReadSerializer(read_only=True)
     enrolled_by_id = serializers.UUIDField(source='enrolled_by.id', read_only=True)
+    hospital_id = serializers.UUIDField(source='hospital.id', read_only=True, allow_null=True)
 
     class Meta:
         model = HospitalAdmin
@@ -91,6 +101,7 @@ class HospitalAdminDetailSerializer(serializers.ModelSerializer):
             'front_national_id_image',
             'back_national_id_image',
             'enrolled_by_id',
+            'hospital_id',
         ]
 
 
@@ -114,11 +125,13 @@ class HospitalAdminUpdateSerializer(serializers.ModelSerializer):
             'national_id_number',
             'front_national_id_image',
             'back_national_id_image',
+            'hospital',
         ]
         extra_kwargs = {
             'national_id_number': {'required': False},
             'front_national_id_image': {'required': False},
             'back_national_id_image': {'required': False},
+            'hospital': {'required': False},
         }
 
     USER_FIELDS = {'username', 'email', 'first_name', 'last_name', 'phone_number', 'perfered_language'}
