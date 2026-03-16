@@ -73,6 +73,11 @@ class FeeAccount(SingletonAccountMixin, Account):
     def __str__(self):
         return f"{self.name} - Balance: {self.balance} XAF"
 
+class CampaignAccount(Account):
+    
+    def __str__(self):
+        return f"{self.name} - Balance: {self.balance} XAF"
+
 
 class FeePolicy(models.Model):
     id = models.AutoField(primary_key=True)
