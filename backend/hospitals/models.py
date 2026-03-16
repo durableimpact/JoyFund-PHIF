@@ -51,6 +51,7 @@ class Services(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='services')
     name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     is_available = models.BooleanField(default=True)
     description = models.TextField(blank=True)
