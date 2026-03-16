@@ -1,5 +1,8 @@
+from drf_yasg.utils import swagger_auto_schema
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import status
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,6 +15,8 @@ from accounts.serializers import (
 )
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin
 
+_TAG = ['Social Workers']
+
 
 class SocialWorkerCreateView(APIView):
     """
@@ -22,6 +27,12 @@ class SocialWorkerCreateView(APIView):
 
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=SocialWorkerCreateSerializer,
+        responses={201: SocialWorkerDetailSerializer},
+        operation_description="Create a new Social Worker account. Only accessible by SYSTEM_ADMIN.",
+    )
     def post(self, request):
         try:
             enrolled_by = request.user.systemadmin
@@ -43,6 +54,42 @@ class SocialWorkerCreateView(APIView):
         )
 
 
+class SocialWorkerListView(ListAPIView):
+    """
+    GET /api/accounts/social-workers/list/
+    Accessible only by SYSTEM_ADMIN.
+    """
+
+    queryset = SocialWorker.objects.select_related('user', 'enrolled_by__user').all().order_by('-user__date_joined')
+    serializer_class = SocialWorkerDetailSerializer
+    permission_classes = [IsAuthenticated, IsSystemAdmin]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = {
+        'id': ['exact'],
+        'organization': ['exact', 'icontains'],
+        'region_assigned': ['exact', 'icontains'],
+        'is_approved': ['exact'],
+        'enrolled_by_id': ['exact'],
+        'national_id_number': ['exact', 'icontains'],
+        'user__username': ['exact', 'icontains'],
+        'user__email': ['exact', 'icontains'],
+        'user__phone_number': ['exact', 'icontains'],
+        'user__is_verified': ['exact'],
+        'user__is_active': ['exact'],
+        'user__created_at': ['date', 'gte', 'lte'],
+    }
+    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'user__email', 'organization', 'region_assigned']
+    ordering_fields = ['user__date_joined', 'user__created_at', 'user__username']
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: SocialWorkerDetailSerializer(many=True)},
+        operation_description="List Social Worker profiles. Accessible only by SYSTEM_ADMIN.",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
 class SocialWorkerDetailView(RetrieveAPIView):
     """
     GET /api/accounts/social-workers/<id>/
@@ -53,6 +100,14 @@ class SocialWorkerDetailView(RetrieveAPIView):
     serializer_class = SocialWorkerDetailSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrSystemAdmin]
     lookup_field = 'id'
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: SocialWorkerDetailSerializer},
+        operation_description="Retrieve a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class SocialWorkerUpdateView(UpdateAPIView):
@@ -66,3 +121,12 @@ class SocialWorkerUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrSystemAdmin]
     lookup_field = 'id'
     http_method_names = ['patch', 'head', 'options']
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=SocialWorkerUpdateSerializer,
+        responses={200: SocialWorkerDetailSerializer},
+        operation_description="Partially update a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
