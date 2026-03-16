@@ -1,5 +1,8 @@
+from drf_yasg.utils import swagger_auto_schema
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import status
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,6 +15,8 @@ from accounts.serializers import (
 )
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin
 
+_TAG = ['Hospital Admins']
+
 
 class HospitalAdminCreateView(APIView):
     """
@@ -22,6 +27,12 @@ class HospitalAdminCreateView(APIView):
 
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=HospitalAdminCreateSerializer,
+        responses={201: HospitalAdminDetailSerializer},
+        operation_description="Create a new Hospital Admin account. Only accessible by SYSTEM_ADMIN.",
+    )
     def post(self, request):
         # The requesting user must have a SystemAdmin profile
         try:
@@ -44,6 +55,40 @@ class HospitalAdminCreateView(APIView):
         )
 
 
+class HospitalAdminListView(ListAPIView):
+    """
+    GET /api/accounts/hospital-admins/list/
+    Accessible only by SYSTEM_ADMIN.
+    """
+
+    queryset = HospitalAdmin.objects.select_related('user', 'enrolled_by__user', 'hospital').all().order_by('-user__date_joined')
+    serializer_class = HospitalAdminDetailSerializer
+    permission_classes = [IsAuthenticated, IsSystemAdmin]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = {
+        'id': ['exact'],
+        'hospital_id': ['exact', 'isnull'],
+        'enrolled_by_id': ['exact'],
+        'national_id_number': ['exact', 'icontains'],
+        'user__username': ['exact', 'icontains'],
+        'user__email': ['exact', 'icontains'],
+        'user__phone_number': ['exact', 'icontains'],
+        'user__is_verified': ['exact'],
+        'user__is_active': ['exact'],
+        'user__created_at': ['date', 'gte', 'lte'],
+    }
+    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'user__email', 'national_id_number']
+    ordering_fields = ['user__date_joined', 'user__created_at', 'user__username']
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: HospitalAdminDetailSerializer(many=True)},
+        operation_description="List Hospital Admin profiles. Accessible only by SYSTEM_ADMIN.",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
 class HospitalAdminDetailView(RetrieveAPIView):
     """
     GET /api/accounts/hospital-admins/<id>/
@@ -55,10 +100,18 @@ class HospitalAdminDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrSystemAdmin]
     lookup_field = 'id'
 
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: HospitalAdminDetailSerializer},
+        operation_description="Retrieve a Hospital Admin profile. Accessible by the hospital admin or a SYSTEM_ADMIN.",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class HospitalAdminUpdateView(UpdateAPIView):
     """
-    PATCH /api/accounts/hospital-admins/<id>/
+    PATCH /api/accounts/hospital-admins/<id>/update/
     Accessible by the hospital admin themselves or a SYSTEM_ADMIN.
     """
 
@@ -67,3 +120,12 @@ class HospitalAdminUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrSystemAdmin]
     lookup_field = 'id'
     http_method_names = ['patch', 'head', 'options']
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=HospitalAdminUpdateSerializer,
+        responses={200: HospitalAdminDetailSerializer},
+        operation_description="Partially update a Hospital Admin profile. Accessible by the hospital admin or a SYSTEM_ADMIN.",
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
