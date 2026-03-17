@@ -46,6 +46,32 @@ class IsOwnerOrSystemAdmin(BasePermission):
         return obj.user == request.user
 
 
+class IsHospitalStaff(BasePermission):
+    """Allows access only to users with HOSPITAL_ADMIN or RECEPTIONIST roles."""
+
+    message = "Only Hospital Staff can perform this action."
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in (Role.HOSPITAL_ADMIN, Role.RECEPTIONIST)
+        )
+
+
+class IsAdminOrSocialWorker(BasePermission):
+    """Allows access only to users with SYSTEM_ADMIN, HOSPITAL_ADMIN, or SOCIAL_WORKER roles."""
+
+    message = "Only Admins or Social Workers can perform this action."
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in (Role.SYSTEM_ADMIN, Role.HOSPITAL_ADMIN, Role.SOCIAL_WORKER)
+        )
+
+
 class IsOwnerOrHospitalAdmin(BasePermission):
     """
     Object-level permission.
