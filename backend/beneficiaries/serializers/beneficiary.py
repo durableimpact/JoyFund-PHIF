@@ -25,9 +25,6 @@ class BeneficiaryDetailSerializer(serializers.ModelSerializer):
             'emergency_contact_relationship',
             'chronic_conditions',
             'expected_delivery_date',
-            'is_active',
-            'created_at',
-            'updated_at',
             'enrolled_by_id',
         ]
 
