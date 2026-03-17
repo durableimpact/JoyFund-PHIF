@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JoyFund PHIF</title>
+  <style>
+    :root {
+      --bg-1: #0f172a;
+      --bg-2: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22c55e;
+      --accent-2: #06b6d4;
+      --card: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.25), transparent 35%),
+        radial-gradient(circle at 80% 0%, rgba(6, 182, 212, 0.22), transparent 40%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: min(960px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .content {
+      padding: 56px 42px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .highlight {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    p {
+      margin: 18px auto 0;
+      max-width: 680px;
+      font-size: clamp(16px, 2vw, 20px);
+      color: #d1d5db;
+      line-height: 1.6;
+    }
+
+    .actions {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .btn {
+      text-decoration: none;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--accent), #16a34a);
+      box-shadow: 0 10px 24px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 16px 22px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      background: rgba(0, 0, 0, 0.18);
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="content">
+      <span class="badge">JoyFund PHIF Platform</span>
+      <h1>Healthcare support made <span class="highlight">faster</span> and <span class="highlight">fairer</span>.</h1>
+      <p>
+        Welcome to JoyFund PHIF. This backend powers campaigns, beneficiaries, hospitals, vouchers,
+        and core donation workflows for life-changing patient support.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/swagger/">Open API Docs</a>
+        <a class="btn btn-secondary" href="/redoc/">ReDoc</a>
+      </div>
+    </section>
+    <footer class="footer">© 2026 JoyFund PHIF • Backend service is running</footer>
+  </main>
+</body>
+</html>
