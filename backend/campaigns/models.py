@@ -34,8 +34,6 @@ class Campaign(models.Model):
     
     impact_goal_count = models.IntegerField(default=1) 
     impact_service_category = models.CharField(max_length=50, blank=True)
-    account = models.OneToOneField('payments.CampaignAccount', on_delete=models.SET_NULL, null=True, blank=True, related_name='campaign')
-    
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()
 
