@@ -46,6 +46,7 @@ urlpatterns = [
     path('api/campaigns/', include('campaigns.urls')),
     path('api/hospitals/', include('hospitals.urls')),
     path('api/vouchers/', include('vouchers.urls')),
+    path('api/payments/', include('payments.urls')),
 
     # API documentation
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
