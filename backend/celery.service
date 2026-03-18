@@ -1,0 +1,47 @@
+# Systemd service file for Celery Worker
+# Place this file in: /etc/systemd/system/celery.service
+# Enable with: sudo systemctl enable celery
+# Start with: sudo systemctl start celery
+# Check status: sudo systemctl status celery
+# Logs: sudo journalctl -u celery -f
+
+[Unit]
+Description=Celery Service for JoyFund
+After=network.target rabbitmq.service
+Requires=rabbitmq.service
+
+[Service]
+Type=forking
+User=www-data
+Group=www-data
+WorkingDirectory=/app
+
+# Environment variables
+EnvironmentFile=/app/.env
+Environment="PYTHONUNBUFFERED=1"
+
+# Command to run
+ExecStart=/app/env/bin/celery -A backend worker \
+    --loglevel=info \
+    --concurrency=4 \
+    --max-tasks-per-child=1000 \
+    --time-limit=3600 \
+    --soft-time-limit=3300 \
+    --logfile=/app/logs/celery.log \
+    --pidfile=/var/run/celery.pid
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Resource limits
+CPUAccounting=true
+MemoryAccounting=true
+MemoryLimit=512M
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
