@@ -14,6 +14,11 @@ class Account(PolymorphicModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+
 
 class SingletonAccountMixin:
     """
@@ -192,6 +197,12 @@ class Transaction(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['source', 'destination', 'created_at']),
+        ]
 
     def save(self, *args, **kwargs):
         # Auto-derive direction from type when not explicitly set
