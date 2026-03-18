@@ -44,6 +44,13 @@ class Campaign(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['donor', 'created_at']),
+            models.Index(fields=['created_at']),
+        ]
+
     @property
     def progress_percentage(self):
         if self.goal_amount > 0:
@@ -77,6 +84,14 @@ class Donation(models.Model):
     
     confirm_at = models.DateTimeField(null=True, blank=True) # When payment is confirmed by provider
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['transaction_reference']),
+            models.Index(fields=['status']),
+            models.Index(fields=['campaign']),
+            models.Index(fields=['donor']),
+        ]
 
     def __str__(self):
         return f"{self.amount} XAF to {self.campaign.title} by {self.donor_name}"
