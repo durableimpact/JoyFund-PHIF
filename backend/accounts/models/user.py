@@ -27,5 +27,13 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['phone_number']),
+            models.Index(fields=['email']),
+            models.Index(fields=['role']),
+            models.Index(fields=['created_at']),
+        ]
+
     def __str__(self):
         return f"{self.username} ({self.role})"
