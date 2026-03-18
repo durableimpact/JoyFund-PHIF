@@ -1,0 +1,44 @@
+# Systemd service file for Celery Beat (Scheduler)
+# Place this file in: /etc/systemd/system/celery-beat.service
+# Enable with: sudo systemctl enable celery-beat
+# Start with: sudo systemctl start celery-beat
+# Check status: sudo systemctl status celery-beat
+# Logs: sudo journalctl -u celery-beat -f
+
+[Unit]
+Description=Celery Beat Scheduler for JoyFund
+After=network.target rabbitmq.service
+Requires=rabbitmq.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/app
+
+# Environment variables
+EnvironmentFile=/app/.env
+Environment="PYTHONUNBUFFERED=1"
+
+# Command to run
+ExecStart=/app/env/bin/celery -A backend beat \
+    --loglevel=info \
+    --scheduler django_celery_beat.schedulers:DatabaseScheduler \
+    --logfile=/app/logs/celery-beat.log \
+    --pidfile=/var/run/celery-beat.pid
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Resource limits
+CPUAccounting=true
+MemoryAccounting=true
+MemoryLimit=256M
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
