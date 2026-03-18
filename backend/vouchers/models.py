@@ -99,6 +99,13 @@ class VoucherAssignment(models.Model):
 
     matched_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['beneficiary', 'status']),
+            models.Index(fields=['campaign']),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.approval_deadline:
             self.approval_deadline = timezone.now() + timedelta(hours=24)
@@ -179,6 +186,14 @@ class CareVoucher(models.Model):
     locked_at = models.DateTimeField(null=True, blank=True)
     redeemed_at = models.DateTimeField(null=True, blank=True)
     expired_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['voucher_code']),
+            models.Index(fields=['status']),
+            models.Index(fields=['beneficiary', 'status']),
+            models.Index(fields=['hospital']),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.voucher_code:
