@@ -99,8 +99,18 @@ class Beneficiary(models.Model):
         SocialWorker, on_delete=models.CASCADE, related_name='beneficiaries'
     )
     
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['digital_health_id']),
+            models.Index(fields=['category']),
+            models.Index(fields=['urgency_level']),
+            models.Index(fields=['geographic_remoteness']),
+            models.Index(fields=['enrolled_by', 'created_at']),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.digital_health_id:
@@ -174,6 +184,10 @@ class WaitingPoolEntry(models.Model):
         ordering = ['-final_score']
         verbose_name = 'Waiting Pool Entry'
         verbose_name_plural = 'Waiting Pool Entries'
+        indexes = [
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['beneficiary', 'status']),
+        ]
 
     def __str__(self):
         return f"{self.beneficiary.digital_health_id} — Score: {self.final_score}"
