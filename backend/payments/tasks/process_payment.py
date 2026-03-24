@@ -50,7 +50,7 @@ def process_payment_task(webhook_data:dict):
             return {
                 'status':'success',
                 'message':'Donation process successfully',
-                'donation_id':donation.donation_id,
+                'donation_id':donation.id,
             }
             
         else:
@@ -64,7 +64,7 @@ def process_payment_task(webhook_data:dict):
             return {
                 'status':'failed',
                 'message':'Donation failed',
-                'donation_id':donation.donation_id,
+                'donation_id':donation.id,
             }
     
     except Exception as e:
