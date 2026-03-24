@@ -1,3 +1,94 @@
 from django.contrib import admin
+from .models import Campaign, Payment, Donation
 
-# Register your models here.
+
+class DonationInline(admin.TabularInline):
+    model = Donation
+    extra = 0
+    fields = ('id', 'donor', 'donor_name', 'amount', 'status', 'is_anonymous', 'created_at')
+    readonly_fields = ('id', 'created_at')
+    can_delete = True
+
+
+class PaymentInline(admin.TabularInline):
+    model = Payment
+    extra = 0
+    fields = ('payment_id', 'payment_method', 'phone_number', 'amount', 'payment_status', 'payment_reference', 'created_at')
+    readonly_fields = ('payment_id', 'created_at')
+    can_delete = False
+
+
+@admin.register(Campaign)
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ('title', 'donor', 'goal_amount', 'current_amount', 'progress_percentage', 'status', 'is_active', 'created_at')
+    list_filter = ('status', 'is_active', 'is_public', 'event_type', 'created_at')
+    search_fields = ('title', 'description', 'donor__user__email')
+    readonly_fields = ('id', 'current_amount', 'progress_percentage', 'start_date', 'created_at')
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('id', 'title', 'description', 'donor', 'cover_image', 'event_type')
+        }),
+        ('Campaign Goals', {
+            'fields': ('goal_amount', 'current_amount', 'progress_percentage', 'impact_goal_count', 'impact_service_category')
+        }),
+        ('Timeline', {
+            'fields': ('start_date', 'end_date', 'created_at')
+        }),
+        ('Status & Visibility', {
+            'fields': ('status', 'is_active', 'is_public')
+        }),
+    )
+    
+    inlines = [DonationInline]
+    list_per_page = 25
+    ordering = ('-created_at',)
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('payment_id', 'payment_method', 'phone_number', 'amount', 'payment_status', 'created_at')
+    list_filter = ('payment_status', 'payment_method', 'created_at')
+    search_fields = ('payment_id', 'phone_number', 'payment_reference')
+    readonly_fields = ('payment_id', 'created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Payment Details', {
+            'fields': ('payment_id', 'payment_method', 'phone_number', 'amount')
+        }),
+        ('Status & Reference', {
+            'fields': ('payment_status', 'payment_reference')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+    
+    list_per_page = 25
+    ordering = ('-created_at',)
+
+
+@admin.register(Donation)
+class DonationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'campaign', 'donor', 'donor_name', 'amount', 'status', 'is_anonymous', 'created_at')
+    list_filter = ('status', 'is_anonymous', 'created_at', 'campaign')
+    search_fields = ('id', 'donor_name', 'campaign__title', 'donor__user__email', 'message')
+    readonly_fields = ('id', 'created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Donation Information', {
+            'fields': ('id', 'campaign', 'donor', 'donor_name', 'amount', 'is_anonymous')
+        }),
+        ('Message & Status', {
+            'fields': ('message', 'status')
+        }),
+        ('Payment Reference', {
+            'fields': ('payment',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+    
+    list_per_page = 25
+    ordering = ('-created_at',)
