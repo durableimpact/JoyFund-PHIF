@@ -71,15 +71,14 @@ class SocialWorkerListView(ListAPIView):
         'is_approved': ['exact'],
         'enrolled_by_id': ['exact'],
         'national_id_number': ['exact', 'icontains'],
-        'user__username': ['exact', 'icontains'],
         'user__email': ['exact', 'icontains'],
         'user__phone_number': ['exact', 'icontains'],
         'user__is_verified': ['exact'],
         'user__is_active': ['exact'],
         'user__created_at': ['date', 'gte', 'lte'],
     }
-    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'user__email', 'organization', 'region_assigned']
-    ordering_fields = ['user__date_joined', 'user__created_at', 'user__username']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'organization', 'region_assigned']
+    ordering_fields = ['user__created_at']
 
     @swagger_auto_schema(
         tags=_TAG,
