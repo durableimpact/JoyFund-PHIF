@@ -5,7 +5,7 @@ from .views.account import AccountListView, EscrowAccountDetailView, FeeAccountD
 from .views.fee_policy import FeePolicyViewSet
 from .views.gateway import PaymentGatewayViewSet
 from .views.transaction import TransactionViewSet, FeeSplitViewSet
-from .views.webhook import WebhookEventViewSet
+from .views.webhook import WebhookEventViewSet, payment_webhook
 
 app_name = 'payments'
 
@@ -21,6 +21,9 @@ urlpatterns = [
     path('accounts/', AccountListView.as_view(), name='account-list'),
     path('accounts/escrow/', EscrowAccountDetailView.as_view(), name='escrow-account'),
     path('accounts/fee/', FeeAccountDetailView.as_view(), name='fee-account'),
+
+    # Webhook endpoint
+    path('webhook/', payment_webhook, name='payment-webhook'),
 
     # Router-registered ViewSets
     path('', include(router.urls)),
