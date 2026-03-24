@@ -38,12 +38,12 @@ class PaymentGatewayAdmin(admin.ModelAdmin):
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'type', 'direction', 'amount', 'currency', 'status', 'provider', 'created_at']
+    list_display = ['id', 'type', 'direction', 'amount', 'currency', 'status', 'gateway', 'created_at']
     list_filter = ['type', 'direction', 'status', 'currency']
-    search_fields = ['provider_transaction_id']
+    search_fields = ['gateway_transaction_id']
     readonly_fields = [
-        'id', 'type', 'direction', 'amount', 'currency', 'provider',
-        'provider_transaction_id', 'status', 'source', 'destination',
+        'id', 'type', 'direction', 'amount', 'currency', 'gateway',
+        'gateway_transaction_id', 'status', 'source', 'destination',
         'donation', 'metadata', 'created_at', 'updated_at',
     ]
     ordering = ['-created_at']

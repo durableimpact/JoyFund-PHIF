@@ -180,10 +180,9 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, default='XAF')
 
-    # "MTN Mobile Money", "Orange Money", "Bank Transfer", etc.
-    provider = models.ForeignKey(PaymentGateway, on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions')
-    provider_transaction_id = models.CharField(
-        max_length=100, blank=True,unique=True,)  # From payment provider
+    gateway = models.ForeignKey(PaymentGateway, on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions')
+    gateway_transaction_id = models.CharField(
+        max_length=100, blank=True, unique=True,)  # From payment gateway
 
     # "PENDING", "SUCCESS", "FAILED"    
     status = models.CharField(

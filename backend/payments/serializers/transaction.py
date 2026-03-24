@@ -31,7 +31,6 @@ class TransactionSerializer(serializers.ModelSerializer):
     type_display = serializers.CharField(source='get_type_display', read_only=True)
     direction_display = serializers.CharField(source='get_direction_display', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    provider = serializers.StringRelatedField()
     donation = serializers.StringRelatedField()
     source = serializers.StringRelatedField()
     destination = serializers.StringRelatedField()
@@ -41,7 +40,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = [
             'id', 'type', 'type_display', 'direction', 'direction_display',
-            'amount', 'currency', 'provider', 'provider_transaction_id',
+            'amount', 'currency', 'gateway', 'gateway_transaction_id',
             'status', 'status_display', 'donation', 'source', 'destination',
             'metadata', 'fee_split', 'created_at', 'updated_at',
         ]

@@ -12,9 +12,9 @@ from ..serializers.transaction import TransactionSerializer, FeeSplitSerializer
     tags=['Payments — Transactions'],
     operation_summary="List Transactions",
     operation_description=(
-        "**Filters:** `type`, `direction`, `status`, `currency`, `provider`, "
+        "**Filters:** `type`, `direction`, `status`, `currency`, `gateway`, "
         "`min_amount`, `max_amount`, `created_after`, `created_before`\n\n"
-        "**Search:** `provider_transaction_id`\n\n"
+        "**Search:** `gateway_transaction_id`\n\n"
         "**Ordering:** `amount`, `status`, `created_at`"
     ),
 ))
@@ -36,7 +36,7 @@ class TransactionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
     serializer_class = TransactionSerializer
     permission_classes = [IsSystemAdmin]
     filterset_class = TransactionFilter
-    search_fields = ['provider_transaction_id']
+    search_fields = ['gateway_transaction_id']
     ordering_fields = ['amount', 'status', 'created_at']
     ordering = ['-created_at']
 

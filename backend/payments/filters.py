@@ -26,7 +26,7 @@ class TransactionFilter(django_filters.FilterSet):
     direction = django_filters.ChoiceFilter(choices=Transaction.Direction.choices)
     status = django_filters.ChoiceFilter(choices=Transaction.TRANSACTION_STATUS)
     currency = django_filters.CharFilter(lookup_expr='iexact')
-    provider = django_filters.ModelChoiceFilter(queryset=PaymentGateway.objects.all())
+    gateway = django_filters.ModelChoiceFilter(queryset=PaymentGateway.objects.all())
     min_amount = django_filters.NumberFilter(field_name='amount', lookup_expr='gte')
     max_amount = django_filters.NumberFilter(field_name='amount', lookup_expr='lte')
     created_after = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
@@ -34,7 +34,7 @@ class TransactionFilter(django_filters.FilterSet):
 
     class Meta:
         model = Transaction
-        fields = ['type', 'direction', 'status', 'currency', 'provider']
+        fields = ['type', 'direction', 'status', 'currency', 'gateway']
 
 
 class FeeSplitFilter(django_filters.FilterSet):
