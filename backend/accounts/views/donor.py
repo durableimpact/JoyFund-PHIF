@@ -54,7 +54,6 @@ class DonorListView(ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = {
         'id': ['exact'],
-        'user__username': ['exact', 'icontains'],
         'user__email': ['exact', 'icontains'],
         'user__phone_number': ['exact', 'icontains'],
         'user__is_verified': ['exact'],
@@ -62,8 +61,8 @@ class DonorListView(ListAPIView):
         'user__perfered_language': ['exact'],
         'user__created_at': ['date', 'gte', 'lte'],
     }
-    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'user__email', 'user__phone_number']
-    ordering_fields = ['user__date_joined', 'user__created_at', 'user__username']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'user__phone_number']
+    ordering_fields = ['user__created_at']
 
     @swagger_auto_schema(
         tags=_TAG,
