@@ -4,6 +4,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Role(models.TextChoices):
@@ -37,7 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email address'), unique=True)
     first_name = models.CharField(_("first name"), max_length=150)
     last_name = models.CharField(_("last name"), max_length=150)
-    phone_number = models.CharField(max_length=15, unique=True)
+    phone_number = PhoneNumberField(unique=True, help_text=_("Phone number in international format e.g. +237670123456"))
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.DONOR)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
