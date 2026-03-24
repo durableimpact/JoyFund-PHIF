@@ -31,7 +31,7 @@ def create_default_fee_policy(sender, **kwargs):
 def create_campay_gateway(sender, **kwargs):
     """Seed the CamPay PaymentGateway after migrations. Connected via AppConfig.ready()."""
     PaymentGateway.objects.get_or_create(
-        name="CAMPAY",
+        name="CamPay",
         defaults={
             'description': 'CamPay mobile money gateway (MTN & Orange)',
             'is_active': True,
