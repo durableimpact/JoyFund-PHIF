@@ -1,27 +1,7 @@
-from .hospital import (
-    HospitalCreateView,
-    HospitalDeleteView,
-    HospitalListView,
-    HospitalRetrieveView,
-    HospitalUpdateView,
-)
-from .service import (
-    ServiceCreateView,
-    ServiceDeleteView,
-    ServiceListView,
-    ServiceRetrieveView,
-    ServiceUpdateView,
-)
+from .hospital import HospitalViewSet
+from .service import ServiceViewSet
 
 __all__ = [
-    'HospitalCreateView',
-    'HospitalListView',
-    'HospitalRetrieveView',
-    'HospitalUpdateView',
-    'HospitalDeleteView',
-    'ServiceCreateView',
-    'ServiceListView',
-    'ServiceRetrieveView',
-    'ServiceUpdateView',
-    'ServiceDeleteView',
+    'HospitalViewSet',
+    'ServiceViewSet',
 ]

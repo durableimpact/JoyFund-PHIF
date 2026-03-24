@@ -1,29 +1,13 @@
-from django.urls import path
+from rest_framework_nested import routers
 
-from hospitals.views import (
-    HospitalCreateView,
-    HospitalDeleteView,
-    HospitalListView,
-    HospitalRetrieveView,
-    HospitalUpdateView,
-    ServiceCreateView,
-    ServiceDeleteView,
-    ServiceListView,
-    ServiceRetrieveView,
-    ServiceUpdateView,
-)
+from hospitals.views import HospitalViewSet, ServiceViewSet
 
 app_name = 'hospitals'
 
-urlpatterns = [
-    path('', HospitalListView.as_view(), name='hospital-list'),
-    path('create/', HospitalCreateView.as_view(), name='hospital-create'),
-    path('<uuid:id>/', HospitalRetrieveView.as_view(), name='hospital-retrieve'),
-    path('<uuid:id>/update/', HospitalUpdateView.as_view(), name='hospital-update'),
-    path('<uuid:id>/delete/', HospitalDeleteView.as_view(), name='hospital-delete'),
-    path('<uuid:hospital_id>/services/', ServiceListView.as_view(), name='service-list'),
-    path('<uuid:hospital_id>/services/create/', ServiceCreateView.as_view(), name='service-create'),
-    path('<uuid:hospital_id>/services/<uuid:id>/', ServiceRetrieveView.as_view(), name='service-retrieve'),
-    path('<uuid:hospital_id>/services/<uuid:id>/update/', ServiceUpdateView.as_view(), name='service-update'),
-    path('<uuid:hospital_id>/services/<uuid:id>/delete/', ServiceDeleteView.as_view(), name='service-delete'),
-]
+router = routers.SimpleRouter()
+router.register(r'', HospitalViewSet, basename='hospital')
+
+services_router = routers.NestedSimpleRouter(router, r'', lookup='hospital')
+services_router.register(r'services', ServiceViewSet, basename='hospital-services')
+
+urlpatterns = router.urls + services_router.urls
