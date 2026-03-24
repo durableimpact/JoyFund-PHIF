@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +33,8 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
+# Accept all hosts in development
+ALLOWED_HOSTS = ['*'] if DEBUG else os.environ.get('ALLOWED_HOSTS', 'localhost').split()
 
 
 # Application definition
@@ -52,6 +57,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_celery_results',
     'django_celery_beat',
+    'phonenumber_field',
 
     # Local apps
     'accounts',
@@ -296,8 +302,10 @@ CACHES = {
 # ─────────────────────────────────────────────────────────────────────────────
 # Celery (RabbitMQ Broker)
 # ─────────────────────────────────────────────────────────────────────────────
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://joyfund:joyfund@rabbitmq:5672//')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/1')
+# Use localhost for development (when running outside Docker)
+# Use service names (rabbitmq, redis) when running inside Docker (via env vars)
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://joyfund:joyfund@localhost:5672//')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -335,6 +343,16 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@example.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-email-password')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'webmaster@example.com')
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CamPay Payment Gateway Configuration
+# ─────────────────────────────────────────────────────────────────────────────
+CAMPAY_APP_ID = os.environ.get('CAMPAY_APP_ID', '')
+CAMPAY_APP_USERNAME = os.environ.get('CAMPAY_APP_USERNAME', '')
+CAMPAY_APP_PASSWORD = os.environ.get('CAMPAY_APP_PASSWORD', '')
+CAMPAY_PERMANENT_TOKEN = os.environ.get('CAMPAY_PERMANENT_TOKEN', '')
+CAMPAY_WEBHOOK_SECRET = os.environ.get('CAMPAY_WEBHOOK_SECRET', '')
+CAMPAY_ENVIRONMENT = os.environ.get('CAMPAY_ENVIRONMENT', 'DEV')
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Logging Configuration
