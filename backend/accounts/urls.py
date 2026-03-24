@@ -17,11 +17,17 @@ from accounts.views import (
     SocialWorkerDetailView,
     SocialWorkerListView,
     SocialWorkerUpdateView,
+    UserInfoView,
 )
 
 app_name = 'accounts'
 
 urlpatterns = [
+    # -----------------------------------------------------------------------
+    # User Info  (get current user info after login)
+    # -----------------------------------------------------------------------
+    path('info/', UserInfoView.as_view(), name='user-info'),
+
     # -----------------------------------------------------------------------
     # Donors  (public registration)
     # -----------------------------------------------------------------------
