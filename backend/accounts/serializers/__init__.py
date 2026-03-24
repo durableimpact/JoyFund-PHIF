@@ -1,4 +1,4 @@
-from .user import UserReadSerializer
+from .user import UserReadSerializer, UserInfoSerializer
 from .donor import (
     DonorRegisterSerializer,
     DonorDetailSerializer,
@@ -22,6 +22,7 @@ from .social_worker import (
 
 __all__ = [
     'UserReadSerializer',
+    'UserInfoSerializer',
     'DonorRegisterSerializer',
     'DonorDetailSerializer',
     'DonorUpdateSerializer',
