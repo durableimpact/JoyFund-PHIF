@@ -30,7 +30,7 @@ class DonationDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donation
         fields = [
-            'donation_id',
+            'id',
             'campaign_id',
             'donor_id',
             'donor_name',
