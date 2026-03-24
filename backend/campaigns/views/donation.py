@@ -117,8 +117,8 @@ class DonationViewSet(
             )
 
             donor_name = "Anonymous"
-            if donor:
-                donor_name = donor.user.username
+            if donor and not is_anonymous:
+                donor_name = f"{donor.user.last_name}".strip()
             if is_anonymous:
                 donor_name = "Anonymous"
 
@@ -150,7 +150,7 @@ class DonationViewSet(
                 payment_link = campay.create_payment_link(
                     amount=str(amount),
                     description=description,
-                    external_reference=donation.donation_id,
+                    external_reference=donation.id,
                     redirect_url=success_url,
                     failure_redirect_url=failure_url,
                     first_name=None,
