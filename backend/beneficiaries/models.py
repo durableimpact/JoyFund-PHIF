@@ -176,7 +176,7 @@ class WaitingPoolEntry(models.Model):
     final_score = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     score_updated_at = models.DateTimeField(auto_now=True)
 
-    entered_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     matched_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
 
@@ -235,7 +235,7 @@ class WaitingPoolEntry(models.Model):
         )
 
         # --- Waiting time (15%): ~0.7 points per day, capped at 100 ---
-        days_waiting = (timezone.now().date() - self.entered_at.date()).days
+        days_waiting = (timezone.now().date() - self.created_at.date()).days
         wait_score = min(
             decimal.Decimal(days_waiting) * decimal.Decimal('0.7'),
             decimal.Decimal('100'),

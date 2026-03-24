@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 
 from accounts.models import Role
 from beneficiaries.models import Beneficiary
+from beneficiaries.filters import BeneficiaryFilter
 from beneficiaries.serializers import (
     BeneficiaryCreateSerializer,
     BeneficiaryDetailSerializer,
@@ -70,23 +71,7 @@ class BeneficiaryListView(ListAPIView):
     serializer_class = BeneficiaryDetailSerializer
     permission_classes = [IsAuthenticated, IsSocialWorker]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = {
-        'id': ['exact'],
-        'full_name': ['exact', 'icontains'],
-        'phone': ['exact', 'icontains'],
-        'email': ['exact', 'icontains', 'isnull'],
-        'national_id_number': ['exact', 'icontains'],
-        'date_of_birth': ['exact', 'gte', 'lte'],
-        'gender': ['exact'],
-        'category': ['exact'],
-        'region': ['exact', 'icontains'],
-        'city': ['exact', 'icontains'],
-        'enrolled_by_id': ['exact'],
-        'is_active': ['exact'],
-        'expected_delivery_date': ['exact', 'gte', 'lte'],
-        'created_at': ['date', 'gte', 'lte'],
-        'updated_at': ['date', 'gte', 'lte'],
-    }
+    filterset_class = BeneficiaryFilter
     search_fields = ['full_name', 'phone', 'email', 'national_id_number', 'emergency_contact_name']
     ordering_fields = ['created_at', 'updated_at', 'full_name', 'city', 'region']
 
