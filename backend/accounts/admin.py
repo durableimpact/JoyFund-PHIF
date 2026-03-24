@@ -18,10 +18,10 @@ from accounts.models import (
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_verified', 'is_staff')
+    list_display = ('email', 'first_name', 'last_name', 'role', 'is_verified', 'is_staff')
     list_filter = ('role', 'is_verified', 'is_staff', 'is_active')
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'phone_number')
-    ordering = ('-date_joined',)
+    search_fields = ('email', 'first_name', 'last_name', 'phone_number')
+    ordering = ('-created_at',)
 
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Profile', {
