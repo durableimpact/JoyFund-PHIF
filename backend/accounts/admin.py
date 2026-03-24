@@ -23,16 +23,37 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('email', 'first_name', 'last_name', 'phone_number')
     ordering = ('-created_at',)
 
-    fieldsets = BaseUserAdmin.fieldsets + (
+    fieldsets = (
+        (None, {
+            'fields': ('email', 'password'),
+        }),
+        ('Personal info', {
+            'fields': ('first_name', 'last_name', 'phone_number', 'perfered_language'),
+        }),
+        ('Permissions', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        }),
         ('Profile', {
-            'fields': ('role', 'phone_number', 'is_verified', 'perfered_language'),
+            'fields': ('role', 'is_verified'),
+        }),
+        ('Important dates', {
+            'fields': ('last_login', 'created_at', 'updated_at'),
         }),
     )
-    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2'),
+        }),
+        ('Personal info', {
+            'fields': ('first_name', 'last_name', 'phone_number', 'perfered_language'),
+        }),
         ('Profile', {
-            'fields': ('role', 'phone_number', 'first_name', 'last_name', 'perfered_language'),
+            'fields': ('role', 'is_verified'),
         }),
     )
+    
+    readonly_fields = ('created_at', 'updated_at', 'last_login')
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -47,57 +68,53 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(SystemAdmin)
 class SystemAdminAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_username')
-    search_fields = ('user__username', 'user__email')
+    list_display = ('id', 'get_email')
+    search_fields = ('user__email',)
 
-    @admin.display(description='Username')
-    def get_username(self, obj):
-        return obj.user.username
+    @admin.display(description='Email')
+    def get_email(self, obj):
+        return obj.user.email
 
 
 @admin.register(HospitalAdmin)
 class HospitalAdminAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_username', 'national_id_number', 'enrolled_by')
-    search_fields = ('user__username', 'user__email', 'national_id_number')
+    list_display = ('id', 'get_email', 'national_id_number', 'enrolled_by')
+    search_fields = ('user__email', 'national_id_number')
     raw_id_fields = ('user', 'enrolled_by')
 
-    @admin.display(description='Username')
-    def get_username(self, obj):
-        return obj.user.username
+    @admin.display(description='Email')
+    def get_email(self, obj):
+        return obj.user.email
 
 
 @admin.register(Receptionist)
 class ReceptionistAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_username', 'national_id_number', 'enrolled_by', 'hospital')
-    search_fields = ('user__username', 'user__email', 'national_id_number')
+    list_display = ('id', 'get_email', 'national_id_number', 'enrolled_by', 'hospital')
+    search_fields = ('user__email', 'national_id_number')
     raw_id_fields = ('user', 'enrolled_by', 'hospital')
 
-    @admin.display(description='Username')
-    def get_username(self, obj):
-        return obj.user.username
+    @admin.display(description='Email')
+    def get_email(self, obj):
+        return obj.user.email
 
 
 @admin.register(SocialWorker)
 class SocialWorkerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_username', 'organization', 'region_assigned', 'is_approved', 'enrolled_by')
+    list_display = ('id', 'get_email', 'organization', 'region_assigned', 'is_approved', 'enrolled_by')
     list_filter = ('is_approved',)
-    search_fields = ('user__username', 'user__email', 'organization', 'region_assigned')
+    search_fields = ('user__email', 'organization', 'region_assigned')
     raw_id_fields = ('user', 'enrolled_by')
 
-    @admin.display(description='Username')
-    def get_username(self, obj):
-        return obj.user.username
+    @admin.display(description='Email')
+    def get_email(self, obj):
+        return obj.user.email
 
 
 @admin.register(Donor)
 class DonorAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_username', 'get_email')
-    search_fields = ('user__username', 'user__email')
+    list_display = ('id', 'get_email')
+    search_fields = ('user__email',)
     raw_id_fields = ('user',)
-
-    @admin.display(description='Username')
-    def get_username(self, obj):
-        return obj.user.username
 
     @admin.display(description='Email')
     def get_email(self, obj):
