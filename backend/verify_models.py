@@ -43,7 +43,6 @@ def verify_models():
         campaign=campaign,
         donor_name="Mama Solange",
         amount=50000,
-        transaction_reference=str(uuid.uuid4()),
         status="SUCCESS",
         message="Congrats Junior!"
     )
