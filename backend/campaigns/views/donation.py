@@ -1,107 +1,80 @@
+from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework import mixins, status, viewsets
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from accounts.models import Role
-from campaigns.models import Campaign, Donation
+from campaigns.filters import DonationFilter
+from campaigns.models import Campaign, Donation, Payment
 from campaigns.serializers import DonationCreateSerializer, DonationDetailSerializer
+from utils.campay import CamPayManager
 
 _TAG = ['Campaign Donations']
 
 
-class CampaignVisibilityMixin:
-    def get_visible_campaign_queryset(self):
+class DonationViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = DonationFilter
+    search_fields = ['donor_name', 'message']
+    ordering_fields = ['amount', 'created_at']
+    ordering = ['-created_at']
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return DonationCreateSerializer
+        return DonationDetailSerializer
+
+    def _get_campaign(self):
+        # Handle schema generation for Swagger - return empty queryset
+        if getattr(self, 'swagger_fake_view', False):
+            return None
+        
         queryset = Campaign.objects.select_related('donor__user').all()
         if self.request.user.is_authenticated and getattr(self.request.user, 'role', None) == Role.DONOR:
             try:
                 donor = self.request.user.donor
-                return queryset.filter(Q(is_public=True, is_active=True) | Q(donor=donor))
+                queryset = queryset.filter(Q(is_public=True, is_active=True) | Q(donor=donor))
             except Exception:
-                pass
-        return queryset.filter(is_public=True, is_active=True)
-
-    def get_campaign(self):
-        return get_object_or_404(self.get_visible_campaign_queryset(), id=self.kwargs['campaign_id'])
-
-
-class DonationListView(CampaignVisibilityMixin, ListAPIView):
-    serializer_class = DonationDetailSerializer
-    permission_classes = [AllowAny]
+                queryset = queryset.filter(is_public=True, is_active=True)
+        else:
+            queryset = queryset.filter(is_public=True, is_active=True)
+        return get_object_or_404(queryset, id=self.kwargs['campaign_pk'])
 
     def get_queryset(self):
-        campaign = self.get_campaign()
-        queryset = Donation.objects.select_related('campaign', 'donor__user').filter(campaign=campaign).order_by('-created_at')
-
-        status_value = self.request.query_params.get('status')
-        if status_value:
-            queryset = queryset.filter(status=status_value)
-
-        min_amount = self.request.query_params.get('min_amount')
-        if min_amount:
-            queryset = queryset.filter(amount__gte=min_amount)
-
-        max_amount = self.request.query_params.get('max_amount')
-        if max_amount:
-            queryset = queryset.filter(amount__lte=max_amount)
-
-        donor_name = self.request.query_params.get('donor_name')
-        if donor_name:
-            queryset = queryset.filter(donor_name__icontains=donor_name)
-
-        return queryset
+        # Handle schema generation for Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return Donation.objects.none()
+        
+        campaign = self._get_campaign()
+        return Donation.objects.select_related('campaign', 'donor__user').filter(
+            campaign=campaign
+        )
 
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: DonationDetailSerializer(many=True)},
         operation_description='List donations for a visible campaign.',
     )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
-class DonationRetrieveView(CampaignVisibilityMixin, RetrieveAPIView):
-    serializer_class = DonationDetailSerializer
-    permission_classes = [AllowAny]
-    lookup_field = 'id'
-
-    def get_queryset(self):
-        campaign = self.get_campaign()
-        return Donation.objects.select_related('campaign', 'donor__user').filter(campaign=campaign)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: DonationDetailSerializer},
         operation_description='Retrieve a donation under a visible campaign.',
     )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
-class DonationCreateView(CampaignVisibilityMixin, CreateAPIView):
-    serializer_class = DonationCreateSerializer
-    permission_classes = [AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        campaign = self.get_campaign()
-
-        donor = None
-        if request.user.is_authenticated and getattr(request.user, 'role', None) == Role.DONOR:
-            try:
-                donor = request.user.donor
-            except Exception:
-                donor = None
-
-        serializer = self.get_serializer(
-            data=request.data,
-            context={'campaign': campaign, 'donor': donor},
-        )
-        serializer.is_valid(raise_exception=True)
-        donation = serializer.save()
-        return Response(DonationDetailSerializer(donation).data, status=status.HTTP_201_CREATED)
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -109,5 +82,91 @@ class DonationCreateView(CampaignVisibilityMixin, CreateAPIView):
         responses={201: DonationDetailSerializer},
         operation_description='Create a donation under a visible campaign.',
     )
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        try:
+            campaign_id = self.kwargs['campaign_pk']
+            try:
+                campaign = Campaign.objects.get(id=campaign_id)
+            except Campaign.DoesNotExist:
+                return Response({'error': 'Campaign not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            donor = None
+            if request.user.is_authenticated and getattr(request.user, 'role', None) == Role.DONOR:
+                try:
+                    donor = request.user.donor
+                except Exception:
+                    donor = None
+
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            validated_data = serializer.validated_data
+
+            payment_method = validated_data['payment_method']
+            phone_number = validated_data['phone_number']
+            success_url = validated_data['success_url']
+            failure_url = validated_data['failure_url']
+            donor_name = validated_data['donor_name']
+            amount = validated_data['amount']
+            message = validated_data['message']
+            is_anonymous = validated_data['is_anonymous']
+
+            payment = Payment.objects.create(
+                payment_method=payment_method,
+                phone_number=phone_number,
+                amount=amount,
+            )
+
+            donor_name = "Anonymous"
+            if donor:
+                donor_name = donor.user.username
+            if is_anonymous:
+                donor_name = "Anonymous"
+
+            donation = Donation.objects.create(
+                donor=donor,
+                campaign=campaign,
+                donor_name=donor_name,
+                amount=amount,
+                message=message,
+                is_anonymous=is_anonymous,
+                payment=payment,
+            )
+
+            if settings.CAMPAY_ENVIRONMENT == "DEV" and float(amount) > 25.00:
+                return Response(
+                    {'error': 'In demo mode, maximum amount is limited to 25.00 XAF'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            campay = CamPayManager(
+                app_username=settings.CAMPAY_APP_USERNAME,
+                app_password=settings.CAMPAY_APP_PASSWORD,
+                environment=settings.CAMPAY_ENVIRONMENT,
+            )
+
+            description = f"Donate {amount} for {campaign.title}"
+
+            try:
+                payment_link = campay.create_payment_link(
+                    amount=str(amount),
+                    description=description,
+                    external_reference=donation.donation_id,
+                    redirect_url=success_url,
+                    failure_redirect_url=failure_url,
+                    first_name=None,
+                    last_name=None,
+                    email=None,
+                    phone=phone_number.replace('+', ''),
+                )
+                return Response({'payment_link': payment_link['link']})
+
+            except Exception as campay_error:
+                print(f"CamPay Error: {str(campay_error)}")
+                error_message = campay_error['message'] if isinstance(campay_error, dict) and 'message' in campay_error else str(campay_error)
+                return Response(
+                    {'error': f"Payment service error: {error_message}", 'campay_error': True},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

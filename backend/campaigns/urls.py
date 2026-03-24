@@ -1,25 +1,17 @@
 from django.urls import path
+from rest_framework_nested import routers
 
-from campaigns.views import (
-    CampaignCreateView,
-    CampaignDeleteView,
-    CampaignListView,
-    CampaignRetrieveView,
-    CampaignUpdateView,
-    DonationCreateView,
-    DonationListView,
-    DonationRetrieveView,
-)
+from campaigns.views import CampaignViewSet, DonationViewSet
 
 app_name = 'campaigns'
 
-urlpatterns = [
-    path('', CampaignListView.as_view(), name='campaign-list'),
-    path('create/', CampaignCreateView.as_view(), name='campaign-create'),
-    path('<uuid:id>/', CampaignRetrieveView.as_view(), name='campaign-retrieve'),
-    path('<uuid:id>/update/', CampaignUpdateView.as_view(), name='campaign-update'),
-    path('<uuid:id>/delete/', CampaignDeleteView.as_view(), name='campaign-delete'),
-    path('<uuid:campaign_id>/donations/', DonationListView.as_view(), name='donation-list'),
-    path('<uuid:campaign_id>/donations/create/', DonationCreateView.as_view(), name='donation-create'),
-    path('<uuid:campaign_id>/donations/<int:id>/', DonationRetrieveView.as_view(), name='donation-retrieve'),
+router = routers.SimpleRouter()
+router.register(r'', CampaignViewSet, basename='campaign')
+
+donations_router = routers.NestedSimpleRouter(router, r'', lookup='campaign')
+donations_router.register(r'donations', DonationViewSet, basename='campaign-donations')
+
+urlpatterns = router.urls + donations_router.urls + [
+    # POST only — create a donation / initiate CamPay payment
+    path('<uuid:campaign_pk>/donate/', DonationViewSet.as_view({'post': 'create'}), name='campaign-donate'),
 ]

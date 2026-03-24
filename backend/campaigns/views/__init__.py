@@ -1,19 +1,7 @@
-from .campaign import (
-    CampaignCreateView,
-    CampaignDeleteView,
-    CampaignListView,
-    CampaignRetrieveView,
-    CampaignUpdateView,
-)
-from .donation import DonationCreateView, DonationListView, DonationRetrieveView
+from .campaign import CampaignViewSet
+from .donation import DonationViewSet
 
 __all__ = [
-    'CampaignCreateView',
-    'CampaignListView',
-    'CampaignRetrieveView',
-    'CampaignUpdateView',
-    'CampaignDeleteView',
-    'DonationCreateView',
-    'DonationListView',
-    'DonationRetrieveView',
+    'CampaignViewSet',
+    'DonationViewSet',
 ]

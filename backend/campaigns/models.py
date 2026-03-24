@@ -59,6 +59,34 @@ class Campaign(models.Model):
 
     def __str__(self):
         return self.title
+    
+class Payment(models.Model):
+    PAYMENT_METHODS = [
+        ('MTN', 'MTN Money'),
+        ('ORANGE', 'Orange Money'),
+    ]
+    
+    PAYMENT_STATUS = [
+        ('PENDING', 'Pending'),
+        ('SUCCESS', 'Success'),
+        ('FAILED', 'Failed'),
+    ]
+    
+    payment_id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
+    phone_number = models.CharField(max_length=20, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='PENDING')
+    
+    payment_reference = models.CharField(max_length=255,blank=True,null=True)
+
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    
 
 class Donation(models.Model):
     STATUS_CHOICES = [
@@ -67,27 +95,22 @@ class Donation(models.Model):
         ('FAILED', 'Failed'),
     ]
 
+    donation_id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     donor = models.ForeignKey(Donor, on_delete=models.SET_NULL, null=True, blank=True, related_name='donations')
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='donations')
     donor_name = models.CharField(max_length=100,blank=True,null=True, default="Anonymous")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_reference = models.CharField(max_length=100, unique=True) # From Payment Gateway
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     message = models.TextField(blank=True) # "Congrats Junior!"
     
-    payment_provider = models.CharField(max_length=50, blank=True) # "MTN Mobile Money"
-    provider_transaction_id = models.CharField(max_length=100, blank=True) # From Payment Provider
-    platform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0) # Fee charged by JoyFund
-    net_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0) # amount - platform_fee
-    
     is_anonymous = models.BooleanField(default=False)
+    payment = models.OneToOneField(Payment,on_delete=models.CASCADE,related_name='donation')
     
-    confirm_at = models.DateTimeField(null=True, blank=True) # When payment is confirmed by provider
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [
-            models.Index(fields=['transaction_reference']),
             models.Index(fields=['status']),
             models.Index(fields=['campaign']),
             models.Index(fields=['donor']),
