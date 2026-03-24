@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to {{ app_name }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .message {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: opacity 0.3s ease;
+        }
+        .cta-button:hover {
+            opacity: 0.9;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px 30px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        .feature-list li {
+            padding: 10px 0;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .feature-list strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to {{ app_name }}! 🎉</h1>
+        </div>
+        
+        <div class="content">
+            <p class="greeting">Hello {{ first_name }},</p>
+            
+            <p class="message">
+                Thank you for joining {{ app_name }}! We're thrilled to have you on board. 
+                Your account has been successfully created and is ready to use.
+            </p>
+            
+            <p class="message">
+                Here's what you can do next:
+            </p>
+            
+            <ul class="feature-list">
+                <li><strong>Complete Your Profile:</strong> Add more details to help us serve you better</li>
+                <li><strong>Explore Our Platform:</strong> Discover the various features available to you</li>
+                <li><strong>Connect with Community:</strong> Join our vibrant community of users</li>
+                <li><strong>Get Support:</strong> Contact our support team anytime you need help</li>
+            </ul>
+            
+            <p class="message">
+                If you have any questions or need assistance, please don't hesitate to reach out to our support team.
+            </p>
+            
+            <div style="text-align: center;">
+                <a href="{{ login_url }}" class="cta-button">Get Started Now</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>
+                &copy; 2024 {{ app_name }}. All rights reserved.<br>
+                <a href="{{ login_url }}">Visit our website</a> | 
+                <a href="mailto:support@example.com">Contact Support</a>
+            </p>
+            <p>
+                You're receiving this email because you created an account on {{ app_name }}.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

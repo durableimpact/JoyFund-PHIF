@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ notification_title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .notification-section {
+            background-color: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .notification-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .notification-message {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .notification-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #777;
+            font-style: italic;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: opacity 0.3s ease;
+        }
+        .cta-button:hover {
+            opacity: 0.9;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px 30px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .notification-type-alert {
+            border-left-color: #ff6b6b;
+        }
+        .notification-type-alert .notification-title {
+            color: #ff6b6b;
+        }
+        .notification-type-success {
+            border-left-color: #51cf66;
+        }
+        .notification-type-success .notification-title {
+            color: #51cf66;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ notification_title }}</h1>
+            <div class="badge">{{ notification_type }}</div>
+        </div>
+        
+        <div class="content">
+            <p class="greeting">Hello {{ user_name }},</p>
+            
+            <div class="notification-section">
+                <div class="notification-message">
+                    {{ notification_message }}
+                </div>
+                {% if notification_description %}
+                <div class="notification-description">
+                    {{ notification_description }}
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if action_url %}
+            <div style="text-align: center;">
+                <a href="{{ action_url }}" class="cta-button">View Details</a>
+            </div>
+            {% endif %}
+            
+            <p style="font-size: 14px; color: #999; margin-top: 30px;">
+                Notification ID: {{ notification_id }}
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>
+                You're receiving this email because you have a new notification from {{ app_name }}.
+            </p>
+            <p>
+                &copy; 2024 {{ app_name }}. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
