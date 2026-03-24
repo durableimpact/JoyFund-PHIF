@@ -2,6 +2,7 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
@@ -59,13 +60,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if self.action in ['update', 'partial_update', 'destroy']:
             try:
                 donor = self.request.user.donor
-                return Campaign.objects.select_related('donor__user', 'account').filter(
+                return Campaign.objects.select_related('donor__user').filter(
                     donor=donor
                 ).order_by('-created_at')
             except Exception:
                 return Campaign.objects.none()
 
-        queryset = Campaign.objects.select_related('donor__user', 'account').all()
+        queryset = Campaign.objects.select_related('donor__user').all()
         if self.request.user.is_authenticated and getattr(self.request.user, 'role', None) == Role.DONOR:
             try:
                 donor = self.request.user.donor
@@ -134,3 +135,29 @@ class CampaignViewSet(viewsets.ModelViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated, IsDonor],
+        url_path='my-campaigns',
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: CampaignDetailSerializer(many=True)},
+        operation_description='Get all campaigns belonging to the authenticated donor.',
+    )
+    def my_campaigns(self, request, *args, **kwargs):
+        """Get campaigns of the authenticated donor"""
+        try:
+            donor = request.user.donor
+            campaigns = Campaign.objects.select_related('donor__user').filter(
+                donor=donor
+            ).order_by('-created_at')
+            serializer = self.get_serializer(campaigns, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'detail': 'Requesting user does not have a Donor profile.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
