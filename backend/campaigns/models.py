@@ -84,7 +84,7 @@ class Payment(models.Model):
     updated_at = models.DateField(auto_now=True)
     
     def __str__(self):
-        return self.name
+        return f"{self.payment_id} - {self.amount} XAF ({self.payment_status})"
     
     
 
@@ -95,7 +95,7 @@ class Donation(models.Model):
         ('FAILED', 'Failed'),
     ]
 
-    donation_id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    id = models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     donor = models.ForeignKey(Donor, on_delete=models.SET_NULL, null=True, blank=True, related_name='donations')
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='donations')
     donor_name = models.CharField(max_length=100,blank=True,null=True, default="Anonymous")
