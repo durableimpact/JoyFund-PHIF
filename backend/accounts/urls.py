@@ -5,28 +5,36 @@ from accounts.views import (
     DonorListView,
     DonorRegisterView,
     DonorUpdateView,
+    DonorInfoView,
     HospitalAdminCreateView,
     HospitalAdminDetailView,
     HospitalAdminListView,
     HospitalAdminUpdateView,
+    HospitalAdminInfoView,
     ReceptionistCreateView,
     ReceptionistDetailView,
     ReceptionistListView,
     ReceptionistUpdateView,
+    ReceptionistInfoView,
     SocialWorkerCreateView,
     SocialWorkerDetailView,
     SocialWorkerListView,
     SocialWorkerUpdateView,
-    UserInfoView,
+    SocialWorkerInfoView,
+    SystemAdminInfoView,
 )
 
 app_name = 'accounts'
 
 urlpatterns = [
     # -----------------------------------------------------------------------
-    # User Info  (get current user info after login)
+    # User Info (get authenticated user info after login)
     # -----------------------------------------------------------------------
-    path('info/', UserInfoView.as_view(), name='user-info'),
+    path('donor/info/', DonorInfoView.as_view(), name='donor-info'),
+    path('hospital-admin/info/', HospitalAdminInfoView.as_view(), name='hospital-admin-info'),
+    path('receptionist/info/', ReceptionistInfoView.as_view(), name='receptionist-info'),
+    path('social-worker/info/', SocialWorkerInfoView.as_view(), name='social-worker-info'),
+    path('system-admin/info/', SystemAdminInfoView.as_view(), name='system-admin-info'),
 
     # -----------------------------------------------------------------------
     # Donors  (public registration)
