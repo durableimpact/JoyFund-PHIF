@@ -1,11 +1,14 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, serializers, status
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..models import VoucherAssignment, CareVoucher, VoucherAuditLog
+from ..filters import CareVoucherFilter, VoucherAssignmentFilter
+from ..models import CareVoucher, VoucherAssignment, VoucherAuditLog
 from ..serializers.assignment import VoucherAssignmentSerializer
-from ..serializers.voucher import CareVoucherListSerializer, CareVoucherDetailSerializer
+from ..serializers.voucher import CareVoucherDetailSerializer, CareVoucherListSerializer
 from ..engine import approve_assignment
 from accounts.utils.permissions import IsAdminOrSocialWorker
 
@@ -20,7 +23,11 @@ class VoucherAssignmentListView(generics.ListAPIView):
     ).order_by('-matched_at')
     serializer_class = VoucherAssignmentSerializer
     permission_classes = [IsAdminOrSocialWorker]
-    filterset_fields = ['status', 'beneficiary', 'hospital', 'assigned_to']
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = VoucherAssignmentFilter
+    search_fields = ['beneficiary__full_name', 'beneficiary__digital_health_id']
+    ordering_fields = ['matched_at', 'status']
+    ordering = ['-matched_at']
 
     @swagger_auto_schema(
         tags=['Vouchers (Admin)'],
@@ -133,7 +140,11 @@ class CareVoucherListView(generics.ListAPIView):
     queryset = CareVoucher.objects.select_related('beneficiary', 'hospital').order_by('-created_at')
     serializer_class = CareVoucherListSerializer
     permission_classes = [IsAdminOrSocialWorker]
-    filterset_fields = ['status', 'hospital', 'beneficiary']
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = CareVoucherFilter
+    search_fields = ['beneficiary__full_name', 'beneficiary__digital_health_id', 'voucher_code']
+    ordering_fields = ['created_at', 'status']
+    ordering = ['-created_at']
 
     @swagger_auto_schema(
         tags=['Vouchers (Admin)'],
