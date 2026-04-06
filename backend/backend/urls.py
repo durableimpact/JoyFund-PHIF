@@ -23,6 +23,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from .views import login_view, logout_view
+from chanx.channels import urls as chanx_urls
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -41,6 +42,9 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('accounts/logout/', logout_view, name='logout'),
     path('admin/', admin.site.urls),
+    
+    # WebSocket AsyncAPI Documentation (Chanx)
+    path('asyncapi/', include(chanx_urls.urlpatterns)),
 
     # API endpoints
     path('auth/', include('drf_social_oauth2.urls', namespace='drf')),
@@ -51,6 +55,7 @@ urlpatterns = [
     path('api/vouchers/', include('vouchers.urls')),
     path('api/payments/', include('payments.urls')),
     path('api/notifications/', include('notifications.urls')),
+    path('api/logs/', include('logs.urls')),  # Logging system API
 
     # API documentation
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
