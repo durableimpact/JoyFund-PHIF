@@ -19,10 +19,10 @@ def login_view(request):
         next_url = '/'
     
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
         
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=email, password=password)
         
         if user is not None:
             auth_login(request, user)
