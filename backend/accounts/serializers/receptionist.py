@@ -15,7 +15,6 @@ class ReceptionistCreateSerializer(serializers.Serializer):
     `enrolled_by` is injected from the view (request.user.hospitaladmin).
     """
 
-    username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
     first_name = serializers.CharField(max_length=150)
@@ -39,11 +38,6 @@ class ReceptionistCreateSerializer(serializers.Serializer):
             allow_null=True,
         )
 
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Username already taken.")
-        return value
-
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already registered.")
@@ -59,7 +53,7 @@ class ReceptionistCreateSerializer(serializers.Serializer):
         enrolled_by: HospitalAdmin = self.context['enrolled_by']
         password = validated_data.pop('password')
 
-        user_fields = ['username', 'email', 'first_name', 'last_name', 'phone_number', 'perfered_language']
+        user_fields = ['email', 'first_name', 'last_name', 'phone_number', 'perfered_language']
         user_data = {k: validated_data.pop(k) for k in user_fields if k in validated_data}
 
         user = User(**user_data, role=Role.RECEPTIONIST)
@@ -103,7 +97,6 @@ class ReceptionistDetailSerializer(serializers.ModelSerializer):
 # ---------------------------------------------------------------------------
 
 class ReceptionistUpdateSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=150, required=False)
     email = serializers.EmailField(required=False)
     first_name = serializers.CharField(max_length=150, required=False)
     last_name = serializers.CharField(max_length=150, required=False)
@@ -113,7 +106,7 @@ class ReceptionistUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Receptionist
         fields = [
-            'username', 'email', 'first_name', 'last_name',
+            'email', 'first_name', 'last_name',
             'phone_number', 'perfered_language',
             'national_id_number',
             'front_national_id_image',
@@ -127,13 +120,7 @@ class ReceptionistUpdateSerializer(serializers.ModelSerializer):
             'hospital': {'required': False},
         }
 
-    USER_FIELDS = {'username', 'email', 'first_name', 'last_name', 'phone_number', 'perfered_language'}
-
-    def validate_username(self, value):
-        qs = User.objects.filter(username=value).exclude(pk=self.instance.user.pk)
-        if qs.exists():
-            raise serializers.ValidationError("Username already taken.")
-        return value
+    USER_FIELDS = {'email', 'first_name', 'last_name', 'phone_number', 'perfered_language'}
 
     def validate_email(self, value):
         qs = User.objects.filter(email=value).exclude(pk=self.instance.user.pk)
