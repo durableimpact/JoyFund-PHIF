@@ -17,4 +17,4 @@ class SocialWorker(BaseProfile, NationalIDMixin):
     )
 
     def __str__(self):
-        return "Social Worker: " + self.user.username
+        return "Social Worker: " + self.user.email
