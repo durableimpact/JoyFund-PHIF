@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import sentry_sdk
 
 # Load environment variables from .env file
 load_dotenv()
@@ -40,6 +41,9 @@ ALLOWED_HOSTS = ['*'] if DEBUG else os.environ.get('ALLOWED_HOSTS', 'localhost')
 # Application definition
 
 INSTALLED_APPS = [
+    
+    "daphne",
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,6 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.gis',
 
     # Third party apps
+    'channels',
+    'chanx.channels',
     'rest_framework',
     'django_filters',
     'oauth2_provider',
@@ -58,8 +64,10 @@ INSTALLED_APPS = [
     'django_celery_results',
     'django_celery_beat',
     'phonenumber_field',
+    'puml_generator',
 
     # Local apps
+    'logs',  # Logging system - must be before other apps to ensure proper app initialization
     'accounts',
     'campaigns',
     'vouchers',
@@ -73,6 +81,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Logging middleware - must be after SessionMiddleware to have access to session
+    'logs.middleware.LoggingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -100,6 +110,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = "backend.asgi.application"
 
 
 # Database
@@ -217,6 +228,8 @@ REST_FRAMEWORK = {
         'anon': os.environ.get('THROTTLE_ANON', '100/hour'),
         'user': os.environ.get('THROTTLE_USER', '1000/hour'),
     },
+    # Custom exception handler with logging
+    'EXCEPTION_HANDLER': 'logs.exceptions.custom_exception_handler',
     # Compact json for better performance
     'COMPACT_JSON': True,
 }
@@ -324,6 +337,32 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Django Channels (WebSocket/Real-time)
+# ─────────────────────────────────────────────────────────────────────────────
+# Configure channels to use Redis as the channel layer backend
+# This enables real-time communication through WebSocket connections
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('CHANNEL_LAYER_HOST', 'redis://localhost:6379/0')],
+            # Capacity: number of messages that can be stored in a group
+            "capacity": 1500,
+            # Expiry: seconds before a message expires in a group
+            "expiry": 10,
+        },
+    },
+}
+
+# Chanx Configuration for AsyncAPI documentation
+CHANX = {
+    "CAMELIZE": False,  # Keep snake_case (convert from camelCase if True)
+    "ASYNCAPI_TITLE": "JoyFund WebSocket API",
+    "ASYNCAPI_DESCRIPTION": "Real-time notifications for donors, admins, and hospital staff",
+    "ASYNCAPI_VERSION": "1.0.0",
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Session & Security
 # ─────────────────────────────────────────────────────────────────────────────
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
@@ -426,3 +465,23 @@ if not (BASE_DIR / 'logs').exists():
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Sentry
+
+sentry_sdk.init(
+    dsn="https://aa10d259382d4d60082a61f49d8f7cc7@o4507198990647296.ingest.us.sentry.io/4511172985028608",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+    # Enable sending logs to Sentry
+    enable_logs=True,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profile_session_sample_rate to 1.0 to profile 100%
+    # of profile sessions.
+    profile_session_sample_rate=1.0,
+    # Set profile_lifecycle to "trace" to automatically
+    # run the profiler on when there is an active transaction
+    profile_lifecycle="trace",
+)
