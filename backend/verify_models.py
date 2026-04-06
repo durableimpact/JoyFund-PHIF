@@ -14,10 +14,10 @@ def verify_models():
     print("--- Starting Verification ---")
     
     # 1. Create a User
-    username = "testuser"
+    email = "testuser@example.com"
     phone = "237123456789"
     try:
-        user = User.objects.create_user(username=username, phone_number=phone, password="testpassword", email="test@example.com")
+        user = User.objects.create_user(email=email, phone_number=phone, password="testpassword", first_name="Test", last_name="User")
         print(f"User created: {user}")
     except Exception as e:
         print(f"Error creating user: {e}")
