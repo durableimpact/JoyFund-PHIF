@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -16,6 +17,7 @@ from accounts.serializers import (
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin
 
 _TAG = ['Donors']
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
 class DonorRegisterView(APIView):
@@ -25,6 +27,11 @@ class DonorRegisterView(APIView):
     """
 
     permission_classes = [AllowAny]
+
+    @staticmethod
+    def _invalidate_list_cache():
+        """Invalidate donor list cache"""
+        cache.delete('donor_list')
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -36,6 +43,7 @@ class DonorRegisterView(APIView):
         serializer = DonorRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         donor = serializer.save()
+        self._invalidate_list_cache()
         return Response(
             DonorDetailSerializer(donor).data,
             status=status.HTTP_201_CREATED,
@@ -64,13 +72,25 @@ class DonorListView(ListAPIView):
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'user__phone_number']
     ordering_fields = ['user__created_at']
 
+    @staticmethod
+    def _get_cache_key():
+        """Get cache key for donor list"""
+        return 'donor_list'
+
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: DonorDetailSerializer(many=True)},
         operation_description="List Donor profiles. Accessible only by SYSTEM_ADMIN.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = self._get_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class DonorDetailView(RetrieveAPIView):
@@ -84,13 +104,31 @@ class DonorDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrSystemAdmin]
     lookup_field = 'id'
 
+    @staticmethod
+    def _get_list_cache_key():
+        """Get cache key for donor list"""
+        return 'donor_list'
+
+    @staticmethod
+    def _get_detail_cache_key(donor_id):
+        """Get cache key for donor detail"""
+        return f'donor_detail_{donor_id}'
+
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: DonorDetailSerializer},
         operation_description="Retrieve a Donor profile. Accessible by the donor or a SYSTEM_ADMIN.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        donor_id = kwargs.get('id')
+        cache_key = self._get_detail_cache_key(donor_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class DonorUpdateView(UpdateAPIView):
@@ -105,6 +143,16 @@ class DonorUpdateView(UpdateAPIView):
     lookup_field = 'id'
     http_method_names = ['patch', 'head', 'options']
 
+    @staticmethod
+    def _invalidate_list_cache():
+        """Invalidate donor list cache"""
+        cache.delete('donor_list')
+
+    @staticmethod
+    def _invalidate_detail_cache(donor_id):
+        """Invalidate donor detail cache"""
+        cache.delete(f'donor_detail_{donor_id}')
+
     @swagger_auto_schema(
         tags=_TAG,
         request_body=DonorUpdateSerializer,
@@ -112,4 +160,8 @@ class DonorUpdateView(UpdateAPIView):
         operation_description="Partially update a Donor profile. Only accessible by the donor or a SYSTEM_ADMIN.",
     )
     def patch(self, request, *args, **kwargs):
-        return super().patch(request, *args, **kwargs)
+        donor_id = kwargs.get('id')
+        response = super().patch(request, *args, **kwargs)
+        self._invalidate_list_cache()
+        self._invalidate_detail_cache(donor_id)
+        return response
