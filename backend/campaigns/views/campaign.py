@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
@@ -13,6 +14,7 @@ from campaigns.models import Campaign
 from campaigns.serializers import CampaignCreateUpdateSerializer, CampaignDetailSerializer
 
 _TAG = ['Campaigns']
+CACHE_TIMEOUT = 3 * 24 * 60 * 60  # 3 days
 
 
 class IsDonor(BasePermission):
@@ -56,7 +58,31 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return CampaignCreateUpdateSerializer
         return CampaignDetailSerializer
 
+    @staticmethod
+    def _get_list_cache_key():
+        """Get cache key for campaigns list"""
+        return 'campaign_list'
+
+    @staticmethod
+    def _get_detail_cache_key(campaign_id):
+        """Get cache key for campaign detail"""
+        return f'campaign_detail_{campaign_id}'
+
+    @staticmethod
+    def _invalidate_list_cache():
+        """Invalidate campaigns list cache"""
+        cache.delete(CampaignViewSet._get_list_cache_key())
+
+    @staticmethod
+    def _invalidate_detail_cache(campaign_id):
+        """Invalidate specific campaign detail cache"""
+        cache.delete(CampaignViewSet._get_detail_cache_key(campaign_id))
+
     def get_queryset(self):
+        # Handle schema generation for Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return Campaign.objects.none()
+        
         if self.action in ['update', 'partial_update', 'destroy']:
             try:
                 donor = self.request.user.donor
@@ -81,7 +107,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
         operation_description='Public list of campaigns with filters. Donors also see their private campaigns.',
     )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        cache_key = self._get_list_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -100,6 +133,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         campaign = serializer.save(donor=donor)
+        self._invalidate_list_cache()
         return Response(CampaignDetailSerializer(campaign).data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
@@ -108,7 +142,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
         operation_description='Retrieve a campaign visible to the requester. Public for everyone; donors can also retrieve their own private campaigns.',
     )
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        campaign_id = kwargs.get('pk')
+        cache_key = self._get_detail_cache_key(campaign_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -117,7 +159,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
         operation_description='Replace a donor-owned campaign.',
     )
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        campaign_id = kwargs.get('pk')
+        response = super().update(request, *args, **kwargs)
+        self._invalidate_detail_cache(campaign_id)
+        self._invalidate_list_cache()
+        return response
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -126,7 +172,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
         operation_description='Partially update a donor-owned campaign.',
     )
     def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
+        campaign_id = kwargs.get('pk')
+        response = super().partial_update(request, *args, **kwargs)
+        self._invalidate_detail_cache(campaign_id)
+        self._invalidate_list_cache()
+        return response
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -134,7 +184,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
         operation_description='Delete a donor-owned campaign.',
     )
     def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
+        campaign_id = kwargs.get('pk')
+        response = super().destroy(request, *args, **kwargs)
+        self._invalidate_list_cache()
+        self._invalidate_detail_cache(campaign_id)
+        return response
 
     @action(
         detail=False,
