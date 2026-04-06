@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -16,6 +17,7 @@ from accounts.serializers import (
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin
 
 _TAG = ['Social Workers']
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
 class SocialWorkerCreateView(APIView):
@@ -26,6 +28,11 @@ class SocialWorkerCreateView(APIView):
     """
 
     permission_classes = [IsAuthenticated, IsSystemAdmin]
+
+    @staticmethod
+    def _invalidate_list_cache():
+        """Invalidate social worker list cache"""
+        cache.delete('social_worker_list')
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -48,6 +55,7 @@ class SocialWorkerCreateView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         social_worker = serializer.save()
+        self._invalidate_list_cache()
         return Response(
             SocialWorkerDetailSerializer(social_worker).data,
             status=status.HTTP_201_CREATED,
@@ -80,13 +88,25 @@ class SocialWorkerListView(ListAPIView):
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'organization', 'region_assigned']
     ordering_fields = ['user__created_at']
 
+    @staticmethod
+    def _get_cache_key():
+        """Get cache key for social worker list"""
+        return 'social_worker_list'
+
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: SocialWorkerDetailSerializer(many=True)},
         operation_description="List Social Worker profiles. Accessible only by SYSTEM_ADMIN.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = self._get_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class SocialWorkerDetailView(RetrieveAPIView):
@@ -100,13 +120,31 @@ class SocialWorkerDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrSystemAdmin]
     lookup_field = 'id'
 
+    @staticmethod
+    def _get_list_cache_key():
+        """Get cache key for social worker list"""
+        return 'social_worker_list'
+
+    @staticmethod
+    def _get_detail_cache_key(social_worker_id):
+        """Get cache key for social worker detail"""
+        return f'social_worker_detail_{social_worker_id}'
+
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: SocialWorkerDetailSerializer},
         operation_description="Retrieve a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        social_worker_id = kwargs.get('id')
+        cache_key = self._get_detail_cache_key(social_worker_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class SocialWorkerUpdateView(UpdateAPIView):
@@ -121,6 +159,16 @@ class SocialWorkerUpdateView(UpdateAPIView):
     lookup_field = 'id'
     http_method_names = ['patch', 'head', 'options']
 
+    @staticmethod
+    def _invalidate_list_cache():
+        """Invalidate social worker list cache"""
+        cache.delete('social_worker_list')
+
+    @staticmethod
+    def _invalidate_detail_cache(social_worker_id):
+        """Invalidate social worker detail cache"""
+        cache.delete(f'social_worker_detail_{social_worker_id}')
+
     @swagger_auto_schema(
         tags=_TAG,
         request_body=SocialWorkerUpdateSerializer,
@@ -128,4 +176,8 @@ class SocialWorkerUpdateView(UpdateAPIView):
         operation_description="Partially update a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
     def patch(self, request, *args, **kwargs):
-        return super().patch(request, *args, **kwargs)
+        social_worker_id = kwargs.get('id')
+        response = super().patch(request, *args, **kwargs)
+        self._invalidate_list_cache()
+        self._invalidate_detail_cache(social_worker_id)
+        return response
