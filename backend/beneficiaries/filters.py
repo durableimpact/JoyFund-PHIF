@@ -1,6 +1,6 @@
 import django_filters
 from django_filters import rest_framework as filters
-from beneficiaries.models import Beneficiary, Gender, BeneficiaryCategory
+from beneficiaries.models import Beneficiary, Gender, BeneficiaryCategory, UrgencyLevel, GeographicRemoteness
 
 
 class BeneficiaryFilter(filters.FilterSet):
@@ -17,8 +17,19 @@ class BeneficiaryFilter(filters.FilterSet):
         choices=BeneficiaryCategory.choices, 
         lookup_expr='exact'
     )
+    urgency_level = django_filters.ChoiceFilter(
+        field_name='urgency_level',
+        choices=UrgencyLevel.choices,
+        lookup_expr='exact'
+    )
+    geographic_remoteness = django_filters.ChoiceFilter(
+        field_name='geographic_remoteness',
+        choices=GeographicRemoteness.choices,
+        lookup_expr='exact'
+    )
     enrolled_by_id = django_filters.UUIDFilter(field_name='enrolled_by_id', lookup_expr='exact')
     is_active = django_filters.BooleanFilter(field_name='is_active', lookup_expr='exact')
+    income_verified = django_filters.BooleanFilter(field_name='income_verified', lookup_expr='exact')
     
     # Search filters (case-insensitive contains)
     full_name = django_filters.CharFilter(field_name='full_name', lookup_expr='icontains')
