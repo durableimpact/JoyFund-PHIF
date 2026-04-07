@@ -2,6 +2,7 @@ from .donor import DonorRegisterView, DonorListView, DonorDetailView, DonorUpdat
 from .hospital_admin import HospitalAdminCreateView, HospitalAdminListView, HospitalAdminDetailView, HospitalAdminUpdateView
 from .receptionist import ReceptionistCreateView, ReceptionistListView, ReceptionistDetailView, ReceptionistUpdateView
 from .social_worker import SocialWorkerCreateView, SocialWorkerListView, SocialWorkerDetailView, SocialWorkerUpdateView
+from .verification import VerifyEmailView, ResendVerificationView
 from .info import (
     DonorInfoView,
     HospitalAdminInfoView,
@@ -32,4 +33,6 @@ __all__ = [
     'ReceptionistInfoView',
     'SocialWorkerInfoView',
     'SystemAdminInfoView',
+    'VerifyEmailView',
+    'ResendVerificationView',
 ]
