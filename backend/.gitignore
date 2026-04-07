@@ -40,3 +40,6 @@ htmlcov/
 
 .vscode
 .vscode/*
+# Local env files
+envs/dev/.env
+envs/prod/.env
