@@ -47,15 +47,22 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
             'login_url': getattr(settings, 'FRONTEND_URL', 'https://joyfund.app'),
         }
         
-        # Render HTML email template
-        html_message = render_to_string('emails/welcome.html', context)
+        user_role = getattr(instance, 'role', None)
         
-        # Trigger async task - this returns immediately, doesn't block
-        send_email.delay(
-            subject=subject,
-            recipient_email=instance.email,
-            html_message=html_message,
-        )
+        # If user is a donor send the Verification OTP instead of just a standard welcome email
+        if user_role == 'DONOR':
+            from accounts.utils.verification import send_verification_email
+            send_verification_email(instance)
+        else:
+            # Render HTML email template
+            html_message = render_to_string('emails/welcome.html', context)
+            
+            # Trigger async task - this returns immediately, doesn't block
+            send_email.delay(
+                subject=subject,
+                recipient_email=instance.email,
+                html_message=html_message,
+            )
         
         # Notify admin dashboard for donor account creations
         # (as per requirements: only donors and patients, not staff/system admin)
