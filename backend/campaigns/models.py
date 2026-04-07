@@ -41,6 +41,17 @@ class Campaign(models.Model):
 
     status = models.CharField(max_length=20, choices=CAMPAIGN_STATUS, default='DRAFT')
 
+    certificate_generated = models.BooleanField(
+        default=False, 
+        help_text="True if an Impact Certificate PDF has been generated for this completed campaign."
+    )
+    certificate_file = models.FileField(
+        upload_to='certificates/', 
+        null=True, 
+        blank=True,
+        help_text="The generated PDF Impact Certificate."
+    )
+
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
