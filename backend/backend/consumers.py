@@ -347,3 +347,51 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             notification.delete()
         except Notification.DoesNotExist:
             logger.warning(f"Notification {notification_id} not found")
+
+@channel(
+    name="pulse_dashboard",
+    description='Live Layer 1 "Pulse" and Layer 2 "Proof" global feed',
+    tags=["pulse", "public"]
+)
+class PulseConsumer(AsyncJsonWebsocketConsumer):
+    """
+    Handles Layer 1: "The Pulse" (Public Stats) & Layer 2: "The Proof"
+    This is an open/unauthenticated consumer that streams live global
+    donations and impacts to anyone viewing the homepage.
+    """
+    
+    async def connect(self) -> None:
+        """Accepts public dashboard connections directly."""
+        await self.accept()
+        # Add to the global pulse broadcast group
+        await self.channel_layer.group_add("global_pulse", self.channel_name)
+        logger.info(f"New client connected to public Pulse Dashboard: {self.channel_name}")
+
+    async def disconnect(self, close_code: int) -> None:
+        """Removes from the global pulse group."""
+        await self.channel_layer.group_discard("global_pulse", self.channel_name)
+        logger.info(f"Client disconnected from Pulse Dashboard: {self.channel_name}")
+
+    @event_handler
+    async def handle_pulse_donation(self, message: DonationCreatedMessage) -> None:
+        """
+        Broadcasts new donations live on the "Proof" (Layer 2 feed).
+        Adds to the 'Total Joy Pooled' counter.
+        """
+        payload = message.payload.dict()
+        await self.send_json({
+            "action": "pulse_donation",
+            "data": payload
+        })
+
+    @event_handler
+    async def handle_pulse_redemption(self, message: VoucherRedeemedMessage) -> None:
+        """
+        Broadcasts live impacts on the "Proof" (Layer 2 feed).
+        Increments 'Lives Impacted' counter.
+        """
+        payload = message.payload.dict()
+        await self.send_json({
+            "action": "pulse_redemption",
+            "data": payload
+        })
