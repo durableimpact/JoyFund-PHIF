@@ -5,6 +5,7 @@ from .hospital_admin import HospitalAdmin
 from .receptionist import Receptionist
 from .social_worker import SocialWorker
 from .donor import Donor
+from .verification import EmailVerificationToken
 
 __all__ = [
     'BaseProfile',
@@ -16,4 +17,5 @@ __all__ = [
     'Receptionist',
     'SocialWorker',
     'Donor',
+    'EmailVerificationToken',
 ]
