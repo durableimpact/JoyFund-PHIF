@@ -22,11 +22,19 @@ from accounts.views import (
     SocialWorkerUpdateView,
     SocialWorkerInfoView,
     SystemAdminInfoView,
+    VerifyEmailView,
+    ResendVerificationView,
 )
 
 app_name = 'accounts'
 
 urlpatterns = [
+    # -----------------------------------------------------------------------
+    # Email Verification
+    # -----------------------------------------------------------------------
+    path('verify-email/', VerifyEmailView.as_view(), name='verify-email'),
+    path('resend-verification/', ResendVerificationView.as_view(), name='resend-verification'),
+
     # -----------------------------------------------------------------------
     # User Info (get authenticated user info after login)
     # -----------------------------------------------------------------------
