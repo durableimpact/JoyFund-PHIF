@@ -8,10 +8,10 @@ from rest_framework.views import APIView
 
 from accounts.utils.permissions import IsSystemAdmin
 from ..filters import WebhookEventFilter
-from ..models import WebhookEvent, PaymentGateway
+from ..models import WebhookEvent, PaymentGateway, Transaction
 from ..serializers.webhook import WebhookEventSerializer
 
-from ..tasks.process_payment import process_payment_task
+from ..tasks.process_payment import process_payment_task, process_disbursement_task
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 
@@ -117,9 +117,19 @@ class PaymentWebhookView(APIView):
             )
 
             logger.info(f"Received webhook data: {webhook_data}")
+            
+            ext_ref = webhook_data.get("external_reference")
+            # Default to tracking as donation
+            target_task = process_payment_task
+            
+            if ext_ref:
+                # Check if it's a disbursement via Transaction
+                # (Disbursements use the Transaction ID as the external_reference)
+                if Transaction.objects.filter(id=ext_ref, type='DISBURSEMENT').exists():
+                    target_task = process_disbursement_task
 
             # Queue payment processing using Celery
-            result = process_payment_task.delay(webhook_data)
+            result = target_task.delay(webhook_data)
             logger.info(f"Task queued with ID: {result.id}")
 
             return Response(
