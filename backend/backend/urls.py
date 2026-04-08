@@ -29,7 +29,7 @@ schema_view = get_schema_view(
     openapi.Info(
         title='JoyFund PHIF API',
         default_version='v1',
-        description='JoyFund Patient Health Insurance Fund - REST API documentation',
+        description='JoyFund People Health Insurance Fund - REST API documentation',
         contact=openapi.Contact(email='admin@joyfund.org'),
         license=openapi.License(name='Proprietary'),
     ),
