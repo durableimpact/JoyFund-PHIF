@@ -25,6 +25,7 @@ class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
+        tags=['Password Management'],
         operation_summary="Request Password Reset",
         operation_description="Request a password reset link to be sent to your email. "
                             "For security, the endpoint will return success even if the email doesn't exist.",
@@ -77,6 +78,7 @@ class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
+        tags=['Password Management'],
         operation_summary="Reset Password with Token",
         operation_description="Complete the password reset process with a valid reset token.",
         request_body=openapi.Schema(
@@ -143,6 +145,7 @@ class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
+        tags=['Password Management'],
         operation_summary="Change Password (Authenticated User)",
         operation_description="Change your password. Requires authentication and the old password.",
         request_body=openapi.Schema(
