@@ -3,6 +3,7 @@ from .hospital_admin import HospitalAdminCreateView, HospitalAdminListView, Hosp
 from .receptionist import ReceptionistCreateView, ReceptionistListView, ReceptionistDetailView, ReceptionistUpdateView
 from .social_worker import SocialWorkerCreateView, SocialWorkerListView, SocialWorkerDetailView, SocialWorkerUpdateView
 from .verification import VerifyEmailView, ResendVerificationView
+from .password import PasswordResetRequestView, PasswordResetConfirmView, PasswordChangeView
 from .info import (
     DonorInfoView,
     HospitalAdminInfoView,
@@ -35,4 +36,7 @@ __all__ = [
     'SystemAdminInfoView',
     'VerifyEmailView',
     'ResendVerificationView',
+    'PasswordResetRequestView',
+    'PasswordResetConfirmView',
+    'PasswordChangeView',
 ]
