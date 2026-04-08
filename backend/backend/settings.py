@@ -466,6 +466,10 @@ if not (BASE_DIR / 'logs').exists():
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# Frontend URL for password reset links and other redirects
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+
 # Sentry
 
 sentry_sdk.init(
