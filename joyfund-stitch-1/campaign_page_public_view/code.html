@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#2f2e43",
+                    "on-primary-container": "#003f51",
+                    "primary": "#006781",
+                    "tertiary-container": "#00b7a8",
+                    "tertiary-fixed": "#53fae8",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#efecff",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#5ad4ff",
+                    "surface": "#fcf8ff",
+                    "surface-container-highest": "#e2e0fc",
+                    "tertiary": "#006a61",
+                    "surface-tint": "#006781",
+                    "inverse-on-surface": "#f2efff",
+                    "on-tertiary-fixed-variant": "#005049",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e2e0fc",
+                    "on-primary-fixed": "#001f29",
+                    "outline-variant": "#bcc8cf",
+                    "secondary-fixed-dim": "#bcc3ff",
+                    "primary-fixed": "#baeaff",
+                    "primary-container": "#1db1db",
+                    "outline": "#6d797f",
+                    "on-secondary-container": "#fffbff",
+                    "on-primary-fixed-variant": "#004d62",
+                    "on-error-container": "#93000a",
+                    "background": "#fcf8ff",
+                    "on-tertiary-container": "#00413b",
+                    "secondary-fixed": "#dfe0ff",
+                    "surface-container-low": "#f5f2ff",
+                    "on-surface": "#1a1a2e",
+                    "error": "#ba1a1a",
+                    "on-background": "#1a1a2e",
+                    "secondary": "#2e46e6",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#e8e5ff",
+                    "inverse-primary": "#5ad4ff",
+                    "secondary-container": "#4c63ff",
+                    "surface-dim": "#dad7f3",
+                    "on-secondary-fixed-variant": "#0429d2",
+                    "on-secondary-fixed": "#000c60",
+                    "tertiary-fixed-dim": "#23decb",
+                    "surface-bright": "#fcf8ff",
+                    "on-surface-variant": "#3d484e",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#00201d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-nav {
+            background: rgba(252, 248, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 glass-nav shadow-sm">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto w-full">
+<div class="text-2xl font-black text-primary tracking-tighter font-headline">JoyFund</div>
+<div class="hidden md:flex gap-8 items-center font-headline text-sm tracking-tight">
+<a class="text-on-surface hover:text-primary transition-all duration-300" href="#">Home</a>
+<a class="text-on-surface hover:text-primary transition-all duration-300" href="#">How It Works</a>
+<a class="text-on-surface hover:text-primary transition-all duration-300" href="#">About</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Explore</a>
+<a class="text-on-surface hover:text-primary transition-all duration-300" href="#">Privacy</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-primary font-bold active:scale-95 transform transition-all">Sign Up</button>
+<button class="bg-primary text-white px-6 py-2.5 rounded-full font-bold active:scale-95 transform transition-all">Start a JoyFund</button>
+</div>
+</div>
+<div class="bg-gradient-to-b from-[#f5f2ff] to-transparent h-px"></div>
+</nav>
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-7xl mx-auto">
+<!-- Hero Story Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<!-- Left Side: Story & Visual -->
+<div class="lg:col-span-7 space-y-8">
+<div class="relative group">
+<div class="absolute -inset-4 bg-primary-container/10 rounded-xl blur-2xl group-hover:bg-primary-container/20 transition-all duration-500"></div>
+<img alt="A smiling Cameroonian woman holding her newborn baby in a bright clinic setting" class="relative w-full aspect-[4/3] object-cover rounded-xl shadow-lg" data-alt="A joyful Cameroonian mother cradling her newborn infant in a clean, sunlit healthcare clinic, warm lens flare, high-end photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYxb20tU1POieP9EO_mMO0EgNwbx-ISoMHCTRJLAbBcJjU-1WhbfLRQnAXBf7W5k-iUQd9K8C-0npBv7A0QUKA2Huh1r9vaJKxE17E874ciz6wkSO1tnAlTZosLfn2L8s7SuBTeOjwYg0pYUoFJ-LvIHxFvH5dLTY6Uo54NjpSE2y6Gw3Wy0P9rE3PlbavusdtwpASLRjgxaoRAJiA7Q8wD3zwRXXOv1rp-XHTF_d-dANhPr8jk_YsRS3evlSiKu65tL3UQcbZIm-u"/>
+</div>
+<div class="space-y-6">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-tertiary-container/10 text-tertiary font-bold text-xs uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                        Impact Story
+                    </div>
+<h1 class="text-4xl md:text-5xl font-headline font-extrabold text-on-surface leading-tight tracking-tight">
+                        Safe arrival for baby Amara in Douala
+                    </h1>
+<p class="text-lg text-on-surface-variant leading-relaxed italic">
+                        "When I found out I was expecting, my biggest fear wasn't the pain, but the cost. JoyFund connected me to a community that didn't just give money, they gave me peace of mind." — <span class="font-bold text-primary">Nadine S.</span>
+</p>
+<div class="prose prose-on-surface max-w-none text-on-surface-variant">
+<p>Nadine’s story is one of many. In the heart of Douala, access to safe delivery services can be the difference between a celebration and a tragedy. This JoyFund is dedicated to ensuring 50 more mothers like Nadine receive the vital medical care they need during labor and delivery.</p>
+</div>
+</div>
+</div>
+<!-- Right Side: Progress & Action (Floating Card) -->
+<div class="lg:col-span-5 sticky top-32">
+<div class="bg-surface-container-low rounded-xl p-8 space-y-8 shadow-xl shadow-on-surface/5">
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="font-headline text-4xl font-black text-primary tracking-tighter">32 <span class="text-xl font-medium text-on-surface-variant">of 50</span></span>
+<span class="text-primary font-bold">64% funded</span>
+</div>
+<p class="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Safe Deliveries Funded</p>
+<!-- Custom Progress Bar -->
+<div class="h-4 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 64%"></div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex -space-x-3 items-center">
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-low" data-alt="Close up portrait of a young man smiling warmly, outdoor natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArp15WAOpH9jP7RLzH9ybUKj8TNSqGPdBJ7CxaoqK1cK31Fbzk0BAyJePPfkFctKim1m3A9VOu0C0pNeU5jDUb5n8BnyZWoUM-_hoRBsTA-FuS7YqRzvCr3OzGdZSeaEIF79n61_dgxuCnazQza_SfGrY5Ro21wLQ7lBHkU34um-pcfaHBT6xCm2t0R61ytv2WZQShs0QrFwDOYf2-zOpkR38e0v4oon7peHU0RJmlItHbVTCbKQFzwGIovpMzvLbjnYGRgc9I96NU"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-low" data-alt="Close up portrait of a woman with braided hair, soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHPyPO2d982Lrn4O2h1Mv2FoxBFMR40LQ9oOp9bsJBy-ZmHxyhI5_3CYA9hSNKhLJQBSOKwxWrHV3KbW6XjZ6rwmELBbT6KO1UqqSZN9VpkeaNtrd_w0lAJR6kZtFqePcI1eXnOScigaZA7fk32InqsQkA-JF-5togWO5U0bOFcfSLTsTMb6zKYhjFZIf-A4CMhNF4BJGLelw9ixPFyii-1G5F2THGBmJDKhrtW5YvjhP1NaenPytq5VZwZ4Q1X6ySF5ebyS7YOPzs"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-low" data-alt="Cheerful elderly woman with glasses, blurred garden background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWJ4pB4rFcH9w3l09lSyE9zw2rUL5Yf7hONq5fX17FtOCDvlEKnUBiYX-uUl01iXZl8xAsxFQAmFm1W6cflIdXhQJ401sTO17Dcbtn4wu4t0In8RJicnGgG0gc8TgyS4IkksFiJsHLGx9mBq6jJ-1O2evo_G_zDFUdBzHtjWT3OCCAwZnKve1W56ppSAJvm_yLxgXoJGFrqxlhnuHbeoICwVguBVdR-AXmnzW5eevWPSGaa5Kc7EkEa86z0n97CaLcGl6YRXKHJsmN"/>
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-xs font-bold border-2 border-surface-container-low">
+                                +142
+                            </div>
+<span class="ml-6 text-sm font-medium text-on-surface-variant">145 people have contributed</span>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full bg-primary-container hover:bg-primary text-on-primary-container hover:text-white py-5 rounded-full font-headline font-extrabold text-lg transition-all duration-300 transform active:scale-95 shadow-lg shadow-primary-container/20">
+                            Give a Gift
+                        </button>
+<p class="text-center mt-4 text-xs font-medium text-on-surface-variant uppercase tracking-widest">Your joy, their care</p>
+</div>
+<div class="space-y-4 border-t border-outline-variant/15 pt-6">
+<h3 class="font-headline font-bold text-on-surface">Recent Donors</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold text-xs">MA</div>
+<span class="font-medium">Marie-Alice</span>
+</div>
+<span class="text-sm font-bold text-primary">50,000 CFA</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant font-bold text-xs">JE</div>
+<span class="font-medium">Jean</span>
+</div>
+<span class="text-sm font-bold text-primary">15,000 CFA</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant font-bold text-xs">SA</div>
+<span class="font-medium">Samuel</span>
+</div>
+<span class="text-sm font-bold text-primary">25,000 CFA</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Info Bento Grid -->
+<section class="mt-24">
+<h2 class="text-3xl font-headline font-extrabold mb-12 text-center">Where your gift goes</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-high p-8 rounded-xl space-y-4 border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-4xl" data-weight="fill">medical_services</span>
+<h3 class="text-xl font-bold font-headline">Clinical Support</h3>
+<p class="text-sm text-on-surface-variant">Direct coverage of hospital fees, nursing care, and emergency surgery if needed.</p>
+</div>
+<div class="bg-surface-container-high p-8 rounded-xl space-y-4 border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-4xl" data-weight="fill">child_care</span>
+<h3 class="text-xl font-bold font-headline">Newborn Kit</h3>
+<p class="text-sm text-on-surface-variant">Essential hygiene supplies and initial vaccinations for the baby's first month.</p>
+</div>
+<div class="bg-surface-container-high p-8 rounded-xl space-y-4 border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-4xl" data-weight="fill">diversity_1</span>
+<h3 class="text-xl font-bold font-headline">Community Care</h3>
+<p class="text-sm text-on-surface-variant">Post-partum checkups and emotional support for the family during transition.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<div class="md:hidden">
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-6 pb-6 pt-2 bg-surface/80 backdrop-blur-2xl z-50 shadow-[0px_-10px_30px_rgba(26,26,46,0.08)] rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-on-surface/60 p-2">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label text-[10px] uppercase tracking-widest font-bold">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-gradient-to-tr from-primary to-primary-container text-white rounded-full p-3 w-14 h-14 -translate-y-4 shadow-lg">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface/60 p-2">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-label text-[10px] uppercase tracking-widest font-bold">Impact</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface/60 p-2">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label text-[10px] uppercase tracking-widest font-bold">Account</span>
+</div>
+</nav>
+</div>
+<!-- Footer -->
+<footer class="bg-[#1a1a2e] w-full pt-16 pb-8 px-8 mt-24">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/10 pt-8">
+<div class="text-lg font-black text-white font-headline">JoyFund</div>
+<div class="flex flex-wrap justify-center gap-6 font-label text-xs text-[#e2e0fc]/70">
+<a class="hover:text-primary-container transition-colors duration-200" href="#">Privacy Policy</a>
+<a class="hover:text-primary-container transition-colors duration-200" href="#">Terms of Service</a>
+<a class="hover:text-primary-container transition-colors duration-200" href="#">Partner Hospitals</a>
+<a class="hover:text-primary-container transition-colors duration-200" href="#">Contact Support</a>
+</div>
+<p class="font-label text-xs text-[#e2e0fc]/70">© 2024 JoyFund Cameroon. Vitality through Community.</p>
+</div>
+</footer>
+</body></html>

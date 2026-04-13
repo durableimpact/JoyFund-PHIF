@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#2f2e43",
+                    "on-primary-container": "#003f51",
+                    "primary": "#006781",
+                    "tertiary-container": "#00b7a8",
+                    "tertiary-fixed": "#53fae8",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#efecff",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#5ad4ff",
+                    "surface": "#fcf8ff",
+                    "surface-container-highest": "#e2e0fc",
+                    "tertiary": "#006a61",
+                    "surface-tint": "#006781",
+                    "inverse-on-surface": "#f2efff",
+                    "on-tertiary-fixed-variant": "#005049",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e2e0fc",
+                    "on-primary-fixed": "#001f29",
+                    "outline-variant": "#bcc8cf",
+                    "secondary-fixed-dim": "#bcc3ff",
+                    "primary-fixed": "#baeaff",
+                    "primary-container": "#1db1db",
+                    "outline": "#6d797f",
+                    "on-secondary-container": "#fffbff",
+                    "on-primary-fixed-variant": "#004d62",
+                    "on-error-container": "#93000a",
+                    "background": "#fcf8ff",
+                    "on-tertiary-container": "#00413b",
+                    "secondary-fixed": "#dfe0ff",
+                    "surface-container-low": "#f5f2ff",
+                    "on-surface": "#1a1a2e",
+                    "error": "#ba1a1a",
+                    "on-background": "#1a1a2e",
+                    "secondary": "#2e46e6",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#e8e5ff",
+                    "inverse-primary": "#5ad4ff",
+                    "secondary-container": "#4c63ff",
+                    "surface-dim": "#dad7f3",
+                    "on-secondary-fixed-variant": "#0429d2",
+                    "on-secondary-fixed": "#000c60",
+                    "tertiary-fixed-dim": "#23decb",
+                    "surface-bright": "#fcf8ff",
+                    "on-surface-variant": "#3d484e",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#00201d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#fcf8ff]/80 backdrop-blur-xl dark:bg-[#1a1a2e]/80 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto w-full">
+<div class="text-2xl font-black text-[#006781] dark:text-[#1db1db] tracking-tighter">JoyFund</div>
+<div class="hidden md:flex items-center gap-8 font-['Plus_Jakarta_Sans'] text-sm tracking-tight">
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">Home</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">How It Works</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">About</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">Explore</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">Privacy</a>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2 rounded-full font-bold text-sm bg-primary text-white hover:opacity-80 transition-all duration-300 active:scale-95 transform">Start a JoyFund</button>
+</div>
+</div>
+<div class="bg-gradient-to-b from-[#f5f2ff] to-transparent h-px w-full"></div>
+</nav>
+<main class="pt-24 pb-32 px-4 max-w-5xl mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+<div>
+<nav class="flex items-center gap-2 text-sm text-on-surface-variant mb-4 font-medium">
+<span class="material-symbols-outlined text-base">arrow_back</span>
+<span>Back to Caseload</span>
+</nav>
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-primary mb-2">Mama Marie</h1>
+<p class="text-on-surface-variant font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">id_card</span>
+                    Health ID: JF-CMR-2024-8892
+                </p>
+</div>
+<div class="flex flex-col items-start md:items-end gap-3">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-bold text-sm shadow-sm">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">lock</span>
+                    Funds Locked — Care in Progress
+                </div>
+<div class="flex items-center gap-2 text-tertiary font-semibold text-sm">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+                    Donor notified
+                </div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Fund Summary Card -->
+<div class="md:col-span-1 bg-surface-container-low rounded-xl p-8 flex flex-col justify-between relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-on-surface-variant text-sm font-bold uppercase tracking-widest mb-1">Estimated Fund Value</p>
+<h2 class="text-5xl font-black text-primary tracking-tighter mb-4">45,000 <span class="text-2xl">XAF</span></h2>
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden mb-2">
+<div class="h-full w-full bg-gradient-to-r from-tertiary-container to-primary rounded-full"></div>
+</div>
+<p class="text-xs text-on-surface-variant font-medium italic">100% Secure &amp; Allocated</p>
+</div>
+<div class="mt-8 relative z-10">
+<p class="text-sm font-semibold text-on-surface">“Your joy, their care”</p>
+</div>
+<!-- Decorative element -->
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+</div>
+<!-- Services Coverage Card -->
+<div class="md:col-span-2 bg-surface-container-highest rounded-xl p-8">
+<h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">medical_services</span>
+                    Services Covered
+                </h3>
+<div class="space-y-4">
+<!-- Service Row 1 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">pregnancy</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Prenatal Care</p>
+<p class="text-xs text-on-surface-variant">4 Checkups &amp; Essential Labs</p>
+</div>
+</div>
+<span class="text-primary font-bold text-sm">Active</span>
+</div>
+<!-- Service Row 2 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">baby_changing_station</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Delivery Services</p>
+<p class="text-xs text-on-surface-variant">Safe Birth Facility Fees</p>
+</div>
+</div>
+<span class="text-primary font-bold text-sm">Active</span>
+</div>
+<!-- Service Row 3 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">health_and_safety</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Postnatal Care</p>
+<p class="text-xs text-on-surface-variant">Follow-up &amp; Immunization</p>
+</div>
+</div>
+<span class="text-primary font-bold text-sm">Active</span>
+</div>
+</div>
+</div>
+<!-- Action Center / Next Steps -->
+<div class="md:col-span-3 bg-inverse-surface text-inverse-on-surface rounded-xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-primary-container shrink-0">
+<img alt="Doctor Profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional African female doctor in a white coat smiling warmly in a clinical setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4d9AccmtqgT8ntNFkjVTNsS7QYCRz8OyhHCNwk9Ouh4WopaKg--xm6L7IWTMk4h16bvprP-r1eyzetj2gU6y6hN0cYpkQ88x5v5fKUBoyom4Yqh46Tz3tcBtELUgjutJkk19TuYadL5BCi9yz-OsUxqpSCUnVsBkvZA-4t9yN28GjKemzVZ7UwjGCf4VK8k1Wv5MWzTJKFCEj7kCKcTxyaxUbUkzoBM0PvYG0aC0Rrdslfp7R16IPyggqBVY6QYm-D3wKG3YdxH_5"/>
+</div>
+<div>
+<h4 class="font-bold text-lg">Assigned Provider: Dr. Ngassa</h4>
+<p class="text-sm opacity-70">Registered at Central Hospital Yaoundé</p>
+</div>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-8 py-3 bg-primary-container text-on-primary-container rounded-full font-bold hover:opacity-90 transition-all active:scale-95">Verify Care Event</button>
+<button class="flex-1 md:flex-none px-8 py-3 border border-outline-variant rounded-full font-bold hover:bg-white/10 transition-all">Support</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-6 pb-6 pt-2 bg-[#fcf8ff]/80 backdrop-blur-2xl dark:bg-[#1a1a2e]/90 shadow-[0px_-10px_30px_rgba(26,26,46,0.08)] z-50 rounded-t-[32px]">
+<div class="flex flex-col items-center justify-center text-[#1a1a2e]/60 dark:text-[#e2e0fc]/60 p-2">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest font-bold">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1a1a2e]/60 dark:text-[#e2e0fc]/60 p-2">
+<span class="material-symbols-outlined">search</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest font-bold">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-gradient-to-tr from-[#006781] to-[#1db1db] text-white rounded-full p-3 w-14 h-14 -translate-y-4 shadow-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1a1a2e]/60 dark:text-[#e2e0fc]/60 p-2">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest font-bold">Account</span>
+</div>
+</nav>
+<!-- Footer -->
+<footer class="bg-[#1a1a2e] w-full pt-16 pb-8 px-8">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/10 pt-8 max-w-7xl mx-auto">
+<div class="text-lg font-black text-white">JoyFund</div>
+<div class="flex flex-wrap justify-center gap-6 text-[#e2e0fc]/70 font-['Inter'] text-xs">
+<a class="hover:text-[#1db1db] transition-colors duration-200" href="#">Privacy Policy</a>
+<a class="hover:text-[#1db1db] transition-colors duration-200" href="#">Terms of Service</a>
+<a class="hover:text-[#1db1db] transition-colors duration-200" href="#">Partner Hospitals</a>
+<a class="hover:text-[#1db1db] transition-colors duration-200" href="#">Contact Support</a>
+</div>
+<div class="text-[#e2e0fc]/70 font-['Inter'] text-xs">
+                © 2024 JoyFund Cameroon. Vitality through Community.
+            </div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #1DB1DB;
+  --secondary: #1D38DB;
+  --hover: #1D75DB;
+  --success: #1CDBC9;
+  --admin: #471DDB;
+  --background: #F9FAFB;
+  --text: #1A1A2E;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-all duration-200 hover:opacity-90 active:scale-95 cursor-pointer border-none;
+    background-color: var(--primary);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-all duration-200 hover:opacity-90 active:scale-95 cursor-pointer border-none;
+    background-color: var(--secondary);
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-all duration-200 hover:bg-gray-50 active:scale-95 border-2 border-gray-800 text-gray-800 cursor-pointer bg-white;
+  }
+
+  .btn-success {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-all duration-200 hover:opacity-90 active:scale-95 cursor-pointer border-none;
+    background-color: var(--success);
+    color: #0a4a44;
+  }
+
+  .btn-admin {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-all duration-200 hover:opacity-90 active:scale-95 cursor-pointer border-none;
+    background-color: var(--admin);
+  }
+
+  .card {
+    @apply bg-white shadow-sm border border-gray-100 rounded-3xl;
+  }
+
+  .card-sm {
+    @apply bg-white shadow-sm border border-gray-100;
+    border-radius: 12px;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-200 outline-none transition-all duration-200 text-sm bg-white text-gray-900;
+    border-radius: 12px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .input-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(29, 177, 219, 0.1);
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full;
+  }
+
+  .progress-bar {
+    @apply w-full bg-gray-100 overflow-hidden rounded-full;
+    height: 8px;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-700;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+  }
+
+  .section-title {
+    @apply text-2xl font-bold mb-1 text-gray-900;
+  }
+
+  .section-sub {
+    @apply text-gray-500 text-sm mb-6;
+  }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.35s ease forwards;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }

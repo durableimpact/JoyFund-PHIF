@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JoyFund | Turn Your Celebration into Care</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2f2e43",
+                        "on-primary-container": "#003f51",
+                        "primary": "#006781",
+                        "tertiary-container": "#00b7a8",
+                        "tertiary-fixed": "#53fae8",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#efecff",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#5ad4ff",
+                        "surface": "#fcf8ff",
+                        "surface-container-highest": "#e2e0fc",
+                        "tertiary": "#006a61",
+                        "surface-tint": "#006781",
+                        "inverse-on-surface": "#f2efff",
+                        "on-tertiary-fixed-variant": "#005049",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e2e0fc",
+                        "on-primary-fixed": "#001f29",
+                        "outline-variant": "#bcc8cf",
+                        "secondary-fixed-dim": "#bcc3ff",
+                        "primary-fixed": "#baeaff",
+                        "primary-container": "#1db1db",
+                        "outline": "#6d797f",
+                        "on-secondary-container": "#fffbff",
+                        "on-primary-fixed-variant": "#004d62",
+                        "on-error-container": "#93000a",
+                        "background": "#fcf8ff",
+                        "on-tertiary-container": "#00413b",
+                        "secondary-fixed": "#dfe0ff",
+                        "surface-container-low": "#f5f2ff",
+                        "on-surface": "#1a1a2e",
+                        "error": "#ba1a1a",
+                        "on-background": "#1a1a2e",
+                        "secondary": "#2e46e6",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e8e5ff",
+                        "inverse-primary": "#5ad4ff",
+                        "secondary-container": "#4c63ff",
+                        "surface-dim": "#dad7f3",
+                        "on-secondary-fixed-variant": "#0429d2",
+                        "on-secondary-fixed": "#000c60",
+                        "tertiary-fixed-dim": "#23decb",
+                        "surface-bright": "#fcf8ff",
+                        "on-surface-variant": "#3d484e",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#00201d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .radiant-gradient {
+            background: linear-gradient(135deg, #006781 0%, #1db1db 100%);
+        }
+        .glass-nav {
+            background: rgba(252, 248, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#fcf8ff]/80 backdrop-blur-xl dark:bg-[#1a1a2e]/80 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto w-full">
+<div class="text-2xl font-black text-[#006781] dark:text-[#1db1db] tracking-tighter font-headline">JoyFund</div>
+<!-- Desktop Links -->
+<div class="hidden md:flex items-center gap-8 font-['Plus_Jakarta_Sans'] text-sm tracking-tight">
+<a class="text-[#006781] font-bold border-b-2 border-[#006781] pb-1" href="#">Home</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">How It Works</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">About</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">Explore</a>
+<a class="text-[#1a1a2e] dark:text-[#e2e0fc] hover:text-[#006781] transition-all duration-300" href="#">Privacy</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-sm font-semibold text-primary hover:opacity-80 transition-all">Sign Up</button>
+<button class="bg-primary text-white px-6 py-2.5 rounded-full font-bold text-sm hover:opacity-80 transition-all active:scale-95 transform">Start a JoyFund</button>
+</div>
+</div>
+<div class="bg-gradient-to-b from-[#f5f2ff] to-transparent h-px"></div>
+</nav>
+<main class="pt-24 pb-32">
+<!-- Hero Section -->
+<section class="px-6 py-12 md:py-24 max-w-7xl mx-auto">
+<div class="grid md:grid-cols-2 gap-12 items-center">
+<div class="space-y-8">
+<div class="space-y-4">
+<span class="bg-secondary/10 text-secondary px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">Community-Led Health</span>
+<h1 class="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter text-on-surface leading-[1.1]">
+                            Turn your celebration into <span class="text-primary italic">someone's safe delivery</span>.
+                        </h1>
+<p class="text-lg text-on-surface-variant max-w-lg leading-relaxed">
+                            Create a JoyFund for your birthday, wedding, or graduation and transform your gifts into life-saving maternal care for mothers in Cameroon. 
+                            <span class="block mt-2 font-medium">Votre joie, leur soin.</span>
+</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="bg-secondary text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-secondary/20 transition-all active:scale-95">Start a JoyFund</button>
+<button class="flex items-center justify-center gap-2 text-on-surface font-bold px-8 py-4 rounded-full border-2 border-outline-variant/30 hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">play_circle</span>
+                            How It Works
+                        </button>
+</div>
+</div>
+<div class="relative">
+<div class="aspect-[4/5] rounded-xl overflow-hidden relative group">
+<img class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105" data-alt="A warm, smiling Cameroonian mother holding her newborn baby in a bright, modern clinic setting with soft daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBARTiOspCsgKM2QSGhzmRl0gSXNeWJTmI85IrP2AHFWuzSO3ZZVq3aM6QcVqoHIZi0XLRGlDc-pxAp6CmKQqwI4ihaUPtbUU2nIAMggnwrKWBPmVwF7KxhC9dmDrg2LkbxSFnBQ2J1iVlPUdmyB1UEX5CtZOmE1RY7LJfzKbbSU08YF8XLxVlPaV9SkkFGnSP8W4hNNtERCWUj29wgJUGNgMqpXEdcJilr3YOxdh2BiYpWHj9XQXyneA8lEOEReAr-wh_3vYuzJ7TJ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/40 to-transparent"></div>
+</div>
+<!-- Floating Card -->
+<div class="absolute -bottom-6 -left-6 md:-left-12 bg-surface-container-lowest p-6 rounded-lg shadow-2xl max-w-[240px]">
+<div class="flex items-center gap-3 mb-2">
+<div class="flex -space-x-3">
+<div class="w-8 h-8 rounded-full border-2 border-white bg-tertiary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young smiling donor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEUpRTEfLdNmkGaBI0-V3yc-CMBfL3ZDp9VqAq2IE0OydiZDNTJEXH8YQWtu071XCBIvTwZ0O7Y1d_cxOF2g6DU3GLyCazbRt6O7EeeEPuNCDdMgNW-hi3y0milPpx9-wHSfcdbMk9fIhgD3RLr6xn2PUSa0wqf2e5dEYXFrpoUud7tcudTDDpJ5WmcP3_uxs6mTjLXsTFsF_UEnZy_VepCgmaIktFFAEPw1Oe7SW5NsWEEfWtvGH4eVru1xkxgeuR-P_7BX5c-jPS"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-primary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPMenvMDckOiG21Gz9eH9q0QvJjsOsVTfoiswZM1DJpAb-FgoiAOnktBl-s5QJepFboe8gw5zjXbg6LaxO0NvTTCL3PRMWMnrNar7MHQgagkuI-1TBtgUhpnTSDnZUQCkIFEwcFCcHM-KUMmKuwYRaAgJQlemgfdNZf9pKFNy3s0P6wP9RoKpPyXKY6MOms7Vew6fVXoDAnWcl8_bxMFaGfbpeFER1E-3rG8leSTs1oxs1rb-JodvwwwVp-Y1vLgQsEJ1PloTt0fEP"/>
+</div>
+</div>
+<span class="text-xs font-bold text-on-surface-variant">+42 Joined today</span>
+</div>
+<p class="text-sm font-headline font-bold">New delivery at Mbankomo Hospital supported.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Section -->
+<section class="bg-surface-container-low py-16">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+<div class="space-y-2">
+<p class="text-4xl font-headline font-black text-primary tracking-tighter">1,240+</p>
+<p class="text-sm font-bold text-on-surface-variant uppercase tracking-widest">Total lives supported</p>
+</div>
+<div class="space-y-2">
+<p class="text-4xl font-headline font-black text-secondary tracking-tighter">158</p>
+<p class="text-sm font-bold text-on-surface-variant uppercase tracking-widest">Campaigns active</p>
+</div>
+<div class="space-y-2">
+<p class="text-4xl font-headline font-black text-tertiary tracking-tighter">FCFA 45M+</p>
+<p class="text-sm font-bold text-on-surface-variant uppercase tracking-widest">Funds raised</p>
+</div>
+</div>
+</section>
+<!-- Explainer Section -->
+<section class="py-24 max-w-7xl mx-auto px-6">
+<div class="text-center mb-16 space-y-4">
+<h2 class="text-3xl md:text-5xl font-headline font-extrabold tracking-tight">Simple steps to impact</h2>
+<p class="text-on-surface-variant max-w-2xl mx-auto">Connecting your milestones to maternal health milestones across the country.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<!-- Step 1 -->
+<div class="bg-surface-container-lowest p-10 rounded-lg group hover:translate-y-[-8px] transition-transform duration-300">
+<div class="w-16 h-16 radiant-gradient text-white rounded-full flex items-center justify-center mb-8 shadow-lg">
+<span class="material-symbols-outlined text-3xl">celebration</span>
+</div>
+<h3 class="text-2xl font-headline font-bold mb-4">Celebrate</h3>
+<p class="text-on-surface-variant leading-relaxed">Choose your life event and set a goal. Invite friends and family to donate instead of buying physical gifts.</p>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container-lowest p-10 rounded-lg group hover:translate-y-[-8px] transition-transform duration-300">
+<div class="w-16 h-16 bg-secondary text-white rounded-full flex items-center justify-center mb-8 shadow-lg">
+<span class="material-symbols-outlined text-3xl">diversity_1</span>
+</div>
+<h3 class="text-2xl font-headline font-bold mb-4">Pool</h3>
+<p class="text-on-surface-variant leading-relaxed">Collect funds securely through Mobile Money. Watch the progress bar move as your community joins your cause.</p>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container-lowest p-10 rounded-lg group hover:translate-y-[-8px] transition-transform duration-300">
+<div class="w-16 h-16 bg-tertiary text-white rounded-full flex items-center justify-center mb-8 shadow-lg">
+<span class="material-symbols-outlined text-3xl">medical_services</span>
+</div>
+<h3 class="text-2xl font-headline font-bold mb-4">Care</h3>
+<p class="text-on-surface-variant leading-relaxed">Directly fund vouchers for maternal health. Every FCFA raised covers real costs for mothers in need.</p>
+</div>
+</div>
+</section>
+<!-- Featured Campaigns -->
+<section class="bg-surface-container-low py-24 px-6">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+<div>
+<h2 class="text-3xl md:text-5xl font-headline font-extrabold tracking-tight">Active JoyFunds</h2>
+<p class="text-on-surface-variant mt-2 italic">Support a celebration today.</p>
+</div>
+<a class="text-primary font-bold flex items-center gap-2 group" href="#">
+                        Explore all campaigns
+                        <span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
+</a>
+</div>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Campaign Card 1 -->
+<div class="bg-surface-container-lowest rounded-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300">
+<div class="h-56 relative">
+<img class="w-full h-full object-cover" data-alt="Happy outdoor wedding reception with colorful decorations and people laughing in a tropical garden" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_CwDjgWLS-9qCgs4KqsJ-Awtg8UT9LUZQYVDUP-FL0sDIXWymr_JqFESkck98ov7A_mMEcCpe1JrqQ5fYS5_Fl_7R9r6Vuhiux8KxhK3IKJ7FdkcCtuRPjRMjo9wcidfoJerNBqy7rTb7BFKd-ZzJdCNEHhboXWb1hYFkrY3OpAASsw05jH9t6sxsUz6soJ41skpIT6YTUAcJtTAsjNU7OOAfIWsn2dJL6cfcoLHZhBZ29jd0jeNzEm2MRMlZ7L7qAErd86asuXHw"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary">WEDDING</div>
+</div>
+<div class="p-8 flex-1 flex flex-col">
+<h3 class="text-xl font-headline font-bold mb-2">Sarah &amp; Jean’s Union</h3>
+<p class="text-sm text-on-surface-variant mb-6 flex-1">"Help us welcome new life into the world as we start ours together."</p>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-primary font-bold text-lg">75% <span class="text-xs font-normal text-on-surface-variant ml-1">funded</span></span>
+<span class="text-sm font-bold">FCFA 500k goal</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full radiant-gradient" style="width: 75%"></div>
+</div>
+<button class="w-full py-3 rounded-full border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-colors">Contribute</button>
+</div>
+</div>
+</div>
+<!-- Campaign Card 2 -->
+<div class="bg-surface-container-lowest rounded-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300">
+<div class="h-56 relative">
+<img class="w-full h-full object-cover" data-alt="Colorful birthday party balloons and decorations with a blurry background of friends celebrating" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB24jBRzR4gOjBpC65I3af7IOzR6d-KlgLtn0hXw-KKVBvEM6zXBNCiEZWDvY5pgJf3ivgJiR4rm369J2o5sA1WFUenxSJfFO11hToEP6Z9OztusiS6kyFp2e2gkKQ5_sif5C8XUPdw6sF-PKnmZhC7NPJmCVQp0pgJa4oTGmnbC-8VwwiFqBRdzMmiIARan4qmsvLmSxDuKwVwx2jRgf0ap5ESxcWRcX9vi1erDkPGWaHp5LYi7qdhj8Npo6c7dhesxodqXszUEGLF"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary">BIRTHDAY</div>
+</div>
+<div class="p-8 flex-1 flex flex-col">
+<h3 class="text-xl font-headline font-bold mb-2">Marie's 30th JoyFund</h3>
+<p class="text-sm text-on-surface-variant mb-6 flex-1">Supporting 10 safe deliveries in the Douala coastal region for my milestone year.</p>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-primary font-bold text-lg">32% <span class="text-xs font-normal text-on-surface-variant ml-1">funded</span></span>
+<span class="text-sm font-bold">FCFA 1.2M goal</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full radiant-gradient" style="width: 32%"></div>
+</div>
+<button class="w-full py-3 rounded-full border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-colors">Contribute</button>
+</div>
+</div>
+</div>
+<!-- Campaign Card 3 -->
+<div class="bg-surface-container-lowest rounded-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300">
+<div class="h-56 relative">
+<img class="w-full h-full object-cover" data-alt="University graduation caps thrown in the air against a clear blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgN0Ga1U3dQHC1eW-CAMdu6zEqAfqfkFElKWVy_rPS91pcEpo0EP4y-DV0fbnjyVrpl5y7Q4XqWQaB6OJscmFa2F65Ggr_gcRzoy22qazV2vIoYWMl8XIXryF7P3SGmejgQrBm_3-d008L-PQ2zHxt9-or1Jc_sjg4p-z6wWMQrHzLvtXpqD4COKApSXPuE9hPy0AOG7vRRndGqBiLOYh24dU4MRD8YWOXr2_-f5CJPx4xyta7Htk-SDtro52uggjov0rwwyoIm2n2"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary">GRADUATION</div>
+</div>
+<div class="p-8 flex-1 flex flex-col">
+<h3 class="text-xl font-headline font-bold mb-2">Eng. Paul’s Graduation</h3>
+<p class="text-sm text-on-surface-variant mb-6 flex-1">Celebrating my engineering degree by building health equity for mothers.</p>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-primary font-bold text-lg">91% <span class="text-xs font-normal text-on-surface-variant ml-1">funded</span></span>
+<span class="text-sm font-bold">FCFA 300k goal</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full radiant-gradient" style="width: 91%"></div>
+</div>
+<button class="w-full py-3 rounded-full border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-colors">Contribute</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="max-w-5xl mx-auto px-6 py-24 text-center">
+<div class="bg-inverse-surface rounded-xl p-12 md:p-24 relative overflow-hidden">
+<div class="relative z-10 space-y-8">
+<h2 class="text-4xl md:text-6xl font-headline font-black text-white leading-tight">Your joy, <span class="text-primary-container">their care</span>.</h2>
+<p class="text-white/70 text-lg max-w-xl mx-auto">Join the movement changing maternal outcomes through the power of communal giving.</p>
+<div class="flex flex-col sm:flex-row justify-center gap-4">
+<button class="bg-primary-container text-on-primary-container px-10 py-5 rounded-full font-extrabold text-lg hover:scale-105 transition-transform">Get Started Now</button>
+<button class="bg-white/10 text-white backdrop-blur-md px-10 py-5 rounded-full font-extrabold text-lg hover:bg-white/20 transition-all">Download App</button>
+</div>
+</div>
+<!-- Abstract blobs -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 blur-3xl rounded-full -translate-x-1/2 translate-y-1/2"></div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-6 pb-6 pt-2 bg-[#fcf8ff]/80 backdrop-blur-2xl dark:bg-[#1a1a2e]/90 rounded-t-[32px] z-50 shadow-[0px_-10px_30px_rgba(26,26,46,0.08)]">
+<a class="flex flex-col items-center justify-center bg-gradient-to-tr from-[#006781] to-[#1db1db] text-white rounded-full p-3 w-14 h-14 -translate-y-4 shadow-lg" href="#">
+<span class="material-symbols-outlined" data-weight="fill">home</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest font-bold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1a1a2e]/60 dark:text-[#e2e0fc]/60 p-2 hover:text-[#006781] transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest font-bold">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1a1a2e]/60 dark:text-[#e2e0fc]/60 p-2 hover:text-[#006781] transition-colors" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest font-bold">Impact</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1a1a2e]/60 dark:text-[#e2e0fc]/60 p-2 hover:text-[#006781] transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest font-bold">Account</span>
+</a>
+</nav>
+<!-- Footer -->
+<footer class="bg-[#1a1a2e] w-full pt-16 pb-8 px-8">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/10 pt-12 pb-8">
+<div class="flex flex-col items-center md:items-start gap-4">
+<div class="text-lg font-black text-white font-headline">JoyFund</div>
+<p class="font-['Inter'] text-xs text-[#e2e0fc]/70">© 2024 JoyFund Cameroon. Vitality through Community.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="text-[#e2e0fc]/70 font-['Inter'] text-xs hover:text-[#1db1db] transition-colors duration-200" href="#">Privacy Policy</a>
+<a class="text-[#e2e0fc]/70 font-['Inter'] text-xs hover:text-[#1db1db] transition-colors duration-200" href="#">Terms of Service</a>
+<a class="text-[#e2e0fc]/70 font-['Inter'] text-xs hover:text-[#1db1db] transition-colors duration-200" href="#">Partner Hospitals</a>
+<a class="text-[#e2e0fc]/70 font-['Inter'] text-xs hover:text-[#1db1db] transition-colors duration-200" href="#">Contact Support</a>
+</div>
+</div>
+<div class="text-center mt-8">
+<p class="text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">Your joy, their care • Votre joie, leur soin</p>
+</div>
+</div>
+</footer>
+</body></html>
