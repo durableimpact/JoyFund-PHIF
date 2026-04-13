@@ -1,5 +1,6 @@
 import uuid
 from decimal import Decimal
+import logging
 
 from django.db import transaction
 from django.db.models import F
@@ -15,6 +16,8 @@ from .models import (
     PaymentGateway,
     Transaction,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_default_fee_policy(sender, **kwargs):
@@ -120,3 +123,22 @@ def create_transactions_on_successful_donation(sender, instance: Donation, **kwa
         instance.campaign.__class__.objects.filter(pk=instance.campaign_id).update(
             current_amount=F('current_amount') + escrow_amount
         )
+    
+    # After successful transaction processing, notify stakeholders via WebSocket
+    try:
+        from .tasks import notify_donation_made
+        
+        notify_donation_made.delay(
+            donation_id=instance.id,
+            donor_id=instance.donor_id if instance.donor else None,
+            campaign_id=instance.campaign_id,
+            donation_data={
+                'amount': str(instance.amount),
+                'currency': instance.currency or 'XAF',
+                'donor_name': getattr(instance.donor, 'get_full_name', lambda: str(instance.donor))(),
+                'status': instance.status,
+            }
+        )
+        logger.info(f"Queued donation notification task for donation: {instance.id}")
+    except Exception as e:
+        logger.error(f"Failed to queue donation notification: {str(e)}", exc_info=True)

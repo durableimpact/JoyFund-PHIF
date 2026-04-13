@@ -1,6 +1,7 @@
 """
 Django signals for the notifications app.
 """
+from django.core.cache import cache
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
@@ -49,3 +50,31 @@ def send_notification_email(sender, instance, created, **kwargs):
             recipient_email=instance.user.email,
             html_message=html_message,
         )
+
+
+@receiver(post_save, sender=Notification, dispatch_uid='invalidate_notification_caches')
+def invalidate_notification_caches(sender, instance, created, **kwargs):
+    """
+    Signal handler that invalidates notification caches when a notification is created or updated.
+    
+    This ensures that:
+    - New notifications trigger list cache invalidation for the user
+    - Updated notifications (e.g., marked as read) invalidate list, detail, and unread count caches
+    
+    Args:
+        sender: The model class (Notification)
+        instance: The notification instance
+        created (bool): True if this is a new notification creation
+        **kwargs: Additional signal arguments
+    """
+    user_id = instance.user.id
+    notification_id = instance.id
+    
+    # Invalidate the user's notification list cache
+    cache.delete(f'notification_list_{user_id}')
+    
+    # Invalidate the notification detail cache
+    cache.delete(f'notification_detail_{notification_id}')
+    
+    # Invalidate the user's unread count cache (always invalidate, as read status may have changed)
+    cache.delete(f'notification_unread_count_{user_id}')

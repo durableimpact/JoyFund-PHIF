@@ -65,3 +65,14 @@ class DonationCreateSerializer(serializers.ModelSerializer):
             'success_url',
             'failure_url',
         ]
+
+
+# class DonationCreateSerializer(serializers.Serializer):
+#     donor_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
+#     amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+#     message = serializers.CharField(required=False, allow_blank=True)
+#     is_anonymous = serializers.BooleanField(default=False)
+#     payment_method = serializers.CharField(max_length=10)
+#     phone_number = serializers.CharField(max_length=20)
+#     success_url = serializers.URLField()
+#     failure_url = serializers.URLField()

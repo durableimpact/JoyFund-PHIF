@@ -1,7 +1,10 @@
+from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 
 from accounts.utils.permissions import IsSystemAdmin
+
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 from ..models import Account, EscrowAccount, FeeAccount
 from ..serializers.account import AccountSerializer, EscrowAccountSerializer, FeeAccountSerializer
 
@@ -27,7 +30,14 @@ class AccountListView(generics.ListAPIView):
         ),
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = 'account_list'
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class EscrowAccountDetailView(generics.RetrieveAPIView):
@@ -47,7 +57,14 @@ class EscrowAccountDetailView(generics.RetrieveAPIView):
         operation_description="Returns the singleton Escrow Account that holds funds awaiting disbursement.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = 'escrow_account_detail'
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class FeeAccountDetailView(generics.RetrieveAPIView):
@@ -67,4 +84,11 @@ class FeeAccountDetailView(generics.RetrieveAPIView):
         operation_description="Returns the singleton Fee Account that accumulates platform fee revenue.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = 'fee_account_detail'
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response

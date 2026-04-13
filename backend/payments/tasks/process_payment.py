@@ -1,7 +1,9 @@
 import logging
 from celery import shared_task
 from django.utils import timezone
-from campaigns.models import Donation,Payment
+from django.db import transaction
+from campaigns.models import Donation, Payment
+from payments.models import Transaction, HospitalAccount
 import json
 
 
@@ -10,7 +12,7 @@ logger = logging.getLogger(__name__)
 @shared_task
 def process_payment_task(webhook_data:dict):
     """
-    Process payment webhook data asynchronously using PaymentReference model
+    Process payment webhook data asynchronously using PaymentReference model for Donations.
     """
     
     try:
@@ -30,8 +32,8 @@ def process_payment_task(webhook_data:dict):
             donation = Donation.objects.get(id=external_reference)
             
         except Exception as e:
-            logger.error(f"Donation couldn't be find from the external reference {external_reference}")
-            return {'status':'error','message':f"Donation couldn't be find from the external reference {external_reference}"}
+            logger.error(f"Donation couldn't be found from the external reference {external_reference}")
+            return {'status':'error','message':f"Donation couldn't be found from the external reference {external_reference}"}
         
         payment = donation.payment
             
@@ -39,12 +41,10 @@ def process_payment_task(webhook_data:dict):
         
         if status == 'SUCCESSFUL':
             
-            
             payment.payment_status = "SUCCESS"
             payment.save()
             
             donation.status = "SUCCESS"
-            
             donation.save()
             
             return {
@@ -69,6 +69,48 @@ def process_payment_task(webhook_data:dict):
     
     except Exception as e:
         logger.exception(f"Error processing payment: {str(e)}")
+        return {'status': 'error', 'message': str(e)}
+
+
+@shared_task
+def process_disbursement_task(webhook_data:dict):
+    """
+    Process payment webhook data asynchronously for Disbursements.
+    """
+    try:
+        logger.info(f"Starting process_disbursement_task with webhook_data : {webhook_data}")
+        
+        campay_reference = webhook_data.get("reference")
+        external_reference = webhook_data.get("external_reference")
+        status = webhook_data.get("status")
+        
+        if not external_reference:
+            logger.error("Missing external_reference in webhook data")
+            return {'status': 'error', 'message': 'Missing external_reference in webhook data'}
+
+        tx = Transaction.objects.filter(id=external_reference).first()
+        if not tx or tx.type != 'DISBURSEMENT':
+            logger.error(f"Disbursement Transaction couldn't be found from the external reference {external_reference}")
+            return {'status': 'error', 'message': 'Disbursement Transaction not found'}
+
+        tx.gateway_transaction_id = campay_reference
+        if status == 'SUCCESSFUL':
+            tx.status = 'SUCCESSFUL'
+            tx.save()
+            return {'status': 'success', 'message': 'Disbursement processed successfully', 'transaction_id': tx.id}
+        else:
+            # If failed, we need to refund the HospitalAccount
+            tx.status = 'FAILED'
+            with transaction.atomic():
+                tx.save()
+                if tx.source and isinstance(tx.source, HospitalAccount):
+                    # Return funds to the hospital
+                    tx.source.balance += tx.amount
+                    tx.source.save()
+            return {'status': 'failed', 'message': 'Disbursement failed and funds refunded', 'transaction_id': tx.id}
+
+    except Exception as e:
+        logger.exception(f"Error processing disbursement callback: {str(e)}")
         return {'status': 'error', 'message': str(e)}
     
     

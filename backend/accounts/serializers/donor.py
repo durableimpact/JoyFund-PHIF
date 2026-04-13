@@ -16,18 +16,12 @@ class DonorRegisterSerializer(serializers.Serializer):
     """
 
     # User fields
-    username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     phone_number = serializers.CharField(max_length=15)
     perfered_language = serializers.CharField(max_length=10, default='en')
-
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("A user with this username already exists.")
-        return value
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -74,7 +68,6 @@ class DonorUpdateSerializer(serializers.ModelSerializer):
     All user-level fields are included directly; Donor has no extra fields.
     """
 
-    username = serializers.CharField(max_length=150, required=False)
     email = serializers.EmailField(required=False)
     first_name = serializers.CharField(max_length=150, required=False)
     last_name = serializers.CharField(max_length=150, required=False)
@@ -83,13 +76,7 @@ class DonorUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Donor
-        fields = ['username', 'email', 'first_name', 'last_name', 'phone_number', 'perfered_language']
-
-    def validate_username(self, value):
-        qs = User.objects.filter(username=value).exclude(pk=self.instance.user.pk)
-        if qs.exists():
-            raise serializers.ValidationError("A user with this username already exists.")
-        return value
+        fields = ['email', 'first_name', 'last_name', 'phone_number', 'perfered_language']
 
     def validate_email(self, value):
         qs = User.objects.filter(email=value).exclude(pk=self.instance.user.pk)

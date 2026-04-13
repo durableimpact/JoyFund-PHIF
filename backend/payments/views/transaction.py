@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins
@@ -6,6 +7,8 @@ from accounts.utils.permissions import IsSystemAdmin
 from ..filters import TransactionFilter, FeeSplitFilter
 from ..models import Transaction, FeeSplit
 from ..serializers.transaction import TransactionSerializer, FeeSplitSerializer
+
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
 @method_decorator(name='list', decorator=swagger_auto_schema(
@@ -40,6 +43,35 @@ class TransactionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
     ordering_fields = ['amount', 'status', 'created_at']
     ordering = ['-created_at']
 
+    @staticmethod
+    def _get_list_cache_key():
+        return 'transaction_list'
+
+    @staticmethod
+    def _get_detail_cache_key(transaction_id):
+        return f'transaction_detail_{transaction_id}'
+
+    def list(self, request, *args, **kwargs):
+        cache_key = self._get_list_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
+
+    def retrieve(self, request, *args, **kwargs):
+        transaction_id = kwargs.get('pk')
+        cache_key = self._get_detail_cache_key(transaction_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
+
 
 @method_decorator(name='list', decorator=swagger_auto_schema(
     tags=['Payments — Fee Splits'],
@@ -63,3 +95,32 @@ class FeeSplitViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
     filterset_class = FeeSplitFilter
     ordering_fields = ['gross_amount', 'escrow_amount', 'platform_amount', 'created_at']
     ordering = ['-created_at']
+
+    @staticmethod
+    def _get_list_cache_key():
+        return 'fee_split_list'
+
+    @staticmethod
+    def _get_detail_cache_key(fee_split_id):
+        return f'fee_split_detail_{fee_split_id}'
+
+    def list(self, request, *args, **kwargs):
+        cache_key = self._get_list_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
+
+    def retrieve(self, request, *args, **kwargs):
+        fee_split_id = kwargs.get('pk')
+        cache_key = self._get_detail_cache_key(fee_split_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response

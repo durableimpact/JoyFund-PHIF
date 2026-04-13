@@ -20,4 +20,4 @@ class Receptionist(BaseProfile, NationalIDMixin):
     )
 
     def __str__(self):
-        return "Receptionist: " + self.user.username
+        return "Receptionist: " + self.user.email

@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -16,6 +17,7 @@ from accounts.serializers import (
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin
 
 _TAG = ['Hospital Admins']
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
 class HospitalAdminCreateView(APIView):
@@ -26,6 +28,11 @@ class HospitalAdminCreateView(APIView):
     """
 
     permission_classes = [IsAuthenticated, IsSystemAdmin]
+
+    @staticmethod
+    def _invalidate_list_cache():
+        """Invalidate hospital admin list cache"""
+        cache.delete('hospital_admin_list')
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -49,6 +56,7 @@ class HospitalAdminCreateView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         hospital_admin = serializer.save()
+        self._invalidate_list_cache()
         return Response(
             HospitalAdminDetailSerializer(hospital_admin).data,
             status=status.HTTP_201_CREATED,
@@ -79,13 +87,25 @@ class HospitalAdminListView(ListAPIView):
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'national_id_number']
     ordering_fields = ['user__created_at']
 
+    @staticmethod
+    def _get_cache_key():
+        """Get cache key for hospital admin list"""
+        return 'hospital_admin_list'
+
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: HospitalAdminDetailSerializer(many=True)},
         operation_description="List Hospital Admin profiles. Accessible only by SYSTEM_ADMIN.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = self._get_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class HospitalAdminDetailView(RetrieveAPIView):
@@ -99,13 +119,31 @@ class HospitalAdminDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrSystemAdmin]
     lookup_field = 'id'
 
+    @staticmethod
+    def _get_list_cache_key():
+        """Get cache key for hospital admin list"""
+        return 'hospital_admin_list'
+
+    @staticmethod
+    def _get_detail_cache_key(admin_id):
+        """Get cache key for hospital admin detail"""
+        return f'hospital_admin_detail_{admin_id}'
+
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: HospitalAdminDetailSerializer},
         operation_description="Retrieve a Hospital Admin profile. Accessible by the hospital admin or a SYSTEM_ADMIN.",
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        admin_id = kwargs.get('id')
+        cache_key = self._get_detail_cache_key(admin_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class HospitalAdminUpdateView(UpdateAPIView):
@@ -120,6 +158,16 @@ class HospitalAdminUpdateView(UpdateAPIView):
     lookup_field = 'id'
     http_method_names = ['patch', 'head', 'options']
 
+    @staticmethod
+    def _invalidate_list_cache():
+        """Invalidate hospital admin list cache"""
+        cache.delete('hospital_admin_list')
+
+    @staticmethod
+    def _invalidate_detail_cache(admin_id):
+        """Invalidate hospital admin detail cache"""
+        cache.delete(f'hospital_admin_detail_{admin_id}')
+
     @swagger_auto_schema(
         tags=_TAG,
         request_body=HospitalAdminUpdateSerializer,
@@ -127,4 +175,8 @@ class HospitalAdminUpdateView(UpdateAPIView):
         operation_description="Partially update a Hospital Admin profile. Accessible by the hospital admin or a SYSTEM_ADMIN.",
     )
     def patch(self, request, *args, **kwargs):
-        return super().patch(request, *args, **kwargs)
+        admin_id = kwargs.get('id')
+        response = super().patch(request, *args, **kwargs)
+        self._invalidate_list_cache()
+        self._invalidate_detail_cache(admin_id)
+        return response

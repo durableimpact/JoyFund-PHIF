@@ -8,8 +8,9 @@ app_name = 'campaigns'
 router = routers.SimpleRouter()
 router.register(r'', CampaignViewSet, basename='campaign')
 
-donations_router = routers.NestedSimpleRouter(router, r'', lookup='campaign')
-donations_router.register(r'donations', DonationViewSet, basename='campaign-donations')
+# Register DonationViewSet at top level for custom actions like my-donations
+donations_router = routers.SimpleRouter()
+donations_router.register(r'donations', DonationViewSet, basename='donation')
 
 urlpatterns = router.urls + donations_router.urls + [
     # POST only — create a donation / initiate CamPay payment

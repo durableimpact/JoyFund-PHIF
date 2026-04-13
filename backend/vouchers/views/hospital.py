@@ -1,3 +1,5 @@
+from django.core.cache import cache
+from django.utils import timezone
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +11,17 @@ from ..serializers.hospital import (
     VoucherRedeemSerializer, VoucherRedeemResponseSerializer,
 )
 from accounts.utils.permissions import IsHospitalStaff
+
+
+class CacheInvalidator:
+    """Helper class to invalidate voucher-related caches"""
+    @staticmethod
+    def invalidate_voucher_caches(voucher_id=None):
+        """Invalidate all voucher-related list and detail caches"""
+        cache.delete('care_voucher_list')
+        cache.delete('voucher_assignment_list')
+        if voucher_id:
+            cache.delete(f'care_voucher_detail_{voucher_id}')
 
 
 class VoucherCheckInView(APIView):
@@ -57,8 +70,11 @@ class VoucherCheckInView(APIView):
             voucher=voucher,
             action=VoucherAuditLog.Action.LOCKED,
             performed_by=request.user,
-            notes=f"Voucher checked in by {request.user.username} at hospital."
+            notes=f"Voucher checked in by {request.user.email} at hospital."
         )
+
+        # Invalidate voucher caches
+        CacheInvalidator.invalidate_voucher_caches(voucher.id)
 
         # TODO: Trigger real-time notification to the donor
 
@@ -128,8 +144,11 @@ class VoucherRedeemView(APIView):
             voucher=voucher,
             action=VoucherAuditLog.Action.REDEEMED,
             performed_by=request.user,
-            notes=f"Voucher redeemed with patient PIN by {request.user.username}."
+            notes=f"Voucher redeemed with patient PIN by {request.user.email}."
         )
+
+        # Invalidate voucher caches
+        CacheInvalidator.invalidate_voucher_caches(voucher.id)
 
         # TODO: Trigger the HospitalPayout creation and fund transfer
 

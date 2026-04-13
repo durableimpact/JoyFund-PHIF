@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils import timezone
 
 from accounts.models import (
     Donor,
@@ -9,6 +10,8 @@ from accounts.models import (
     SocialWorker,
     SystemAdmin,
     User,
+    PasswordResetToken,
+    EmailVerificationToken,
 )
 
 
@@ -115,6 +118,42 @@ class DonorAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_email')
     search_fields = ('user__email',)
     raw_id_fields = ('user',)
+
+    @admin.display(description='Email')
+    def get_email(self, obj):
+        return obj.user.email
+
+
+# ---------------------------------------------------------------------------
+# Token Management
+# ---------------------------------------------------------------------------
+
+@admin.register(PasswordResetToken)
+class PasswordResetTokenAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_email', 'created_at', 'expires_at', 'is_used', 'is_valid')
+    list_filter = ('is_used', 'created_at', 'expires_at')
+    search_fields = ('user__email', 'token')
+    readonly_fields = ('id', 'token', 'created_at', 'expires_at')
+    raw_id_fields = ('user',)
+    ordering = ('-created_at',)
+
+    @admin.display(description='Email')
+    def get_email(self, obj):
+        return obj.user.email
+
+    @admin.display(description='Valid', boolean=True)
+    def is_valid(self, obj):
+        return obj.is_valid
+
+
+@admin.register(EmailVerificationToken)
+class EmailVerificationTokenAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_email', 'token', 'created_at', 'expires_at', 'is_valid')
+    list_filter = ('created_at', 'expires_at')
+    search_fields = ('user__email', 'token')
+    readonly_fields = ('id', 'token', 'created_at', 'expires_at')
+    raw_id_fields = ('user',)
+    ordering = ('-created_at',)
 
     @admin.display(description='Email')
     def get_email(self, obj):

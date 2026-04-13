@@ -22,11 +22,29 @@ from accounts.views import (
     SocialWorkerUpdateView,
     SocialWorkerInfoView,
     SystemAdminInfoView,
+    VerifyEmailView,
+    ResendVerificationView,
+    PasswordResetRequestView,
+    PasswordResetConfirmView,
+    PasswordChangeView,
 )
 
 app_name = 'accounts'
 
 urlpatterns = [
+    # -----------------------------------------------------------------------
+    # Email Verification
+    # -----------------------------------------------------------------------
+    path('verify-email/', VerifyEmailView.as_view(), name='verify-email'),
+    path('resend-verification/', ResendVerificationView.as_view(), name='resend-verification'),
+
+    # -----------------------------------------------------------------------
+    # Password Reset & Change
+    # -----------------------------------------------------------------------
+    path('password/reset/', PasswordResetRequestView.as_view(), name='password-reset-request'),
+    path('password/reset-confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    path('password/change/', PasswordChangeView.as_view(), name='password-change'),
+
     # -----------------------------------------------------------------------
     # User Info (get authenticated user info after login)
     # -----------------------------------------------------------------------

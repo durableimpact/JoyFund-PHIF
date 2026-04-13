@@ -113,7 +113,7 @@ def approve_assignment(assignment_id, admin_user):
         voucher=voucher,
         action=VoucherAuditLog.Action.APPROVED,
         performed_by=admin_user,
-        notes=f"Assignment approved by {admin_user.username}."
+        notes=f"Assignment approved by {admin_user.email}."
     )
     VoucherAuditLog.objects.create(
         voucher=voucher,

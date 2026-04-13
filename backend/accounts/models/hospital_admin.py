@@ -21,4 +21,4 @@ class HospitalAdmin(BaseProfile, NationalIDMixin):
     )
 
     def __str__(self):
-        return "Hospital Admin: " + self.user.username
+        return "Hospital Admin: " + self.user.email

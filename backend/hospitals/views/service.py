@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
@@ -10,6 +11,7 @@ from hospitals.serializers import ServiceCreateUpdateSerializer, ServiceDetailSe
 from .hospital import IsSystemOrHospitalAdmin
 
 _TAG = ['Services']
+CACHE_TIMEOUT = 3 * 24 * 60 * 60  # 3 days
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
@@ -32,6 +34,26 @@ class ServiceViewSet(viewsets.ModelViewSet):
             return ServiceCreateUpdateSerializer
         return ServiceDetailSerializer
 
+    @staticmethod
+    def _get_list_cache_key(hospital_id):
+        """Get cache key for services list under a hospital"""
+        return f'service_list_hospital_{hospital_id}'
+
+    @staticmethod
+    def _get_detail_cache_key(hospital_id, service_id):
+        """Get cache key for service detail with hospital context"""
+        return f'service_detail_hospital_{hospital_id}_{service_id}'
+
+    @staticmethod
+    def _invalidate_hospital_services_list(hospital_id):
+        """Invalidate services list cache for a hospital"""
+        cache.delete(ServiceViewSet._get_list_cache_key(hospital_id))
+
+    @staticmethod
+    def _invalidate_detail_cache(hospital_id, service_id):
+        """Invalidate specific service detail cache for a hospital"""
+        cache.delete(ServiceViewSet._get_detail_cache_key(hospital_id, service_id))
+
     def get_queryset(self):
         # Handle schema generation for Swagger
         if getattr(self, 'swagger_fake_view', False):
@@ -52,32 +74,67 @@ class ServiceViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(tags=_TAG, responses={200: ServiceDetailSerializer(many=True)},
                          operation_description='List services under a hospital.')
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        hospital_id = self.kwargs.get('hospital_pk')
+        cache_key = self._get_list_cache_key(hospital_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
     @swagger_auto_schema(tags=_TAG, request_body=ServiceCreateUpdateSerializer,
                          responses={201: ServiceDetailSerializer},
                          operation_description='Create a service under a hospital.')
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        hospital_id = self.kwargs.get('hospital_pk')
+        response = super().create(request, *args, **kwargs)
+        self._invalidate_hospital_services_list(hospital_id)
+        return response
 
     @swagger_auto_schema(tags=_TAG, responses={200: ServiceDetailSerializer},
                          operation_description='Retrieve a service under a hospital.')
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        hospital_id = self.kwargs.get('hospital_pk')
+        service_id = kwargs.get('pk')
+        cache_key = self._get_detail_cache_key(hospital_id, service_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
     @swagger_auto_schema(tags=_TAG, request_body=ServiceCreateUpdateSerializer,
                          responses={200: ServiceDetailSerializer},
                          operation_description='Replace a service under a hospital.')
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        hospital_id = self.kwargs.get('hospital_pk')
+        service_id = kwargs.get('pk')
+        response = super().update(request, *args, **kwargs)
+        self._invalidate_hospital_services_list(hospital_id)
+        self._invalidate_detail_cache(hospital_id, service_id)
+        return response
 
     @swagger_auto_schema(tags=_TAG, request_body=ServiceCreateUpdateSerializer,
                          responses={200: ServiceDetailSerializer},
                          operation_description='Update a service under a hospital.')
     def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
+        hospital_id = self.kwargs.get('hospital_pk')
+        service_id = kwargs.get('pk')
+        response = super().partial_update(request, *args, **kwargs)
+        self._invalidate_hospital_services_list(hospital_id)
+        self._invalidate_detail_cache(hospital_id, service_id)
+        return response
 
     @swagger_auto_schema(tags=_TAG, responses={204: 'No Content'},
                          operation_description='Delete a service under a hospital.')
     def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
+        hospital_id = self.kwargs.get('hospital_pk')
+        service_id = kwargs.get('pk')
+        response = super().destroy(request, *args, **kwargs)
+        self._invalidate_hospital_services_list(hospital_id)
+        self._invalidate_detail_cache(hospital_id, service_id)
+        return response

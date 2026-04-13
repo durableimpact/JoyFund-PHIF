@@ -76,6 +76,10 @@ class BeneficiaryListView(ListAPIView):
     ordering_fields = ['created_at', 'updated_at', 'full_name', 'city', 'region']
 
     def get_queryset(self):
+        # Handle schema generation for Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return Beneficiary.objects.none()
+        
         return Beneficiary.objects.select_related('enrolled_by__user').filter(
             enrolled_by__user=self.request.user
         ).order_by('-created_at')

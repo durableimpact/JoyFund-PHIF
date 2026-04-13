@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Impact Certificate - {{ campaign.title }}</title>
+    <style>
+        @page { size: A4 landscape; margin: 2cm; }
+        body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; text-align: center; color: #333; }
+        .certificate { border: 10px solid #2e7d32; padding: 40px; height: 100%; box-sizing: border-box; }
+        .title { font-size: 40px; color: #2e7d32; font-weight: bold; margin-bottom: 20px; }
+        .donor { font-size: 30px; margin: 20px 0; font-weight: bold; }
+        .details { font-size: 18px; line-height: 1.6; margin-bottom: 40px; }
+        .chain { font-size: 16px; text-align: left; margin: 0 auto; width: 80%; background: #f9f9f9; padding: 20px; border-radius: 8px; }
+        .chain h3 { color: #2e7d32; margin-top: 0; }
+        .chain ul { list-style: none; padding: 0; }
+        .chain li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        .footer { margin-top: 50px; font-size: 14px; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="title">Certificate of Social Impact</div>
+        
+        <p class="details">This is proudly presented to</p>
+        <div class="donor">{{ donor_name }}</div>
+        
+        <p class="details">
+            In recognition of your exceptional generosity via the <b>{{ campaign.title }}</b> JoyFund campaign.<br>
+            Your community network successfully pooled <b>{{ campaign.current_amount }} XAF</b> 
+            to redirect celebratory milestones into life-saving maternal healthcare.
+        </p>
+        
+        <div class="chain">
+            <h3>The Chain of Life Record:</h3>
+            <ul>
+                {% for assignment in assignments %}
+                    <li>
+                        <b>Beneficiary:</b> {{ assignment.beneficiary.user.first_name|default:"A mother in need" }} 
+                        <br>
+                        <b>Facility:</b> {{ assignment.hospital.name|default:"JoyFund Partner Hospital" }}
+                        <br>
+                        <b>Status:</b> {% if assignment.voucher.status == 'REDEEMED' %}Care Completed & Paid{% else %}Voucher Issued{% endif %}
+                    </li>
+                {% empty %}
+                    <li>Funds are actively being routed to expectant mothers in our waiting pool.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>Solidarity Health Bridge (JoyFund-PHIF) &bull; Verified Impact Report &bull; {{ date }}</p>
+        </div>
+    </div>
+</body>
+</html>

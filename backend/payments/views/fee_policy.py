@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
@@ -8,6 +9,7 @@ from ..filters import FeePolicyFilter
 from ..models import FeePolicy
 from ..serializers.fee_policy import FeePolicySerializer
 
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 _tag = ['Payments — Fee Policies']
 
 
@@ -51,7 +53,57 @@ class FeePolicyViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'platform_fee_percentage', 'escrow_fee_percentage', 'created_at']
     ordering = ['-created_at']
 
-    def _build_response(self, serializer):
+    @staticmethod
+    def _get_list_cache_key():
+        return 'fee_policy_list'
+
+    @staticmethod
+    def _get_detail_cache_key(policy_id):
+        return f'fee_policy_detail_{policy_id}'
+
+    @staticmethod
+    def _invalidate_list_cache():
+        cache.delete(FeePolicyViewSet._get_list_cache_key())
+
+    @staticmethod
+    def _invalidate_detail_cache(policy_id):
+        cache.delete(FeePolicyViewSet._get_detail_cache_key(policy_id))
+
+    def list(self, request, *args, **kwargs):
+        cache_key = self._get_list_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
+
+    def retrieve(self, request, *args, **kwargs):
+        policy_id = kwargs.get('pk')
+        cache_key = self._get_detail_cache_key(policy_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        self._invalidate_list_cache()
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        policy_id = self.kwargs.get('pk')
+        self._invalidate_detail_cache(policy_id)
+        self._invalidate_list_cache()
+
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+        self._invalidate_detail_cache(instance.id)
+        self._invalidate_list_cache()
         data = serializer.data
         deactivated = serializer.validated_data.pop('_deactivates', None)
         if deactivated:

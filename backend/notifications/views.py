@@ -1,6 +1,7 @@
+from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import viewsets, status
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
@@ -10,17 +11,20 @@ from notifications.models import Notification, NotificationType
 from notifications.serializers import NotificationSerializer, NotificationListSerializer
 
 _TAG = ['Notifications']
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
-class NotificationViewSet(viewsets.ModelViewSet):
+class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
-    ViewSet for managing notifications.
+    ViewSet for managing notifications (read-only creation).
     
     Users can:
     - List their own notifications
     - Retrieve a specific notification
     - Mark notifications as read/unread
     - Delete notifications
+    
+    Notifications are created by the system only.
     """
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -33,8 +37,42 @@ class NotificationViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at', 'is_read']
     ordering = ['-created_at']
     
+    @staticmethod
+    def _get_list_cache_key(user_id):
+        """Get cache key for user's notification list"""
+        return f'notification_list_{user_id}'
+    
+    @staticmethod
+    def _get_detail_cache_key(notification_id):
+        """Get cache key for notification detail"""
+        return f'notification_detail_{notification_id}'
+    
+    @staticmethod
+    def _get_unread_count_cache_key(user_id):
+        """Get cache key for unread notification count"""
+        return f'notification_unread_count_{user_id}'
+    
+    @staticmethod
+    def _invalidate_list_cache(user_id):
+        """Invalidate user's notification list cache"""
+        cache.delete(NotificationViewSet._get_list_cache_key(user_id))
+    
+    @staticmethod
+    def _invalidate_detail_cache(notification_id):
+        """Invalidate notification detail cache"""
+        cache.delete(NotificationViewSet._get_detail_cache_key(notification_id))
+    
+    @staticmethod
+    def _invalidate_unread_count_cache(user_id):
+        """Invalidate user's unread count cache"""
+        cache.delete(NotificationViewSet._get_unread_count_cache_key(user_id))
+    
     def get_queryset(self):
         """Return only notifications for the current user."""
+        # Handle schema generation for Swagger
+        if getattr(self, 'swagger_fake_view', False):
+            return Notification.objects.none()
+        
         return Notification.objects.filter(user=self.request.user)
     
     def get_serializer_class(self):
@@ -43,17 +81,21 @@ class NotificationViewSet(viewsets.ModelViewSet):
             return NotificationListSerializer
         return NotificationSerializer
     
-    def perform_create(self, serializer):
-        """Set the user to the current authenticated user."""
-        serializer.save(user=self.request.user)
-    
     @swagger_auto_schema(
         tags=_TAG,
         operation_description='List all notifications for the current user.',
         responses={200: NotificationListSerializer(many=True)}
     )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        user_id = request.user.id
+        cache_key = self._get_list_cache_key(user_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
     
     @swagger_auto_schema(
         tags=_TAG,
@@ -61,7 +103,15 @@ class NotificationViewSet(viewsets.ModelViewSet):
         responses={200: NotificationSerializer}
     )
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        notification_id = kwargs.get('pk')
+        cache_key = self._get_detail_cache_key(notification_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
     
     @swagger_auto_schema(
         tags=_TAG,
@@ -74,6 +124,12 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification = self.get_object()
         notification.is_read = True
         notification.save()
+        
+        # Invalidate caches
+        self._invalidate_list_cache(request.user.id)
+        self._invalidate_detail_cache(notification.id)
+        self._invalidate_unread_count_cache(request.user.id)
+        
         serializer = self.get_serializer(notification)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -88,6 +144,12 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification = self.get_object()
         notification.is_read = False
         notification.save()
+        
+        # Invalidate caches
+        self._invalidate_list_cache(request.user.id)
+        self._invalidate_detail_cache(notification.id)
+        self._invalidate_unread_count_cache(request.user.id)
+        
         serializer = self.get_serializer(notification)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -100,6 +162,11 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def mark_all_as_read(self, request):
         """Mark all notifications as read for the current user."""
         count = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        
+        # Invalidate all caches
+        self._invalidate_list_cache(request.user.id)
+        self._invalidate_unread_count_cache(request.user.id)
+        
         return Response({'message': f'{count} notifications marked as read'}, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
@@ -110,7 +177,15 @@ class NotificationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def unread_count(self, request):
         """Get the count of unread notifications."""
+        user_id = request.user.id
+        cache_key = self._get_unread_count_cache_key(user_id)
+        cached_count = cache.get(cache_key)
+        
+        if cached_count is not None:
+            return Response({'unread_count': cached_count}, status=status.HTTP_200_OK)
+        
         count = Notification.objects.filter(user=request.user, is_read=False).count()
+        cache.set(cache_key, count, CACHE_TIMEOUT)
         return Response({'unread_count': count}, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
@@ -143,6 +218,18 @@ class NotificationViewSet(viewsets.ModelViewSet):
         operation_description='Delete a notification.',
         responses={204: 'Notification deleted'}
     )
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
+    @action(detail=True, methods=['delete'])
+    def delete_notification(self, request, pk=None):
+        """Delete a notification."""
+        notification = self.get_object()
+        user_id = notification.user.id
+        notification_id = notification.id
+        notification.delete()
+        
+        # Invalidate caches
+        self._invalidate_list_cache(user_id)
+        self._invalidate_detail_cache(notification_id)
+        self._invalidate_unread_count_cache(user_id)
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
 

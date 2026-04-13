@@ -128,7 +128,8 @@ class CareVoucher(models.Model):
         PENDING_APPROVAL = 'PENDING_APPROVAL', 'Pending Admin Approval'  # Voucher exists but not yet released to beneficiary.
         AVAILABLE = 'AVAILABLE', 'Available'  # Ready for beneficiary use within validity window.
         LOCKED = 'LOCKED', 'Checked-In at Hospital'  # Presented at facility; reserved for this visit.
-        REDEEMED = 'REDEEMED', 'Care Completed'  # Service delivered and voucher consumed.
+        PENDING_CONFIRMATION = 'PENDING_CONFIRMATION', 'Pending Patient Confirmation'  # Service done; waiting for patient PIN.
+        REDEEMED = 'REDEEMED', 'Care Completed'  # PIN verified and voucher consumed.
         EXPIRED = 'EXPIRED', 'Expired'  # Validity lapsed before use.
 
     class Language(models.TextChoices):
@@ -199,8 +200,8 @@ class CareVoucher(models.Model):
         if not self.voucher_code:
             self.voucher_code = _generate_voucher_code()
         
-        # Generate a 4-digit PIN when the voucher is created
-        if not self.patient_confirmation_pin:
+        # Generate a 4-digit PIN ONLY when the hospital marks the service as completed (PENDING_CONFIRMATION)
+        if self.status == self.Status.PENDING_CONFIRMATION and not self.patient_confirmation_pin:
             self.patient_confirmation_pin = _generate_patient_otp()
 
         # Set 30-day expiry when voucher becomes AVAILABLE
@@ -292,6 +293,7 @@ class VoucherAuditLog(models.Model):
         SMS_SENT = 'SMS_SENT', 'SMS Dispatched to Beneficiary'  # Voucher code SMS sent.
         SW_NOTIFIED = 'SW_NOTIFIED', 'Social Worker Notified'  # Assigned social worker notified.
         LOCKED = 'LOCKED', 'Checked-In at Hospital'  # Hospital check-in recorded.
+        PENDING_CONFIRMATION = 'PENDING_CONFIRMATION', 'Service Done — Awaiting PIN'  # Service done, OTP sent.
         REDEEMED = 'REDEEMED', 'Care Completed & Redeemed'  # Service completed and voucher redeemed.
         REMINDER_SENT = 'REMINDER_SENT', 'Expiry Reminder Sent'  # Day-20/day-28 reminder sent.
         EXPIRED = 'EXPIRED', 'Voucher Expired'  # Voucher expired without redemption.

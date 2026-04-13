@@ -1,9 +1,12 @@
+from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 from ..filters import CareVoucherFilter, VoucherAssignmentFilter
 from ..models import CareVoucher, VoucherAssignment, VoucherAuditLog
@@ -29,12 +32,27 @@ class VoucherAssignmentListView(generics.ListAPIView):
     ordering_fields = ['matched_at', 'status']
     ordering = ['-matched_at']
 
+    @staticmethod
+    def _get_list_cache_key():
+        return 'voucher_assignment_list'
+
+    @staticmethod
+    def _invalidate_list_cache():
+        cache.delete(VoucherAssignmentListView._get_list_cache_key())
+
     @swagger_auto_schema(
         tags=['Vouchers (Admin)'],
         operation_summary="List all Voucher Assignments"
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = self._get_list_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class ApproveVoucherAssignmentView(APIView):
@@ -126,8 +144,11 @@ class FlagVoucherAssignmentView(APIView):
         VoucherAuditLog.objects.create(
             action=VoucherAuditLog.Action.FLAGGED,
             performed_by=request.user,
-            notes=f"Assignment for {assignment.beneficiary.digital_health_id} flagged by {request.user.username}. Reason: {reason}"
+            notes=f"Assignment for {assignment.beneficiary.digital_health_id} flagged by {request.user.email}. Reason: {reason}"
         )
+
+        # Invalidate caches
+        VoucherAssignmentListView._invalidate_list_cache()
 
         return Response({"success": True, "message": "Assignment has been flagged for review."}, status=status.HTTP_200_OK)
 
@@ -146,12 +167,27 @@ class CareVoucherListView(generics.ListAPIView):
     ordering_fields = ['created_at', 'status']
     ordering = ['-created_at']
 
+    @staticmethod
+    def _get_list_cache_key():
+        return 'care_voucher_list'
+
+    @staticmethod
+    def _invalidate_list_cache():
+        cache.delete(CareVoucherListView._get_list_cache_key())
+
     @swagger_auto_schema(
         tags=['Vouchers (Admin)'],
         operation_summary="List all Care Vouchers"
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        cache_key = self._get_list_cache_key()
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
 
 
 class CareVoucherDetailView(generics.RetrieveAPIView):
@@ -163,9 +199,25 @@ class CareVoucherDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAdminOrSocialWorker]
     lookup_field = 'id'
 
+    @staticmethod
+    def _get_detail_cache_key(voucher_id):
+        return f'care_voucher_detail_{voucher_id}'
+
+    @staticmethod
+    def _invalidate_detail_cache(voucher_id):
+        cache.delete(CareVoucherDetailView._get_detail_cache_key(voucher_id))
+
     @swagger_auto_schema(
         tags=['Vouchers (Admin)'],
         operation_summary="Get Care Voucher Details"
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        voucher_id = kwargs.get('id')
+        cache_key = self._get_detail_cache_key(voucher_id)
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return cached_response
+        
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response, CACHE_TIMEOUT)
+        return response
