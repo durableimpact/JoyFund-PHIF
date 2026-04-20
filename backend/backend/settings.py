@@ -115,7 +115,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 ASGI_APPLICATION = "backend.asgi.application"
 
 
-# Database
+# Databas
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
