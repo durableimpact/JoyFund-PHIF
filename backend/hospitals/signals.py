@@ -3,6 +3,25 @@ from django.dispatch import receiver
 from django.core.cache import cache
 
 from hospitals.models import Hospital, Services
+from payments.models import HospitalAccount
+
+
+@receiver(post_save, sender=Hospital)
+def create_hospital_account(sender, instance, created, **kwargs):
+    """
+    Automatically create a HospitalAccount when a Hospital is created.
+    
+    The account serves as the ledger for the hospital's balance.
+    Funds are moved here from the EscrowAccount when vouchers are completed.
+    """
+    if created:
+        HospitalAccount.objects.get_or_create(
+            hospital=instance,
+            defaults={
+                'name': f'{instance.name} Account',
+                'balance': 0,
+            }
+        )
 
 
 @receiver(post_save, sender=Hospital)
