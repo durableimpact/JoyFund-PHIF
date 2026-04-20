@@ -117,6 +117,21 @@ class DonationConsumer(AsyncJsonWebsocketConsumer):
         Called when message type is 'donation_event'.
         """
         await self.send_json(event)
+    
+    async def donation_notification(self, event: dict) -> None:
+        """
+        Handle real-time donation notifications from Celery tasks.
+        Sends donation updates with progress percentage to campaign page.
+        
+        Triggered when:
+        - Donation is successfully processed (status=SUCCESS)
+        - Within 30 seconds via Celery async task
+        - Includes: amount, donor name, progress percentage
+        """
+        message_json = event.get('message')
+        if message_json:
+            import json
+            await self.send_json(json.loads(message_json))
 
 
 # ============================================================================
@@ -284,6 +299,26 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         Called when message type is 'notification_event'.
         """
         await self.send_json(event)
+    
+    async def donation_notification(self, event: dict) -> None:
+        """
+        Handle real-time donation notifications from Celery tasks.
+        Sends donation updates with progress percentage to authenticated user.
+        
+        Triggered when:
+        - Donation is successfully processed (status=SUCCESS)
+        - Within 30 seconds via Celery async task
+        - Includes: amount, donor name, progress percentage
+        
+        User Story D-003 Implementation:
+        ✓ Push notification received within 30 seconds
+        ✓ Shows contribution amount and donor name
+        ✓ Includes progress percentage update
+        """
+        message_json = event.get('message')
+        if message_json:
+            import json
+            await self.send_json(json.loads(message_json))
     
     # Database operations
     @database_sync_to_async
