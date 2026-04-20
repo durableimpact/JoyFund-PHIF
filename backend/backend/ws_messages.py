@@ -149,6 +149,7 @@ class DonationPayload(BaseModel):
     amount: float
     currency: str = "XAF"
     status: str
+    progress_percentage: float = Field(default=0.0, description="Campaign progress percentage (0-100)")
     created_at: datetime
 
 
