@@ -5,13 +5,16 @@ Handles events like:
 - Voucher assignment creation (pending admin approval)
 - Care voucher creation/approval
 - Care voucher redemption
+- Report statistics calculation
 """
 
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db.models import Count, Sum
+from datetime import timedelta
 
-from vouchers.models import CareVoucher, VoucherAssignment
+from vouchers.models import CareVoucher, VoucherAssignment, VoucherReport
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +50,73 @@ def notify_on_voucher_assignment_created(sender, instance: VoucherAssignment, cr
     
     except Exception as e:
         logger.error(f"Error in notify_on_voucher_assignment_created: {str(e)}", exc_info=True)
+
+
+@receiver(post_save, sender=VoucherReport)
+def calculate_report_statistics(sender, instance, created, **kwargs):
+    """
+    Auto-calculate report statistics when a report is created.
+    Aggregates voucher data for the report month.
+    
+    This ensures the report always has accurate statistics without
+    requiring manual recalculation.
+    """
+    if not created:
+        return  # Only run on creation
+
+    try:
+        # Get first and last day of report month
+        first_day = instance.report_month
+        last_day = (first_day + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+
+        # Filter vouchers for this hospital and month
+        vouchers = CareVoucher.objects.filter(
+            hospital=instance.hospital,
+            created_at__date__gte=first_day,
+            created_at__date__lte=last_day,
+        )
+
+        # Calculate redeemed
+        redeemed = vouchers.filter(
+            status=CareVoucher.Status.REDEEMED
+        ).aggregate(
+            count=Count('id'),
+            total=Sum('value')
+        )
+
+        # Calculate pending (not redeemed, not expired)
+        pending = vouchers.exclude(
+            status__in=[
+                CareVoucher.Status.REDEEMED,
+                CareVoucher.Status.EXPIRED,
+            ]
+        ).aggregate(
+            count=Count('id'),
+            total=Sum('value')
+        )
+
+        # Update report with calculated statistics
+        instance.total_vouchers_redeemed = redeemed['count'] or 0
+        instance.total_amount_received = redeemed['total'] or 0
+        instance.total_services_provided = vouchers.filter(
+            status=CareVoucher.Status.REDEEMED
+        ).values('service').distinct().count()
+        instance.total_pending_vouchers = pending['count'] or 0
+        instance.total_pending_amount = pending['total'] or 0
+
+        # Save without triggering signal again
+        instance.save(update_fields=[
+            'total_vouchers_redeemed',
+            'total_amount_received',
+            'total_services_provided',
+            'total_pending_vouchers',
+            'total_pending_amount',
+        ])
+        
+        logger.info(f"Calculated statistics for report: {instance.id}")
+    
+    except Exception as e:
+        logger.error(f"Error in calculate_report_statistics: {str(e)}", exc_info=True)
 
 
 @receiver(post_save, sender=CareVoucher)
