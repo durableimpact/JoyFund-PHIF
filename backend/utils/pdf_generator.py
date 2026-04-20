@@ -22,7 +22,7 @@ def create_impact_certificate(campaign):
     elif hasattr(campaign, 'assignments'):
         assignments = campaign.assignments.all()
     
-    donor_name = campaign.donor.user.get_full_name() if campaign.donor.user else "JoyFund Supporter"
+    donor_name = campaign.donor.get_full_name() if campaign.donor.user else "JoyFund Supporter"
     
     # 2. Render Template
     context = {
