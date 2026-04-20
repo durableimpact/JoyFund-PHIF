@@ -20,6 +20,7 @@ export default function CTASection() {
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
           Start A JoyFund Today
         </h2>
+        
         <p className="text-blue-100 mb-10 leading-relaxed text-sm md:text-base max-w-lg mx-auto">
           Use this space to show JoyFunds statistics so far; for example show
           the number of lives changed, the amount of money raised on the
