@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'phonenumber_field',
     'puml_generator',
+    'django_smart_ratelimit',
 
     # Local apps
     'logs',  # Logging system - must be before other apps to ensure proper app initialization
@@ -76,6 +77,7 @@ INSTALLED_APPS = [
     'payments',
     'notifications',
     'disbursements',
+    'anc',  # Antenatal Care tracking system
 ]
 
 MIDDLEWARE = [
@@ -354,6 +356,7 @@ CHANNEL_LAYERS = {
     },
 }
 
+
 # Chanx Configuration for AsyncAPI documentation
 CHANX = {
     "CAMELIZE": False,  # Keep snake_case (convert from camelCase if True)
@@ -361,6 +364,19 @@ CHANX = {
     "ASYNCAPI_DESCRIPTION": "Real-time notifications for donors, admins, and hospital staff",
     "ASYNCAPI_VERSION": "1.0.0",
 }
+
+
+# ============================================================================
+# Rate limiting settings for django-smart-ratelimit
+# ─────────────────────────────────────────────────────────────────────────────
+# Configure Redis as the backend
+RATELIMIT_BACKEND = 'redis'
+RATELIMIT_REDIS = {
+    'host': os.environ.get('REDIS_HOST','localhost'),
+    'port': 6379,
+    'db': 3,
+}
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Session & Security

@@ -2,14 +2,20 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django_smart_ratelimit import rate_limit
 
 
 @require_http_methods(["GET", "POST"])
 @csrf_protect
+@rate_limit(key='user_or_ip', rate='5/h')
 def login_view(request):
     """
     Custom login view for API documentation access.
     Redirects to 'next' parameter after successful login.
+    
+    Rate Limiting:
+    - 5 login attempts per hour per IP/user
+    - Prevents brute force attacks on admin/donor accounts
     """
     # Get the next URL from query params or POST data
     next_url = request.POST.get('next') or request.GET.get('next', '/')
@@ -56,3 +62,28 @@ def logout_view(request):
     
     # Redirect to the next URL
     return redirect(next_url)
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+@rate_limit(key='user_or_ip', rate='10/h')
+def oauth2_token_view(request):
+    """
+    Rate-limited OAuth2 token endpoint wrapper.
+    
+    This wraps the drf-social-oauth2 token endpoint with rate limiting to prevent:
+    - Brute force attacks on OAuth2 token endpoint
+    - Credential stuffing attacks
+    - Denial of service attacks
+    
+    Rate Limiting:
+    - 10 token requests per hour per IP/user
+    - Applies to password grant, refresh token, and other flows
+    
+    The actual OAuth2 token logic is handled by drf-social-oauth2.
+    """
+    from oauth2_provider.views import TokenView
+    
+    # Delegate to the actual OAuth2 token view
+    token_view = TokenView.as_view()
+    return token_view(request)

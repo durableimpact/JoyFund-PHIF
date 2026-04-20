@@ -193,9 +193,9 @@ class DonationViewSet(
                     external_reference=donation.id,
                     redirect_url=success_url,
                     failure_redirect_url=failure_url,
-                    first_name=None,
-                    last_name=None,
-                    email=None,
+                    first_name=donor.user.first_name if donor else None,
+                    last_name=donor.user.last_name if donor else None,
+                    email=donor.user.email if donor else None,
                     phone=phone_number.replace('+', ''),
                 )
                 return Response({'payment_link': payment_link['link']})

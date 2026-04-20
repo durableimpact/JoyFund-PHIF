@@ -5,6 +5,7 @@ class AppTagAutoSchema(SwaggerAutoSchema):
     TAG_LABELS = {
         'auth': 'Authentication',
         'accounts': 'Accounts',
+        'anc': 'ANC Tracking',
         'beneficiaries': 'Beneficiaries',
         'campaigns': 'Campaigns',
         'disbursements': 'Disbursements',

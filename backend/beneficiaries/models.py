@@ -255,25 +255,3 @@ class WaitingPoolEntry(models.Model):
 
         self.save()
 
-class ANCVisit(models.Model):
-    """
-    Tracks the Antenatal Care (ANC) attendance of a pregnant beneficiary.
-    Supports ensuring completing all 4 recommended visits to fully 
-    unlock/verify delivery vouchers if necessary.
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    beneficiary = models.ForeignKey(Beneficiary, related_name="anc_visits", on_delete=models.CASCADE)
-    visit_number = models.PositiveSmallIntegerField(help_text="e.g. 1st Visit, 2nd Visit... up to 4")
-    date_attended = models.DateField(null=True, blank=True)
-    hospital = models.ForeignKey("hospitals.Hospital", related_name="anc_visits_conducted", on_delete=models.SET_NULL, null=True, blank=True)
-    notes = models.TextField(blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["visit_number"]
-        unique_together = ("beneficiary", "visit_number")
-
-    def __str__(self):
-        return f"Visit {self.visit_number} for {self.beneficiary.user.get_full_name()}"
-

@@ -37,6 +37,10 @@ class BaseProfile(models.Model):
         on_delete=models.CASCADE,
         related_name='%(class)s',
     )
+    
+    @property
+    def get_full_name(self)->str:
+        return f"{self.user.first_name} {self.user.last_name}"
 
     class Meta:
         abstract = True

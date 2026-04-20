@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from django.db.models import Count, Q, Avg
 from .models import ActivityLog, RequestLog, ErrorLog
 from .serializers import ActivityLogSerializer, RequestLogSerializer, ErrorLogSerializer
@@ -59,6 +61,14 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(user_id=user_id)
 
         return queryset
+
+    @swagger_auto_schema(tags=['Logging - Activity'])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=['Logging - Activity'])
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
@@ -111,6 +121,14 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
+    @swagger_auto_schema(tags=['Logging - Request'])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=['Logging - Request'])
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -152,6 +170,14 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
+    @swagger_auto_schema(tags=['Logging - Error'])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=['Logging - Error'])
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class LogStatsView(viewsets.ViewSet):
     """
@@ -162,6 +188,7 @@ class LogStatsView(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
 
     @action(detail=False, methods=['get'])
+    @swagger_auto_schema(tags=['Logging - Statistics'])
     def stats(self, request):
         """
         GET /api/logs/stats/

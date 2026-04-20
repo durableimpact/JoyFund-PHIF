@@ -5,8 +5,84 @@ from datetime import timedelta
 from campaigns.models import Campaign, Donation
 from accounts.models import User
 from utils.pdf_generator import create_impact_certificate
+from django.core.asgi import get_asgi_application
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
+
+@shared_task
+def broadcast_donation_notification(donation_id, campaign_id, campaign_name, donor_name, amount, progress_percentage, donor_user_id):
+    """
+    Broadcast donation notification via WebSocket to campaign donor.
+    
+    This task ensures donors receive real-time updates within 30 seconds when:
+    - Someone contributes to their campaign
+    - Shows: contribution amount, donor name, progress percentage
+    
+    Acceptance Criteria (D-003):
+    ✓ Push notification received within 30 seconds (Celery async task)
+    ✓ Shows contribution amount and donor name (in payload)
+    ✓ Includes progress percentage update (real-time UI update)
+    """
+    try:
+        from backend.ws_messages import DonationCreatedMessage, DonationPayload
+        from django.db import connection
+        from channels.layers import get_channel_layer
+        
+        # Ensure we have a database connection
+        connection.ensure_connection()
+        
+        # Create the donation payload
+        donation_payload = DonationPayload(
+            donation_id=int(donation_id),
+            campaign_id=int(campaign_id),
+            campaign_name=campaign_name,
+            donor_name=donor_name,
+            amount=float(amount),
+            currency="XAF",
+            status="SUCCESS",
+            progress_percentage=float(progress_percentage),
+            created_at=timezone.now(),
+        )
+        
+        # Create the donation message
+        donation_message = DonationCreatedMessage(payload=donation_payload)
+        
+        # Get channel layer
+        channel_layer = get_channel_layer()
+        
+        # Send to campaign-specific group (for updates on campaign page)
+        campaign_group_name = f"campaign_{campaign_id}"
+        async_to_sync(channel_layer.group_send)(
+            campaign_group_name,
+            {
+                "type": "donation_notification",  # This routes to the donation_notification method in consumer
+                "message": donation_message.model_dump_json(),
+            }
+        )
+        
+        # Send to donor's notification group (for personal notifications)
+        donor_group_name = f"user_{donor_user_id}_notifications"
+        async_to_sync(channel_layer.group_send)(
+            donor_group_name,
+            {
+                "type": "donation_notification",
+                "message": donation_message.model_dump_json(),
+            }
+        )
+        
+        logger.info(
+            f"✅ Real-time donation broadcast sent for campaign {campaign_id}: "
+            f"{donor_name} contributed {amount} XAF (progress: {progress_percentage:.1f}%)"
+        )
+        
+    except Exception as e:
+        logger.error(
+            f"❌ Failed to broadcast donation notification: {str(e)}",
+            exc_info=True
+        )
+        raise
+
 
 @shared_task
 def send_anniversary_reminders():

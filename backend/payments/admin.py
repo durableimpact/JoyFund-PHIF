@@ -4,9 +4,8 @@ from django.utils.html import format_html
 from .models import (
     Account, EscrowAccount, FeeAccount,
     FeePolicy, PaymentGateway,
-    Transaction, FeeSplit, WebhookEvent,
+    Transaction, FeeSplit, WebhookEvent,HospitalAccount
 )
-
 
 @admin.register(FeePolicy)
 class FeePolicyAdmin(admin.ModelAdmin):
@@ -105,4 +104,20 @@ class FeeAccountAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(HospitalAccount)
+class HospitalAccountAdmin(admin.ModelAdmin):
+    list_display = ['hospital', 'balance', 'updated_at']
+    readonly_fields = ['id', 'hospital', 'created_at', 'updated_at']
+    search_fields = ['hospital__name']
+    ordering = ['hospital__name']
+
+    def has_add_permission(self, request):
+        # Accounts are created automatically via signals when hospitals are created
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        # Prevent accidental deletion of hospital ledger accounts
         return False

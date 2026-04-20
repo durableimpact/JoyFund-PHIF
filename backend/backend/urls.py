@@ -22,7 +22,7 @@ from django.views.generic import TemplateView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from .views import login_view, logout_view
+from .views import login_view, logout_view, oauth2_token_view
 from chanx.channels import urls as chanx_urls
 
 schema_view = get_schema_view(
@@ -47,7 +47,12 @@ urlpatterns = [
     path('asyncapi/', include(chanx_urls.urlpatterns)),
 
     # API endpoints
+    # OAuth2 authentication with rate limiting
+    # ✓ Rate limited token endpoint: 10 requests/hour
+    path('auth/token/', oauth2_token_view, name='oauth2_token'),
+    # Include remaining drf-social-oauth2 endpoints (convert-token, refresh, etc.)
     path('auth/', include('drf_social_oauth2.urls', namespace='drf')),
+    
     path('api/accounts/', include('accounts.urls')),
     path('api/beneficiaries/', include('beneficiaries.urls')),
     path('api/campaigns/', include('campaigns.urls')),
@@ -55,6 +60,7 @@ urlpatterns = [
     path('api/vouchers/', include('vouchers.urls')),
     path('api/payments/', include('payments.urls')),
     path('api/notifications/', include('notifications.urls')),
+    path('api/anc/', include('anc.urls')),  # Antenatal Care tracking
     path('api/logs/', include('logs.urls')),  # Logging system API
 
     # API documentation
