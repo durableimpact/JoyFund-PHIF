@@ -18,7 +18,7 @@ def log_user_login(sender, request, user, **kwargs):
         request,
         'user.login',
         user=user,
-        description=f'User {user.get_full_name() or user.email} logged in',
+        description=f'User {user.get_full_name or user.email} logged in',
         target=user,
     )
 
@@ -30,7 +30,7 @@ def log_user_logout(sender, request, user, **kwargs):
         request,
         'user.logout',
         user=user,
-        description=f'User {user.get_full_name() or user.email} logged out',
+        description=f'User {user.get_full_name or user.email} logged out',
         target=user,
     )
 
@@ -43,7 +43,7 @@ def log_user_created(sender, instance, created, **kwargs):
             None,  # No request in registration signal context
             'user.registered',
             user=instance,
-            description=f'New user registered: {instance.get_full_name() or instance.email} ({instance.email})',
+            description=f'New user registered: {instance.get_full_name or instance.email} ({instance.email})',
             target=instance,
         )
 
@@ -54,5 +54,5 @@ def log_user_deleted(sender, instance, **kwargs):
     LogService.warning(
         None,
         'user.deleted',
-        description=f'User deleted: {instance.get_full_name() or instance.email} ({instance.email})',
+        description=f'User deleted: {instance.get_full_name or instance.email} ({instance.email})',
     )
