@@ -17,6 +17,7 @@ class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
+        tags=['Email Verification'],
         operation_summary="Verify Email OTP",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -69,6 +70,7 @@ class ResendVerificationView(APIView):
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
+        tags=['Email Verification'],
         operation_summary="Resend Verification Email",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
