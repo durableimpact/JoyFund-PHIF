@@ -52,6 +52,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number']
 
     objects = UserManager()
+    
+    @property
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
     class Meta:
         indexes = [
