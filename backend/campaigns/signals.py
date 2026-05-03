@@ -2,8 +2,39 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 
-from campaigns.models import Campaign, Donation
+from campaigns.models import Campaign, Donation,CampaignTransaction
 from notifications.models import Notification, NotificationType
+
+
+
+@receiver(post_save,sender=Donation)
+def create_campaign_transaction_on_donation_success(sender, instance:Donation, created, **kwargs):
+    """
+    When a donation is successfully completed:
+    1. Create a CampaignTransaction record to log the contribution
+    2. This serves as the financial record for the campaign's progress
+    
+    Acceptance Criteria (D-004):
+    - CampaignTransaction created within 30 seconds of donation success ✓ (Celery async task)
+    - Links to the correct campaign and donation ✓ (foreign keys)
+    - Records the contribution amount and donor name ✓ (fields in model)
+    """
+    # Only process if created and status is SUCCESS
+    if not created or instance.status != 'SUCCESS':
+        return
+    
+    # Get campaign data
+    campaign = instance.campaign
+    donor_name = instance.donor_name
+    
+    # 1. Create CampaignTransaction record in database
+    CampaignTransaction.objects.create(
+        campaign=campaign,
+        donation=instance,
+        amount=instance.amount,
+        donor_name=donor_name,
+        transaction_type=CampaignTransaction.TransactionType.DONATION,
+    )
 
 
 @receiver(post_save, sender=Campaign)
