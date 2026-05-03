@@ -1,0 +1,120 @@
+from django.db import models
+import uuid
+from decimal import Decimal
+from accounts.models import Donor
+
+
+class Campaign(models.Model):
+
+    class EventType(models.TextChoices):
+        BIRTHDAY = 'BIRTHDAY', 'Birthday'
+        WEDDING = 'WEDDING', 'Wedding'
+        PROMOTION = 'PROMOTION', 'Job Promotion'
+        GRADUATION = 'GRADUATION', 'Graduation'
+        MEMORIAL = 'MEMORIAL', 'Memorial'
+
+    class CampaignStatus(models.TextChoices):
+        DRAFT = 'DRAFT', 'Draft'
+        ACTIVE = 'ACTIVE', 'Active'
+        INACTIVE = 'INACTIVE', 'Inactive'
+        FUNDED = 'FUNDED', 'Funded'
+        CLOSED = 'CLOSED', 'Closed'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    donor = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, related_name='my_campaigns'
+    )
+
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    cover_image = models.ImageField(upload_to='campaigns/', null=True, blank=True)
+
+    event_type = models.CharField(
+        max_length=20,
+        choices=EventType.choices
+    )
+
+    goal_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    impact_goal_count = models.IntegerField(default=1)
+    impact_service_category = models.CharField(max_length=50, blank=True)
+
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField()
+
+    is_public = models.BooleanField(default=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=CampaignStatus.choices,
+        default=CampaignStatus.DRAFT
+    )
+
+    certificate_generated = models.BooleanField(
+        default=False,
+        help_text="True if an Impact Certificate PDF has been generated for this completed campaign."
+    )
+
+    certificate_file = models.FileField(
+        upload_to='certificates/',
+        null=True,
+        blank=True,
+        help_text="The generated PDF Impact Certificate."
+    )
+
+    currently_allocated = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Funds currently locked in active/issued vouchers"
+    )
+
+    total_disbursed = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Total funds actually paid to partner hospitals"
+    )
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['donor', 'created_at']),
+            models.Index(fields=['created_at']),
+        ]
+
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(currently_allocated__gte=0),
+                name='currently_allocated_non_negative'
+            ),
+            models.CheckConstraint(
+                condition=models.Q(total_disbursed__gte=0),
+                name='total_disbursed_non_negative'
+            ),
+        ]
+
+    @property
+    def total_net_raised(self):
+        return self.donations.filter(status='SUCCESS').aggregate(
+            total=models.Sum('net_amount')
+        )['total'] or Decimal('0')
+
+    @property
+    def available_balance(self):
+        net = self.total_net_raised
+        return max(Decimal('0'), net - self.total_disbursed - self.currently_allocated)
+
+    @property
+    def progress_percentage(self):
+        if self.goal_amount > 0:
+            return (self.current_amount / self.goal_amount) * 100
+        return 0
+
+    def __str__(self):
+        return self.title
