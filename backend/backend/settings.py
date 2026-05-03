@@ -76,8 +76,6 @@ INSTALLED_APPS = [
     'beneficiaries',
     'payments',
     'notifications',
-    'disbursements',
-    'anc',  # Antenatal Care tracking system
 ]
 
 MIDDLEWARE = [
