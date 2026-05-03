@@ -1,0 +1,95 @@
+from .hospital import Hospital
+from vouchers.models import Voucher
+from django.db import models
+from accounts.models import Receptionist,SystemAdmin
+
+class ClaimStatus(models.TextChoices):
+        # Claim has been submitted but not yet reviewed by hospital staff.
+        PENDING = 'PENDING', 'Pending Review'
+        # Hospital staff have approved the claim amount.
+        APPROVED = 'APPROVED', 'Approved'
+        # Hospital staff have rejected the claim.
+        REJECTED = 'REJECTED', 'Rejected'
+
+class MedicalClaim(models.Model):
+
+    voucher = models.OneToOneField(
+        Voucher, on_delete=models.CASCADE, related_name='medical_claim')
+    hospital = models.ForeignKey(
+        Hospital, on_delete=models.SET_NULL, null=True, related_name='medical_claims')
+    service_description = models.TextField(blank=True)
+    total_cost = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00)
+    claim_status = models.CharField(
+        max_length=20, default='PENDING', choices=ClaimStatus)  # PENDING, APPROVED, REJECTED
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('voucher',)  # Ensure one claim per voucher
+        
+        indexes = [
+            models.Index(fields=['claim_status']),
+            models.Index(fields=['submitted_at']),
+            models.Index(fields=['hospital']),
+        ]
+
+    def __str__(self):
+        return f"Claim for Voucher {self.voucher.id} at {self.hospital.name if self.hospital else 'Unknown Hospital'}"
+
+
+class ClaimItem(models.Model):
+    medical_claim = models.ForeignKey(
+        MedicalClaim, on_delete=models.CASCADE, related_name='claim_items')
+    name = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Claim Item: {self.name} - {self.amount}"
+
+
+class DocumentType(models.TextChoices):
+    BILL = 'BILL', 'Hospital Bill'
+    PRESCRIPTION = 'PRESCRIPTION', 'Prescription'
+    LAB_RESULT = 'LAB_RESULT', 'Lab Result'
+    DISCHARGE = 'DISCHARGE', 'Discharge Summary'
+    IMAGING = 'IMAGING', 'Imaging (X-ray, Scan)'
+    OTHER = 'OTHER', 'Other'
+    
+    
+class VerificationStatus(models.TextChoices):
+    PENDING = 'PENDING', 'Pending Verification'
+    VERIFIED = 'VERIFIED', 'Verified'
+    REJECTED = 'REJECTED', 'Rejected'
+    FLAGGED = 'FLAGGED', 'Flagged for Review'
+
+class MedicalClaimProof(models.Model):
+    
+    medical_claim = models.ForeignKey(
+        MedicalClaim, on_delete=models.CASCADE, related_name='proofs')
+    file = models.FileField(upload_to='claims/proofs/')
+    document_type = models.CharField(
+        max_length=20, choices=DocumentType.choices)
+    
+    uploaded_by = models.ForeignKey(
+        Receptionist, on_delete=models.SET_NULL, null=True, related_name='uploaded_claim_documents')
+    verification_status = models.CharField(
+        max_length=20, choices=VerificationStatus.choices, default=VerificationStatus.PENDING)
+    verified_by = models.ForeignKey(
+        SystemAdmin, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_claim_documents')
+    verified_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True, null=True)
+    
+    
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['document_type']),
+            models.Index(fields=['verification_status']),
+            models.Index(fields=['uploaded_at']),
+        ]
+
+    def __str__(self):
+        return f"Document for Claim {self.medical_claim.id}"
