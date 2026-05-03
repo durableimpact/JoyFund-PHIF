@@ -2,26 +2,44 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 
-from hospitals.models import Hospital, Services
+from hospitals.models import Hospital, Services,ClaimItem
 from payments.models import HospitalAccount
+from django.db.models import Sum
 
 
-@receiver(post_save, sender=Hospital)
-def create_hospital_account(sender, instance, created, **kwargs):
-    """
-    Automatically create a HospitalAccount when a Hospital is created.
+
+# @receiver(post_save, sender=Hospital)
+# def create_hospital_account(sender, instance, created, **kwargs):
+#     """
+#     Automatically create a HospitalAccount when a Hospital is created.
     
-    The account serves as the ledger for the hospital's balance.
-    Funds are moved here from the EscrowAccount when vouchers are completed.
+#     The account serves as the ledger for the hospital's balance.
+#     Funds are moved here from the EscrowAccount when vouchers are completed.
+#     """
+#     if created:
+#         HospitalAccount.objects.get_or_create(
+#             hospital=instance,
+#             defaults={
+#                 'name': f'{instance.name} Account',
+#                 'balance': 0,
+#             }
+#         )
+
+@receiver(post_save, sender=ClaimItem)
+@receiver(post_delete, sender=ClaimItem)
+def update_claim_total_cost(sender, instance, **kwargs):
     """
-    if created:
-        HospitalAccount.objects.get_or_create(
-            hospital=instance,
-            defaults={
-                'name': f'{instance.name} Account',
-                'balance': 0,
-            }
-        )
+    Whenever a ClaimItem is created, updated, or deleted, recalculate the total cost of the associated MedicalClaim.
+    This ensures that the MedicalClaim's total_cost field always reflects the sum of its ClaimItems.
+    """
+    claim = instance.medical_claim
+    
+    total = claim.claim_items.aggregate(
+        total=Sum('amount')
+    )['total'] or 0
+
+    claim.total_cost = total
+    claim.save(update_fields=['total_cost'])
 
 
 @receiver(post_save, sender=Hospital)
