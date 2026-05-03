@@ -65,3 +65,238 @@ This is the step-by-step journey that turns a celebratory gift into a safe child
 *   **Real-Time Transparency Dashboard**: A public-facing dashboard showing live stats on funds raised and lives impacted, building trust.
 *   **SMS Gateway**: Uses services like Orange SMS API to deliver critical voucher codes and PINs to beneficiaries, ensuring accessibility even without a smartphone.
 *   **Closed-Loop Audit Trail**: Every single action—from donation to payout—is recorded in the `VoucherAuditLog`, creating an immutable record for ultimate transparency.
+
+---
+
+## 5. Local Development (Without Docker)
+
+This guide lets you run the backend directly on your Linux machine — no Docker required.
+
+### Prerequisites
+
+| Tool | Version |
+| :--- | :--- |
+| Python | 3.12 or 3.13 |
+| PostgreSQL | 14 + (with PostGIS extension) |
+| Redis | 6 + (for Celery / Django Channels) |
+| GDAL / GEOS / PROJ | see below |
+
+> **Why GDAL?** The project uses **GeoDjango** (`PointField`) which requires the GDAL, GEOS, and PROJ native shared libraries to be present on the host machine.
+
+> **Broker note:** The project's default Celery broker is **RabbitMQ** (see `.env.example`). For a quick local test you can swap it for Redis, but the instructions below show both options.
+
+---
+
+### Step 1 — Install GDAL, GEOS, and PROJ
+
+Pick the section that matches your distro.
+
+#### Ubuntu / Debian (20.04 LTS and later)
+
+```bash
+sudo apt update
+sudo apt install -y \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
+    python3-gdal
+```
+
+Verify the installation:
+
+```bash
+gdal-config --version   # e.g. 3.4.1
+geos-config --version   # e.g. 3.10.2
+proj --version          # e.g. Rel. 8.2.1
+```
+
+#### Fedora / RHEL / Rocky Linux / AlmaLinux
+
+```bash
+# Enable EPEL first if on RHEL-based distro
+sudo dnf install -y epel-release      # skip on Fedora
+
+sudo dnf install -y \
+    gdal \
+    gdal-devel \
+    geos \
+    geos-devel \
+    proj \
+    proj-devel
+```
+
+#### Arch Linux / Manjaro
+
+```bash
+sudo pacman -Syu gdal geos proj
+```
+
+---
+
+### Step 2 — Set GeoDjango Library Paths
+
+Django needs to know where the native `.so` files live. Add the following to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) **and** to the project's `.env` file.
+
+First, find the exact paths on your machine:
+
+```bash
+# GDAL
+python3 -c "from ctypes.util import find_library; print(find_library('gdal'))"
+# or
+find /usr -name "libgdal.so*" 2>/dev/null | head -5
+
+# GEOS
+find /usr -name "libgeos_c.so*" 2>/dev/null | head -5
+
+# PROJ data directory
+find /usr -type d -name "proj" 2>/dev/null | head -5
+```
+
+Then add the paths to your `.env` **only if Django cannot find them automatically**:
+
+```dotenv
+# GeoDjango — these are OPTIONAL; only set them if you get a "Could not find GDAL library" error.
+# Adjust paths to match the output of the find commands above.
+GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
+GEOS_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgeos_c.so
+PROJ_LIB=/usr/share/proj
+```
+
+> **How it works:** `settings.py` only applies `GDAL_LIBRARY_PATH` / `GEOS_LIBRARY_PATH` when those env vars are explicitly set. On most modern distros (Ubuntu 22.04+, Fedora 38+, Arch) GeoDjango finds the libraries automatically — you don't need to set them at all.
+
+> **Path tips by distro:**
+> - Ubuntu/Debian → `/usr/lib/x86_64-linux-gnu/`
+> - Fedora/RHEL → `/usr/lib64/`
+> - Arch Linux → `/usr/lib/`
+
+---
+
+### Step 3 — Install PostGIS
+
+GeoDjango also requires the **PostGIS** extension on your PostgreSQL database.
+
+```bash
+# Ubuntu / Debian
+sudo apt install -y postgis postgresql-14-postgis-3
+
+# Fedora / RHEL
+sudo dnf install -y postgis33_14   # adjust version suffix as needed
+
+# Arch
+sudo pacman -Syu postgis
+```
+
+Then enable it in your database:
+
+```sql
+-- run as the postgres superuser
+CREATE EXTENSION postgis;
+```
+
+---
+
+### Step 4 — Create and Activate a Virtual Environment
+
+```bash
+cd backend/
+
+python3 -m venv env
+source env/bin/activate
+
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+---
+
+### Step 5 — Configure Environment Variables
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+After copying `.env.example` to `.env`, update the following values — the example file is pre-configured for Docker service names, so you must adjust them for a local run:
+
+```dotenv
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+
+# ⚠️ DB_HOST is 'db' in .env.example (Docker service name) — change it to localhost:
+DB_HOST=localhost
+DB_USER=joyfund       # or postgres, depending on your local pg setup
+DB_PASSWORD=joyfund   # match whatever you created in PostgreSQL
+
+# ⚠️ Broker URLs use Docker hostnames in .env.example — change them:
+# Option A — RabbitMQ (default, matches .env.example)
+CELERY_BROKER_URL=amqp://guest:guest@localhost:5672//
+CELERY_RESULT_BACKEND=redis://localhost:6379/1
+
+# Option B — Redis only (simpler for local testing, no RabbitMQ needed)
+# CELERY_BROKER_URL=redis://localhost:6379/0
+# CELERY_RESULT_BACKEND=redis://localhost:6379/1
+
+# Redis cache
+CACHE_LOCATION=redis://localhost:6379/2
+REDIS_HOST=localhost
+```
+
+> **RabbitMQ quick install** (if using Option A):
+> ```bash
+> # Ubuntu/Debian
+> sudo apt install -y rabbitmq-server
+> sudo systemctl enable --now rabbitmq-server
+>
+> # Fedora/RHEL
+> sudo dnf install -y rabbitmq-server
+> sudo systemctl enable --now rabbitmq-server
+>
+> # Arch
+> sudo pacman -Syu rabbitmq
+> sudo systemctl enable --now rabbitmq
+> ```
+
+---
+
+### Step 6 — Run Migrations and Start the Server
+
+```bash
+# Apply migrations
+python manage.py migrate
+
+# (Optional) Create a superuser
+python manage.py createsuperuser
+
+# Start the development server
+python manage.py runserver
+```
+
+The API will be available at **http://127.0.0.1:8000/**.  
+The Swagger docs are at **http://127.0.0.1:8000/swagger/**.
+
+---
+
+### Step 7 — (Optional) Start Celery Workers
+
+Open two additional terminals (with the virtualenv activated):
+
+```bash
+# Terminal 2 — Celery worker
+celery -A backend worker --loglevel=info
+
+# Terminal 3 — Celery beat scheduler
+celery -A backend beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+```
+
+---
+
+### Troubleshooting
+
+| Error | Likely Cause & Fix |
+| :--- | :--- |
+| `Could not find the GDAL library` | `GDAL_LIBRARY_PATH` in `.env` is wrong or GDAL is not installed. Run the `find` command in Step 2 and update the path. |
+| `cannot import name 'GEOSGeometry'` | GEOS library not found. Check `GEOS_LIBRARY_PATH`. |
+| `django.db.utils.OperationalError: could not connect to server` | PostgreSQL is not running or `DB_*` credentials are incorrect. |
+| `ModuleNotFoundError: No module named 'gdal'` | `python3-gdal` (Ubuntu) or equivalent Python binding is missing. Install it, then re-run `pip install -r requirements.txt`. |
