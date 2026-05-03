@@ -57,10 +57,9 @@ urlpatterns = [
     path('api/beneficiaries/', include('beneficiaries.urls')),
     path('api/campaigns/', include('campaigns.urls')),
     path('api/hospitals/', include('hospitals.urls')),
-    path('api/vouchers/', include('vouchers.urls')),
+    # path('api/vouchers/', include('vouchers.urls')), # Removed as vouchers app is deleted.
     path('api/payments/', include('payments.urls')),
     path('api/notifications/', include('notifications.urls')),
-    path('api/anc/', include('anc.urls')),  # Antenatal Care tracking
     path('api/logs/', include('logs.urls')),  # Logging system API
 
     # API documentation
