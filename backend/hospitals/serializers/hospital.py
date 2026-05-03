@@ -79,6 +79,8 @@ class HospitalCreateUpdateSerializer(serializers.ModelSerializer):
             'city',
             'address',
             'gps_coordinates',
+            'lat',
+            'lng',
             'phone_number',
             'email',
             'website',
