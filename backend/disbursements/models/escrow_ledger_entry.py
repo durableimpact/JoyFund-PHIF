@@ -1,6 +1,5 @@
-from django.db import models
 import uuid
-
+from django.db import models
 
 class EscrowLedgerEntry(models.Model):
     """
@@ -18,10 +17,10 @@ class EscrowLedgerEntry(models.Model):
     """
 
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending (Campaign milestone not yet reached)'  # Funds not yet unlocked from campaign.
-        READY = 'READY', 'Ready for Assignment'  # Funds available for matching engine.
-        ASSIGNED = 'ASSIGNED', 'Assigned to Beneficiary'  # Funds consumed by a specific voucher assignment.
-        RETURNED = 'RETURNED', 'Returned to Escrow Pool'  # Funds sent back after expiry/cancellation.
+        PENDING = 'PENDING', 'Pending (Campaign milestone not yet reached)'
+        READY = 'READY', 'Ready for Assignment'
+        ASSIGNED = 'ASSIGNED', 'Assigned to Beneficiary'
+        RETURNED = 'RETURNED', 'Returned to Escrow Pool'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
