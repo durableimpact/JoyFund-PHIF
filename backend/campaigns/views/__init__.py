@@ -1,7 +1,8 @@
-from .campaign import CampaignViewSet
+from .campaign import CampaignViewSet, CampaignAvailableBalanceListView
 from .donation import DonationViewSet
 
 __all__ = [
-    'CampaignViewSet',
-    'DonationViewSet',
+    "CampaignViewSet",
+    "DonationViewSet",
+    "CampaignAvailableBalanceListView",
 ]
