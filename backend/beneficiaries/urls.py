@@ -6,6 +6,8 @@ from beneficiaries.views import (
     HealthIssueListCreateView,
     HealthIssueDetailView,
     HealthIssueStatusActionView,
+    HealthIssueVerifyView,
+    HealthIssueRejectView,
     BeneficiaryDocumentListCreateView,
     BeneficiaryDocumentDetailView,
 )
@@ -34,6 +36,16 @@ urlpatterns = [
         "health-issues/<int:id>/<str:action>/",
         HealthIssueStatusActionView.as_view(),
         name="health-issue-status-action",
+    ),
+    path(
+        "health-issues/<int:id>/verify/",
+        HealthIssueVerifyView.as_view(),
+        name="health-issue-verify",
+    ),
+    path(
+        "health-issues/<int:id>/reject/",
+        HealthIssueRejectView.as_view(),
+        name="health-issue-reject",
     ),
     # Documents
     path(
