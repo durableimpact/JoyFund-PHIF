@@ -49,11 +49,3 @@ class HealthIssueRejectSerializer(serializers.Serializer):
     rejection_reason = serializers.CharField(
         max_length=1000, help_text="Reason for rejecting the health issue"
     )
-
-
-class HealthIssueFlagSerializer(serializers.Serializer):
-    """Serializer for flagging a health issue for review with a reason."""
-
-    rejection_reason = serializers.CharField(
-        max_length=1000, help_text="Reason for flagging the health issue for review"
-    )
