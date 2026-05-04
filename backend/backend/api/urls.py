@@ -6,6 +6,7 @@ urlpatterns = [
     path("campaigns/", include("campaigns.urls")),
     path("hospitals/", include("hospitals.urls")),
     path("payments/", include("payments.urls")),
+    path("vouchers/", include("vouchers.urls")),
     path("notifications/", include("notifications.urls")),
     path("logs/", include("logs.urls")),
 ]
