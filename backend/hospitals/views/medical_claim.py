@@ -338,4 +338,3 @@ class MedicalClaimProofFlagView(APIView):
             MedicalClaimProofSerializer(proof).data,
             status=status.HTTP_200_OK,
         )
-
