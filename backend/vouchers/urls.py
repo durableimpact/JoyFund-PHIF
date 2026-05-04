@@ -1,2 +1,8 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
+from vouchers.views.voucher import VoucherCheckView
+
+app_name = "vouchers"
+
+urlpatterns = [
+    path("check/", VoucherCheckView.as_view(), name="voucher-check"),
+]
