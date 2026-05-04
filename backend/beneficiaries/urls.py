@@ -1,19 +1,49 @@
 from django.urls import path
 
 from beneficiaries.views import (
-    BeneficiaryCreateView,
-    BeneficiaryDeleteView,
     BeneficiaryListView,
-    BeneficiaryRetrieveView,
-    BeneficiaryUpdateView,
+    BeneficiaryDetailView,
+    HealthIssueListCreateView,
+    HealthIssueDetailView,
+    HealthIssueStatusActionView,
+    BeneficiaryDocumentListCreateView,
+    BeneficiaryDocumentDetailView,
 )
 
-app_name = 'beneficiaries'
+app_name = "beneficiaries"
 
 urlpatterns = [
-    path('', BeneficiaryListView.as_view(), name='beneficiary-list'),
-    path('create/', BeneficiaryCreateView.as_view(), name='beneficiary-create'),
-    path('<uuid:id>/', BeneficiaryRetrieveView.as_view(), name='beneficiary-retrieve'),
-    path('<uuid:id>/update/', BeneficiaryUpdateView.as_view(), name='beneficiary-update'),
-    path('<uuid:id>/delete/', BeneficiaryDeleteView.as_view(), name='beneficiary-delete'),
+    path("", BeneficiaryListView.as_view(), name="beneficiary-list-create"),
+    path(
+        "<uuid:id>/",
+        BeneficiaryDetailView.as_view(),
+        name="beneficiary-detail-update-delete",
+    ),
+    # Health Issues
+    path(
+        "health-issues/",
+        HealthIssueListCreateView.as_view(),
+        name="health-issue-list-create",
+    ),
+    path(
+        "health-issues/<int:id>/",
+        HealthIssueDetailView.as_view(),
+        name="health-issue-detail",
+    ),
+    path(
+        "health-issues/<int:id>/<str:action>/",
+        HealthIssueStatusActionView.as_view(),
+        name="health-issue-status-action",
+    ),
+    # Documents
+    path(
+        "documents/",
+        BeneficiaryDocumentListCreateView.as_view(),
+        name="document-list-create",
+    ),
+    path(
+        "documents/<int:id>/",
+        BeneficiaryDocumentDetailView.as_view(),
+        name="document-detail",
+    ),
 ]

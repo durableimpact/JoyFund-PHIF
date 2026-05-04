@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
@@ -27,45 +28,43 @@ from chanx.channels import urls as chanx_urls
 
 schema_view = get_schema_view(
     openapi.Info(
-        title='JoyFund PHIF API',
-        default_version='v1',
-        description='JoyFund People Health Insurance Fund - REST API documentation',
-        contact=openapi.Contact(email='admin@joyfund.org'),
-        license=openapi.License(name='Proprietary'),
+        title="JoyFund PHIF API",
+        default_version="v1",
+        description="JoyFund People Health Insurance Fund - REST API documentation",
+        contact=openapi.Contact(email="admin@joyfund.org"),
+        license=openapi.License(name="Proprietary"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
-    path('', TemplateView.as_view(template_name='landing.html'), name='landing'),
-    path('login/', login_view, name='login'),
-    path('accounts/logout/', logout_view, name='logout'),
-    path('admin/', admin.site.urls),
-    
+    path("", TemplateView.as_view(template_name="landing.html"), name="landing"),
+    path("login/", login_view, name="login"),
+    path("accounts/logout/", logout_view, name="logout"),
+    path("admin/", admin.site.urls),
     # WebSocket AsyncAPI Documentation (Chanx)
-    path('asyncapi/', include(chanx_urls.urlpatterns)),
-
+    path("asyncapi/", include(chanx_urls.urlpatterns)),
     # API endpoints
     # OAuth2 authentication with rate limiting
     # ✓ Rate limited token endpoint: 10 requests/hour
-    path('auth/token/', oauth2_token_view, name='oauth2_token'),
+    path("auth/token/", oauth2_token_view, name="oauth2_token"),
     # Include remaining drf-social-oauth2 endpoints (convert-token, refresh, etc.)
-    path('auth/', include('drf_social_oauth2.urls', namespace='drf')),
-    
-    path('api/accounts/', include('accounts.urls')),
-    path('api/beneficiaries/', include('beneficiaries.urls')),
-    path('api/campaigns/', include('campaigns.urls')),
-    path('api/hospitals/', include('hospitals.urls')),
-    # path('api/vouchers/', include('vouchers.urls')), # Removed as vouchers app is deleted.
-    path('api/payments/', include('payments.urls')),
-    path('api/notifications/', include('notifications.urls')),
-    path('api/logs/', include('logs.urls')),  # Logging system API
-
+    path("auth/", include("drf_social_oauth2.urls", namespace="drf")),
+    # Versioned API
+    path("api/", include("backend.api.urls")),
     # API documentation
-    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    re_path(
+        r"^swagger(?P<format>\.json|\.yaml)$",
+        schema_view.without_ui(cache_timeout=0),
+        name="schema-json",
+    ),
+    path(
+        "swagger/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
 
 if settings.DEBUG:
