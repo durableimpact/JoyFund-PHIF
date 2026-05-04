@@ -18,7 +18,6 @@ from beneficiaries.serializers.health_issue import (
     BeneficiaryDocumentSerializer,
     HealthIssueVerifySerializer,
     HealthIssueRejectSerializer,
-    HealthIssueFlagSerializer,
 )
 from beneficiaries.filters.health_issue import HealthIssueFilter
 from beneficiaries.views.beneficiary import (
@@ -161,44 +160,6 @@ class HealthIssueRejectView(APIView):
         serializer.is_valid(raise_exception=True)
 
         health_issue.status = HealthIssueStatus.REJECTED
-        health_issue.validated_by = request.user.systemadmin
-        health_issue.rejection_reason = serializer.validated_data["rejection_reason"]
-        health_issue.save()
-
-        return Response(
-            HealthIssueDetailSerializer(health_issue).data,
-            status=status.HTTP_200_OK,
-        )
-
-
-class HealthIssueFlagView(APIView):
-    """Flag a health issue for review with a reason (System Admin only)."""
-
-    permission_classes = [IsSystemAdmin]
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        operation_description="Flag a health issue for manual review with a reason. System Admin endpoint.",
-        request_body=HealthIssueFlagSerializer,
-        responses={
-            200: HealthIssueDetailSerializer,
-            404: "Health issue not found",
-            400: "Bad request",
-        },
-    )
-    def post(self, request, id):
-        try:
-            health_issue = HealthIssue.objects.get(id=id)
-        except HealthIssue.DoesNotExist:
-            return Response(
-                {"detail": "Health issue not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        serializer = HealthIssueFlagSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        health_issue.status = HealthIssueStatus.WAITING
         health_issue.validated_by = request.user.systemadmin
         health_issue.rejection_reason = serializer.validated_data["rejection_reason"]
         health_issue.save()

@@ -6,6 +6,8 @@ from .health_issue import (
     HealthIssueListCreateView,
     HealthIssueDetailView,
     HealthIssueStatusActionView,
+    HealthIssueVerifyView,
+    HealthIssueRejectView,
     BeneficiaryDocumentListCreateView,
     BeneficiaryDocumentDetailView,
 )
@@ -16,6 +18,8 @@ __all__ = [
     "HealthIssueListCreateView",
     "HealthIssueDetailView",
     "HealthIssueStatusActionView",
+    "HealthIssueVerifyView",
+    "HealthIssueRejectView",
     "BeneficiaryDocumentListCreateView",
     "BeneficiaryDocumentDetailView",
 ]
