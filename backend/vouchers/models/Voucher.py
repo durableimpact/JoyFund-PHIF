@@ -33,9 +33,14 @@ def _generate_patient_otp():
 class Voucher(models.Model):
 
     class Status(models.TextChoices):
-        ACTIVE = "ACTIVE", "Active"  # Voucher is active and can be redeemed.
-        USED = "USED", "Used"  # Voucher has been redeemed.
-        EXPIRED = "EXPIRED", "Expired"  # Voucher has passed its expiry date
+        AVAILABLE = "AVAILABLE", "Available"  # Assigned, 30-day window starts
+        ACTIVE = "ACTIVE", "Active"  # Patient arrived, claim open
+        PENDING_CONFIRMATION = (
+            "PENDING_CONFIRMATION",
+            "Pending Confirmation",
+        )  # PIN generated
+        USED = "USED", "Used"  # Patient confirmed
+        EXPIRED = "EXPIRED", "Expired"
 
     class Language(models.TextChoices):
         FRENCH = "fr", "French"  # Send beneficiary SMS in French.
@@ -61,7 +66,7 @@ class Voucher(models.Model):
 
     # --- Status & language ---
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.ACTIVE, db_index=True
+        max_length=20, choices=Status.choices, default=Status.AVAILABLE, db_index=True
     )
     language_preference = models.CharField(
         max_length=10, choices=Language.choices, default=Language.FRENCH
@@ -96,16 +101,10 @@ class Voucher(models.Model):
         if not self.voucher_code:
             self.voucher_code = _generate_voucher_code()
 
-        # Generate a 4-digit PIN ONLY when the hospital marks the service as completed (PENDING_CONFIRMATION)
-        if (
-            self.status == self.Status.PENDING_CONFIRMATION
-            and not self.patient_confirmation_pin
-        ):
-            self.patient_confirmation_pin = _generate_patient_otp()
-
-        # Set 30-day expiry when voucher becomes AVAILABLE
-        if not self.expiry_date and self.status == self.Status.AVAILABLE:
+        # Set 30-day expiry when voucher becomes ACTIVE
+        if not self.expiry_date and self.status == self.Status.ACTIVE:
             self.expiry_date = date.today() + timedelta(days=30)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
