@@ -1,15 +1,21 @@
 from .beneficiary import (
-    BeneficiaryCreateView,
-    BeneficiaryDeleteView,
     BeneficiaryListView,
-    BeneficiaryRetrieveView,
-    BeneficiaryUpdateView,
+    BeneficiaryDetailView,
+)
+from .health_issue import (
+    HealthIssueListCreateView,
+    HealthIssueDetailView,
+    HealthIssueStatusActionView,
+    BeneficiaryDocumentListCreateView,
+    BeneficiaryDocumentDetailView,
 )
 
 __all__ = [
-    'BeneficiaryCreateView',
-    'BeneficiaryListView',
-    'BeneficiaryRetrieveView',
-    'BeneficiaryUpdateView',
-    'BeneficiaryDeleteView',
+    "BeneficiaryListView",
+    "BeneficiaryDetailView",
+    "HealthIssueListCreateView",
+    "HealthIssueDetailView",
+    "HealthIssueStatusActionView",
+    "BeneficiaryDocumentListCreateView",
+    "BeneficiaryDocumentDetailView",
 ]
