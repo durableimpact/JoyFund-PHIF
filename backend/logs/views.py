@@ -27,18 +27,21 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ActivityLogSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['level', 'action']
-    search_fields = ['description', 'actor_label', 'action']
-    ordering_fields = ['created_at', 'level', 'action']
-    ordering = ['-created_at']
+    filterset_fields = ["level", "action"]
+    search_fields = ["description", "actor_label", "action"]
+    ordering_fields = ["created_at", "level", "action"]
+    ordering = ["-created_at"]
     pagination_class = None  # Will use default pagination from settings
 
     def get_queryset(self):
         """Filter by date range and user_id if provided."""
         queryset = super().get_queryset()
 
+        if getattr(self, "swagger_fake_view", False):
+            return queryset
+
         # Filter by from_date
-        from_date_str = self.request.query_params.get('from_date')
+        from_date_str = self.request.query_params.get("from_date")
         if from_date_str:
             try:
                 from_date = datetime.fromisoformat(from_date_str)
@@ -47,7 +50,7 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
                 pass
 
         # Filter by to_date
-        to_date_str = self.request.query_params.get('to_date')
+        to_date_str = self.request.query_params.get("to_date")
         if to_date_str:
             try:
                 to_date = datetime.fromisoformat(to_date_str)
@@ -56,17 +59,17 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
                 pass
 
         # Filter by user_id
-        user_id = self.request.query_params.get('user_id')
+        user_id = self.request.query_params.get("user_id")
         if user_id:
             queryset = queryset.filter(user_id=user_id)
 
         return queryset
 
-    @swagger_auto_schema(tags=['Logging - Activity'])
+    @swagger_auto_schema(tags=["Logging - Activity"])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=['Logging - Activity'])
+    @swagger_auto_schema(tags=["Logging - Activity"])
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -81,18 +84,21 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = RequestLogSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['method', 'status_code']
-    search_fields = ['path', 'ip_address']
-    ordering_fields = ['created_at', 'response_time_ms', 'status_code']
-    ordering = ['-created_at']
+    filterset_fields = ["method", "status_code"]
+    search_fields = ["path", "ip_address"]
+    ordering_fields = ["created_at", "response_time_ms", "status_code"]
+    ordering = ["-created_at"]
     pagination_class = None  # Will use default pagination from settings
 
     def get_queryset(self):
         """Filter by date range and user_id if provided."""
         queryset = super().get_queryset()
 
+        if getattr(self, "swagger_fake_view", False):
+            return queryset
+
         # Filter by from_date
-        from_date_str = self.request.query_params.get('from_date')
+        from_date_str = self.request.query_params.get("from_date")
         if from_date_str:
             try:
                 from_date = datetime.fromisoformat(from_date_str)
@@ -101,7 +107,7 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
                 pass
 
         # Filter by to_date
-        to_date_str = self.request.query_params.get('to_date')
+        to_date_str = self.request.query_params.get("to_date")
         if to_date_str:
             try:
                 to_date = datetime.fromisoformat(to_date_str)
@@ -110,22 +116,22 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
                 pass
 
         # Filter by user_id
-        user_id = self.request.query_params.get('user_id')
+        user_id = self.request.query_params.get("user_id")
         if user_id:
             queryset = queryset.filter(user_id=user_id)
 
         # Filter by path pattern
-        path = self.request.query_params.get('path')
+        path = self.request.query_params.get("path")
         if path:
             queryset = queryset.filter(path__icontains=path)
 
         return queryset
 
-    @swagger_auto_schema(tags=['Logging - Request'])
+    @swagger_auto_schema(tags=["Logging - Request"])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=['Logging - Request'])
+    @swagger_auto_schema(tags=["Logging - Request"])
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -140,18 +146,21 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ErrorLogSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['error_type']
-    search_fields = ['error_type', 'error_message', 'stack_trace']
-    ordering_fields = ['created_at', 'error_type']
-    ordering = ['-created_at']
+    filterset_fields = ["error_type"]
+    search_fields = ["error_type", "error_message", "stack_trace"]
+    ordering_fields = ["created_at", "error_type"]
+    ordering = ["-created_at"]
     pagination_class = None  # Will use default pagination from settings
 
     def get_queryset(self):
         """Filter by date range."""
         queryset = super().get_queryset()
 
+        if getattr(self, "swagger_fake_view", False):
+            return queryset
+
         # Filter by from_date
-        from_date_str = self.request.query_params.get('from_date')
+        from_date_str = self.request.query_params.get("from_date")
         if from_date_str:
             try:
                 from_date = datetime.fromisoformat(from_date_str)
@@ -160,7 +169,7 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
                 pass
 
         # Filter by to_date
-        to_date_str = self.request.query_params.get('to_date')
+        to_date_str = self.request.query_params.get("to_date")
         if to_date_str:
             try:
                 to_date = datetime.fromisoformat(to_date_str)
@@ -170,11 +179,11 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @swagger_auto_schema(tags=['Logging - Error'])
+    @swagger_auto_schema(tags=["Logging - Error"])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=['Logging - Error'])
+    @swagger_auto_schema(tags=["Logging - Error"])
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -187,8 +196,8 @@ class LogStatsView(viewsets.ViewSet):
 
     permission_classes = [IsAdminUser]
 
-    @action(detail=False, methods=['get'])
-    @swagger_auto_schema(tags=['Logging - Statistics'])
+    @action(detail=False, methods=["get"])
+    @swagger_auto_schema(tags=["Logging - Statistics"])
     def stats(self, request):
         """
         GET /api/logs/stats/
@@ -204,38 +213,55 @@ class LogStatsView(viewsets.ViewSet):
         requests = RequestLog.objects.filter(created_at__gte=thirty_days_ago)
         total_requests = requests.count()
         error_requests = requests.filter(status_code__gte=500).count()
-        error_rate = (error_requests / total_requests * 100) if total_requests > 0 else 0
+        error_rate = (
+            (error_requests / total_requests * 100) if total_requests > 0 else 0
+        )
 
         # Calculate average response time
-        avg_response_time = requests.aggregate(avg=Avg('response_time_ms'))['avg'] or 0
+        avg_response_time = requests.aggregate(avg=Avg("response_time_ms"))["avg"] or 0
 
         # Get top actions
-        top_actions = ActivityLog.objects.filter(
-            created_at__gte=thirty_days_ago
-        ).values('action').annotate(count=Count('action')).order_by('-count')[:10]
+        top_actions = (
+            ActivityLog.objects.filter(created_at__gte=thirty_days_ago)
+            .values("action")
+            .annotate(count=Count("action"))
+            .order_by("-count")[:10]
+        )
 
         # Get errors by type
-        errors_by_type = ErrorLog.objects.filter(
-            created_at__gte=thirty_days_ago
-        ).values('error_type').annotate(count=Count('error_type')).order_by('-count')[:10]
+        errors_by_type = (
+            ErrorLog.objects.filter(created_at__gte=thirty_days_ago)
+            .values("error_type")
+            .annotate(count=Count("error_type"))
+            .order_by("-count")[:10]
+        )
 
         # Get requests by status code
-        requests_by_status = requests.values('status_code').annotate(
-            count=Count('status_code')
-        ).order_by('-count')[:10]
+        requests_by_status = (
+            requests.values("status_code")
+            .annotate(count=Count("status_code"))
+            .order_by("-count")[:10]
+        )
 
         # Count active users in last 7 days
-        active_users = ActivityLog.objects.filter(
-            created_at__gte=seven_days_ago,
-            user__isnull=False,
-        ).values('user').distinct().count()
+        active_users = (
+            ActivityLog.objects.filter(
+                created_at__gte=seven_days_ago,
+                user__isnull=False,
+            )
+            .values("user")
+            .distinct()
+            .count()
+        )
 
-        return Response({
-            'total_requests': total_requests,
-            'error_rate_percent': round(error_rate, 2),
-            'avg_response_time_ms': round(avg_response_time, 2),
-            'top_actions': list(top_actions),
-            'errors_by_type': list(errors_by_type),
-            'requests_by_status': list(requests_by_status),
-            'active_users_last_7_days': active_users,
-        })
+        return Response(
+            {
+                "total_requests": total_requests,
+                "error_rate_percent": round(error_rate, 2),
+                "avg_response_time_ms": round(avg_response_time, 2),
+                "top_actions": list(top_actions),
+                "errors_by_type": list(errors_by_type),
+                "requests_by_status": list(requests_by_status),
+                "active_users_last_7_days": active_users,
+            }
+        )
