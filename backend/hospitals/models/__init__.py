@@ -1,5 +1,5 @@
 from .hospital import Hospital, PartnershipStatus
-from .service import Services
+from .service import Services, ServiceCategory
 from .medical_claim import (
     MedicalClaim,
     ClaimItem,
@@ -7,7 +7,6 @@ from .medical_claim import (
     MedicalClaimProof,
     VerificationStatus,
     DocumentType,
-    ServiceCategory,
 )
 
 __all__ = [

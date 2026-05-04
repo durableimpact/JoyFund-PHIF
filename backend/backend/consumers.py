@@ -28,10 +28,10 @@ from backend.ws_messages import (
     PongMessage, SubscribedMessage, UnsubscribedMessage,
     NotificationMarkedReadMessage, AllNotificationsMarkedReadMessage,
     NotificationDeletedMessage, ErrorMessage,
-    UserCreatedMessage, DonationCreatedMessage, VoucherAssignmentPendingMessage,
+    UserCreatedMessage, DonationCreatedMessage,
     VoucherCreatedMessage, VoucherRedeemedMessage,
     # Event messages (from HTTP/Celery)
-    UserCreatedEvent, DonationCreatedEvent, VoucherAssignmentPendingEvent,
+    UserCreatedEvent, DonationCreatedEvent,
     VoucherCreatedEvent, VoucherRedeemedEvent,
 )
 
@@ -271,13 +271,6 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
     ) -> DonationCreatedMessage:
         """Handle donation_created event from HTTP."""
         return DonationCreatedMessage(payload=event.payload)
-    
-    @event_handler
-    async def handle_voucher_assignment_pending(
-        self, event: VoucherAssignmentPendingEvent
-    ) -> VoucherAssignmentPendingMessage:
-        """Handle voucher_assignment_pending event from HTTP."""
-        return VoucherAssignmentPendingMessage(payload=event.payload)
     
     @event_handler
     async def handle_voucher_created(

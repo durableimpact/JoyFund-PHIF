@@ -159,22 +159,6 @@ class DonationCreatedMessage(BaseMessage):
     payload: DonationPayload
 
 
-class VoucherAssignmentPayload(BaseModel):
-    """Payload for voucher assignment pending approval."""
-    voucher_id: int
-    beneficiary_name: str
-    campaign_name: str
-    hospital_name: str
-    matched_amount: float
-    created_at: datetime
-
-
-class VoucherAssignmentPendingMessage(BaseMessage):
-    """Notifies admins that voucher assignment requires approval within 24h."""
-    action: Literal["voucher_assignment_pending"] = "voucher_assignment_pending"
-    payload: VoucherAssignmentPayload
-
-
 class VoucherPayload(BaseModel):
     """Payload for voucher creation/redemption events."""
     voucher_id: int
@@ -215,12 +199,6 @@ class DonationCreatedEvent(BaseMessage):
     """Event: Donation created in system."""
     action: Literal["donation_created"] = "donation_created"
     payload: DonationPayload
-
-
-class VoucherAssignmentPendingEvent(BaseMessage):
-    """Event: Voucher assignment pending."""
-    action: Literal["voucher_assignment_pending"] = "voucher_assignment_pending"
-    payload: VoucherAssignmentPayload
 
 
 class VoucherCreatedEvent(BaseMessage):
