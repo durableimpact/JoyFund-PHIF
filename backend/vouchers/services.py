@@ -27,17 +27,17 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
 
 from decimal import Decimal
-from django.db.models import Sum, F, Value, DecimalField, ExpressionWrapper, Q,QuerySet
+from django.db.models import Sum, F, Value, DecimalField, ExpressionWrapper, Q, QuerySet
 from django.db.models.functions import Coalesce
-from typing import Optional,Literal,Any,Dict
+from typing import Optional, Literal, Any, Dict
 
 logger = logging.getLogger(__name__)
-
 
 
 # ---------------------------------------------------------------------------
 # Internal logging helpers
 # ---------------------------------------------------------------------------
+
 
 def _log_activity(
     action: str,
@@ -88,6 +88,7 @@ def _log_error(
 # Campaign balance helper
 # ---------------------------------------------------------------------------
 
+
 def get_campaign_with_available_balance(
     threshold: Decimal = Decimal("0"),
 ) -> QuerySet[Campaign]:
@@ -116,15 +117,15 @@ def get_campaign_with_available_balance(
 # Voucher settlement
 # ---------------------------------------------------------------------------
 
+
 @transaction.atomic
 def allocate_funds_to_voucher(
     campaign: Campaign, voucher_funding: VoucherFunding, committed_amount: float
-)-> tuple[bool, str]:
+) -> tuple[bool, str]:
     """
-    Called when voucher is created from an approved health issue. 
+    Called when voucher is created from an approved health issue.
     Allocates funds from the campaign to the voucher.
     """
-
 
     try:
         if committed_amount <= 0:
@@ -183,7 +184,7 @@ def settle_voucher_with_campaign_updates(voucher: Voucher):
 
     medical_claim = (
         MedicalClaim.objects.filter(voucher=voucher)
-        .prefetch_related("claim_items","proofs")
+        .prefetch_related("claim_items", "proofs")
         .first()
     )
 
@@ -401,7 +402,7 @@ def settle_voucher_with_campaign_updates(voucher: Voucher):
     else:
         remaining_cost = medical_claim_cost
         for funding in fundings:
-            campaign:Campaign = funding.campaign
+            campaign: Campaign = funding.campaign
 
             if remaining_cost <= 0:
                 # This funding record is fully surplus — cancel it
@@ -429,7 +430,7 @@ def settle_voucher_with_campaign_updates(voucher: Voucher):
                 )
                 continue
 
-            utilize_amount:Decimal = min(funding.committed_amount, remaining_cost)
+            utilize_amount: Decimal = min(funding.committed_amount, remaining_cost)
             remaining_cost -= utilize_amount
             funding.utilized_amount = utilize_amount
             funding.refund_amount = Decimal("0.0")
@@ -444,7 +445,6 @@ def settle_voucher_with_campaign_updates(voucher: Voucher):
                 ]
             )
 
-
             campaign.currently_allocated -= funding.committed_amount
             campaign.total_disbursed += utilize_amount
             campaign.save(update_fields=["currently_allocated", "total_disbursed"])
@@ -458,9 +458,9 @@ def settle_voucher_with_campaign_updates(voucher: Voucher):
             )
 
     _log_activity(
-    action="voucher.settlement.success",
-    description=(
-        f"Voucher {voucher.voucher_code} successfully settled. "
+        action="voucher.settlement.success",
+        description=(
+            f"Voucher {voucher.voucher_code} successfully settled. "
             f"Total cost: {medical_claim_cost:.2f} XAF to {voucher.hospital.name}."
         ),
         level="INFO",
@@ -476,331 +476,115 @@ def settle_voucher_with_campaign_updates(voucher: Voucher):
     )
     return True, f"Voucher {voucher.voucher_code} settled successfully."
 
-    
 
 @transaction.atomic
-def create_voucher_from_approved_health_issue(health_issue: HealthIssue) -> Optional[Voucher]:
+def create_voucher_from_approved_health_issue(
+    health_issue: HealthIssue, hospital: Hospital, amount: Decimal, campaign: Campaign
+) -> tuple[Optional[Voucher], str]:
     """
-    Create a Voucher and associated VoucherFunding when a HealthIssue is approved.
-
-    Steps:
-    1. Create Voucher with status 'ACTIVE' linked to the HealthIssue
-    2. Create VoucherFunding record to log the source of funds (e.g. Campaign or Hospital)
-    3. Ensure atomicity so that both records are created successfully or rolled back together
+    Manual voucher creation by System Admin.
+    Validates health issue status and unique constraint (one voucher per health issue).
+    Allocates the specified amount from the selected campaign.
     """
 
+    # 1. Validation
     if health_issue.status != HealthIssueStatus.VALIDATED:
-        msg = (
-            f"HealthIssue #{health_issue.id} is not in VALIDATED status "
-            f"(current: '{health_issue.status}'). Cannot create voucher."
+        return None, f"Health Issue #{health_issue.id} is not VALIDATED."
+
+    if Voucher.objects.filter(health_issue=health_issue).exists():
+        return None, f"A voucher already exists for Health Issue #{health_issue.id}."
+
+    if amount <= 0:
+        return None, "Allocation amount must be greater than zero."
+
+    # 2. Check Campaign Balance
+    # We use a threshold of 0 here because we are explicitly checking the balance
+    available = (
+        campaign.available_balance if hasattr(campaign, "available_balance") else 0
+    )
+    # If campaign object wasn't annotated with available_balance, we fallback or re-calculate
+    if not hasattr(campaign, "available_balance"):
+        # Quick re-annotation for this specific campaign
+        campaign = Campaign.objects.annotate(
+            available_balance=ExpressionWrapper(
+                Coalesce(
+                    Sum("donations__net_amount", filter=Q(donations__status="SUCCESS")),
+                    Value(0),
+                )
+                - F("total_disbursed")
+                - F("currently_allocated"),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            )
+        ).get(id=campaign.id)
+        available = campaign.available_balance
+
+    if amount > available:
+        return (
+            None,
+            f"Insufficient funds in campaign '{campaign.title}'. Available: {available} XAF.",
         )
-        _log_activity(
-            action="voucher.creation.failed",
-            description=msg,
-            level="WARNING",
-            target_type="HealthIssue",
-            target_id=health_issue.id,
-            metadata={"health_issue_status": health_issue.status},
-        )
-        return None
 
-    # get category of the health issue for the voucher
-    category = health_issue.category
-
-    # based on category we are going to assing some amount that would be allocated initially to the voucher funding
-
-    base_amount_map = {
-        HealthIssueCategoryChoices.MATERNAL: 250_000,
-        HealthIssueCategoryChoices.ELDERLY: 150_000,
-        HealthIssueCategoryChoices.EMERGENCY: 300_000,
-        HealthIssueCategoryChoices.CHRONIC: 100_000,
-    }
-    base_amount = Decimal(str(base_amount_map.get(category, 50_000)))
-
-    # search for active campaigns that match the health issue category
-    campaigns = get_campaign_with_available_balance(base_amount)
-
-    # prioritize newer campaigns
-
-    if not campaigns.exists():
-        msg = (
-            f"No active campaigns with sufficient balance to fund this voucher "
-            f"for HealthIssue #{health_issue.id}."
-        )
-        _log_activity(
-            action="voucher.creation.failed",
-            description=msg,
-            level="ERROR",
-            target_type="HealthIssue",
-            target_id=health_issue.id,
-            metadata={"health_issue_status": health_issue.status},
-        )
-        return None
-
-    # Now search the hospital that is closest to the beneficiary location that can provide the needed services for the health issue and create the voucher with the hospital and campaign we found
-    beneficiary = health_issue.beneficiary
-    
-    if not beneficiary.lat or not beneficiary.lng:
-        msg = f"Beneficiary {beneficiary.digital_health_id} has no GPS coordinates. Cannot find nearby hospital."
-        _log_activity(
-            action="voucher.creation.failed",
-            description=msg,
-            level="ERROR",
-            target_type="HealthIssue",
-            target_id=health_issue.id,
-            metadata={"beneficiary_id": str(beneficiary.id)},
-        )
-        return None
-
-    # health issue category
-    # health_issue_category = health_issue.category
-
-    beneficiary_location = Point(
-        float(beneficiary.lng), float(beneficiary.lat), srid=4326
+    # 3. Create Voucher
+    voucher = Voucher.objects.create(
+        beneficiary=health_issue.beneficiary,
+        health_issue=health_issue,
+        hospital=hospital,
+        status=Voucher.Status.ACTIVE,
     )
 
-    # Get the hospitals that are within 20km radius from the beneficiary location and that are active and have an active partnership with us and that have gps coordinates and order them by distance to the beneficiary and take the first 5
-    hospitals = (
-        Hospital.objects.filter(
-            gps_coordinates__isnull=False,
-            is_active=True,
-            partnership_status=PartnershipStatus.ACTIVE,
-            gps_coordinates__distance_lte=(beneficiary_location, D(km=20)),
-        )
-        .annotate(distance=Distance("gps_coordinates", beneficiary_location))
-        .order_by("distance")
+    # 4. Create Funding Record
+    voucher_funding = VoucherFunding.objects.create(
+        voucher=voucher,
+        campaign=campaign,
+        committed_amount=amount,
+        utilized_amount=Decimal("0.00"),
+        refund_amount=Decimal("0.00"),
+        status=VoucherFunding.FundingStatus.COMMITTED,
     )
 
-    # check if there are hospitals that match the criteria
-    if not hospitals.exists():
-        msg = (
-            f"No active partner hospital found within 20 km of beneficiary "
-            f"{beneficiary.digital_health_id} for HealthIssue #{health_issue.id}."
-        )
-        _log_activity(
-            action="voucher.creation.failed",
-            description=msg,
-            level="ERROR",
-            target_type="HealthIssue",
-            target_id=health_issue.id,
-            metadata={
-                "beneficiary_id": str(beneficiary.id),
-                "lat": str(beneficiary.lat),
-                "lng": str(beneficiary.lng),
-            },
-        )
-        return None
+    # 5. Update Campaign
+    campaign.currently_allocated = F("currently_allocated") + amount
+    campaign.save(update_fields=["currently_allocated"])
 
-    if campaigns.count() >= 1:
+    # 6. Log Transaction
+    CampaignTransaction.objects.create(
+        campaign=campaign,
+        voucher_funding=voucher_funding,
+        transaction_type=CampaignTransaction.TransactionType.VOUCHER_ALLOCATED,
+        amount=amount,
+        description=f"Admin allocated {amount:.2f} XAF to voucher {voucher.voucher_code} for health issue #{health_issue.id}",
+    )
 
-        # if campaigns exist we take the first one and allocate funds to the voucher funding
-        campaign:Campaign = campaigns.first()
+    _log_activity(
+        action="voucher.creation.manual",
+        description=(
+            f"Admin created voucher {voucher.voucher_code} for health issue #{health_issue.id}. "
+            f"Allocated {amount:.2f} XAF from campaign '{campaign.title}'."
+        ),
+        level="INFO",
+        target_type="Voucher",
+        target_id=voucher.id,
+        target_label=voucher.voucher_code,
+        metadata={
+            "health_issue_id": health_issue.id,
+            "campaign_id": str(campaign.id),
+            "amount": str(amount),
+            "hospital": hospital.name,
+        },
+    )
 
-        # select first hospital in the list that can provide the needed services for the health issue
-        hospital = hospitals.first()
-
-        # create the voucher with the first hospital in the list that can provide the needed services for the health issue
-        voucher = Voucher.objects.create(
-            beneficiary=beneficiary,
-            health_issue=health_issue,
-            hospital=hospital,
-            status=Voucher.Status.ACTIVE,
-        )
-
-        # create the voucher funding with the campaign we found and the voucher we just created and the committed amount based on the health issue category
-        voucher_funding = VoucherFunding.objects.create(
-            voucher=voucher,
-            campaign=campaign,
-            committed_amount=base_amount,
-            utilized_amount=0,
-            refund_amount=0,
-        )
-
-        campaign.currently_allocated = (
-            Decimal(campaign.currently_allocated or 0) + base_amount
-        )
-        campaign.save(update_fields=["currently_allocated"])
-
-        CampaignTransaction.objects.create(
-            campaign=campaign,
-            voucher_funding=voucher_funding,
-            transaction_type=CampaignTransaction.TransactionType.VOUCHER_ALLOCATED,
-            amount=base_amount,
-            description=f"Allocated {base_amount:.2f} XAF to voucher {voucher.voucher_code} for health issue #{health_issue.id}",
-        )
-
-        _log_activity(
-            action="voucher.creation.success",
-            description=(
-                f"Voucher {voucher.voucher_code} created for HealthIssue #{health_issue.id}. "
-                f"Fully funded ({base_amount:.2f} XAF) from campaign '{campaign.title}'."
-            ),
-            level="INFO",
-            target_type="Voucher",
-            target_id=voucher.id,
-            target_label=voucher.voucher_code,
-            metadata={
-                "health_issue_id": health_issue.id,
-                "campaign_id": str(campaign.id),
-                "amount": str(base_amount),
-                "hospital": hospital.name,
-            },
-        )
-        return voucher
-
-    else:
-
-        """
-        if no campaing with those funds exits we are going to search for campaigns with funds,
-        even if they are not enough as soon as they are funds what we are going to do is to look
-        at campaings with funds even if it is to collect a percentage of it an assign to a voucher.
-
-        For the percentage :
-        80% for EMERGENCY and CHRONIC
-        70% for MATERNAL
-        50% for ELDERLY
-        40% for other
-
-        this percentage would be collected from the different campaigns until we reach to like a min 50% of
-        the base amount and then we are going to create the voucher with the hospital and the campaign
-        we found if that amount is not suficient while the patient is in the hospital and the
-        receptionist add a medical claim from that we would get how much it is require to complete
-        if what was allocated to the voucher was insufficient to what the doctor would do concerning the health issue.
-
-        """
-
-        coverage_map = {
-            HealthIssueCategoryChoices.EMERGENCY: Decimal("0.8"),
-            HealthIssueCategoryChoices.CHRONIC: Decimal("0.8"),
-            HealthIssueCategoryChoices.MATERNAL: Decimal("0.7"),
-            HealthIssueCategoryChoices.ELDERLY: Decimal("0.5"),
-        }
-        coverage = coverage_map.get(category, Decimal("0.4"))
-        min_needed = (Decimal(str(base_amount)) * coverage).quantize(Decimal("0.01"))
-
-        threshold = Decimal("10000")
-
-        campaigns = get_campaign_with_available_balance(threshold=threshold)
-
-        if not campaigns:
-            msg = (
-                f"No active campaigns with sufficient balance to partially fund "
-                f"HealthIssue #{health_issue.id}. Required minimum: {min_needed:.2f} XAF."
-            )
-            _log_activity(
-                action="voucher.creation.failed",
-                description=msg,
-                level="ERROR",
-                target_type="HealthIssue",
-                target_id=health_issue.id,
-                metadata={
-                    "category": category,
-                    "base_amount": str(base_amount),
-                    "min_needed": str(min_needed),
-                },
-            )
-            _log_error(
-                error_type="InsufficientCampaignFunds",
-                error_message=msg,
-                extra={"health_issue_id": health_issue.id},
-            )
-            return None
-
-        remaining = min_needed
-        allocations: list[tuple[Campaign, Decimal]] = []
-        for campaign in campaigns:
-            if remaining <= 0:
-                break
-
-            available = campaign.available_balance
-            to_allocate = min(available, remaining)
-
-            if to_allocate > 0:
-                allocations.append((campaign, to_allocate))
-                remaining -= to_allocate
-
-        if remaining > 0:
-            # Log the partial allocation and proceed to create the voucher with whatever
-            # funds were collected. This preserves previous behaviour of creating the
-            # voucher while avoiding a hard failure when only partial funding is available.
-            allocated_total = sum(a[1] for a in allocations)
-            shortfall = remaining
-            _log_activity(
-            action="voucher.creation.partial_funding",
-            description=(
-                f"Partial allocation for HealthIssue #{health_issue.id}: "
-                f"collected {allocated_total:.2f} XAF from {len(allocations)} campaign(s), "
-                f"shortfall {shortfall:.2f} XAF. Proceeding with voucher creation."
-            ),
-            level="WARNING",
-            target_type="HealthIssue",
-            target_id=health_issue.id,
-            metadata={
-                "allocated_total": str(allocated_total),
-                "shortfall": str(shortfall),
-                "campaigns_count": len(allocations),
-            },
-        )
-
-        # Create voucher and create voucher funding for each campaign allocation
-        hospital = hospitals.first()
-
-        voucher = Voucher.objects.create(
-            beneficiary=beneficiary,
-            health_issue=health_issue,
-            hospital=hospital,
-            status=Voucher.Status.ACTIVE,
-        )
-
-        for campaign, amount in allocations:
-            committed_amount = Decimal(amount).quantize(Decimal("0.01"))
-            voucher_funding = VoucherFunding.objects.create(
-                voucher=voucher,
-                campaign=campaign,
-                committed_amount=committed_amount,
-                utilized_amount=Decimal("0.00"),
-                refund_amount=Decimal("0.00"),
-            )
-            # Ensure currently_allocated is Decimal and update
-            campaign.currently_allocated = (
-                Decimal(campaign.currently_allocated or 0) + committed_amount
-            )
-            campaign.save(update_fields=["currently_allocated"])
-
-            CampaignTransaction.objects.create(
-                campaign=campaign,
-                voucher_funding=voucher_funding,
-                transaction_type=CampaignTransaction.TransactionType.VOUCHER_ALLOCATED,
-                amount=committed_amount,
-                description=f"Allocated {committed_amount:.2f} XAF to voucher {voucher.voucher_code} for health issue #{health_issue.id}",
-            )
-
-        _log_activity(
-            action="voucher.creation.success",
-            description=(
-                f"Voucher {voucher.voucher_code} created for HealthIssue #{health_issue.id} "
-                f"via {len(allocations)} campaign(s)."
-            ),
-            level="INFO",
-            target_type="Voucher",
-            target_id=voucher.id,
-            target_label=voucher.voucher_code,
-            metadata={
-                "health_issue_id": health_issue.id,
-                "campaigns_count": len(allocations),
-                "hospital": hospital.name,
-            },
-        )
-        return voucher
-
+    return voucher, "Voucher created successfully."
 
 
 # ---------------------------------------------------------------------------
 # Add more funds after a medical claim requests more
 # ---------------------------------------------------------------------------
 
+
 @transaction.atomic
-def add_more_fund_to_voucher_after_medical_claim_request_more(voucher: Voucher)-> tuple[bool, str]:
+def add_more_fund_to_voucher_after_medical_claim_request_more(
+    voucher: Voucher,
+) -> tuple[bool, str]:
     """
     This function is called when a medical claim is made for a voucher and the doctor realize that the amount that was allocated to the voucher is not suficient to cover all the cost of the medical claim so what we do is to add more fund to the voucher funding and if there is no campaign with available fund we create a campaign transaction with type `FUNDING_SHORTFALL` to keep track of those case and also to be able to report on them later and see how many time we have this case and how much we are loosing because of that.
     """
@@ -825,9 +609,6 @@ def add_more_fund_to_voucher_after_medical_claim_request_more(voucher: Voucher)-
         )
         return False, msg
 
-    
-
-
     # Get toal commited amount to a voucher
     total_committed = voucher.funding_records.aggregate(
         total_committed=Coalesce(
@@ -842,7 +623,7 @@ def add_more_fund_to_voucher_after_medical_claim_request_more(voucher: Voucher)-
 
     # Get difference between the total commited and the medical claim cost to know how much we need to add to the voucher funding
 
-    amount_needded :Decimal= Decimal(str(medical_claim.total_cost)) - total_committed
+    amount_needded: Decimal = Decimal(str(medical_claim.total_cost)) - total_committed
 
     if amount_needded <= 0:
         msg = (
@@ -985,3 +766,149 @@ def add_more_fund_to_voucher_after_medical_claim_request_more(voucher: Voucher)-
         },
     )
     return True, f"Voucher {voucher.voucher_code} topped up successfully."
+
+
+@transaction.atomic
+def create_voucher_from_multiple_campaigns(
+    health_issue: HealthIssue,
+    hospital: Hospital,
+    total_amount: Decimal,
+    campaign_allocations: list,
+) -> tuple[Optional[Voucher], str]:
+    """
+    Create a voucher funded by multiple campaigns.
+    Each allocation specifies either a fixed amount or percentage to contribute.
+
+    Args:
+        health_issue: The validated health issue
+        hospital: The hospital where services will be provided
+        total_amount: Total amount to allocate across campaigns
+        campaign_allocations: List of dicts with campaign_id and either amount or percentage
+
+    Returns:
+        Tuple of (Voucher object or None, message string)
+    """
+
+    # 1. Validation - Health Issue status
+    if health_issue.status != HealthIssueStatus.VALIDATED:
+        return None, f"Health Issue #{health_issue.id} is not VALIDATED."
+
+    # 2. Validation - Uniqueness constraint
+    if Voucher.objects.filter(health_issue=health_issue).exists():
+        return None, f"A voucher already exists for Health Issue #{health_issue.id}."
+
+    # 3. Validation - Total amount
+    if total_amount <= 0:
+        return None, "Total amount must be greater than zero."
+
+    # 4. Process allocations and calculate actual amounts
+    allocations_to_create = []
+    total_allocated = Decimal("0.00")
+
+    for allocation in campaign_allocations:
+        campaign_id = allocation.get("campaign_id")
+        if hasattr(campaign_id, "id"):
+            campaign_id = campaign_id.id
+
+        try:
+            campaign = Campaign.objects.get(id=campaign_id)
+        except Campaign.DoesNotExist:
+            return None, f"Campaign {campaign_id} does not exist."
+
+        # Calculate actual amount based on fixed or percentage
+        if allocation.get("amount") is not None:
+            amount = Decimal(str(allocation["amount"]))
+        else:
+            percentage = Decimal(str(allocation["percentage"]))
+            amount = (total_amount * percentage / Decimal("100")).quantize(
+                Decimal("0.01")
+            )
+
+        # Validate campaign balance
+        available = (
+            campaign.available_balance if hasattr(campaign, "available_balance") else 0
+        )
+        if not hasattr(campaign, "available_balance"):
+            # Re-annotate if needed
+            campaign = Campaign.objects.annotate(
+                available_balance=ExpressionWrapper(
+                    Coalesce(
+                        Sum(
+                            "donations__net_amount",
+                            filter=Q(donations__status="SUCCESS"),
+                        ),
+                        Value(0),
+                    )
+                    - F("total_disbursed")
+                    - F("currently_allocated"),
+                    output_field=DecimalField(max_digits=12, decimal_places=2),
+                )
+            ).get(id=campaign_id)
+            available = campaign.available_balance
+
+        if available < amount:
+            return (
+                None,
+                f"Campaign '{campaign.title}' has insufficient balance. Available: {available} XAF, Needed: {amount}.",
+            )
+
+        allocations_to_create.append((campaign, amount))
+        total_allocated += amount
+
+    # 5. Validate total allocation
+    if total_allocated > total_amount:
+        return (
+            None,
+            f"Total allocation {total_allocated} exceeds required amount {total_amount}.",
+        )
+
+    # 6. Create Voucher
+    voucher = Voucher.objects.create(
+        beneficiary=health_issue.beneficiary,
+        health_issue=health_issue,
+        hospital=hospital,
+        status=Voucher.Status.ACTIVE,
+    )
+
+    # 7. Create Funding Records and update campaigns
+    for campaign, amount in allocations_to_create:
+        voucher_funding = VoucherFunding.objects.create(
+            voucher=voucher,
+            campaign=campaign,
+            committed_amount=amount,
+            utilized_amount=Decimal("0.00"),
+            refund_amount=Decimal("0.00"),
+            status=VoucherFunding.FundingStatus.COMMITTED,
+        )
+
+        campaign.currently_allocated = F("currently_allocated") + amount
+        campaign.save(update_fields=["currently_allocated"])
+
+        CampaignTransaction.objects.create(
+            campaign=campaign,
+            voucher_funding=voucher_funding,
+            transaction_type=CampaignTransaction.TransactionType.VOUCHER_ALLOCATED,
+            amount=amount,
+            description=f"Allocated {amount:.2f} XAF to voucher {voucher.voucher_code} for health issue #{health_issue.id}",
+        )
+
+    # 8. Log Activity
+    _log_activity(
+        action="voucher.creation.multiple_campaigns",
+        description=(
+            f"Admin created voucher {voucher.voucher_code} for health issue #{health_issue.id}. "
+            f"Allocated {total_allocated:.2f} XAF from {len(allocations_to_create)} campaign(s)."
+        ),
+        level="INFO",
+        target_type="Voucher",
+        target_id=voucher.id,
+        target_label=voucher.voucher_code,
+        metadata={
+            "health_issue_id": health_issue.id,
+            "hospital": hospital.name,
+            "campaigns_count": len(allocations_to_create),
+            "total_allocated": str(total_allocated),
+        },
+    )
+
+    return voucher, "Voucher created successfully from multiple campaigns."
