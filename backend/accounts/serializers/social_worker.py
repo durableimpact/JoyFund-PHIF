@@ -4,10 +4,10 @@ from rest_framework import serializers
 from accounts.models import Role, SocialWorker, SystemAdmin, User
 from .user import UserReadSerializer
 
-
 # ---------------------------------------------------------------------------
 # Create  (only SYSTEM_ADMIN)
 # ---------------------------------------------------------------------------
+
 
 class SocialWorkerCreateSerializer(serializers.Serializer):
     """
@@ -16,11 +16,13 @@ class SocialWorkerCreateSerializer(serializers.Serializer):
     """
 
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
+    password = serializers.CharField(
+        write_only=True, min_length=8, style={"input_type": "password"}
+    )
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     phone_number = serializers.CharField(max_length=15)
-    perfered_language = serializers.CharField(max_length=10, default='en')
+    perfered_language = serializers.CharField(max_length=10, default="en")
 
     national_id_number = serializers.CharField(max_length=500)
     front_national_id_image = serializers.ImageField()
@@ -41,11 +43,19 @@ class SocialWorkerCreateSerializer(serializers.Serializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        enrolled_by: SystemAdmin = self.context['enrolled_by']
-        password = validated_data.pop('password')
+        enrolled_by: SystemAdmin = self.context["enrolled_by"]
+        password = validated_data.pop("password")
 
-        user_fields = ['email', 'first_name', 'last_name', 'phone_number', 'perfered_language']
-        user_data = {k: validated_data.pop(k) for k in user_fields if k in validated_data}
+        user_fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "perfered_language",
+        ]
+        user_data = {
+            k: validated_data.pop(k) for k in user_fields if k in validated_data
+        }
 
         user = User(**user_data, role=Role.SOCIAL_WORKER)
         user.set_password(password)
@@ -66,27 +76,52 @@ class SocialWorkerCreateSerializer(serializers.Serializer):
 # Detail (read)
 # ---------------------------------------------------------------------------
 
+
+class SocialWorkerMinimalSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="user.get_full_name", read_only=True)
+    profile_picture = serializers.ImageField(
+        source="user.profile_picture", read_only=True
+    )
+
+    class Meta:
+        model = SocialWorker
+        fields = ["id", "full_name", "organization", "profile_picture"]
+
+
+class SystemAdminMinimalSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="user.get_full_name", read_only=True)
+    profile_picture = serializers.ImageField(
+        source="user.profile_picture", read_only=True
+    )
+
+    class Meta:
+        model = SystemAdmin
+        fields = ["id", "full_name", "profile_picture"]
+
+
 class SocialWorkerDetailSerializer(serializers.ModelSerializer):
     user = UserReadSerializer(read_only=True)
-    enrolled_by_id = serializers.UUIDField(source='enrolled_by.id', read_only=True)
+    enrolled_by_id = serializers.UUIDField(source="enrolled_by.id", read_only=True)
 
     class Meta:
         model = SocialWorker
         fields = [
-            'id', 'user',
-            'national_id_number',
-            'front_national_id_image',
-            'back_national_id_image',
-            'organization',
-            'region_assigned',
-            'is_approved',
-            'enrolled_by_id',
+            "id",
+            "user",
+            "national_id_number",
+            "front_national_id_image",
+            "back_national_id_image",
+            "organization",
+            "region_assigned",
+            "is_approved",
+            "enrolled_by_id",
         ]
 
 
 # ---------------------------------------------------------------------------
 # Update
 # ---------------------------------------------------------------------------
+
 
 class SocialWorkerUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=False)
@@ -98,25 +133,34 @@ class SocialWorkerUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialWorker
         fields = [
-            'email', 'first_name', 'last_name',
-            'phone_number', 'perfered_language',
-            'national_id_number',
-            'front_national_id_image',
-            'back_national_id_image',
-            'organization',
-            'region_assigned',
-            'is_approved',
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "perfered_language",
+            "national_id_number",
+            "front_national_id_image",
+            "back_national_id_image",
+            "organization",
+            "region_assigned",
+            "is_approved",
         ]
         extra_kwargs = {
-            'national_id_number': {'required': False},
-            'front_national_id_image': {'required': False},
-            'back_national_id_image': {'required': False},
-            'organization': {'required': False},
-            'region_assigned': {'required': False},
-            'is_approved': {'required': False},
+            "national_id_number": {"required": False},
+            "front_national_id_image": {"required": False},
+            "back_national_id_image": {"required": False},
+            "organization": {"required": False},
+            "region_assigned": {"required": False},
+            "is_approved": {"required": False},
         }
 
-    USER_FIELDS = {'email', 'first_name', 'last_name', 'phone_number', 'perfered_language'}
+    USER_FIELDS = {
+        "email",
+        "first_name",
+        "last_name",
+        "phone_number",
+        "perfered_language",
+    }
 
     def validate_email(self, value):
         qs = User.objects.filter(email=value).exclude(pk=self.instance.user.pk)

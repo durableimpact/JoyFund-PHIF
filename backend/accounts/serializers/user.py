@@ -9,22 +9,30 @@ class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'email',
-            'first_name', 'last_name',
-            'phone_number', 'perfered_language',
-            'role', 'is_verified',
-            'created_at', 'updated_at',
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "profile_picture",
+            "phone_number",
+            "perfered_language",
+            "role",
+            "is_verified",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = fields
 
 
 class DonorProfileSerializer(serializers.Serializer):
     """Profile structure for DONOR role."""
+
     id = serializers.UUIDField()
 
 
 class HospitalAdminProfileSerializer(serializers.Serializer):
     """Profile structure for HOSPITAL_ADMIN role."""
+
     id = serializers.UUIDField()
     national_id_number = serializers.CharField()
     front_national_id_image = serializers.URLField(allow_null=True, required=False)
@@ -35,6 +43,7 @@ class HospitalAdminProfileSerializer(serializers.Serializer):
 
 class ReceptionistProfileSerializer(serializers.Serializer):
     """Profile structure for RECEPTIONIST role."""
+
     id = serializers.UUIDField()
     national_id_number = serializers.CharField()
     front_national_id_image = serializers.URLField(allow_null=True, required=False)
@@ -45,6 +54,7 @@ class ReceptionistProfileSerializer(serializers.Serializer):
 
 class SocialWorkerProfileSerializer(serializers.Serializer):
     """Profile structure for SOCIAL_WORKER role."""
+
     id = serializers.UUIDField()
     national_id_number = serializers.CharField()
     front_national_id_image = serializers.URLField(allow_null=True, required=False)
@@ -57,6 +67,7 @@ class SocialWorkerProfileSerializer(serializers.Serializer):
 
 class SystemAdminProfileSerializer(serializers.Serializer):
     """Profile structure for SYSTEM_ADMIN role."""
+
     id = serializers.UUIDField()
 
 
@@ -64,44 +75,60 @@ class SystemAdminProfileSerializer(serializers.Serializer):
 # ROLE-SPECIFIC INFO SERIALIZERS (for the info endpoints)
 # ===============================================================================
 
+
 class DonorInfoSerializer(serializers.ModelSerializer):
     """Donor user info serializer - returns only donor-relevant fields."""
-    profile = DonorProfileSerializer(source='donor', read_only=True, allow_null=True)
+
+    profile = DonorProfileSerializer(source="donor", read_only=True, allow_null=True)
 
     class Meta:
         model = User
         fields = [
-            'id', 'email',
-            'first_name', 'last_name',
-            'phone_number', 'perfered_language',
-            'role', 'is_verified',
-            'created_at', 'updated_at',
-            'profile',
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "perfered_language",
+            "role",
+            "is_verified",
+            "created_at",
+            "updated_at",
+            "profile",
         ]
         read_only_fields = fields
 
 
 class HospitalAdminInfoSerializer(serializers.ModelSerializer):
     """Hospital Admin user info serializer - returns admin + profile + hospital."""
-    profile = HospitalAdminProfileSerializer(source='hospitaladmin', read_only=True, allow_null=True)
+
+    profile = HospitalAdminProfileSerializer(
+        source="hospitaladmin", read_only=True, allow_null=True
+    )
     hospital = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
         fields = [
-            'id', 'email',
-            'first_name', 'last_name',
-            'phone_number', 'perfered_language',
-            'role', 'is_verified',
-            'created_at', 'updated_at',
-            'profile', 'hospital',
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "perfered_language",
+            "role",
+            "is_verified",
+            "created_at",
+            "updated_at",
+            "profile",
+            "hospital",
         ]
         read_only_fields = fields
 
     def get_hospital(self, obj):
         """Get hospital object for HOSPITAL_ADMIN."""
         from hospitals.serializers import HospitalDetailSerializer
-        
+
         try:
             hospital_admin = obj.hospitaladmin
             if hospital_admin.hospital:
@@ -113,25 +140,34 @@ class HospitalAdminInfoSerializer(serializers.ModelSerializer):
 
 class ReceptionistInfoSerializer(serializers.ModelSerializer):
     """Receptionist user info serializer - returns receptionist + profile + hospital."""
-    profile = ReceptionistProfileSerializer(source='receptionist', read_only=True, allow_null=True)
+
+    profile = ReceptionistProfileSerializer(
+        source="receptionist", read_only=True, allow_null=True
+    )
     hospital = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
         fields = [
-            'id', 'email',
-            'first_name', 'last_name',
-            'phone_number', 'perfered_language',
-            'role', 'is_verified',
-            'created_at', 'updated_at',
-            'profile', 'hospital',
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "perfered_language",
+            "role",
+            "is_verified",
+            "created_at",
+            "updated_at",
+            "profile",
+            "hospital",
         ]
         read_only_fields = fields
 
     def get_hospital(self, obj):
         """Get hospital object for RECEPTIONIST."""
         from hospitals.serializers import HospitalDetailSerializer
-        
+
         try:
             receptionist = obj.receptionist
             if receptionist.hospital:
@@ -143,34 +179,50 @@ class ReceptionistInfoSerializer(serializers.ModelSerializer):
 
 class SocialWorkerInfoSerializer(serializers.ModelSerializer):
     """Social Worker user info serializer - returns social worker + profile."""
-    profile = SocialWorkerProfileSerializer(source='socialworker', read_only=True, allow_null=True)
+
+    profile = SocialWorkerProfileSerializer(
+        source="socialworker", read_only=True, allow_null=True
+    )
 
     class Meta:
         model = User
         fields = [
-            'id', 'email',
-            'first_name', 'last_name',
-            'phone_number', 'perfered_language',
-            'role', 'is_verified',
-            'created_at', 'updated_at',
-            'profile',
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "perfered_language",
+            "role",
+            "is_verified",
+            "created_at",
+            "updated_at",
+            "profile",
         ]
         read_only_fields = fields
 
 
 class SystemAdminInfoSerializer(serializers.ModelSerializer):
     """System Admin user info serializer - returns system admin data."""
-    profile = SystemAdminProfileSerializer(source='systemadmin', read_only=True, allow_null=True)
+
+    profile = SystemAdminProfileSerializer(
+        source="systemadmin", read_only=True, allow_null=True
+    )
 
     class Meta:
         model = User
         fields = [
-            'id', 'email',
-            'first_name', 'last_name',
-            'phone_number', 'perfered_language',
-            'role', 'is_verified',
-            'created_at', 'updated_at',
-            'profile',
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "perfered_language",
+            "role",
+            "is_verified",
+            "created_at",
+            "updated_at",
+            "profile",
         ]
         read_only_fields = fields
 
