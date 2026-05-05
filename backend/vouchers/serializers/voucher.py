@@ -25,7 +25,9 @@ class VoucherCheckSerializer(serializers.ModelSerializer):
 
 
 class VoucherListSerializer(serializers.ModelSerializer):
-    beneficiary_name = serializers.CharField(source="beneficiary.full_name", read_only=True)
+    beneficiary_name = serializers.CharField(
+        source="beneficiary.full_name", read_only=True
+    )
     hospital_name = serializers.CharField(source="hospital.name", read_only=True)
 
     class Meta:
