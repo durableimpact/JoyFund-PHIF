@@ -39,6 +39,7 @@ from hospitals.services.voucher_topup import (
 from vouchers.services import settle_voucher_with_campaign_updates
 from accounts.models import Role
 
+
 class IsReceptionist(IsAuthenticated):
     """Permission to check if user is a Receptionist."""
 
@@ -474,7 +475,9 @@ class MedicalClaimFinalVerifyView(APIView):
 
         if medical_claim.service_completed_at is None:
             return Response(
-                {"detail": "Service must be marked complete before final verification."},
+                {
+                    "detail": "Service must be marked complete before final verification."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -482,9 +485,7 @@ class MedicalClaimFinalVerifyView(APIView):
         medical_claim.claim_status = "APPROVED"
         medical_claim.reviewed_by = request.user.system_admin
         medical_claim.reviewed_at = timezone.now()
-        medical_claim.save(
-            update_fields=["claim_status", "reviewed_by", "reviewed_at"]
-        )
+        medical_claim.save(update_fields=["claim_status", "reviewed_by", "reviewed_at"])
 
         # Settle voucher and disburse funds
         voucher = medical_claim.voucher
