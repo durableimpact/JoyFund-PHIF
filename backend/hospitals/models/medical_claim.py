@@ -28,6 +28,9 @@ class MedicalClaim(models.Model):
     )  # PENDING, APPROVED, REJECTED
     submitted_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    service_completed_at = models.DateTimeField(
+        null=True, blank=True, help_text="When receptionist marked service as complete"
+    )
     submitted_by = models.ForeignKey(
         Receptionist,
         on_delete=models.SET_NULL,
