@@ -109,19 +109,28 @@ def approve_top_up_request_and_allocate_funds(
             return False, f"Campaign {campaign_id} not found."
 
         # Check available balance
-        available = campaign.available_balance if hasattr(campaign, "available_balance") else 0
+        available = (
+            campaign.available_balance if hasattr(campaign, "available_balance") else 0
+        )
         if not hasattr(campaign, "available_balance"):
-            campaign = Campaign.objects.annotate(
-                available_balance=ExpressionWrapper(
-                    Coalesce(
-                        Sum("donations__net_amount", filter=Q(donations__status="SUCCESS")),
-                        Value(0),
+            campaign = (
+                Campaign.objects.annotate(
+                    available_balance=ExpressionWrapper(
+                        Coalesce(
+                            Sum(
+                                "donations__net_amount",
+                                filter=Q(donations__status="SUCCESS"),
+                            ),
+                            Value(0),
+                        )
+                        - F("total_disbursed")
+                        - F("currently_allocated"),
+                        output_field=DecimalField(max_digits=12, decimal_places=2),
                     )
-                    - F("total_disbursed")
-                    - F("currently_allocated"),
-                    output_field=DecimalField(max_digits=12, decimal_places=2),
                 )
-            ).select_for_update().get(id=campaign_id)
+                .select_for_update()
+                .get(id=campaign_id)
+            )
             available = campaign.available_balance
 
         if available < amount:
