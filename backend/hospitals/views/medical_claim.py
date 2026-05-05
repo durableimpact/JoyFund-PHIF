@@ -29,13 +29,19 @@ from hospitals.serializers.voucher_topup import (
     VoucherTopUpRequestCreateSerializer,
     VoucherTopUpRequestApproveSerializer,
     VoucherTopUpRequestRejectSerializer,
+    VoucherApproveSerializer,
+    VoucherConfirmPinSerializer,
+    MedicalClaimApproveSerializer,
+    MedicalClaimRejectSerializer,
     MedicalClaimFinalVerifySerializer,
 )
 from hospitals.services.voucher_topup import (
     approve_top_up_request_and_allocate_funds,
     reject_top_up_request,
     mark_claim_service_complete,
+    confirm_voucher_pin,
     send_campaign_contributor_notifications,
+    approve_voucher,
 )
 from vouchers.services import settle_voucher_with_campaign_updates
 from accounts.models import Role
@@ -498,6 +504,106 @@ class MedicalClaimMarkCompleteView(APIView):
         )
 
 
+class MedicalClaimApproveView(APIView):
+    """System Admin approves a medical claim."""
+
+    permission_classes = [IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=["Medical Claims"],
+        operation_description="Admin approves a medical claim. Optional approval_notes for audit trail.",
+        request_body=MedicalClaimApproveSerializer,
+        responses={200: MedicalClaimDetailSerializer},
+    )
+    def post(self, request, medical_claim_id):
+        try:
+            medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
+        except MedicalClaim.DoesNotExist:
+            return Response(
+                {"detail": "Medical claim not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if medical_claim.claim_status != "PENDING":
+            return Response(
+                {
+                    "detail": f"Cannot approve claim with status {medical_claim.claim_status}. Only PENDING claims can be approved."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = MedicalClaimApproveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        medical_claim.claim_status = "APPROVED"
+        medical_claim.reviewed_by = request.user
+        medical_claim.reviewed_at = timezone.now()
+        medical_claim.rejection_reason = None
+        medical_claim.save(
+            update_fields=[
+                "claim_status",
+                "reviewed_by",
+                "reviewed_at",
+                "rejection_reason",
+            ]
+        )
+
+        return Response(
+            MedicalClaimDetailSerializer(medical_claim).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class MedicalClaimRejectView(APIView):
+    """System Admin rejects a medical claim with a reason."""
+
+    permission_classes = [IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=["Medical Claims"],
+        operation_description="Admin rejects a medical claim with a reason.",
+        request_body=MedicalClaimRejectSerializer,
+        responses={200: MedicalClaimDetailSerializer},
+    )
+    def post(self, request, medical_claim_id):
+        try:
+            medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
+        except MedicalClaim.DoesNotExist:
+            return Response(
+                {"detail": "Medical claim not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if medical_claim.claim_status != "PENDING":
+            return Response(
+                {
+                    "detail": f"Cannot reject claim with status {medical_claim.claim_status}. Only PENDING claims can be rejected."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = MedicalClaimRejectSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        medical_claim.claim_status = "REJECTED"
+        medical_claim.reviewed_by = request.user
+        medical_claim.reviewed_at = timezone.now()
+        medical_claim.rejection_reason = serializer.validated_data["rejection_reason"]
+        medical_claim.save(
+            update_fields=[
+                "claim_status",
+                "reviewed_by",
+                "reviewed_at",
+                "rejection_reason",
+            ]
+        )
+
+        return Response(
+            MedicalClaimDetailSerializer(medical_claim).data,
+            status=status.HTTP_200_OK,
+        )
+
+
 class MedicalClaimFinalVerifyView(APIView):
     """System Admin verifies completed claim and triggers fund disbursement."""
 
@@ -510,6 +616,10 @@ class MedicalClaimFinalVerifyView(APIView):
         responses={200: MedicalClaimDetailSerializer},
     )
     def post(self, request, medical_claim_id):
+        from django.db.models import Sum
+        from decimal import Decimal
+        from vouchers.models import Voucher
+
         try:
             medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
         except MedicalClaim.DoesNotExist:
@@ -518,6 +628,7 @@ class MedicalClaimFinalVerifyView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        # Validate: service must be marked complete
         if medical_claim.service_completed_at is None:
             return Response(
                 {
@@ -526,19 +637,44 @@ class MedicalClaimFinalVerifyView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Validate: claim must be APPROVED
+        if medical_claim.claim_status != "APPROVED":
+            return Response(
+                {
+                    "detail": f"Claim status must be APPROVED before final verification. Current status: {medical_claim.claim_status}"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate: voucher must be USED (PIN confirmed)
+        voucher = medical_claim.voucher
+        if voucher.status != Voucher.Status.USED:
+            return Response(
+                {
+                    "detail": f"Voucher must be USED (PIN confirmed) before final verification. Current status: {voucher.status}"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate: total funded amount <= medical claim cost
+        total_funded = voucher.funding_records.filter(status="COMMITTED").aggregate(
+            total=Sum("committed_amount")
+        )["total"] or Decimal("0.00")
+
+        if total_funded > medical_claim.total_cost:
+            return Response(
+                {
+                    "detail": f"Voucher funding ({total_funded:.2f} XAF) exceeds medical claim cost ({medical_claim.total_cost:.2f} XAF). "
+                    f"Cannot finalize until funding is reduced or claim cost is updated."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Validate request body with optional approval_notes
         serializer = MedicalClaimFinalVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        approval_notes = serializer.validated_data.get("approval_notes", "")
-
-        # Approve the claim
-        medical_claim.claim_status = "APPROVED"
-        medical_claim.reviewed_by = request.user.system_admin
-        medical_claim.reviewed_at = timezone.now()
-        medical_claim.save(update_fields=["claim_status", "reviewed_by", "reviewed_at"])
 
         # Settle voucher and disburse funds
-        voucher = medical_claim.voucher
         success, message = settle_voucher_with_campaign_updates(voucher)
 
         if not success:
@@ -588,3 +724,88 @@ class VoucherTopUpRequestDetailView(RetrieveAPIView):
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+
+class VoucherApproveView(APIView):
+    """System Admin approves a voucher, transitioning to PENDING_CONFIRMATION."""
+
+    permission_classes = [IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=["Vouchers"],
+        operation_description="Admin approves a voucher, transitioning it from ACTIVE to PENDING_CONFIRMATION.",
+        request_body=VoucherApproveSerializer,
+        responses={200: "Voucher approved successfully"},
+    )
+    def post(self, request, voucher_id):
+        try:
+            from vouchers.models import Voucher
+
+            voucher = Voucher.objects.get(id=voucher_id)
+        except Voucher.DoesNotExist:
+            return Response(
+                {"detail": "Voucher not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = VoucherApproveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        success, message = approve_voucher(
+            voucher=voucher,
+            system_admin=request.user,
+        )
+
+        if not success:
+            return Response(
+                {"detail": message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {"detail": message},
+            status=status.HTTP_200_OK,
+        )
+
+
+class VoucherConfirmPinView(APIView):
+    """Receptionist confirms beneficiary's PIN to complete voucher redemption."""
+
+    permission_classes = [IsReceptionist]
+
+    @swagger_auto_schema(
+        tags=["Vouchers"],
+        operation_description="Receptionist confirms PIN provided by beneficiary. Transitions voucher from PENDING_CONFIRMATION to USED.",
+        request_body=VoucherConfirmPinSerializer,
+        responses={200: "PIN confirmed successfully"},
+    )
+    def post(self, request, voucher_id):
+        try:
+            from vouchers.models import Voucher
+
+            voucher = Voucher.objects.get(id=voucher_id)
+        except Voucher.DoesNotExist:
+            return Response(
+                {"detail": "Voucher not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = VoucherConfirmPinSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        success, message = confirm_voucher_pin(
+            voucher=voucher,
+            provided_pin=serializer.validated_data["patient_pin"],
+            receptionist=request.user,
+        )
+
+        if not success:
+            return Response(
+                {"detail": message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {"detail": message},
+            status=status.HTTP_200_OK,
+        )
