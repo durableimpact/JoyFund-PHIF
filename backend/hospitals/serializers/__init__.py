@@ -20,7 +20,7 @@ from .voucher_topup import (
     VoucherTopUpRequestCreateSerializer,
     CampaignAllocationNestedSerializer,
     VoucherTopUpRequestApproveSerializer,
-    MedicalClaimMarkCompleteSerializer,
+    VoucherTopUpRequestRejectSerializer,
     MedicalClaimFinalVerifySerializer,
 )
 
@@ -43,6 +43,6 @@ __all__ = [
     "VoucherTopUpRequestCreateSerializer",
     "CampaignAllocationNestedSerializer",
     "VoucherTopUpRequestApproveSerializer",
-    "MedicalClaimMarkCompleteSerializer",
+    "VoucherTopUpRequestRejectSerializer",
     "MedicalClaimFinalVerifySerializer",
 ]
