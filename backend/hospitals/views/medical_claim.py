@@ -28,11 +28,12 @@ from hospitals.serializers.voucher_topup import (
     VoucherTopUpRequestSerializer,
     VoucherTopUpRequestCreateSerializer,
     VoucherTopUpRequestApproveSerializer,
-    MedicalClaimMarkCompleteSerializer,
+    VoucherTopUpRequestRejectSerializer,
     MedicalClaimFinalVerifySerializer,
 )
 from hospitals.services.voucher_topup import (
     approve_top_up_request_and_allocate_funds,
+    reject_top_up_request,
     mark_claim_service_complete,
     send_campaign_contributor_notifications,
 )
@@ -416,6 +417,51 @@ class VoucherTopUpRequestApproveView(APIView):
         )
 
 
+class VoucherTopUpRequestRejectView(APIView):
+    """System Admin rejects top-up with a reason."""
+
+    permission_classes = [IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=["Voucher Top-Up"],
+        operation_description="Reject a voucher top-up request.",
+        request_body=VoucherTopUpRequestRejectSerializer,
+        responses={
+            200: VoucherTopUpRequestSerializer,
+            400: "Validation error",
+            404: "Top-up request not found",
+        },
+    )
+    def post(self, request, top_up_request_id):
+        try:
+            top_up_request = VoucherTopUpRequest.objects.get(id=top_up_request_id)
+        except VoucherTopUpRequest.DoesNotExist:
+            return Response(
+                {"detail": "Top-up request not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = VoucherTopUpRequestRejectSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        success, message = reject_top_up_request(
+            top_up_request=top_up_request,
+            system_admin=request.user.system_admin,
+            review_notes=serializer.validated_data["review_notes"],
+        )
+
+        if not success:
+            return Response(
+                {"detail": message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            VoucherTopUpRequestSerializer(top_up_request).data,
+            status=status.HTTP_200_OK,
+        )
+
+
 class MedicalClaimMarkCompleteView(APIView):
     """Receptionist marks that all medical services have been completed."""
 
@@ -423,8 +469,7 @@ class MedicalClaimMarkCompleteView(APIView):
 
     @swagger_auto_schema(
         tags=["Medical Claims"],
-        operation_description="Mark medical services as complete and ready for final admin verification.",
-        request_body=MedicalClaimMarkCompleteSerializer,
+        operation_description="Mark medical services as complete and ready for final admin verification. No request body needed.",
         responses={200: MedicalClaimDetailSerializer},
     )
     def post(self, request, medical_claim_id):
@@ -460,7 +505,7 @@ class MedicalClaimFinalVerifyView(APIView):
 
     @swagger_auto_schema(
         tags=["Medical Claims"],
-        operation_description="Final verification and approval - triggers fund disbursement to hospital.",
+        operation_description="Final verification and approval - triggers fund disbursement to hospital. Optional approval_notes for audit trail.",
         request_body=MedicalClaimFinalVerifySerializer,
         responses={200: MedicalClaimDetailSerializer},
     )
@@ -480,6 +525,11 @@ class MedicalClaimFinalVerifyView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Validate request body with optional approval_notes
+        serializer = MedicalClaimFinalVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        approval_notes = serializer.validated_data.get("approval_notes", "")
 
         # Approve the claim
         medical_claim.claim_status = "APPROVED"
