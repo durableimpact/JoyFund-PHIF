@@ -11,9 +11,13 @@ from .medical_claim import (
     VoucherTopUpRequestCreateView,
     VoucherTopUpRequestListView,
     VoucherTopUpRequestDetailView,
+    VoucherApproveView,
     VoucherTopUpRequestApproveView,
     VoucherTopUpRequestRejectView,
+    VoucherConfirmPinView,
     MedicalClaimMarkCompleteView,
+    MedicalClaimApproveView,
+    MedicalClaimRejectView,
     MedicalClaimFinalVerifyView,
 )
 
@@ -30,8 +34,12 @@ __all__ = [
     "VoucherTopUpRequestCreateView",
     "VoucherTopUpRequestListView",
     "VoucherTopUpRequestDetailView",
+    "VoucherApproveView",
     "VoucherTopUpRequestApproveView",
     "VoucherTopUpRequestRejectView",
+    "VoucherConfirmPinView",
     "MedicalClaimMarkCompleteView",
+    "MedicalClaimApproveView",
+    "MedicalClaimRejectView",
     "MedicalClaimFinalVerifyView",
 ]
