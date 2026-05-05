@@ -8,6 +8,7 @@ from .medical_claim import (
     VerificationStatus,
     DocumentType,
 )
+from .voucher_top_up_request import VoucherTopUpRequest, VoucherTopUpRequestStatus
 
 __all__ = [
     "Hospital",
@@ -20,4 +21,6 @@ __all__ = [
     "DocumentType",
     "VerificationStatus",
     "ServiceCategory",
+    "VoucherTopUpRequest",
+    "VoucherTopUpRequestStatus",
 ]
