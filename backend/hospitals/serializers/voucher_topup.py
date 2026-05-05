@@ -89,6 +89,34 @@ class VoucherTopUpRequestRejectSerializer(serializers.Serializer):
     review_notes = serializers.CharField(max_length=1000, required=True)
 
 
+class VoucherApproveSerializer(serializers.Serializer):
+    """Admin approves a voucher to transition it to PENDING_CONFIRMATION."""
+
+    approval_notes = serializers.CharField(
+        max_length=1000, required=False, allow_blank=True
+    )
+
+
+class VoucherConfirmPinSerializer(serializers.Serializer):
+    """Receptionist confirms PIN with beneficiary."""
+
+    patient_pin = serializers.CharField(max_length=4, min_length=4, required=True)
+
+
+class MedicalClaimApproveSerializer(serializers.Serializer):
+    """Admin approves a medical claim."""
+
+    approval_notes = serializers.CharField(
+        max_length=1000, required=False, allow_blank=True
+    )
+
+
+class MedicalClaimRejectSerializer(serializers.Serializer):
+    """Admin rejects a medical claim with reason."""
+
+    rejection_reason = serializers.CharField(max_length=1000, required=True)
+
+
 class MedicalClaimFinalVerifySerializer(serializers.Serializer):
     """Admin verifies claim and triggers fund disbursement."""
 

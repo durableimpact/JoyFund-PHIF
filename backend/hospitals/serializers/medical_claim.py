@@ -54,18 +54,22 @@ class MedicalClaimDetailSerializer(serializers.ModelSerializer):
             "total_cost",
             "claim_status",
             "submitted_at",
-            "reviewed_at",
             "submitted_by",
+            "reviewed_at",
             "reviewed_by",
+            "service_completed_at",
+            "rejection_reason",
             "claim_items",
             "proofs",
         ]
         read_only_fields = [
             "id",
             "submitted_at",
-            "reviewed_at",
             "submitted_by",
+            "reviewed_at",
             "reviewed_by",
+            "service_completed_at",
+            "rejection_reason",
         ]
 
 
