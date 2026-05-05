@@ -206,6 +206,47 @@ def approve_top_up_request_and_allocate_funds(
 
 
 @transaction.atomic
+def reject_top_up_request(
+    top_up_request: VoucherTopUpRequest, system_admin, review_notes: str
+) -> Tuple[bool, str]:
+    """
+    Admin rejects a top-up request.
+
+    Args:
+        top_up_request: VoucherTopUpRequest instance
+        system_admin: SystemAdmin user instance
+        review_notes: Reason for rejection
+
+    Returns:
+        (success: bool, message: str)
+    """
+    if top_up_request.status != VoucherTopUpRequestStatus.PENDING:
+        return False, f"Request status is {top_up_request.status}, not PENDING."
+
+    if not review_notes:
+        return False, "Review notes (rejection reason) are required."
+
+    top_up_request.status = VoucherTopUpRequestStatus.REJECTED
+    top_up_request.reviewed_by = system_admin
+    top_up_request.review_notes = review_notes
+    top_up_request.reviewed_at = timezone.now()
+    top_up_request.save(
+        update_fields=["status", "reviewed_by", "review_notes", "reviewed_at"]
+    )
+
+    _log_activity(
+        action="voucher_top_up.rejected",
+        description=f"Top-up request #{top_up_request.id} rejected by admin.",
+        level="WARNING",
+        target_type="VoucherTopUpRequest",
+        target_id=top_up_request.id,
+        metadata={"review_notes": review_notes},
+    )
+
+    return True, "Top-up request rejected."
+
+
+@transaction.atomic
 def mark_claim_service_complete(
     medical_claim: MedicalClaim, receptionist
 ) -> Tuple[bool, str]:
