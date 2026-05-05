@@ -77,7 +77,9 @@ class VoucherTopUpRequestApproveSerializer(serializers.Serializer):
 
     def validate_campaign_allocations(self, value):
         if not value:
-            raise serializers.ValidationError("At least one campaign allocation required.")
+            raise serializers.ValidationError(
+                "At least one campaign allocation required."
+            )
         return value
 
 
