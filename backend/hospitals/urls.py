@@ -15,6 +15,7 @@ from hospitals.views import (
     VoucherTopUpRequestListView,
     VoucherTopUpRequestDetailView,
     VoucherTopUpRequestApproveView,
+    VoucherTopUpRequestRejectView,
     MedicalClaimMarkCompleteView,
     MedicalClaimFinalVerifyView,
 )
@@ -86,6 +87,11 @@ urlpatterns = (
             "voucher-top-up-requests/<uuid:top_up_request_id>/approve/",
             VoucherTopUpRequestApproveView.as_view(),
             name="voucher-top-up-approve",
+        ),
+        path(
+            "voucher-top-up-requests/<uuid:top_up_request_id>/reject/",
+            VoucherTopUpRequestRejectView.as_view(),
+            name="voucher-top-up-reject",
         ),
         # Claim completion workflow
         path(
