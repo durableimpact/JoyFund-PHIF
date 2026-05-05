@@ -83,10 +83,10 @@ class VoucherTopUpRequestApproveSerializer(serializers.Serializer):
         return value
 
 
-class MedicalClaimMarkCompleteSerializer(serializers.Serializer):
-    """Receptionist marks service as complete."""
+class VoucherTopUpRequestRejectSerializer(serializers.Serializer):
+    """Admin rejects top-up with reason."""
 
-    pass  # No additional fields needed
+    review_notes = serializers.CharField(max_length=1000, required=True)
 
 
 class MedicalClaimFinalVerifySerializer(serializers.Serializer):
