@@ -3,6 +3,8 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
+    ListAPIView,
+    RetrieveAPIView,
 )
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
@@ -11,7 +13,7 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
 
-from hospitals.models import MedicalClaim, MedicalClaimProof
+from hospitals.models import MedicalClaim, MedicalClaimProof, VoucherTopUpRequest
 from hospitals.serializers.medical_claim import (
     MedicalClaimCreateSerializer,
     MedicalClaimDetailSerializer,
@@ -22,8 +24,20 @@ from hospitals.serializers.medical_claim import (
     MedicalClaimProofRejectSerializer,
     MedicalClaimProofFlagSerializer,
 )
+from hospitals.serializers.voucher_topup import (
+    VoucherTopUpRequestSerializer,
+    VoucherTopUpRequestCreateSerializer,
+    VoucherTopUpRequestApproveSerializer,
+    MedicalClaimMarkCompleteSerializer,
+    MedicalClaimFinalVerifySerializer,
+)
+from hospitals.services.voucher_topup import (
+    approve_top_up_request_and_allocate_funds,
+    mark_claim_service_complete,
+    send_campaign_contributor_notifications,
+)
+from vouchers.services import settle_voucher_with_campaign_updates
 from accounts.models import Role
-
 
 class IsReceptionist(IsAuthenticated):
     """Permission to check if user is a Receptionist."""
@@ -338,3 +352,188 @@ class MedicalClaimProofFlagView(APIView):
             MedicalClaimProofSerializer(proof).data,
             status=status.HTTP_200_OK,
         )
+
+
+class VoucherTopUpRequestCreateView(CreateAPIView):
+    """Receptionist submits a request for additional voucher funding."""
+
+    permission_classes = [IsReceptionist]
+    serializer_class = VoucherTopUpRequestCreateSerializer
+
+    @swagger_auto_schema(
+        tags=["Voucher Top-Up"],
+        operation_description="Submit a top-up request for insufficient voucher funding.",
+        responses={201: VoucherTopUpRequestSerializer},
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class VoucherTopUpRequestApproveView(APIView):
+    """System Admin approves top-up and allocates funds from campaigns."""
+
+    permission_classes = [IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=["Voucher Top-Up"],
+        operation_description="Approve a top-up request and allocate funds from campaigns.",
+        request_body=VoucherTopUpRequestApproveSerializer,
+        responses={
+            200: VoucherTopUpRequestSerializer,
+            400: "Validation error",
+            404: "Top-up request not found",
+        },
+    )
+    def post(self, request, top_up_request_id):
+        try:
+            top_up_request = VoucherTopUpRequest.objects.get(id=top_up_request_id)
+        except VoucherTopUpRequest.DoesNotExist:
+            return Response(
+                {"detail": "Top-up request not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = VoucherTopUpRequestApproveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        success, message = approve_top_up_request_and_allocate_funds(
+            top_up_request=top_up_request,
+            system_admin=request.user.system_admin,
+            campaign_allocations=serializer.validated_data["campaign_allocations"],
+            review_notes=serializer.validated_data.get("review_notes", ""),
+        )
+
+        if not success:
+            return Response(
+                {"detail": message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            VoucherTopUpRequestSerializer(top_up_request).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class MedicalClaimMarkCompleteView(APIView):
+    """Receptionist marks that all medical services have been completed."""
+
+    permission_classes = [IsReceptionist]
+
+    @swagger_auto_schema(
+        tags=["Medical Claims"],
+        operation_description="Mark medical services as complete and ready for final admin verification.",
+        request_body=MedicalClaimMarkCompleteSerializer,
+        responses={200: MedicalClaimDetailSerializer},
+    )
+    def post(self, request, medical_claim_id):
+        try:
+            medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
+        except MedicalClaim.DoesNotExist:
+            return Response(
+                {"detail": "Medical claim not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        success, message = mark_claim_service_complete(
+            medical_claim=medical_claim,
+            receptionist=request.user.receptionist,
+        )
+
+        if not success:
+            return Response(
+                {"detail": message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            MedicalClaimDetailSerializer(medical_claim).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class MedicalClaimFinalVerifyView(APIView):
+    """System Admin verifies completed claim and triggers fund disbursement."""
+
+    permission_classes = [IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=["Medical Claims"],
+        operation_description="Final verification and approval - triggers fund disbursement to hospital.",
+        request_body=MedicalClaimFinalVerifySerializer,
+        responses={200: MedicalClaimDetailSerializer},
+    )
+    def post(self, request, medical_claim_id):
+        try:
+            medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
+        except MedicalClaim.DoesNotExist:
+            return Response(
+                {"detail": "Medical claim not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if medical_claim.service_completed_at is None:
+            return Response(
+                {"detail": "Service must be marked complete before final verification."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Approve the claim
+        medical_claim.claim_status = "APPROVED"
+        medical_claim.reviewed_by = request.user.system_admin
+        medical_claim.reviewed_at = timezone.now()
+        medical_claim.save(
+            update_fields=["claim_status", "reviewed_by", "reviewed_at"]
+        )
+
+        # Settle voucher and disburse funds
+        voucher = medical_claim.voucher
+        success, message = settle_voucher_with_campaign_updates(voucher)
+
+        if not success:
+            return Response(
+                {"detail": f"Disbursement failed: {message}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Send notifications to campaign creators (async)
+        send_campaign_contributor_notifications(str(voucher.id))
+
+        return Response(
+            MedicalClaimDetailSerializer(medical_claim).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class VoucherTopUpRequestListView(ListAPIView):
+    """List all voucher top-up requests."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = VoucherTopUpRequestSerializer
+    queryset = VoucherTopUpRequest.objects.all().order_by("-created_at")
+
+    @swagger_auto_schema(
+        tags=["Voucher Top-Up"],
+        operation_description="List all voucher top-up requests.",
+        responses={200: VoucherTopUpRequestSerializer(many=True)},
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class VoucherTopUpRequestDetailView(RetrieveAPIView):
+    """Retrieve a specific voucher top-up request."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = VoucherTopUpRequestSerializer
+    queryset = VoucherTopUpRequest.objects.all()
+    lookup_field = "id"
+    lookup_url_kwarg = "top_up_request_id"
+
+    @swagger_auto_schema(
+        tags=["Voucher Top-Up"],
+        operation_description="Retrieve details of a specific voucher top-up request.",
+        responses={200: VoucherTopUpRequestSerializer},
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
