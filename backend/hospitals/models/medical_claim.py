@@ -44,6 +44,9 @@ class MedicalClaim(models.Model):
         blank=True,
         related_name="reviewed_claims",
     )
+    rejection_reason = models.TextField(
+        blank=True, null=True, help_text="Reason for claim rejection by admin"
+    )
 
     class Meta:
 
