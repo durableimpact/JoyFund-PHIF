@@ -252,10 +252,19 @@ def mark_claim_service_complete(
 ) -> Tuple[bool, str]:
     """
     Receptionist marks that all services have been rendered.
+    Validates:
+    - Only submitted_by receptionist can mark complete
+    - Voucher funding amount <= medical claim cost
+
+    Generates 4-digit PIN and transitions voucher to PENDING_CONFIRMATION.
+    Proof verification and claim approval happen during admin's final verification.
 
     Returns:
         (success: bool, message: str)
     """
+    from decimal import Decimal
+    from django.db.models import Sum
+    from vouchers.models import Voucher
 
     if medical_claim.submitted_by != receptionist:
         return (
@@ -266,8 +275,35 @@ def mark_claim_service_complete(
     if medical_claim.service_completed_at is not None:
         return False, "Service already marked as complete."
 
+    # Validate: total funded amount <= medical claim cost
+    voucher = medical_claim.voucher
+    total_funded = voucher.funding_records.filter(status="COMMITTED").aggregate(
+        total=Sum("committed_amount")
+    )["total"] or Decimal("0.00")
+
+    if total_funded > medical_claim.total_cost:
+        return (
+            False,
+            f"Voucher funding ({total_funded:.2f} XAF) exceeds medical claim cost ({medical_claim.total_cost:.2f} XAF). "
+            f"Cannot mark complete until funding is reduced or claim cost is updated.",
+        )
+
+    # Generate 4-digit PIN
+    from vouchers.models import _generate_patient_otp
+
+    patient_pin = _generate_patient_otp()
+
+    # Mark service complete
     medical_claim.service_completed_at = timezone.now()
     medical_claim.save(update_fields=["service_completed_at"])
+
+    # Update voucher: generate PIN and transition to PENDING_CONFIRMATION
+    voucher.patient_confirmation_pin = patient_pin
+    voucher.status = Voucher.Status.PENDING_CONFIRMATION
+    voucher.save(update_fields=["patient_confirmation_pin", "status"])
+
+    # TODO: Send PIN via SMS to beneficiary phone
+    # sms_service.send_pin_to_beneficiary(voucher.beneficiary.phone, patient_pin)
 
     _log_activity(
         action="medical_claim.service_complete",
@@ -282,6 +318,96 @@ def mark_claim_service_complete(
     )
 
     return True, "Service marked as complete. Ready for admin final verification."
+
+
+@transaction.atomic
+def confirm_voucher_pin(voucher, provided_pin: str, receptionist) -> Tuple[bool, str]:
+    """
+    Receptionist confirms the 4-digit PIN with beneficiary.
+    Validates PIN matches and transitions voucher to USED status.
+
+    Args:
+        voucher: Voucher instance
+        provided_pin: PIN provided by receptionist (from beneficiary)
+        receptionist: Receptionist user instance
+
+    Returns:
+        (success: bool, message: str)
+    """
+    if voucher.status != "PENDING_CONFIRMATION":
+        return (
+            False,
+            f"Voucher status is {voucher.status}. Only PENDING_CONFIRMATION vouchers can confirm PIN.",
+        )
+
+    # Validate PIN (trim whitespace, case-insensitive for digits)
+    provided_pin = str(provided_pin).strip()
+    stored_pin = voucher.patient_confirmation_pin.strip()
+
+    if provided_pin != stored_pin:
+        return False, "Invalid PIN. Please verify with the beneficiary and try again."
+
+    # PIN confirmed: transition to USED
+    voucher.status = "USED"
+    voucher.redeemed_at = timezone.now()
+    # Keep PIN for audit trail (don't clear it)
+    voucher.save(update_fields=["status", "redeemed_at"])
+
+    _log_activity(
+        action="voucher.pin_confirmed",
+        description=(
+            f"Beneficiary confirmed voucher {voucher.voucher_code} via PIN. "
+            f"Voucher transitioned to USED and ready for final settlement."
+        ),
+        level="INFO",
+        target_type="Voucher",
+        target_id=voucher.id,
+        target_label=voucher.voucher_code,
+        metadata={"voucher_code": voucher.voucher_code},
+    )
+
+    return True, "PIN confirmed. Voucher ready for final settlement."
+
+
+@transaction.atomic
+def approve_voucher(voucher, system_admin) -> Tuple[bool, str]:
+    """
+    System Admin approves a voucher (legacy endpoint, primarily for auditing).
+    Validates that voucher exists and transitions it from ACTIVE to PENDING_CONFIRMATION.
+
+    Args:
+        voucher: Voucher instance
+        system_admin: SystemAdmin user instance
+
+    Returns:
+        (success: bool, message: str)
+    """
+    if voucher.status != "ACTIVE":
+        return (
+            False,
+            f"Voucher status is {voucher.status}. Only ACTIVE vouchers can be approved.",
+        )
+
+    # Approve voucher (transition to PENDING_CONFIRMATION)
+    # Note: This endpoint is typically redundant with mark_claim_service_complete
+    # which also transitions voucher to PENDING_CONFIRMATION when PIN is generated.
+    voucher.status = "PENDING_CONFIRMATION"
+    voucher.save(update_fields=["status"])
+
+    _log_activity(
+        action="voucher.approved",
+        description=(
+            f"System Admin approved voucher {voucher.voucher_code}. "
+            f"Transitioned from ACTIVE to PENDING_CONFIRMATION."
+        ),
+        level="INFO",
+        target_type="Voucher",
+        target_id=voucher.id,
+        target_label=voucher.voucher_code,
+        metadata={"voucher_code": voucher.voucher_code},
+    )
+
+    return True, "Voucher approved and ready for PIN confirmation."
 
 
 def send_campaign_contributor_notifications(voucher_id: str) -> None:
