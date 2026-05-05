@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from vouchers.models.Voucher import Voucher
 from beneficiaries.serializers.beneficiary import BeneficiaryDetailSerializer
+from hospitals.serializers.hospital import HospitalListSerializer
 
 
 class VoucherCheckSerializer(serializers.ModelSerializer):
@@ -21,3 +22,31 @@ class VoucherCheckSerializer(serializers.ModelSerializer):
 
     def get_is_valid(self, obj):
         return obj.status == Voucher.Status.ACTIVE
+
+
+class VoucherListSerializer(serializers.ModelSerializer):
+    beneficiary_name = serializers.CharField(source="beneficiary.full_name", read_only=True)
+    hospital_name = serializers.CharField(source="hospital.name", read_only=True)
+
+    class Meta:
+        model = Voucher
+        fields = [
+            "id",
+            "voucher_code",
+            "beneficiary",
+            "beneficiary_name",
+            "hospital",
+            "hospital_name",
+            "status",
+            "expiry_date",
+            "created_at",
+        ]
+
+
+class VoucherDetailSerializer(serializers.ModelSerializer):
+    beneficiary = BeneficiaryDetailSerializer(read_only=True)
+    hospital = HospitalListSerializer(read_only=True)
+
+    class Meta:
+        model = Voucher
+        fields = "__all__"
