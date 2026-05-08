@@ -62,6 +62,9 @@ class HealthIssue(models.Model):
         default=HealthIssueStatus.REPORTED,
     )
     description = models.TextField()
+    rejection_reason = models.TextField(
+        blank=True, null=True, help_text="Reason for rejection or flagging"
+    )
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 

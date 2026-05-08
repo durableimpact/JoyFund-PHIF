@@ -285,7 +285,62 @@ The Swagger docs are at **http://127.0.0.1:8000/swagger/**.
 
 ---
 
-### Step 7 — (Optional) Start Celery Workers
+### Step 7 — Authentication & API Usage
+
+While the Swagger UI provides an interactive API explorer, some authentication flows (like OAuth2) are not fully explicit. Here's how to use the available authentication routes:
+
+#### 1. OAuth2 Token Generation (Recommended for API)
+JoyFund uses `drf-social-oauth2` for secure API access.
+
+**Endpoint:** `POST /auth/token/` (Rate-limited to 10 requests/hour)
+
+**A. Password Grant (Direct Login)**
+If you have a username (email) and password:
+```bash
+curl -X POST http://127.0.0.1:8000/auth/token/ \
+     -d "grant_type=password" \
+     -d "username=user@example.com" \
+     -d "password=yourpassword" \
+     -d "client_id=your_client_id" \
+     -d "client_secret=your_client_secret"
+```
+
+**B. Social Auth (Google)**
+To convert a Google access token to a JoyFund token:
+```bash
+curl -X POST http://127.0.0.1:8000/auth/convert-token/ \
+     -d "grant_type=convert_token" \
+     -d "backend=google-oauth2" \
+     -d "token=your_google_access_token" \
+     -d "client_id=your_client_id" \
+     -d "client_secret=your_client_secret"
+```
+
+**C. Refresh Token**
+To get a new access token using a refresh token:
+```bash
+curl -X POST http://127.0.0.1:8000/auth/token/ \
+     -d "grant_type=refresh_token" \
+     -d "refresh_token=your_refresh_token" \
+     -d "client_id=your_client_id" \
+     -d "client_secret=your_client_secret"
+```
+
+> **Note:** Client ID and Client Secret can be obtained from the Django Admin at `/admin/oauth2_provider/application/`.
+
+#### 2. Session-Based Authentication (For Web/Browser)
+- **Login:** `POST /login/` (Rate-limited to 5 requests/hour)
+- **Logout:** `GET /accounts/logout/` (Redirects to Swagger by default)
+
+#### 3. Using the Token
+Once you have the `access_token`, include it in the headers of your API requests:
+```text
+Authorization: Bearer <your_access_token>
+```
+
+---
+
+### Step 8 — (Optional) Start Celery Workers
 
 Open two additional terminals (with the virtualenv activated):
 
