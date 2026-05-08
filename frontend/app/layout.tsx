@@ -1,20 +1,19 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
+import Toast from '@/components/shared/Toast';
 
 export const metadata: Metadata = {
-  title: "JoyFund – Celebrate Life. Give the Gift of Health.",
-  description:
-    "Turn birthdays, weddings, graduations, and milestones into healthcare support for someone who needs it.",
+  title: 'JoyFund — Your Joy, Their Care',
+  description: 'Turning celebrations into maternal healthcare for vulnerable women in Cameroon.',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toast />
+      </body>
     </html>
   );
 }
