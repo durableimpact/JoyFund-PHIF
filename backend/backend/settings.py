@@ -492,20 +492,20 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 # Sentry
 
-sentry_sdk.init(
-    dsn="https://aa10d259382d4d60082a61f49d8f7cc7@o4507198990647296.ingest.us.sentry.io/4511172985028608",
-    # Add data like request headers and IP for users,
-    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-    send_default_pii=True,
-    # Enable sending logs to Sentry
-    enable_logs=True,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for tracing.
-    traces_sample_rate=1.0,
-    # Set profile_session_sample_rate to 1.0 to profile 100%
-    # of profile sessions.
-    profile_session_sample_rate=1.0,
-    # Set profile_lifecycle to "trace" to automatically
-    # run the profiler on when there is an active transaction
-    profile_lifecycle="trace",
-)
+# sentry_sdk.init(
+#     dsn="https://aa10d259382d4d60082a61f49d8f7cc7@o4507198990647296.ingest.us.sentry.io/4511172985028608",
+#     # Add data like request headers and IP for users,
+#     # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+#     send_default_pii=True,
+#     # Enable sending logs to Sentry
+#     enable_logs=True,
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for tracing.
+#     traces_sample_rate=1.0,
+#     # Set profile_session_sample_rate to 1.0 to profile 100%
+#     # of profile sessions.
+#     profile_session_sample_rate=1.0,
+#     # Set profile_lifecycle to "trace" to automatically
+#     # run the profiler on when there is an active transaction
+#     profile_lifecycle="trace",
+# )
