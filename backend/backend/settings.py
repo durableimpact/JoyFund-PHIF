@@ -27,89 +27,85 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-qdt8$ejtchowb+mz_2)e8+ind*l0q_*%fpb4ku^=hegbxs$zcm',
+    "SECRET_KEY",
+    "django-insecure-qdt8$ejtchowb+mz_2)e8+ind*l0q_*%fpb4ku^=hegbxs$zcm",
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 # Accept all hosts in development
-ALLOWED_HOSTS = ['*'] if DEBUG else os.environ.get('ALLOWED_HOSTS', 'localhost').split()
+ALLOWED_HOSTS = ["*"] if DEBUG else os.environ.get("ALLOWED_HOSTS", "localhost").split()
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    
     "daphne",
-    
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.gis',
-
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.gis",
     # Third party apps
-    'channels',
-    'chanx.channels',
-    'rest_framework',
-    'django_filters',
-    'oauth2_provider',
-    'social_django',
-    'drf_social_oauth2',
-    'drf_yasg',
-    'django_celery_results',
-    'django_celery_beat',
-    'phonenumber_field',
-    'puml_generator',
-    'django_smart_ratelimit',
-
+    "channels",
+    "chanx.channels",
+    "rest_framework",
+    "django_filters",
+    "oauth2_provider",
+    "social_django",
+    "drf_social_oauth2",
+    "drf_yasg",
+    "django_celery_results",
+    "django_celery_beat",
+    "phonenumber_field",
+    "puml_generator",
+    "django_smart_ratelimit",
     # Local apps
-    'logs',  # Logging system - must be before other apps to ensure proper app initialization
-    'accounts',
-    'campaigns',
-    'vouchers',
-    'hospitals',
-    'beneficiaries',
-    'payments',
-    'notifications',
+    "logs",  # Logging system - must be before other apps to ensure proper app initialization
+    "accounts",
+    "campaigns",
+    "vouchers",
+    "hospitals",
+    "beneficiaries",
+    "payments",
+    "notifications",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     # Logging middleware - must be after SessionMiddleware to have access to session
-    'logs.middleware.LoggingMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "logs.middleware.LoggingMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
+                "social_django.context_processors.login_redirect",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = "backend.wsgi.application"
 ASGI_APPLICATION = "backend.asgi.application"
 
 
@@ -117,35 +113,35 @@ ASGI_APPLICATION = "backend.asgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': os.environ.get('DB_ENGINE', 'django.contrib.gis.db.backends.postgis'),
-        'NAME': os.environ.get('DB_NAME', 'joyfund'),
-        'USER': os.environ.get('DB_USER', 'joyfund'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'joyfund'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+    "default": {
+        "ENGINE": os.environ.get("DB_ENGINE", "django.contrib.gis.db.backends.postgis"),
+        "NAME": os.environ.get("DB_NAME", "joyfund"),
+        "USER": os.environ.get("DB_USER", "joyfund"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "joyfund"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
         # Connection pooling for production
-        'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', 600)),
-        'OPTIONS': {
-            'connect_timeout': 10,
-            'options': '-c statement_timeout=30000 -c idle_in_transaction_session_timeout=60000'
+        "CONN_MAX_AGE": int(os.environ.get("DB_CONN_MAX_AGE", 600)),
+        "OPTIONS": {
+            "connect_timeout": 10,
+            "options": "-c statement_timeout=30000 -c idle_in_transaction_session_timeout=60000",
         },
-        'ATOMIC_REQUESTS': False,  # Avoid long-running transactions
+        "ATOMIC_REQUESTS": False,  # Avoid long-running transactions
     }
 }
 
 # SpatiaLite path — only used when DB_ENGINE is set to the spatialite backend
 # (local development without Docker)
 SPATIALITE_LIBRARY_PATH = os.environ.get(
-    'SPATIALITE_LIBRARY_PATH',
-    '/usr/lib/x86_64-linux-gnu/mod_spatialite.so.8.1.0',
+    "SPATIALITE_LIBRARY_PATH",
+    "/usr/lib/x86_64-linux-gnu/mod_spatialite.so.8.1.0",
 )
 
 # GeoDjango geo library paths
 # Set automatically in Docker via Dockerfile ENV; on Linux these are usually
 # found automatically — only override when needed.
-_gdal_lib = os.environ.get('GDAL_LIBRARY_PATH')
-_geos_lib = os.environ.get('GEOS_LIBRARY_PATH')
+_gdal_lib = os.environ.get("GDAL_LIBRARY_PATH")
+_geos_lib = os.environ.get("GEOS_LIBRARY_PATH")
 if _gdal_lib:
     GDAL_LIBRARY_PATH = _gdal_lib
 if _geos_lib:
@@ -157,16 +153,16 @@ if _geos_lib:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -174,9 +170,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -186,129 +182,135 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static"
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = "accounts.User"
 
 # Login URL for authentication redirects (e.g., from Swagger)
-LOGIN_URL = '/login/'
+LOGIN_URL = "/login/"
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'drf_social_oauth2.backends.DjangoOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
+    "social_core.backends.google.GoogleOAuth2",
+    "drf_social_oauth2.backends.DjangoOAuth2",
+    "django.contrib.auth.backends.ModelBackend",
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
     ),
     # Pagination required for all list endpoints
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': int(os.environ.get('REST_PAGE_SIZE', 20)),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": int(os.environ.get("REST_PAGE_SIZE", 20)),
     # Rate limiting to prevent abuse
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': os.environ.get('THROTTLE_ANON', '100/hour'),
-        'user': os.environ.get('THROTTLE_USER', '1000/hour'),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": os.environ.get("THROTTLE_ANON", "100/hour"),
+        "user": os.environ.get("THROTTLE_USER", "1000/hour"),
     },
     # Custom exception handler with logging
-    'EXCEPTION_HANDLER': 'logs.exceptions.custom_exception_handler',
+    "EXCEPTION_HANDLER": "logs.exceptions.custom_exception_handler",
     # Compact json for better performance
-    'COMPACT_JSON': True,
+    "COMPACT_JSON": True,
 }
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', '')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET', '')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['openid', 'email', 'profile']
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", "")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get(
+    "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", ""
+)
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["openid", "email", "profile"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = [
-    domain for domain in os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS', '').split(',') if domain
+    domain
+    for domain in os.environ.get(
+        "SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS", ""
+    ).split(",")
+    if domain
 ]
 
 SOCIAL_AUTH_ASSOCIATE_BY_EMAIL = True
 SOCIAL_AUTH_PIPELINE = (
-    'social_core.pipeline.social_auth.social_details',
-    'social_core.pipeline.social_auth.social_uid',
-    'social_core.pipeline.social_auth.auth_allowed',
-    'social_core.pipeline.social_auth.social_user',
-    'social_core.pipeline.user.get_username',
-    'accounts.social_auth.create_user_with_placeholder_phone',
-    'social_core.pipeline.social_auth.associate_user',
-    'social_core.pipeline.social_auth.load_extra_data',
-    'social_core.pipeline.user.user_details',
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.auth_allowed",
+    "social_core.pipeline.social_auth.social_user",
+    "social_core.pipeline.user.get_username",
+    "accounts.social_auth.create_user_with_placeholder_phone",
+    "social_core.pipeline.social_auth.associate_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    "social_core.pipeline.user.user_details",
 )
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
     # Google OAuth2
-    'social_core.backends.google.GoogleOAuth2',
+    "social_core.backends.google.GoogleOAuth2",
     # Django
-    'django.contrib.auth.backends.ModelBackend',
+    "django.contrib.auth.backends.ModelBackend",
     # drf-social-oauth2
-    'drf_social_oauth2.backends.DjangoOAuth2',
+    "drf_social_oauth2.backends.DjangoOAuth2",
     # OAuth2
-    'oauth2_provider.backends.OAuth2Backend',
+    "oauth2_provider.backends.OAuth2Backend",
 )
 
 # django-oauth-toolkit v3.x requires explicit model settings (as top-level settings)
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
-OAUTH2_PROVIDER_ID_TOKEN_MODEL = 'oauth2_provider.IDToken'
-OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
-OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
-OAUTH2_PROVIDER_GRANT_MODEL = 'oauth2_provider.Grant'
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"
+OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"
+OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
+OAUTH2_PROVIDER_GRANT_MODEL = "oauth2_provider.Grant"
 
 OAUTH2_PROVIDER = {
-    'ACCESS_TOKEN_EXPIRE_SECONDS': int(os.environ.get('OAUTH2_ACCESS_TOKEN_EXPIRE_SECONDS', 36000)),
-    'REFRESH_TOKEN_EXPIRE_SECONDS': 30 * 24 * 60 * 60,  # 30 days
-    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
-    'SCOPES': {
-        'read': 'Read scope',
-        'write': 'Write scope',
-        'openid': 'OpenID Connect scope',
+    "ACCESS_TOKEN_EXPIRE_SECONDS": int(
+        os.environ.get("OAUTH2_ACCESS_TOKEN_EXPIRE_SECONDS", 36000)
+    ),
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 30 * 24 * 60 * 60,  # 30 days
+    "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
+    "SCOPES": {
+        "read": "Read scope",
+        "write": "Write scope",
+        "openid": "OpenID Connect scope",
     },
-    'OAUTH2_VALIDATOR_CLASS': 'oauth2_provider.oauth2_validators.OAuth2Validator',
+    "OAUTH2_VALIDATOR_CLASS": "oauth2_provider.oauth2_validators.OAuth2Validator",
 }
 
 SWAGGER_SETTINGS = {
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'backend.swagger.AppTagAutoSchema',
-    'OPERATIONS_SORTER': 'alpha',
-    'TAGS_SORTER': 'alpha',
+    "DEFAULT_AUTO_SCHEMA_CLASS": "backend.swagger.AppTagAutoSchema",
+    "OPERATIONS_SORTER": "alpha",
+    "TAGS_SORTER": "alpha",
 }
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Caching (Redis)
 # ─────────────────────────────────────────────────────────────────────────────
 CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://localhost:6379/2'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SOCKET_CONNECT_TIMEOUT': 5,
-            'SOCKET_TIMEOUT': 5,
-            'SOCKET_KEEPALIVE': True,
-            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get("CACHE_LOCATION", "redis://localhost:6379/2"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "SOCKET_CONNECT_TIMEOUT": 5,
+            "SOCKET_TIMEOUT": 5,
+            "SOCKET_KEEPALIVE": True,
+            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
         },
-        'KEY_PREFIX': 'joyfund',
-        'TIMEOUT': 300,  # 5 minutes default
+        "KEY_PREFIX": "joyfund",
+        "TIMEOUT": 300,  # 5 minutes default
     }
 }
 
@@ -317,12 +319,16 @@ CACHES = {
 # ─────────────────────────────────────────────────────────────────────────────
 # Use localhost for development (when running outside Docker)
 # Use service names (rabbitmq, redis) when running inside Docker (via env vars)
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://joyfund:joyfund@localhost:5672//')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_BROKER_URL = os.environ.get(
+    "CELERY_BROKER_URL", "amqp://joyfund:joyfund@localhost:5672//"
+)
+CELERY_RESULT_BACKEND = os.environ.get(
+    "CELERY_RESULT_BACKEND", "redis://localhost:6379/1"
+)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes hard time limit
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
@@ -330,9 +336,9 @@ CELERY_BROKER_CONNECTION_RETRY = True
 
 # Celery Beat (Scheduler)
 CELERY_BEAT_SCHEDULE = {
-    'run-matching-engine-every-5-minutes': {
-        'task': 'vouchers.run_matching_engine_task',
-        'schedule': 300.0,  # 300 seconds = 5 minutes
+    "run-matching-engine-every-5-minutes": {
+        "task": "vouchers.run_matching_engine_task",
+        "schedule": 300.0,  # 300 seconds = 5 minutes
     },
 }
 
@@ -345,7 +351,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get('CHANNEL_LAYER_HOST', 'redis://localhost:6379/0')],
+            "hosts": [os.environ.get("CHANNEL_LAYER_HOST", "redis://localhost:6379/0")],
             # Capacity: number of messages that can be stored in a group
             "capacity": 1500,
             # Expiry: seconds before a message expires in a group
@@ -368,121 +374,121 @@ CHANX = {
 # Rate limiting settings for django-smart-ratelimit
 # ─────────────────────────────────────────────────────────────────────────────
 # Configure Redis as the backend
-RATELIMIT_BACKEND = 'redis'
+RATELIMIT_BACKEND = "redis"
 RATELIMIT_REDIS = {
-    'host': os.environ.get('REDIS_HOST','localhost'),
-    'port': 6379,
-    'db': 3,
+    "host": os.environ.get("REDIS_HOST", "localhost"),
+    "port": 6379,
+    "db": 3,
 }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Session & Security
 # ─────────────────────────────────────────────────────────────────────────────
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = not DEBUG
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Email settings
 # ─────────────────────────────────────────────────────────────────────────────
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.example.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@example.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-email-password')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'webmaster@example.com')
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.example.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "your-email@example.com")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "your-email-password")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "webmaster@example.com")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CamPay Payment Gateway Configuration
 # ─────────────────────────────────────────────────────────────────────────────
-CAMPAY_APP_ID = os.environ.get('CAMPAY_APP_ID', '')
-CAMPAY_APP_USERNAME = os.environ.get('CAMPAY_APP_USERNAME', '')
-CAMPAY_APP_PASSWORD = os.environ.get('CAMPAY_APP_PASSWORD', '')
-CAMPAY_PERMANENT_TOKEN = os.environ.get('CAMPAY_PERMANENT_TOKEN', '')
-CAMPAY_WEBHOOK_SECRET = os.environ.get('CAMPAY_WEBHOOK_SECRET', '')
-CAMPAY_ENVIRONMENT = os.environ.get('CAMPAY_ENVIRONMENT', 'DEV')
+CAMPAY_APP_ID = os.environ.get("CAMPAY_APP_ID", "")
+CAMPAY_APP_USERNAME = os.environ.get("CAMPAY_APP_USERNAME", "")
+CAMPAY_APP_PASSWORD = os.environ.get("CAMPAY_APP_PASSWORD", "")
+CAMPAY_PERMANENT_TOKEN = os.environ.get("CAMPAY_PERMANENT_TOKEN", "")
+CAMPAY_WEBHOOK_SECRET = os.environ.get("CAMPAY_WEBHOOK_SECRET", "")
+CAMPAY_ENVIRONMENT = os.environ.get("CAMPAY_ENVIRONMENT", "DEV")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Logging Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
         },
-        'simple': {
-            'format': '{levelname} {asctime} {message}',
-            'style': '{',
-        },
-    },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
+        "simple": {
+            "format": "{levelname} {asctime} {message}",
+            "style": "{",
         },
     },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
         },
-        'file': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10MB
-            'backupCount': 10,
-            'formatter': 'verbose',
-        },
-        'celery_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'celery.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10MB
-            'backupCount': 5,
-            'formatter': 'verbose',
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
         },
     },
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
-            'propagate': False,
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
-        'celery': {
-            'handlers': ['console', 'celery_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "file": {
+            "level": "WARNING",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "django.log",
+            "maxBytes": 1024 * 1024 * 10,  # 10MB
+            "backupCount": 10,
+            "formatter": "verbose",
+        },
+        "celery_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "celery.log",
+            "maxBytes": 1024 * 1024 * 10,  # 10MB
+            "backupCount": 5,
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "celery": {
+            "handlers": ["console", "celery_file"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }
 
 # Create logs directory if it doesn't exist
-if not (BASE_DIR / 'logs').exists():
-    (BASE_DIR / 'logs').mkdir(exist_ok=True)
+if not (BASE_DIR / "logs").exists():
+    (BASE_DIR / "logs").mkdir(exist_ok=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Frontend URL for password reset links and other redirects
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 # Sentry
 
