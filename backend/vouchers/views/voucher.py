@@ -116,6 +116,14 @@ class VoucherCreateMultipleCampaignsView(CreateAPIView):
     permission_classes = [IsSystemAdmin]
     serializer_class = VoucherCreateMultipleCampaignsSerializer
 
+    @swagger_auto_schema(
+        tags=["Vouchers"],
+        operation_description="Create a voucher funded by multiple campaigns. Admin specifies campaign contributions.",
+        responses={
+            201: VoucherCreateMultipleCampaignsSerializer,
+            400: "Validation error",
+        },
+    )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 

@@ -15,6 +15,11 @@ CACHE_TIMEOUT = 3 * 24 * 60 * 60  # 3 days
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing hospital services.
+    - Accessible by System Admins and Hospital Admins.
+    - Services are nested under a hospital.
+    """
     permission_classes = [IsAuthenticated, IsSystemOrHospitalAdmin]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = {

@@ -36,6 +36,11 @@ class IsSystemOrHospitalAdmin(BasePermission):
 
 
 class HospitalViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing hospitals.
+    - System Admin: full CRUD
+    - Hospital Admin: retrieve, update, partial_update (own hospital)
+    """
     permission_classes = [IsAuthenticated, IsSystemOrHospitalAdmin]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = {

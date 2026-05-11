@@ -21,6 +21,8 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for querying ActivityLog entries.
     Only accessible to admin users.
+    
+    Activity logs record system-level events and user actions for audit purposes.
     """
 
     queryset = ActivityLog.objects.all()
@@ -65,11 +67,17 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @swagger_auto_schema(tags=["Logging - Activity"])
+    @swagger_auto_schema(
+        tags=["Logging - Activity"],
+        operation_description="List activity log entries with date range and user filtering."
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=["Logging - Activity"])
+    @swagger_auto_schema(
+        tags=["Logging - Activity"],
+        operation_description="Retrieve a specific activity log entry."
+    )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -78,6 +86,8 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for querying RequestLog entries.
     Only accessible to admin users.
+    
+    Request logs track incoming HTTP requests, response times, and status codes.
     """
 
     queryset = RequestLog.objects.all()
@@ -127,11 +137,17 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @swagger_auto_schema(tags=["Logging - Request"])
+    @swagger_auto_schema(
+        tags=["Logging - Request"],
+        operation_description="List request log entries with date range and path filtering."
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=["Logging - Request"])
+    @swagger_auto_schema(
+        tags=["Logging - Request"],
+        operation_description="Retrieve a specific request log entry."
+    )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -140,6 +156,8 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for querying ErrorLog entries.
     Only accessible to admin users.
+    
+    Error logs capture unhandled exceptions and system errors with stack traces.
     """
 
     queryset = ErrorLog.objects.all()
@@ -179,11 +197,17 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @swagger_auto_schema(tags=["Logging - Error"])
+    @swagger_auto_schema(
+        tags=["Logging - Error"],
+        operation_description="List error log entries with date range filtering."
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=["Logging - Error"])
+    @swagger_auto_schema(
+        tags=["Logging - Error"],
+        operation_description="Retrieve a specific error log entry."
+    )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -197,7 +221,10 @@ class LogStatsView(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
 
     @action(detail=False, methods=["get"])
-    @swagger_auto_schema(tags=["Logging - Statistics"])
+    @swagger_auto_schema(
+        tags=["Logging - Statistics"],
+        operation_description="Get aggregated statistics for the last 30 days including request counts, error rates, and active users."
+    )
     def stats(self, request):
         """
         GET /api/logs/stats/

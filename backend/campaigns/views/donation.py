@@ -26,6 +26,11 @@ class DonationViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
+    """
+    ViewSet for managing campaign donations.
+    - Public: list, retrieve, create (anonymous or authenticated)
+    - Donors: my-donations
+    """
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = DonationFilter
