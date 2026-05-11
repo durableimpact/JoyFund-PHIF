@@ -33,7 +33,7 @@ class VoucherNotification(models.Model):
     voucher = models.ForeignKey(
         Voucher, on_delete=models.CASCADE, related_name="notifications"
     )
-    campaing = models.ForeignKey(
+    campaign = models.ForeignKey(
         Campaign,
         on_delete=models.SET_NULL,
         null=True,
