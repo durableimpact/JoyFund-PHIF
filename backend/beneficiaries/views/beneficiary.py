@@ -60,6 +60,10 @@ class IsBeneficiaryEnrolledByRequester(BasePermission):
 
 
 class BeneficiaryCreateView(APIView):
+    """
+    View to create a new beneficiary profile.
+    Only accessible by authenticated Social Workers.
+    """
     permission_classes = [IsAuthenticated, IsSocialWorker]
 
     @swagger_auto_schema(
@@ -90,6 +94,10 @@ class BeneficiaryCreateView(APIView):
 
 
 class BeneficiaryListView(ListAPIView):
+    """
+    List beneficiaries enrolled by the authenticated social worker.
+    Supports filtering, searching, and ordering.
+    """
     serializer_class = BeneficiaryDetailSerializer
     permission_classes = [IsAuthenticated, IsSocialWorker]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -150,6 +158,11 @@ class BeneficiaryListView(ListAPIView):
 
 
 class BeneficiaryDetailView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
+    """
+    Retrieve, update, or delete a beneficiary profile.
+    - Retrieve: Social Worker (enroller) or System Admin.
+    - Update/Delete: System Admin only.
+    """
     queryset = Beneficiary.objects.select_related("enrolled_by__user")
     serializer_class = BeneficiaryDetailSerializer
     permission_classes = [

@@ -57,6 +57,11 @@ class IsSystemAdmin(BasePermission):
 
 
 class CampaignViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing campaigns.
+    - Public: list, retrieve (only active/public)
+    - Donors: create, update, delete (own campaigns), my-campaigns
+    """
     lookup_field = "pk"
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = CampaignFilter

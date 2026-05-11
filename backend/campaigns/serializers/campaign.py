@@ -5,9 +5,6 @@ from campaigns.models import Campaign
 
 class CampaignDetailSerializer(serializers.ModelSerializer):
     donor_id = serializers.UUIDField(source="donor.id", read_only=True)
-    account_id = serializers.UUIDField(
-        source="account.id", read_only=True, allow_null=True
-    )
     progress_percentage = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,7 +20,6 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "current_amount",
             "impact_goal_count",
             "impact_service_category",
-            "account_id",
             "start_date",
             "end_date",
             "is_public",

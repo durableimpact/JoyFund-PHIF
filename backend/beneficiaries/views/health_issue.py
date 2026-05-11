@@ -28,6 +28,11 @@ from beneficiaries.views.beneficiary import (
 
 
 class HealthIssueListCreateView(ListCreateAPIView):
+    """
+    List and create health issues reported for beneficiaries.
+    - List: accessible by authenticated users.
+    - Create: only SOCIAL_WORKER can report new health issues.
+    """
     queryset = HealthIssue.objects.all()
     serializer_class = HealthIssueSerializer
     filterset_class = HealthIssueFilter
@@ -44,7 +49,8 @@ class HealthIssueListCreateView(ListCreateAPIView):
         return [IsAuthenticated()]
 
     @swagger_auto_schema(
-        tags=_TAG, responses={200: HealthIssueDetailSerializer(many=True)}
+        tags=_TAG, responses={200: HealthIssueDetailSerializer(many=True)},
+        operation_description="List health issues with optional filtering."
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -53,12 +59,18 @@ class HealthIssueListCreateView(ListCreateAPIView):
         tags=_TAG,
         request_body=HealthIssueSerializer,
         responses={201: HealthIssueDetailSerializer},
+        operation_description="Create a new health issue report for a beneficiary."
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
 
 class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a specific health issue.
+    - Retrieve: accessible by authenticated users.
+    - Update/Delete: only SYSTEM_ADMIN can modify health issue records.
+    """
     queryset = HealthIssue.objects.all()
     serializer_class = HealthIssueSerializer
     lookup_field = "id"
@@ -73,7 +85,8 @@ class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
             return [IsAuthenticated(), IsSystemAdmin()]
         return [IsAuthenticated()]
 
-    @swagger_auto_schema(tags=_TAG, responses={200: HealthIssueDetailSerializer})
+    @swagger_auto_schema(tags=_TAG, responses={200: HealthIssueDetailSerializer},
+                         operation_description="Retrieve full details of a health issue.")
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -81,6 +94,7 @@ class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
         tags=_TAG,
         request_body=HealthIssueSerializer,
         responses={200: HealthIssueDetailSerializer},
+        operation_description="Partially update health issue details (System Admin only)."
     )
     def patch(self, request, *args, **kwargs):
         kwargs["partial"] = True
@@ -90,11 +104,12 @@ class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
         tags=_TAG,
         request_body=HealthIssueSerializer,
         responses={200: HealthIssueDetailSerializer},
+        operation_description="Replace health issue details entirely (System Admin only)."
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=_TAG)
+    @swagger_auto_schema(tags=_TAG, operation_description="Delete a health issue record (System Admin only).")
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
@@ -171,6 +186,10 @@ class HealthIssueRejectView(APIView):
 
 
 class HealthIssueStatusActionView(GenericAPIView):
+    """
+    Action view to validate or reject a health issue.
+    Deprecated in favor of explicit Verify and Reject views but kept for backward compatibility.
+    """
     queryset = HealthIssue.objects.all()
     serializer_class = HealthIssueDetailSerializer
     permission_classes = [IsAuthenticated, IsSystemAdmin]
@@ -179,7 +198,7 @@ class HealthIssueStatusActionView(GenericAPIView):
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: HealthIssueDetailSerializer},
-        operation_description="Validate a reported health issue. Only accessible by SYSTEM_ADMIN.",
+        operation_description="Validate or reject a reported health issue. Only accessible by SYSTEM_ADMIN.",
     )
     def post(self, request, id, action):
         health_issue = self.get_object()
@@ -203,6 +222,11 @@ class HealthIssueStatusActionView(GenericAPIView):
 
 
 class BeneficiaryDocumentListCreateView(ListCreateAPIView):
+    """
+    List and upload documents for beneficiaries.
+    - List: accessible by authenticated users.
+    - Upload: only SOCIAL_WORKER can upload new documents.
+    """
     queryset = BeneficiaryDocument.objects.all()
     serializer_class = BeneficiaryDocumentSerializer
     permission_classes = [IsAuthenticated]
@@ -212,16 +236,21 @@ class BeneficiaryDocumentListCreateView(ListCreateAPIView):
             return [IsAuthenticated(), IsSocialWorker()]
         return [IsAuthenticated()]
 
-    @swagger_auto_schema(tags=_TAG)
+    @swagger_auto_schema(tags=_TAG, operation_description="List beneficiary documents.")
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=_TAG)
+    @swagger_auto_schema(tags=_TAG, operation_description="Upload a new beneficiary document.")
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
 
 class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a specific beneficiary document.
+    - Retrieve: accessible by authenticated users.
+    - Update/Delete: only SYSTEM_ADMIN can modify document records.
+    """
     queryset = BeneficiaryDocument.objects.all()
     serializer_class = BeneficiaryDocumentSerializer
     lookup_field = "id"
@@ -231,19 +260,19 @@ class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
             return [IsAuthenticated(), IsSystemAdmin()]
         return [IsAuthenticated()]
 
-    @swagger_auto_schema(tags=_TAG)
+    @swagger_auto_schema(tags=_TAG, operation_description="Retrieve details of a beneficiary document.")
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=_TAG)
+    @swagger_auto_schema(tags=_TAG, operation_description="Partially update document info (System Admin only).")
     def patch(self, request, *args, **kwargs):
         kwargs["partial"] = True
         return super().patch(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=_TAG)
+    @swagger_auto_schema(tags=_TAG, operation_description="Replace document info entirely (System Admin only).")
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
-    @swagger_auto_schema(tags=_TAG)
+    @swagger_auto_schema(tags=_TAG, operation_description="Delete a beneficiary document (System Admin only).")
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
