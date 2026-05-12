@@ -1,0 +1,1026 @@
+type: spec.insomnia.rest/5.0
+schema_version: "5.1"
+name: Apis
+meta:
+  id: wrk_21c1bbe2ccd14bd387e11d754954b53a
+  created: 1778531762058
+  modified: 1778531762058
+  description: ""
+collection:
+  - name: auth
+    meta:
+      id: fld_784016d87c174f0cba73e53bce3d209b
+      created: 1778531841228
+      modified: 1778533713974
+      sortKey: -1778531841228
+      description: ""
+    children:
+      - url: "{{ _.BASE_URL }}/auth/token/"
+        name: Refresh Token
+        meta:
+          id: req_8555cfa5a7f04d96a21ff4a723fe0020
+          created: 1778531865991
+          modified: 1778533809790
+          isPrivate: false
+          description: ""
+          sortKey: -1778531865991
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"grant_type":"refresh_token",
+            	"refresh_token":"{{ _.refresh_token }}",
+            	"client_id":"{{ _.client_id }}",
+            	"client_secret":"{{ _.client_secret }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/auth/token/"
+        name: Get Token
+        meta:
+          id: req_63686edc1e584836b5b04405d26eb496
+          created: 1778531872415
+          modified: 1778565966561
+          isPrivate: false
+          description: ""
+          sortKey: -1778531872415
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"grant_type":"password",
+            	"username":"admin@gmail.com",
+            	"password":"1234",
+            	"client_id":"{{ _.client_id }}",
+            	"client_secret":"{{ _.client_secret }}"
+
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - name: Donor
+        meta:
+          id: fld_7d75ae9bd1f944f8889a61d108650b07
+          created: 1778586836169
+          modified: 1778586836169
+          sortKey: -1778586836169
+          description: ""
+        children:
+          - url: "{{ _.BASE_URL }}/auth/token/"
+            name: Get Token For Donor
+            meta:
+              id: req_8a26129787eb4f42b6fa9b2dc27aff1a
+              created: 1778586855738
+              modified: 1778586901194
+              isPrivate: false
+              description: ""
+              sortKey: -1778586860805
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                	"grant_type":"password",
+                	"username":"ivantom@joyfund.com",
+                	"password":"12345678",
+                	"client_id":"{{ _.client_id }}",
+                	"client_secret":"{{ _.client_secret }}"
+
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+  - name: Beneficiary
+    meta:
+      id: fld_ddf07b9f306045bd877d0b263af8c40d
+      created: 1778533526565
+      modified: 1778533526565
+      sortKey: -1778533526565
+      description: ""
+    children:
+      - url: "{{ _.BASE_URL }}/api/beneficiaries/"
+        name: List Beneficiaries
+        meta:
+          id: req_8e4fd347882440e9b15bc860b56c2c3a
+          created: 1778533562522
+          modified: 1778534066356
+          isPrivate: false
+          description: ""
+          sortKey: -1778533562522
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        authentication:
+          type: none
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/beneficiaries/"
+        name: Add beneficiary
+        meta:
+          id: req_d450901fe1db411fa234c58c18460623
+          created: 1778534242895
+          modified: 1778536357202
+          isPrivate: false
+          description: ""
+          sortKey: -1778534242895
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - name: full_name
+              value: TOMDIEU IVAN
+              description: ""
+              disabled: false
+            - name: date_of_birth
+              value: 2026-03-13
+              description: ""
+              disabled: false
+            - name: gender
+              value: MALE
+              description: ""
+              disabled: false
+            - name: category
+              value: OTHER
+              description: ""
+              disabled: false
+            - name: is_verified
+              value: "true"
+              description: ""
+              disabled: false
+            - name: phone
+              value: "+237620284328"
+              description: ""
+              disabled: false
+            - name: email
+              value: beneficiary@joyfund.com
+              description: ""
+              disabled: false
+            - name: region
+              value: string
+              description: ""
+              disabled: false
+            - name: city
+              value: string
+              description: ""
+              disabled: false
+            - name: address
+              value: string
+              description: ""
+              disabled: false
+            - name: lat
+              value: "3.52"
+              description: ""
+              disabled: false
+            - name: lng
+              value: "11.859"
+              description: ""
+              disabled: false
+            - name: national_id_number
+              value: "5025924"
+              description: ""
+              disabled: false
+            - name: emergency_contact_name
+              value: Trix
+              description: ""
+              disabled: false
+            - name: emergency_contact_phone
+              value: "+237680018442"
+              description: ""
+              disabled: false
+            - name: emergency_contact_relationship
+              value: Brother
+              description: ""
+              disabled: false
+            - name: uploaded_documents.0
+              value: ""
+              description: ""
+              disabled: false
+              fileName: /home/ivantom/Pictures/passportpng
+              type: file
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: "Bearer "
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Donor
+    meta:
+      id: fld_c7ca8be041bb47cf95ea171a219b253c
+      created: 1778533535052
+      modified: 1778533535052
+      sortKey: -1778533535052
+      description: ""
+    children:
+      - url: "{{ _.BASE_URL }}/api/accounts/donors/register/"
+        name: Create donor account
+        meta:
+          id: req_36b747c042ea44f5aaea476f6ca540bd
+          created: 1778536381715
+          modified: 1778586784858
+          isPrivate: false
+          description: ""
+          sortKey: -1778536381715
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "email": "ivantom@joyfund.com",
+              "password": "12345678",
+              "first_name": "ivan",
+              "last_name": "donor",
+              "phone_number": "+2373678205034",
+              "perfered_language": "en"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/accounts/donors/"
+        name: List donors
+        meta:
+          id: req_b07086a5c8c54eaf921a062a63433650
+          created: 1778536728432
+          modified: 1778565990582
+          isPrivate: false
+          description: ""
+          sortKey: -1778536728432
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL
+          }}/api/accounts/donors/d3c028e2-c708-4fe5-8a2e-9c5f0f7a6349/"
+        name: Get Donor Detail
+        meta:
+          id: req_84bb9be2a419402aa84be384b2ddb706
+          created: 1778565465263
+          modified: 1778575675183
+          isPrivate: false
+          description: ""
+          sortKey: -1778565465263
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Social Worker
+    meta:
+      id: fld_a247f71d915744f3830b0fd9466d567d
+      created: 1778565579054
+      modified: 1778578619669
+      sortKey: -1778565579054
+      description: ""
+    children:
+      - url: "{{ _.BASE_URL }}/api/accounts/social-workers/"
+        name: Create social worker
+        meta:
+          id: req_6b0b1908837d4d32a0a146f62a9a3373
+          created: 1778565585114
+          modified: 1778567663359
+          isPrivate: false
+          description: ""
+          sortKey: -1778565585114
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - name: email
+              value: w@joyfund.com
+              description: ""
+              disabled: false
+            - name: password
+              value: "12345678"
+              description: ""
+              disabled: false
+            - name: first_name
+              value: Joyfund
+              description: ""
+              disabled: false
+            - name: last_name
+              value: Social Worker
+              description: ""
+              disabled: false
+            - name: phone_number
+              value: "+237651484164"
+              description: ""
+              disabled: false
+            - name: national_id_number
+              value: "78965236"
+              description: ""
+              disabled: false
+            - name: organization
+              value: JoyFund
+              description: ""
+              disabled: false
+            - name: region_assigned
+              value: Center
+              description: ""
+              disabled: false
+            - name: front_national_id_image
+              value: ""
+              disabled: false
+              fileName: /home/ivantom/Pictures/Screenshot from 2026-05-08 15-40-30.png
+              type: file
+            - name: back_national_id_image
+              value: ""
+              description: ""
+              disabled: false
+              fileName: /home/ivantom/Pictures/Screenshot from 2026-04-12 00-05-33.png
+              type: file
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/accounts/social-workers/"
+        name: List Social Workers
+        meta:
+          id: req_145f25482fe94db6b95ca4dd44d2d51f
+          created: 1778565749797
+          modified: 1778586453387
+          isPrivate: false
+          description: ""
+          sortKey: -1778565749797
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL
+          }}/api/accounts/social-workers/ebab37ae-9908-4191-a572-e7abd3412365/"
+        name: Get a social worker
+        meta:
+          id: req_f21387aaf2c54a62aed684d68f221d05
+          created: 1778571730548
+          modified: 1778575306634
+          isPrivate: false
+          description: ""
+          sortKey: -1778571730548
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL
+          }}/api/accounts/social-workers/ebab37ae-9908-4191-a572-e7abd3412365/u\
+          pdate/"
+        name: Updated Social worker
+        meta:
+          id: req_82688d384f3a4c26aba186d55e64810b
+          created: 1778575569147
+          modified: 1778575649581
+          isPrivate: false
+          description: ""
+          sortKey: -1778575569147
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"first_name":"Ivantom"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: User Info
+    meta:
+      id: fld_945710d380b945c18452245716b2e1a7
+      created: 1778575695110
+      modified: 1778575695110
+      sortKey: -1778575695110
+      description: ""
+    children:
+      - url: "{{ _.BASE_URL }}/api/accounts/system-admin/info/"
+        name: User info for system admin
+        meta:
+          id: req_0320d6fde1d64ceba97aeaeefef0e19f
+          created: 1778575711282
+          modified: 1778575750855
+          isPrivate: false
+          description: ""
+          sortKey: -1778575711282
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/accounts/social-worker/info/"
+        name: User info for social worker
+        meta:
+          id: req_46c6fb56a1a34393985d81f832bc5c83
+          created: 1778575782234
+          modified: 1778575799701
+          isPrivate: false
+          description: ""
+          sortKey: -1778575640214.5
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/accounts/receptionist/info/"
+        name: User info for Receptionist
+        meta:
+          id: req_cf0e6918cafa47d0a39bb85489942137
+          created: 1778575818063
+          modified: 1778575967935
+          isPrivate: false
+          description: ""
+          sortKey: -1778575604680.75
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/accounts/hospital-admin/info/"
+        name: User info for Hospital admin
+        meta:
+          id: req_ecd457c0ee1348a697406075eec38d67
+          created: 1778575989649
+          modified: 1778575994306
+          isPrivate: false
+          description: ""
+          sortKey: -1778575586913.875
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/accounts/donor/info/"
+        name: User info for Donor
+        meta:
+          id: req_349924379b9649ab8908d2375451886f
+          created: 1778576009565
+          modified: 1778576016197
+          isPrivate: false
+          description: ""
+          sortKey: -1778575578030.4375
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {{ _.access_token }}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Hospital admin
+    meta:
+      id: fld_ae7970c4e0154981907ec98aa60616ec
+      created: 1778576059531
+      modified: 1778576059531
+      sortKey: -1778576059531
+      description: ""
+    children:
+      - url: ""
+        name: New Request
+        meta:
+          id: req_0fd1f2a2674743c2a67046a01ba49e3e
+          created: 1778576068041
+          modified: 1778576068041
+          isPrivate: false
+          description: ""
+          sortKey: -1778576068041
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Campaign
+    meta:
+      id: fld_ca6516592d334bb69a708f67aea5ae1b
+      created: 1778585471551
+      modified: 1778585471551
+      sortKey: -1778585471551
+      description: ""
+    children:
+      - url: "{{ _.BASE_URL }}/api/campaigns/"
+        name: List campaigns
+        meta:
+          id: req_6d74462478b7484484659ac0e46de2fd
+          created: 1778585481968
+          modified: 1778587976876
+          isPrivate: false
+          description: ""
+          sortKey: -1778585481968
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/campaigns/"
+        name: Create campaign
+        meta:
+          id: req_ce5380edd6504ce989f8c0da3e0ea114
+          created: 1778586543159
+          modified: 1778586987609
+          isPrivate: false
+          description: ""
+          sortKey: -1778586543159
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "title": "Help",
+              "description": "Buy me a cup of tea",
+              "event_type": "BIRTHDAY",
+              "goal_amount": "string",
+              "goal_amount": 250000,
+              "impact_service_category": "MATERNAL",
+              "end_date": "2026-05-18T11:51:37.989Z",
+              "is_public": true,
+              "status": "DRAFT",
+              "is_active": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer 6JYDpMIfqb2gR4Oo4vLdeVxELpUsl7
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/campaigns/6f776544-67d1-4b0a-9ead-c7b0d69c41af/"
+        name: Get campaigns details
+        meta:
+          id: req_3796b6833b644dcb97aedf902a834190
+          created: 1778587985430
+          modified: 1778588214934
+          isPrivate: false
+          description: ""
+          sortKey: -1778578421422.75
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/campaigns/6f776544-67d1-4b0a-9ead-c7b0d69c41af/"
+        name: Update a campaign
+        meta:
+          id: req_23388b6392f040048ab808d1de73528a
+          created: 1778588212536
+          modified: 1778588388278
+          isPrivate: false
+          description: ""
+          sortKey: -1778578421522.75
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"title": "Help ivantom buy a computer"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer 6JYDpMIfqb2gR4Oo4vLdeVxELpUsl7
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/campaigns/6f776544-67d1-4b0a-9ead-c7b0d69c41af/"
+        name: Delete a campaigns details
+        meta:
+          id: req_d8617e78c58c4551835fca8023e02678
+          created: 1778588457512
+          modified: 1778588643449
+          isPrivate: false
+          description: ""
+          sortKey: -1778577244731.875
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer 6JYDpMIfqb2gR4Oo4vLdeVxELpUsl7
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.BASE_URL }}/api/campaigns/available-balances/"
+        name: Get campaigns with min amount
+        meta:
+          id: req_1ef6d422ccdd4ba79dde90e38c22773a
+          created: 1778603683689
+          modified: 1778611410086
+          isPrivate: false
+          description: ""
+          sortKey: -1778603683689
+        method: GET
+        parameters:
+          - name: min_amount
+            value: "0"
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - name: Donations
+        meta:
+          id: fld_5896717bb55e4ec292b65baffd8f037d
+          created: 1778588700938
+          modified: 1778588809185
+          sortKey: -1778588700938
+          description: ""
+        children:
+          - url: "{{ _.BASE_URL
+              }}/api/campaigns/95f4dc1c-962e-4e1e-885e-34453537bd59/donate/"
+            name: Donate
+            meta:
+              id: req_3491d51710194cbcab658963bc8fcc02
+              created: 1778588800955
+              modified: 1778590574862
+              isPrivate: false
+              description: ""
+              sortKey: -1778588800955
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "donor_name": "Tomdieu ivan",
+                  "amount": "2",
+                  "message": "string",
+                  "is_anonymous": true,
+                  "payment_method": "MTN",
+                  "phone_number": "+237650039773",
+                  "success_url": "http://localhost:8000",
+                  "failure_url": "http://localhost:8000"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.BASE_URL
+              }}/api/campaigns/95f4dc1c-962e-4e1e-885e-34453537bd59/donations/"
+            name: Get campaing donations
+            meta:
+              id: req_b62846c5dbf64ddb87a83b3c4929b59c
+              created: 1778590544388
+              modified: 1778599019597
+              isPrivate: false
+              description: ""
+              sortKey: -1778590544388
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.BASE_URL
+              }}/api/campaigns/95f4dc1c-962e-4e1e-885e-34453537bd59/donations/4\
+              0563154-d21d-466c-9144-74903cad1b04/"
+            name: Get campaing donations details
+            meta:
+              id: req_7e73263ef75f4c1889b36dc4904268dd
+              created: 1778595827503
+              modified: 1778599094572
+              isPrivate: false
+              description: ""
+              sortKey: -1778589672671.5
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_5bc5dddf72261507b64585824202a58a41d25a68
+    created: 1778531762072
+    modified: 1778531762072
+environments:
+  name: Base Environment
+  meta:
+    id: env_5bc5dddf72261507b64585824202a58a41d25a68
+    created: 1778531762067
+    modified: 1778563809257
+    isPrivate: false
+  data:
+    client_id: gxN8i8t6xfHtoBXTxZ4fBzAvfnNfsQGVfcqKMNGr
+    client_secret: A9n8xjNGSAINhPOtPwZSefw9MqDVda5BdrlpS74C7PZlQ94aafswGeltCS520OtwEwKl9oplz0UjJuKnGgxZiXvmBiAalMdyCYZSKkC0FWPpsilkCDYO9RaHc7FcWbgc
+    BASE_URL: http://localhost:8000
+    refresh_token: dJ3adXMOE5ADcl21syZuiDdr97diez
+    access_token: hUc2hdRkksgXFEujpy77nhhgE2kIY0
+spec:
+  meta:
+    id: spc_1c703070a28a4b8cb97dc67607ca28f0
+    created: 1778531762061
+    modified: 1778531762061
