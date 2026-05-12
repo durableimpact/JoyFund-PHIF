@@ -46,6 +46,17 @@ class IsSystemAdmin(BasePermission):
         )
 
 
+class IsSocialWorkerOrSystemAdmin(BasePermission):
+
+    message = "Only Social Workers or System Administrators can perform this action."
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in [Role.SOCIAL_WORKER, Role.SYSTEM_ADMIN]
+        )
+
 class IsBeneficiaryEnrolledByRequester(BasePermission):
     message = "You can only manage beneficiaries enrolled by your account."
 
@@ -99,7 +110,7 @@ class BeneficiaryListView(ListAPIView):
     Supports filtering, searching, and ordering.
     """
     serializer_class = BeneficiaryDetailSerializer
-    permission_classes = [IsAuthenticated, IsSocialWorker]
+    permission_classes = [IsAuthenticated, IsSocialWorkerOrSystemAdmin]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = BeneficiaryFilter
     search_fields = [
