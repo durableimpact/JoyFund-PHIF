@@ -38,6 +38,12 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+# Standard Django Error Handlers to prevent Celery startup errors
+handler400 = 'django.views.defaults.bad_request'
+handler403 = 'django.views.defaults.permission_denied'
+handler404 = 'django.views.defaults.page_not_found'
+handler500 = 'django.views.defaults.server_error'
+
 urlpatterns = [
     path("", TemplateView.as_view(template_name="landing.html"), name="landing"),
     path("login/", login_view, name="login"),
