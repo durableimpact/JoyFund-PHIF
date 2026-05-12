@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework.routers import SimpleRouter
 
 from accounts.views import (
     DonorDetailView,
@@ -6,10 +7,7 @@ from accounts.views import (
     DonorRegisterView,
     DonorUpdateView,
     DonorInfoView,
-    HospitalAdminCreateView,
-    HospitalAdminDetailView,
-    HospitalAdminListView,
-    HospitalAdminUpdateView,
+    HospitalAdminViewSet,
     HospitalAdminInfoView,
     ReceptionistCreateView,
     ReceptionistDetailView,
@@ -30,6 +28,10 @@ from accounts.views import (
 )
 
 app_name = 'accounts'
+
+# Router for Hospital Admin ViewSet
+router = SimpleRouter()
+router.register(r'hospital-admins', HospitalAdminViewSet, basename='hospital-admin')
 
 urlpatterns = [
     # -----------------------------------------------------------------------
@@ -63,12 +65,9 @@ urlpatterns = [
     path('donors/<uuid:id>/update/', DonorUpdateView.as_view(), name='donor-update'),
 
     # -----------------------------------------------------------------------
-    # Hospital Admins  (created by SYSTEM_ADMIN)
+    # Hospital Admins (created by SYSTEM_ADMIN) - ViewSet Router
     # -----------------------------------------------------------------------
-    path('hospital-admins/', HospitalAdminListView.as_view(), name='hospital-admin-list'),
-    path('hospital-admins/', HospitalAdminCreateView.as_view(), name='hospital-admin-create'),
-    path('hospital-admins/<uuid:id>/', HospitalAdminDetailView.as_view(), name='hospital-admin-detail'),
-    path('hospital-admins/<uuid:id>/update/', HospitalAdminUpdateView.as_view(), name='hospital-admin-update'),
+] + router.urls + [
 
     # -----------------------------------------------------------------------
     # Receptionists  (created by HOSPITAL_ADMIN)
