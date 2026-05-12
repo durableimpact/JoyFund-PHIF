@@ -6,7 +6,7 @@ from .system_admin import SystemAdmin
 
 class SocialWorker(BaseProfile, NationalIDMixin):
 
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=True)
     organization = models.CharField(max_length=255)
     region_assigned = models.CharField(max_length=255)
 
