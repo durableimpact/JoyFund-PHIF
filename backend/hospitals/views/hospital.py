@@ -121,9 +121,16 @@ class HospitalViewSet(viewsets.ModelViewSet):
         operation_description="Create a hospital.",
     )
     def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        
+        # Invalidate cache
         self._invalidate_list_cache()
-        return response
+        
+        # Return full detail representation with id
+        detail_serializer = HospitalDetailSerializer(instance)
+        return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -271,7 +278,7 @@ class HospitalViewSet(viewsets.ModelViewSet):
         receptionists = (
             hospital.receptionists.select_related("user", "enrolled_by__user")
             .all()
-            .order_by("-user__date_joined")
+            .order_by("-user__created_at")
         )
 
         # Apply pagination
