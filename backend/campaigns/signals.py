@@ -1,10 +1,35 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
+from django.db.models import F
 
 from campaigns.models import Campaign, Donation,CampaignTransaction
 from notifications.models import Notification, NotificationType
 
+
+
+@receiver(post_save, sender=Donation)
+def update_campaign_amount_on_donation_success(sender, instance: Donation, created, **kwargs):
+    """
+    Add the successful donation's net_amount to the campaign's current_amount.
+    Only processes when a donation transitions to SUCCESS status.
+    """
+    # Only process if status is SUCCESS
+    if instance.status != 'SUCCESS':
+        return
+    
+    # Guard: skip if we've already processed this donation's success
+    # (check if CampaignTransaction exists, which is created right after this)
+    if CampaignTransaction.objects.filter(donation=instance).exists():
+        return
+    
+    campaign = instance.campaign
+    net_amount = instance.net_amount if instance.net_amount > 0 else instance.amount
+    
+    # Simply add the net amount to current_amount
+    Campaign.objects.filter(pk=campaign.id).update(
+        current_amount=F('current_amount') + net_amount
+    )
 
 
 @receiver(post_save,sender=Donation)
