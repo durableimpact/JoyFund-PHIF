@@ -126,7 +126,7 @@ def create_transactions_on_successful_donation(sender, instance: Donation, **kwa
     
     # After successful transaction processing, notify stakeholders via WebSocket
     try:
-        from .tasks import notify_donation_made
+        from .tasks.notifications import notify_donation_made
         
         notify_donation_made.delay(
             donation_id=instance.id,
