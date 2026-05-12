@@ -1,5 +1,6 @@
 from django.urls import path
 from rest_framework_nested import routers
+from rest_framework.routers import SimpleRouter
 
 from campaigns.views import (
     CampaignViewSet,
@@ -11,35 +12,46 @@ from campaigns.views import (
 
 app_name = "campaigns"
 
-# Main router for campaigns
-router = routers.SimpleRouter()
-router.register(r"", CampaignViewSet, basename="campaign")
-
-# Top-level donations router (GET /api/donations/)
-donations_router = routers.SimpleRouter()
+# ============================================================================
+# DONATIONS - System-wide across all campaigns
+# GET /api/campaigns/donations/ - List all donations
+# GET /api/campaigns/donations/{id}/ - Get specific donation
+# GET /api/campaigns/donations/my-donations/ - Get authenticated donor's donations
+# ============================================================================
+# IMPORTANT: Register donations FIRST so specific routes match before generic ones
+donations_router = SimpleRouter()
 donations_router.register(r"donations", DonationViewSet, basename="donation")
 
-# Nested routers for campaign donations
-campaigns_router = routers.NestedSimpleRouter(router, '', lookup='campaign')
-campaigns_router.register(
-    r'donations',
-    NestedDonationViewSet,
-    basename='campaign-donations'
-)
+# ============================================================================
+# CAMPAIGN DONATIONS - Nested under specific campaigns
+# GET /api/campaigns/{campaign_id}/donations/ - Donations for campaign
+# GET /api/campaigns/{campaign_id}/donations/{id}/ - Specific donation
+# POST /api/campaigns/{campaign_id}/donate/ - Create donation
+# ============================================================================
+campaigns_router = SimpleRouter()
+campaigns_router.register(r"", CampaignViewSet, basename="campaign")
 
-# Nested router for campaign donation creation
-campaigns_create_router = routers.NestedSimpleRouter(router, '', lookup='campaign')
-campaigns_create_router.register(
-    r'donate',
+nested_donations = routers.NestedSimpleRouter(
+    campaigns_router,
+    r"",
+    lookup="campaign"
+)
+nested_donations.register(
+    r"donations",
+    NestedDonationViewSet,
+    basename="campaign-donations"
+)
+nested_donations.register(
+    r"donate",
     DonationCreateViewSet,
-    basename='campaign-donate'
+    basename="campaign-donate"
 )
 
 urlpatterns = (
-    router.urls
-    + donations_router.urls
+    # Register specific routes FIRST, generic routes LAST
+    donations_router.urls
+    + nested_donations.urls
     + campaigns_router.urls
-    + campaigns_create_router.urls
     + [
         # Admin only list of campaigns with balances
         path(
