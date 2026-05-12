@@ -77,8 +77,6 @@ class CampaignAdmin(admin.ModelAdmin):
                     "goal_amount",
                     "current_amount",
                     "progress_percentage",
-                    "impact_goal_count",
-                    "impact_service_category",
                 )
             },
         ),
