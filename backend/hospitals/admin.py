@@ -25,8 +25,34 @@ class HospitalAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Basic Information", {"fields": ("name", "email", "phone_number", "address")}),
-        ("Location", {"fields": ("city", "region", "lat", "lng")}),
-        ("Details", {"fields": ("website", "operational_hours", "partnership_status")}),
+        ("Location", {"fields": ("city", "region", "lat", "lng", "gps_coordinates")}),
+        (
+            "Contact & Payment",
+            {
+                "fields": (
+                    "website",
+                    "momo_number",
+                    "momo_name",
+                    "orange_number",
+                    "orange_name",
+                    "bank_account_number",
+                    "bank_account_name",
+                    "bank_name",
+                    "bank_branch",
+                )
+            },
+        ),
+        (
+            "Accreditation",
+            {
+                "fields": (
+                    "accreditation_number",
+                    "licence_number",
+                    "partnership_status",
+                    "is_active",
+                )
+            },
+        ),
         (
             "Timestamps",
             {
