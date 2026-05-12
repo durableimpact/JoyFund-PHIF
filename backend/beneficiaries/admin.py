@@ -9,7 +9,6 @@ class BeneficiaryAdmin(admin.ModelAdmin):
         "full_name",
         "gender",
         "category",
-        "urgency_level",
         "is_verified",
         "enrolled_by",
         "created_at",
@@ -17,8 +16,6 @@ class BeneficiaryAdmin(admin.ModelAdmin):
     list_filter = (
         "gender",
         "category",
-        "urgency_level",
-        "geographic_remoteness",
         "is_verified",
         "is_active",
         "created_at",
@@ -52,8 +49,6 @@ class BeneficiaryAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "category",
-                    "urgency_level",
-                    "geographic_remoteness",
                     "number_of_previous_births",
                 ),
             },
@@ -64,7 +59,6 @@ class BeneficiaryAdmin(admin.ModelAdmin):
                 "fields": (
                     "phone",
                     "email",
-                    "language_preference",
                     "region",
                     "city",
                     "address",
