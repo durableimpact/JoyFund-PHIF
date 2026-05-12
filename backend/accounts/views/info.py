@@ -1,4 +1,3 @@
-from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.generics import RetrieveAPIView
@@ -13,11 +12,10 @@ from accounts.serializers import (
     SocialWorkerInfoSerializer,
     SystemAdminInfoSerializer,
 )
-from accounts.utils import IsSystemAdmin
+from accounts.utils import IsSystemAdmin, cache_response, make_cache_key
 
 
 _TAG = ['User Info']
-CACHE_TIMEOUT = 10 * 60  # 10 minutes
 
 
 class DonorInfoView(RetrieveAPIView):
@@ -33,11 +31,6 @@ class DonorInfoView(RetrieveAPIView):
         if request.user.role != Role.DONOR:
             self.permission_denied(request, message='Only DONOR can access this endpoint.')
 
-    @staticmethod
-    def _get_cache_key(user_id):
-        """Get cache key for donor info"""
-        return f'donor_info_{user_id}'
-
     @swagger_auto_schema(
         tags=_TAG,
         operation_summary='Get donor user information',
@@ -51,15 +44,10 @@ class DonorInfoView(RetrieveAPIView):
             403: 'Forbidden - Only DONOR can access this endpoint',
         },
     )
+    @cache_response(timeout=10 * 60)
     def get(self, request, *args, **kwargs):
-        cache_key = self._get_cache_key(request.user.id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-        
-        response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
+        """Cache key includes the authenticated user's ID."""
+        return super().get(request, *args, **kwargs)
 
 
 class HospitalAdminInfoView(RetrieveAPIView):
@@ -75,11 +63,6 @@ class HospitalAdminInfoView(RetrieveAPIView):
         if request.user.role != Role.HOSPITAL_ADMIN:
             self.permission_denied(request, message='Only HOSPITAL_ADMIN can access this endpoint.')
 
-    @staticmethod
-    def _get_cache_key(user_id):
-        """Get cache key for hospital admin info"""
-        return f'hospital_admin_info_{user_id}'
-
     @swagger_auto_schema(
         tags=_TAG,
         operation_summary='Get hospital admin user information',
@@ -93,15 +76,10 @@ class HospitalAdminInfoView(RetrieveAPIView):
             403: 'Forbidden - Only HOSPITAL_ADMIN can access this endpoint',
         },
     )
+    @cache_response(timeout=10 * 60)
     def get(self, request, *args, **kwargs):
-        cache_key = self._get_cache_key(request.user.id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-        
-        response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
+        """Cache key includes the authenticated user's ID."""
+        return super().get(request, *args, **kwargs)
 
 
 class ReceptionistInfoView(RetrieveAPIView):
@@ -117,11 +95,6 @@ class ReceptionistInfoView(RetrieveAPIView):
         if request.user.role != Role.RECEPTIONIST:
             self.permission_denied(request, message='Only RECEPTIONIST can access this endpoint.')
 
-    @staticmethod
-    def _get_cache_key(user_id):
-        """Get cache key for receptionist info"""
-        return f'receptionist_info_{user_id}'
-
     @swagger_auto_schema(
         tags=_TAG,
         operation_summary='Get receptionist user information',
@@ -135,15 +108,10 @@ class ReceptionistInfoView(RetrieveAPIView):
             403: 'Forbidden - Only RECEPTIONIST can access this endpoint',
         },
     )
+    @cache_response(timeout=10 * 60)
     def get(self, request, *args, **kwargs):
-        cache_key = self._get_cache_key(request.user.id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-        
-        response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
+        """Cache key includes the authenticated user's ID."""
+        return super().get(request, *args, **kwargs)
 
 
 class SocialWorkerInfoView(RetrieveAPIView):
@@ -159,11 +127,6 @@ class SocialWorkerInfoView(RetrieveAPIView):
         if request.user.role != Role.SOCIAL_WORKER:
             self.permission_denied(request, message='Only SOCIAL_WORKER can access this endpoint.')
 
-    @staticmethod
-    def _get_cache_key(user_id):
-        """Get cache key for social worker info"""
-        return f'social_worker_info_{user_id}'
-
     @swagger_auto_schema(
         tags=_TAG,
         operation_summary='Get social worker user information',
@@ -177,15 +140,10 @@ class SocialWorkerInfoView(RetrieveAPIView):
             403: 'Forbidden - Only SOCIAL_WORKER can access this endpoint',
         },
     )
+    @cache_response(timeout=10 * 60)
     def get(self, request, *args, **kwargs):
-        cache_key = self._get_cache_key(request.user.id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-        
-        response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
+        """Cache key includes the authenticated user's ID."""
+        return super().get(request, *args, **kwargs)
 
 
 class SystemAdminInfoView(RetrieveAPIView):
@@ -195,11 +153,6 @@ class SystemAdminInfoView(RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
-
-    @staticmethod
-    def _get_cache_key(user_id):
-        """Get cache key for system admin info"""
-        return f'system_admin_info_{user_id}'
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -214,12 +167,7 @@ class SystemAdminInfoView(RetrieveAPIView):
             403: 'Forbidden - Only SYSTEM_ADMIN can access this endpoint',
         },
     )
+    @cache_response(timeout=10 * 60)
     def get(self, request, *args, **kwargs):
-        cache_key = self._get_cache_key(request.user.id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-        
-        response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
+        """Cache key includes the authenticated user's ID."""
+        return super().get(request, *args, **kwargs)
