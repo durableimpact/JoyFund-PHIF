@@ -151,17 +151,35 @@ class LoggingMiddleware(MiddlewareMixin):
     def _get_sanitized_request_body(request: HttpRequest) -> str:
         """
         Get request body with sensitive data redacted.
+        Safely handles multipart/form-data and binary content.
         """
         try:
+            # Check content type
+            content_type = request.META.get('CONTENT_TYPE', '')
+            
+            # Skip logging binary content types
+            if 'multipart/form-data' in content_type:
+                # For multipart/form-data, just log field names, not values
+                return '[multipart/form-data - binary file data not logged]'
+            
+            if any(binary_type in content_type for binary_type in ['image/', 'video/', 'audio/', 'application/octet-stream']):
+                return '[binary file data not logged]'
+            
             # Try to get raw body
             if hasattr(request, '_body'):
                 body = request._body
             else:
                 body = request.body
 
-            # Decode if bytes
+            # Handle empty body
+            if not body:
+                return ''
+
+            # Decode if bytes, replace NUL and other invalid characters
             if isinstance(body, bytes):
-                body_str = body.decode('utf-8', errors='ignore')
+                # Replace NUL bytes and other problematic characters with placeholder
+                body_bytes = body.replace(b'\x00', b'[NUL]')
+                body_str = body_bytes.decode('utf-8', errors='replace')
             else:
                 body_str = body
 
@@ -176,8 +194,7 @@ class LoggingMiddleware(MiddlewareMixin):
                 sanitized = LoggingMiddleware._redact_dict(body_json)
                 return json.dumps(sanitized)
             except (json.JSONDecodeError, ValueError):
-                # If not JSON, return the body as is (safe since we truncated it)
-                # But still try to redact if it looks like form data
+                # If not JSON, return the body as is (safe since we truncated it and replaced NULs)
                 return body_str
 
         except Exception as e:
