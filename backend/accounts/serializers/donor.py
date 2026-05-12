@@ -21,7 +21,7 @@ class DonorRegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     phone_number = serializers.CharField(max_length=15)
-    perfered_language = serializers.CharField(max_length=10, default='en')
+    
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -72,11 +72,10 @@ class DonorUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=150, required=False)
     last_name = serializers.CharField(max_length=150, required=False)
     phone_number = serializers.CharField(max_length=15, required=False)
-    perfered_language = serializers.CharField(max_length=10, required=False)
 
     class Meta:
         model = Donor
-        fields = ['email', 'first_name', 'last_name', 'phone_number', 'perfered_language']
+        fields = ['email', 'first_name', 'last_name', 'phone_number']
 
     def validate_email(self, value):
         qs = User.objects.filter(email=value).exclude(pk=self.instance.user.pk)

@@ -30,7 +30,7 @@ class HospitalAdminCreateSerializer(NationalIDInputMixin, serializers.Serializer
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     phone_number = serializers.CharField(max_length=15)
-    perfered_language = serializers.CharField(max_length=10, default='en')
+    
 
     national_id_number = serializers.CharField(max_length=500)
     front_national_id_image = serializers.ImageField()
@@ -60,7 +60,7 @@ class HospitalAdminCreateSerializer(NationalIDInputMixin, serializers.Serializer
         enrolled_by: SystemAdmin = self.context['enrolled_by']
         password = validated_data.pop('password')
 
-        user_fields = ['email', 'first_name', 'last_name', 'phone_number', 'perfered_language']
+        user_fields = ['email', 'first_name', 'last_name', 'phone_number']
         user_data = {k: validated_data.pop(k) for k in user_fields if k in validated_data}
 
         user = User(**user_data, role=Role.HOSPITAL_ADMIN)
@@ -108,13 +108,12 @@ class HospitalAdminUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=150, required=False)
     last_name = serializers.CharField(max_length=150, required=False)
     phone_number = serializers.CharField(max_length=15, required=False)
-    perfered_language = serializers.CharField(max_length=10, required=False)
 
     class Meta:
         model = HospitalAdmin
         fields = [
             'email', 'first_name', 'last_name',
-            'phone_number', 'perfered_language',
+            'phone_number',
             'national_id_number',
             'front_national_id_image',
             'back_national_id_image',
@@ -127,7 +126,7 @@ class HospitalAdminUpdateSerializer(serializers.ModelSerializer):
             'hospital': {'required': False},
         }
 
-    USER_FIELDS = {'email', 'first_name', 'last_name', 'phone_number', 'perfered_language'}
+    USER_FIELDS = {'email', 'first_name', 'last_name', 'phone_number'}
 
     def validate_email(self, value):
         qs = User.objects.filter(email=value).exclude(pk=self.instance.user.pk)

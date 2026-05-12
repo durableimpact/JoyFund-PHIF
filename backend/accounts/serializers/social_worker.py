@@ -22,7 +22,6 @@ class SocialWorkerCreateSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     phone_number = serializers.CharField(max_length=15)
-    perfered_language = serializers.CharField(max_length=10, default="en")
 
     national_id_number = serializers.CharField(max_length=500)
     front_national_id_image = serializers.ImageField()
@@ -51,7 +50,7 @@ class SocialWorkerCreateSerializer(serializers.Serializer):
             "first_name",
             "last_name",
             "phone_number",
-            "perfered_language",
+            
         ]
         user_data = {
             k: validated_data.pop(k) for k in user_fields if k in validated_data
@@ -128,7 +127,6 @@ class SocialWorkerUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=150, required=False)
     last_name = serializers.CharField(max_length=150, required=False)
     phone_number = serializers.CharField(max_length=15, required=False)
-    perfered_language = serializers.CharField(max_length=10, required=False)
 
     class Meta:
         model = SocialWorker
@@ -137,7 +135,7 @@ class SocialWorkerUpdateSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone_number",
-            "perfered_language",
+            
             "national_id_number",
             "front_national_id_image",
             "back_national_id_image",
@@ -159,7 +157,7 @@ class SocialWorkerUpdateSerializer(serializers.ModelSerializer):
         "first_name",
         "last_name",
         "phone_number",
-        "perfered_language",
+        
     }
 
     def validate_email(self, value):

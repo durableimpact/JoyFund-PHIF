@@ -15,7 +15,7 @@ class UserReadSerializer(serializers.ModelSerializer):
             "last_name",
             "profile_picture",
             "phone_number",
-            "perfered_language",
+            
             "role",
             "is_verified",
             "created_at",
@@ -89,7 +89,7 @@ class DonorInfoSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone_number",
-            "perfered_language",
+            
             "role",
             "is_verified",
             "created_at",
@@ -115,7 +115,7 @@ class HospitalAdminInfoSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone_number",
-            "perfered_language",
+            
             "role",
             "is_verified",
             "created_at",
@@ -154,7 +154,7 @@ class ReceptionistInfoSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone_number",
-            "perfered_language",
+            
             "role",
             "is_verified",
             "created_at",
@@ -192,7 +192,7 @@ class SocialWorkerInfoSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone_number",
-            "perfered_language",
+            
             "role",
             "is_verified",
             "created_at",
@@ -217,7 +217,7 @@ class SystemAdminInfoSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone_number",
-            "perfered_language",
+            
             "role",
             "is_verified",
             "created_at",
