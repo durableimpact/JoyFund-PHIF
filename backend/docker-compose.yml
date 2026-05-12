@@ -198,7 +198,7 @@ services:
       - "8000"
 
   # ────────────────────────────────────────────────────────────────────────────
-  # Celery Workers (multiple for high throughput)
+  # Celery Workers (3 instances for high throughput)
   # ────────────────────────────────────────────────────────────────────────────
   celery-worker-1:
     build:
@@ -223,7 +223,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A backend worker -n worker1@%h --loglevel=info --concurrency=4 --max-tasks-per-child=1000 --time-limit=3600 --soft-time-limit=3300
+    command: celery -A backend worker -l INFO --concurrency=4 -n worker1@%h
     deploy:
       resources:
         limits:
@@ -240,7 +240,11 @@ services:
 
   celery-worker-2:
     extends: celery-worker-1
-    command: celery -A backend worker -n worker2@%h --loglevel=info --concurrency=4 --max-tasks-per-child=1000 --time-limit=3600 --soft-time-limit=3300
+    command: celery -A backend worker -l INFO --concurrency=4 -n worker2@%h
+
+  celery-worker-3:
+    extends: celery-worker-1
+    command: celery -A backend worker -l INFO --concurrency=4 -n worker3@%h
 
   # ────────────────────────────────────────────────────────────────────────────
   # Celery Beat (periodic tasks scheduler - only 1 instance)
