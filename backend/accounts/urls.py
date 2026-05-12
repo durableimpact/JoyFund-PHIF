@@ -65,7 +65,7 @@ urlpatterns = [
     # -----------------------------------------------------------------------
     # Hospital Admins  (created by SYSTEM_ADMIN)
     # -----------------------------------------------------------------------
-    path('hospital-admins/list/', HospitalAdminListView.as_view(), name='hospital-admin-list'),
+    path('hospital-admins/', HospitalAdminListView.as_view(), name='hospital-admin-list'),
     path('hospital-admins/', HospitalAdminCreateView.as_view(), name='hospital-admin-create'),
     path('hospital-admins/<uuid:id>/', HospitalAdminDetailView.as_view(), name='hospital-admin-detail'),
     path('hospital-admins/<uuid:id>/update/', HospitalAdminUpdateView.as_view(), name='hospital-admin-update'),
@@ -73,7 +73,7 @@ urlpatterns = [
     # -----------------------------------------------------------------------
     # Receptionists  (created by HOSPITAL_ADMIN)
     # -----------------------------------------------------------------------
-    path('receptionists/list/', ReceptionistListView.as_view(), name='receptionist-list'),
+    path('receptionists/', ReceptionistListView.as_view(), name='receptionist-list'),
     path('receptionists/', ReceptionistCreateView.as_view(), name='receptionist-create'),
     path('receptionists/<uuid:id>/', ReceptionistDetailView.as_view(), name='receptionist-detail'),
     path('receptionists/<uuid:id>/update/', ReceptionistUpdateView.as_view(), name='receptionist-update'),
@@ -81,7 +81,7 @@ urlpatterns = [
     # -----------------------------------------------------------------------
     # Social Workers  (created by SYSTEM_ADMIN)
     # -----------------------------------------------------------------------
-    path('social-workers/list/', SocialWorkerListView.as_view(), name='social-worker-list'),
+    path('social-workers/', SocialWorkerListView.as_view(), name='social-worker-list'),
     path('social-workers/', SocialWorkerCreateView.as_view(), name='social-worker-create'),
     path('social-workers/<uuid:id>/', SocialWorkerDetailView.as_view(), name='social-worker-detail'),
     path('social-workers/<uuid:id>/update/', SocialWorkerUpdateView.as_view(), name='social-worker-update'),
