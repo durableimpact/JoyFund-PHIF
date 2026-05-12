@@ -16,6 +16,15 @@ from accounts.tasks import notify_admin_user_created
 logger = logging.getLogger(__name__)
 
 
+@receiver(post_save,sender=User)
+def create_system_admin_profile_after_user_account_created(sender,instance,created,**kwargs):
+    """
+    Create a system admin profile after a user with role of SYSTEM_ADMIN created
+    """
+    if created:
+        SystemAdmin.objects.get_or_create(instance)
+
+
 @receiver(post_save, sender=User, dispatch_uid='send_welcome_email_on_user_create')
 def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
     """
