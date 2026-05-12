@@ -253,6 +253,12 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
     permission_classes = [AllowAny]
     serializer_class = DonationCreateSerializer
 
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=DonationCreateSerializer,
+        responses={201: DonationDetailSerializer},
+        operation_description='Create a donation for a campaign and initiate payment. Accessible to anyone.',
+    )
     def create(self, request, *args, **kwargs):
         """Create a donation for a campaign and initiate CamPay payment"""
         try:
