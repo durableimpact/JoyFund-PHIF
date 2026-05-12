@@ -26,7 +26,7 @@ class VoucherAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "Voucher Information",
-            {"fields": ("voucher_code", "beneficiary", "health_issue", "hospital")},
+            {"fields": ("beneficiary", "health_issue", "hospital")},
         ),
         ("Status & Language", {"fields": ("status", "language_preference")}),
         (
