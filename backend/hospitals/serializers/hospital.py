@@ -69,6 +69,8 @@ class HospitalDetailSerializer(serializers.ModelSerializer):
 
 
 class HospitalCreateUpdateSerializer(serializers.ModelSerializer):
+    website = serializers.URLField(required=False, allow_blank=True)
+
     class Meta:
         model = Hospital
         fields = [
