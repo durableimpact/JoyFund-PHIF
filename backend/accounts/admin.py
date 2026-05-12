@@ -50,7 +50,7 @@ class UserAdmin(BaseUserAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
-                    "perfered_language",
+                    
                 ),
             },
         ),
@@ -94,7 +94,7 @@ class UserAdmin(BaseUserAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
-                    "perfered_language",
+                    
                 ),
             },
         ),
@@ -127,9 +127,7 @@ class BaseProfileForm(forms.ModelForm):
     first_name = forms.CharField(label="First Name", max_length=150, required=True)
     last_name = forms.CharField(label="Last Name", max_length=150, required=True)
     phone_number = forms.CharField(label="Phone Number", required=True)
-    perfered_language = forms.CharField(
-        label="Preferred Language", max_length=10, required=False, initial="en"
-    )
+    
     is_verified = forms.BooleanField(label="Verified", required=False)
     is_active = forms.BooleanField(label="Active", required=False, initial=True)
 
@@ -146,7 +144,6 @@ class BaseProfileForm(forms.ModelForm):
                 self.fields["first_name"].initial = user.first_name
                 self.fields["last_name"].initial = user.last_name
                 self.fields["phone_number"].initial = user.phone_number
-                self.fields["perfered_language"].initial = user.perfered_language
                 self.fields["is_verified"].initial = user.is_verified
                 self.fields["is_active"].initial = user.is_active
             except Exception:
@@ -191,7 +188,6 @@ class BaseProfileForm(forms.ModelForm):
         user.first_name = self.cleaned_data.get("first_name", "")
         user.last_name = self.cleaned_data.get("last_name", "")
         user.phone_number = self.cleaned_data.get("phone_number", "")
-        user.perfered_language = self.cleaned_data.get("perfered_language", "en")
         user.is_verified = self.cleaned_data.get("is_verified", False)
         user.is_active = self.cleaned_data.get("is_active", True)
 
@@ -316,7 +312,7 @@ class SystemAdminAdmin(admin.ModelAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
-                    "perfered_language",
+                    
                 ),
             },
         ),
@@ -348,7 +344,7 @@ class HospitalAdminAdmin(admin.ModelAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
-                    "perfered_language",
+                    
                 ),
             },
         ),
@@ -386,7 +382,7 @@ class ReceptionistAdmin(admin.ModelAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
-                    "perfered_language",
+                    
                 ),
             },
         ),
@@ -432,7 +428,7 @@ class SocialWorkerAdmin(admin.ModelAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
-                    "perfered_language",
+                    
                 ),
             },
         ),
@@ -474,7 +470,7 @@ class DonorAdmin(admin.ModelAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
-                    "perfered_language",
+                    
                 ),
             },
         ),
