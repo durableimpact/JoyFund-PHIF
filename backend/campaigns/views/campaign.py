@@ -87,26 +87,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return CampaignCreateUpdateSerializer
         return CampaignDetailSerializer
 
-    @staticmethod
-    def _get_list_cache_key():
-        """Get cache key for campaigns list"""
-        return "campaign_list"
-
-    @staticmethod
-    def _get_detail_cache_key(campaign_id):
-        """Get cache key for campaign detail"""
-        return f"campaign_detail_{campaign_id}"
-
-    @staticmethod
-    def _invalidate_list_cache():
-        """Invalidate campaigns list cache"""
-        cache.delete(CampaignViewSet._get_list_cache_key())
-
-    @staticmethod
-    def _invalidate_detail_cache(campaign_id):
-        """Invalidate specific campaign detail cache"""
-        cache.delete(CampaignViewSet._get_detail_cache_key(campaign_id))
-
     def get_queryset(self):
         # Handle schema generation for Swagger
         if getattr(self, "swagger_fake_view", False):
@@ -143,13 +123,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
         operation_description="Public list of campaigns with filters. Donors also see their private campaigns.",
     )
     def list(self, request, *args, **kwargs):
-        cache_key = self._get_list_cache_key()
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cache_key = 'campaign_list'
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
 
         response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        if response.status_code == 200:
+            cache.set(cache_key, response.data, CACHE_TIMEOUT)
         return response
 
     @swagger_auto_schema(
@@ -169,7 +150,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         campaign = serializer.save(donor=donor)
-        self._invalidate_list_cache()
+        cache.delete('campaign_list')
         return Response(
             CampaignDetailSerializer(campaign).data, status=status.HTTP_201_CREATED
         )
@@ -181,13 +162,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
     )
     def retrieve(self, request, *args, **kwargs):
         campaign_id = kwargs.get("pk")
-        cache_key = self._get_detail_cache_key(campaign_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cache_key = f"campaign_detail_{campaign_id}"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
 
         response = super().retrieve(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        if response.status_code == 200:
+            cache.set(cache_key, response.data, CACHE_TIMEOUT)
         return response
 
     @swagger_auto_schema(
@@ -199,8 +181,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         campaign_id = kwargs.get("pk")
         response = super().update(request, *args, **kwargs)
-        self._invalidate_detail_cache(campaign_id)
-        self._invalidate_list_cache()
+        cache.delete(f"campaign_detail_{campaign_id}")
+        cache.delete('campaign_list')
         return response
 
     @swagger_auto_schema(
@@ -212,8 +194,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         campaign_id = kwargs.get("pk")
         response = super().partial_update(request, *args, **kwargs)
-        self._invalidate_detail_cache(campaign_id)
-        self._invalidate_list_cache()
+        cache.delete(f"campaign_detail_{campaign_id}")
+        cache.delete('campaign_list')
         return response
 
     @swagger_auto_schema(
@@ -224,8 +206,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         campaign_id = kwargs.get("pk")
         response = super().destroy(request, *args, **kwargs)
-        self._invalidate_list_cache()
-        self._invalidate_detail_cache(campaign_id)
+        cache.delete('campaign_list')
+        cache.delete(f"campaign_detail_{campaign_id}")
         return response
 
     @action(
@@ -274,6 +256,7 @@ class CampaignAvailableBalanceListView(ListAPIView):
                 openapi.IN_QUERY,
                 description="Filter campaigns with available balance >= this amount",
                 type=openapi.TYPE_NUMBER,
+                
             )
         ],
         operation_description="Returns a list of active campaigns and their currently available balance for allocation.",
