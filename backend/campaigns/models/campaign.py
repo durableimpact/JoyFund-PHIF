@@ -34,16 +34,10 @@ class Campaign(models.Model):
         max_length=20,
         choices=EventType.choices
     )
-
     goal_amount = models.DecimalField(max_digits=12, decimal_places=2)
     current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-
-    impact_goal_count = models.IntegerField(default=1)
-    impact_service_category = models.CharField(max_length=50, blank=True)
-
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()
-
     is_public = models.BooleanField(default=True)
 
     status = models.CharField(
