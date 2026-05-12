@@ -32,20 +32,10 @@ class Beneficiary(models.Model):
     category = models.CharField(
         max_length=20, choices=BeneficiaryCategory.choices, default=BeneficiaryCategory.OTHER
     )
-    number_of_previous_births = models.IntegerField(default=0)
+    number_of_previous_births = models.IntegerField(null=True,blank=True)
     is_verified = models.BooleanField(default=False)
-    urgency_level = models.CharField(
-        max_length=10, choices=UrgencyLevel.choices, default=UrgencyLevel.ROUTINE
-    )
-    geographic_remoteness = models.CharField(
-        max_length=10, choices=GeographicRemoteness.choices, default=GeographicRemoteness.LOW
-    )
     phone = models.CharField(max_length=15)
     email = models.EmailField(null=True, blank=True)
-    language_preference = models.CharField(
-        max_length=20, default='fr',
-        help_text='ISO 639-1 code used for SMS dispatch, e.g. fr, en',
-    )
     region = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     address = models.TextField()
@@ -66,8 +56,6 @@ class Beneficiary(models.Model):
         indexes = [
             models.Index(fields=['digital_health_id']),
             models.Index(fields=['category']),
-            models.Index(fields=['urgency_level']),
-            models.Index(fields=['geographic_remoteness']),
             models.Index(fields=['enrolled_by', 'created_at']),
         ]
 
