@@ -76,18 +76,24 @@ class WebhookEventViewSet(
         operation_summary="Payment Provider Webhook (GET)",
         operation_description=(
             "Health check endpoint for webhook.\n\n"
-            "Accepts GET requests to verify webhook endpoint is ready."
+            "Accepts GET requests to verify webhook endpoint is ready. "
+            "Also accepts payment notifications via query parameters."
         ),
     ),
 )
 class PaymentWebhookView(APIView):
     """
-    Webhook to handle payment notifications from payment providers
+    Webhook to handle payment notifications from payment providers.
+    Supports both POST (JSON/Form) and GET (Query Parameters).
     """
     permission_classes = [AllowAny]
 
     def get(self, request):
-        """Health check for webhook endpoint"""
+        """Health check or process GET notifications if parameters are provided"""
+        if request.GET:
+            logger.info(f"Received webhook via GET: {request.GET.dict()}")
+            return self._process_webhook_data(request.GET.dict())
+        
         return Response(
             {"status": "ok", "message": "Webhook endpoint is ready"},
             status=status.HTTP_200_OK,
@@ -95,7 +101,7 @@ class PaymentWebhookView(APIView):
 
     def post(self, request):
         """
-        Process payment notifications
+        Process payment notifications via POST
         """
         try:
             # Extract data from POST or JSON body
@@ -104,42 +110,8 @@ class PaymentWebhookView(APIView):
             else:
                 webhook_data = request.POST.dict()
 
-            if not webhook_data:
-                logger.warning("Received empty webhook payload")
-                return Response(
-                    {"status": "error", "message": "Empty webhook payload"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            gateway, _ = PaymentGateway.objects.get_or_create(name="CamPay")
-            WebhookEvent.objects.create(
-                gateway=gateway, event_type="payment_notification", payload=webhook_data
-            )
-
-            logger.info(f"Received webhook data: {webhook_data}")
-            
-            ext_ref = webhook_data.get("external_reference")
-            # Default to tracking as donation
-            target_task = process_payment_task
-            
-            if ext_ref:
-                # Check if it's a disbursement via Transaction
-                # (Disbursements use the Transaction ID as the external_reference)
-                if Transaction.objects.filter(id=ext_ref, type='DISBURSEMENT').exists():
-                    target_task = process_disbursement_task
-
-            # Queue payment processing using Celery
-            result = target_task.delay(webhook_data)
-            logger.info(f"Task queued with ID: {result.id}")
-
-            return Response(
-                {
-                    "status": "success",
-                    "message": "Payment queued for processing",
-                    "task_id": result.id,
-                },
-                status=status.HTTP_202_ACCEPTED,
-            )
+            logger.info(f"Received webhook via POST: {webhook_data}")
+            return self._process_webhook_data(webhook_data)
 
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in webhook: {str(e)}")
@@ -151,5 +123,58 @@ class PaymentWebhookView(APIView):
             logger.error(f"Payment webhook error: {str(e)}")
             return Response(
                 {"status": "error", "message": "Internal server error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def _process_webhook_data(self, webhook_data):
+        """
+        Core logic to record event and queue task.
+        """
+        if not webhook_data:
+            logger.warning("Received empty webhook payload")
+            return Response(
+                {"status": "error", "message": "Empty webhook payload"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # 1. Record the raw event for audit trail
+            gateway, _ = PaymentGateway.objects.get_or_create(name="CamPay")
+            WebhookEvent.objects.create(
+                gateway=gateway, 
+                event_type="payment_notification", 
+                payload=webhook_data
+            )
+            
+            # 2. Determine target task (Donation or Disbursement)
+            ext_ref = webhook_data.get("external_reference")
+            target_task = process_payment_task
+            
+            if ext_ref:
+                # Check if it's a disbursement via Transaction
+                # Validating UUID format to prevent database errors
+                try:
+                    if Transaction.objects.filter(id=ext_ref, type='DISBURSEMENT').exists():
+                        target_task = process_disbursement_task
+                except (ValueError, TypeError):
+                    # Not a valid UUID, so definitely not a Transaction ID
+                    pass
+
+            # 3. Queue processing asynchronously
+            result = target_task.delay(webhook_data)
+            logger.info(f"Task {target_task.__name__} queued with ID: {result.id} for ref: {ext_ref}")
+
+            return Response(
+                {
+                    "status": "success",
+                    "message": "Payment notification received and queued",
+                    "task_id": result.id,
+                },
+                status=status.HTTP_202_ACCEPTED,
+            )
+        except Exception as e:
+            logger.exception(f"Error processing webhook data: {str(e)}")
+            return Response(
+                {"status": "error", "message": "Error queueing payment processing"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
