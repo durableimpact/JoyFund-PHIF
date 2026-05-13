@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from decimal import Decimal
 
 class Payment(models.Model):
     PAYMENT_METHODS = [
@@ -17,7 +18,23 @@ class Payment(models.Model):
         primary_key=True, default=uuid.uuid4, editable=False)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
     phone_number = models.CharField(max_length=20, blank=True)
+
+    # WHAT USER PAID
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # WHAT AGGREGATOR SENT TO YOU
+    app_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    # AGGREGATOR COMMISSION
+    aggregator_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
     payment_status = models.CharField(
         max_length=20, choices=PAYMENT_STATUS, default='PENDING')
 
@@ -28,3 +45,12 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.payment_id} - {self.amount} XAF ({self.payment_status})"
+
+    def save(self, *args, **kwargs):
+
+        # auto-calculate aggregator fee
+        self.aggregator_fee = (
+            Decimal(self.amount) - Decimal(self.app_amount)
+        )
+
+        super().save(*args, **kwargs)
