@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from accounts.models import Role
 from accounts.serializers import ReceptionistDetailSerializer
+from accounts.utils import cache_response, invalidate_cache
 from hospitals.models import Hospital
 from hospitals.serializers import (
     HospitalCreateUpdateSerializer,
@@ -52,8 +53,8 @@ class HospitalViewSet(viewsets.ModelViewSet):
         "is_active": ["exact"],
         "created_at": ["date", "gte", "lte"],
         "updated_at": ["date", "gte", "lte"],
-        "manager__id": ["exact", "isnull"],
-        "manager__user__email": ["exact", "icontains"],
+        "admins__id": ["exact", "isnull"],
+        "admins__user__email": ["exact", "icontains"],
     }
     search_fields = [
         "name",
@@ -67,7 +68,7 @@ class HospitalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return (
-            Hospital.objects.select_related("manager__user")
+            Hospital.objects.prefetch_related("admins__user")
             .all()
             .order_by("-created_at")
         )
@@ -79,40 +80,14 @@ class HospitalViewSet(viewsets.ModelViewSet):
             return HospitalListSerializer
         return HospitalDetailSerializer
 
-    @staticmethod
-    def _get_list_cache_key():
-        """Get cache key for hospitals list"""
-        return "hospital_list"
-
-    @staticmethod
-    def _get_detail_cache_key(hospital_id):
-        """Get cache key for hospital detail"""
-        return f"hospital_detail_{hospital_id}"
-
-    @staticmethod
-    def _invalidate_list_cache():
-        """Invalidate hospitals list cache"""
-        cache.delete(HospitalViewSet._get_list_cache_key())
-
-    @staticmethod
-    def _invalidate_detail_cache(hospital_id):
-        """Invalidate specific hospital detail cache"""
-        cache.delete(HospitalViewSet._get_detail_cache_key(hospital_id))
-
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: HospitalListSerializer(many=True)},
         operation_description="List hospitals.",
     )
+    @cache_response(timeout=CACHE_TIMEOUT)
     def list(self, request, *args, **kwargs):
-        cache_key = self._get_list_cache_key()
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-
-        response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
+        return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -120,13 +95,11 @@ class HospitalViewSet(viewsets.ModelViewSet):
         responses={201: HospitalDetailSerializer},
         operation_description="Create a hospital.",
     )
+    @invalidate_cache("view_cache:*")
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        
-        # Invalidate cache
-        self._invalidate_list_cache()
         
         # Return full detail representation with id
         detail_serializer = HospitalDetailSerializer(instance)
@@ -137,16 +110,9 @@ class HospitalViewSet(viewsets.ModelViewSet):
         responses={200: HospitalDetailSerializer},
         operation_description="Retrieve a hospital.",
     )
+    @cache_response(timeout=CACHE_TIMEOUT)
     def retrieve(self, request, *args, **kwargs):
-        hospital_id = kwargs.get("pk")
-        cache_key = self._get_detail_cache_key(hospital_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-
-        response = super().retrieve(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
+        return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -154,11 +120,9 @@ class HospitalViewSet(viewsets.ModelViewSet):
         responses={200: HospitalDetailSerializer},
         operation_description="Replace a hospital.",
     )
+    @invalidate_cache("view_cache:*")
     def update(self, request, *args, **kwargs):
-        hospital_id = kwargs.get("pk")
-        response = super().update(request, *args, **kwargs)
-        self._invalidate_detail_cache(hospital_id)
-        return response
+        return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -166,23 +130,18 @@ class HospitalViewSet(viewsets.ModelViewSet):
         responses={200: HospitalDetailSerializer},
         operation_description="Update a hospital.",
     )
+    @invalidate_cache("view_cache:*")
     def partial_update(self, request, *args, **kwargs):
-        hospital_id = kwargs.get("pk")
-        response = super().partial_update(request, *args, **kwargs)
-        self._invalidate_detail_cache(hospital_id)
-        return response
+        return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
         responses={204: "No Content"},
         operation_description="Delete a hospital.",
     )
+    @invalidate_cache("view_cache:*")
     def destroy(self, request, *args, **kwargs):
-        hospital_id = kwargs.get("pk")
-        response = super().destroy(request, *args, **kwargs)
-        self._invalidate_list_cache()
-        self._invalidate_detail_cache(hospital_id)
-        return response
+        return super().destroy(request, *args, **kwargs)
 
     @action(
         detail=True,
