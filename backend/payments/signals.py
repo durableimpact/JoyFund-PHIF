@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 
 from campaigns.models import Donation
+from payments.tasks.notifications import notify_donation_made
 from .models import (
     EscrowAccount,
     FeeAccount,
@@ -120,24 +121,16 @@ def create_transactions_on_successful_donation(sender, instance: Donation, **kwa
         )
 
         # 5. Reflect the escrow portion on the campaign's fundraising progress
-        instance.campaign.__class__.objects.filter(pk=instance.campaign_id).update(
+        instance.campaign.__class__.objects.filter(pk=instance.campaign.id).update(
             current_amount=F('current_amount') + escrow_amount
         )
     
     # After successful transaction processing, notify stakeholders via WebSocket
     try:
-        from .tasks.notifications import notify_donation_made
-        
         notify_donation_made.delay(
             donation_id=instance.id,
             donor_id=instance.donor_id if instance.donor else None,
-            campaign_id=instance.campaign_id,
-            donation_data={
-                'amount': str(instance.amount),
-                'currency': instance.currency or 'XAF',
-                'donor_name': getattr(instance.donor, 'get_full_name', lambda: str(instance.donor))(),
-                'status': instance.status,
-            }
+            campaign_id=instance.campaign_id
         )
         logger.info(f"Queued donation notification task for donation: {instance.id}")
     except Exception as e:
