@@ -1,8 +1,5 @@
 import { useStore } from '../store/useStore';
-
-const DJANGO_API_URL = process.env.DJANGO_API_URL || 'http://localhost:8000';
-const OAUTH_CLIENT_ID = process.env.DJANGO_OAUTH_CLIENT_ID || 'joyfund-frontend';
-const OAUTH_CLIENT_SECRET = process.env.DJANGO_OAUTH_CLIENT_SECRET || 'joyfund-dev-secret';
+import { DJANGO_API_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET } from '@/lib/apiClient';
 
 export async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const store = useStore.getState();

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const DJANGO_API_URL = process.env.DJANGO_API_URL || 'http://localhost:8000';
+import { DJANGO_API_URL } from '@/lib/apiClient';
 
 export async function POST(req: NextRequest) {
   try {
