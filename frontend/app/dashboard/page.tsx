@@ -34,7 +34,7 @@ export default function DonorDashboard() {
           {/* Notification banner */}
           <div className="rounded-2xl p-4 mb-6 flex items-center gap-3 text-sm" style={{ background: 'linear-gradient(135deg, #1DB1DB15, #1CDBC915)', border: '1px solid #1DB1DB30' }}>
             <Bell size={18} style={{ color: 'var(--primary)' }} />
-            <span className="text-gray-700">Your gift is now being used — <strong>Mama Celestine</strong> checked in at Hôpital de District de Biyem-Assi 🏥</span>
+            <span className="text-gray-700">Your gift is now being used - <strong>Mama Celestine</strong> checked in at Hôpital de District de Biyem-Assi 🏥</span>
           </div>
 
           {/* Stats */}

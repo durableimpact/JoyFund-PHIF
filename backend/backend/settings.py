@@ -278,7 +278,7 @@ OAUTH2_PROVIDER = {
         os.environ.get("OAUTH2_ACCESS_TOKEN_EXPIRE_SECONDS", 36000)
     ),
     "REFRESH_TOKEN_EXPIRE_SECONDS": 30 * 24 * 60 * 60,  # 30 days
-    "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
+    # "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
     "SCOPES": {
         "read": "Read scope",
         "write": "Write scope",
@@ -290,12 +290,12 @@ OAUTH2_PROVIDER = {
     # "refresh_token"      — used by the frontend token-refresh logic in api.ts
     # "authorization_code" — available for future OAuth2 integrations
     # "client_credentials" — available for future server-to-server calls
-    "ALLOWED_GRANT_TYPES": [
-        "password",
-        "refresh_token",
-        "authorization_code",
-        "client_credentials",
-    ],
+    # "ALLOWED_GRANT_TYPES": [
+    #     "password",
+    #     "refresh_token",
+    #     "authorization_code",
+    #     "client_credentials",
+    # ],
 }
 
 SWAGGER_SETTINGS = {
