@@ -19,7 +19,7 @@ channel_layer = get_channel_layer()
 
 
 @shared_task(bind=True, max_retries=3)
-def notify_donation_made(self, donation_id: int, donor_id: int|None, campaign_id: int, donation_data: dict):
+def notify_donation_made(self, donation_id: int, donor_id: int|None, campaign_id: int):
     """
     Notify relevant parties when a donation is successfully made.
     
@@ -35,7 +35,6 @@ def notify_donation_made(self, donation_id: int, donor_id: int|None, campaign_id
         donation_id: ID of the donation
         donor_id: ID of the donor making the donation
         campaign_id: ID of the campaign receiving the donation
-        donation_data: Dict with donation details (amount, currency, status, etc.)
     """
     try:
         from django.contrib.auth import get_user_model
@@ -59,17 +58,17 @@ def notify_donation_made(self, donation_id: int, donor_id: int|None, campaign_id
             'timestamp': donation.created_at.isoformat() if hasattr(donation, 'created_at') else datetime.now().isoformat(),
             'data': {
                 'id': donation.id,
-                'title': f'New Donation to {campaign.name}',
-                'message': f'{donation_data.get("donor_name", "A donor")} donated {donation_data.get("amount", "...")} to {campaign.name}',
+                'title': f'New Donation to {campaign.title}',
+                'message': f'{donation.donor_name or "A donor"} donated {donation.net_amount} XAF to {campaign.title}',
                 'object': {
                     'donation_id': donation.id,
                     'campaign_id': campaign.id,
-                    'campaign_name': campaign.name,
+                    'campaign_name': campaign.title,
                     'donor_id': donor_id,
-                    'donor_name': donation_data.get('donor_name', ''),
-                    'amount': donation_data.get('amount'),
-                    'currency': donation_data.get('currency', 'XAF'),
-                    'status': donation_data.get('status', 'SUCCESS'),
+                    'donor_name': donation.donor_name,
+                    'amount': donation.net_amount,
+                    'currency': "XAF",
+                    'status': donation.status,
                 }
             }
         }
@@ -107,7 +106,7 @@ def notify_donation_made(self, donation_id: int, donor_id: int|None, campaign_id
                     title=message_data['data']['title'],
                     message=message_data['data']['message'],
                     notification_type='DONATION_RECEIVED',
-                    description=f"Donation #{donation.id} for campaign '{campaign.name}'",
+                    description=f"Donation #{donation.id} for campaign '{campaign.title}'",
                 )
             
             # For donor
@@ -117,7 +116,7 @@ def notify_donation_made(self, donation_id: int, donor_id: int|None, campaign_id
                     Notification.objects.create(
                         user=donor_user,
                         title=f'Donation Confirmed',
-                        message=f'Your donation of {donation_data.get("amount")} {donation_data.get("currency")} has been received',
+                        message=f'Your donation of {donation.net_amount} XAF has been received',
                         notification_type='DONATION_SENT',
                     )
                 except User.DoesNotExist:
