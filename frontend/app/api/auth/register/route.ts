@@ -1,26 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { DJANGO_API_URL } from '@/lib/apiClient';
 
-export async function POST(req: NextRequest) {
-  const { fullName, email, phone, password, role } = await req.json();
+function sanitizePhone(phone: string) {
+  const cleaned = phone.replace(/[^\d+]/g, '');
+  if (cleaned.startsWith('+')) {
+    return cleaned;
+  }
+  const digits = cleaned.replace(/^0+/, '');
+  return `+237${digits}`;
+}
 
-  if (!fullName || !email || !password) {
-    return NextResponse.json({ message: 'All fields are required.' }, { status: 400 });
+async function registerDonor(first_name: string, last_name: string, email: string, phone: string, password: string) {
+  const response = await fetch(`${DJANGO_API_URL}/api/accounts/donors/register/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      password,
+      first_name,
+      last_name,
+      phone_number: sanitizePhone(phone),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Backend error:', errorData);
+    const detail = errorData.detail || errorData.email?.[0] || errorData.phone_number?.[0] || errorData.non_field_errors?.[0] || 'Registration failed';
+    throw new Error(detail);
   }
 
-  // TODO: Replace with real DB insert + bcrypt.hash(password, 10)
-//   const res = await fetch('http://127.0.0.1:8000/api/accounts/donors/register/', { 
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ email, password, first_name, last_name, phone_number: phone}),
-//    })
+  return await response.json();
+}
 
-  const mockUser = {
-    id: 'usr-new-' + Date.now(),
-    name: fullName,
-    email,
-    role: role ?? 'donor',
-    token: 'mock-jwt-token-replace-me',
-  };
+export async function POST(req: NextRequest) {
+  try {
+    const { first_name, last_name, email, phone, password } = await req.json();
 
-  return NextResponse.json({ user: mockUser }, { status: 201 });
+    if (!first_name || !last_name || !email || !phone || !password) {
+      return NextResponse.json(
+        { error: 'All fields are required' },
+        { status: 400 }
+      );
+    }
+
+    const registerResult = await registerDonor(first_name, last_name, email, phone, password);
+
+    return NextResponse.json({
+      user: registerResult.user,
+      message: 'Registration successful. Please log in.',
+    }, { status: 201 });
+  } catch (error) {
+    console.error('Register error:', error);
+    const message = error instanceof Error ? error.message : 'Registration failed';
+    return NextResponse.json(
+      { error: message },
+      { status: 400 }
+    );
+  }
 }

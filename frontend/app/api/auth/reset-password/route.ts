@@ -1,15 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { DJANGO_API_URL } from '@/lib/apiClient';
 
 export async function POST(req: NextRequest) {
-  const { email, code, password } = await req.json();
-  if (!email || !code || !password) return NextResponse.json({ message: 'All fields are required.' }, { status: 400 });
+  try {
+    const { token, password } = await req.json();
 
-  // TODO: POST to Django → /api/auth/password-reset/confirm/
-//   const res = await fetch(`${process.env.DJANGO_API_URL}/api/auth/password-reset/confirm/`, {
-//     method: 'POST',
-//     body: JSON.stringify({ email, token: code, password }),
-//   });
-//   if (!res.ok) return NextResponse.json({ message: 'Reset failed.' }, { status: 400 });
+    if (!token || !password) {
+      return NextResponse.json(
+        { error: 'Token and password are required' },
+        { status: 400 }
+      );
+    }
 
-  return NextResponse.json({ ok: true }, { status: 200 });
+    const response = await fetch(`${DJANGO_API_URL}/api/accounts/password/reset-confirm/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token,
+        new_password: password,
+        confirm_password: password,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const detail = errorData.detail || errorData.new_password?.[0] || 'Password reset failed';
+      return NextResponse.json(
+        { error: detail },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ ok: true }, { status: 200 });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    return NextResponse.json(
+      { error: 'Password reset failed' },
+      { status: 500 }
+    );
+  }
 }

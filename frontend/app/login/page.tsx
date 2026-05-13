@@ -39,11 +39,11 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || 'Invalid email or password.');
+        setError(data.error || 'Invalid email or password.');
         return;
       }
 
-      login(data.user); // { id, name, email, role, token }
+      login(data); // { access, refresh, user }
       showToast(`Welcome back, ${data.user.name}! ✅`, 'success');
       router.push(ROLE_REDIRECTS[data.user.role] ?? '/');
 

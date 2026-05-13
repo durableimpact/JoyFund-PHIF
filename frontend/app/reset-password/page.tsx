@@ -76,14 +76,14 @@ export default function ResetPasswordPage() {
       const res = await fetch('/api/auth/verify-reset-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: fullCode }),
+        body: JSON.stringify({ token: fullCode }),
       });
 
       if (res.ok) {
         setStep('password');
       } else {
         const data = await res.json();
-        setError(data.message || 'Invalid or expired code. Please try again.');
+        setError(data.error || 'Invalid or expired code. Please try again.');
         setCode(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }
@@ -115,14 +115,14 @@ export default function ResetPasswordPage() {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: fullCode, password }),
+        body: JSON.stringify({ token: fullCode, password }),
       });
 
       if (res.ok) {
         setStep('done');
       } else {
         const data = await res.json();
-        setError(data.message || 'Could not reset password. Please request a new code.');
+        setError(data.error || 'Could not reset password. Please request a new code.');
       }
     } catch {
       setError('Connection error. Please try again.');
