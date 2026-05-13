@@ -10,7 +10,8 @@ export default function RegisterPage() {
   const { login, showToast } = useStore();
 
   const [form, setForm] = useState({
-    fullName: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     password: '',
@@ -40,7 +41,8 @@ export default function RegisterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: form.fullName,
+          first_name: form.first_name,
+          last_name: form.last_name,
           email: form.email,
           phone: form.phone,
           password: form.password,
@@ -88,9 +90,16 @@ export default function RegisterPage() {
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Full name</label>
-            <input type="text" required value={form.fullName} onChange={set('fullName')}
-              placeholder="e.g. Jean-Pierre Mbarga"
+            <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">First name</label>
+            <input type="text" required value={form.first_name} onChange={set('first_name')}
+              placeholder="e.g. Jean-Pierre"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Last name</label>
+            <input type="text" required value={form.last_name} onChange={set('last_name')}
+              placeholder="e.g. Mbarga"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
           </div>
 
