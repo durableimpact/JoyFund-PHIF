@@ -22,7 +22,7 @@ def create_system_admin_profile_after_user_account_created(sender,instance,creat
     Create a system admin profile after a user with role of SYSTEM_ADMIN created
     """
     if created:
-        SystemAdmin.objects.get_or_create(instance)
+        SystemAdmin.objects.get_or_create(user=instance)
 
 
 @receiver(post_save, sender=User, dispatch_uid='send_welcome_email_on_user_create')

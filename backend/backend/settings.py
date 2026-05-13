@@ -285,6 +285,17 @@ OAUTH2_PROVIDER = {
         "openid": "OpenID Connect scope",
     },
     "OAUTH2_VALIDATOR_CLASS": "oauth2_provider.oauth2_validators.OAuth2Validator",
+    # Explicitly allow the grant types used by this project.
+    # "password"           — used by the Next.js login flow (Resource Owner Password Credentials)
+    # "refresh_token"      — used by the frontend token-refresh logic in api.ts
+    # "authorization_code" — available for future OAuth2 integrations
+    # "client_credentials" — available for future server-to-server calls
+    "ALLOWED_GRANT_TYPES": [
+        "password",
+        "refresh_token",
+        "authorization_code",
+        "client_credentials",
+    ],
 }
 
 SWAGGER_SETTINGS = {

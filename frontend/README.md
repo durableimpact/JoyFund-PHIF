@@ -333,7 +333,7 @@ identical — only the data source changes.
 
 1. Fork the repository and create a feature branch:
 ```bash
-   git checkout -b feature/your-feature-name
+   git checkout -b feat/ivantom
 ```
 2. Make your changes and commit with a clear message:
 ```bash
