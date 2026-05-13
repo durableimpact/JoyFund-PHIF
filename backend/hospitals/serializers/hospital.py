@@ -29,7 +29,7 @@ class HospitalListSerializer(serializers.ModelSerializer):
 
 
 class HospitalDetailSerializer(serializers.ModelSerializer):
-    manager = serializers.SerializerMethodField()
+    admins = serializers.SerializerMethodField()
 
     class Meta:
         model = Hospital
@@ -57,15 +57,12 @@ class HospitalDetailSerializer(serializers.ModelSerializer):
             'is_active',
             'created_at',
             'updated_at',
-            'manager',
+            'admins',
         ]
 
-    def get_manager(self, obj):
-        try:
-            manager = obj.manager
-        except Exception:
-            return None
-        return HospitalManagerSerializer(manager).data
+    def get_admins(self, obj):
+        admins = obj.admins.all()
+        return HospitalManagerSerializer(admins, many=True).data
 
 
 class HospitalCreateUpdateSerializer(serializers.ModelSerializer):
