@@ -44,20 +44,18 @@ export default function RegisterPage() {
           email: form.email,
           phone: form.phone,
           password: form.password,
-          role: 'donor', // Donors self-register; other roles are created by admin
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || 'Registration failed. Please try again.');
+        setError(data.error || 'Registration failed. Please try again.');
         return;
       }
 
-      login(data.user);
-      showToast(`Welcome to JoyFund, ${data.user.name}! 🎉`, 'success');
-      router.push('/dashboard');
+      showToast(`Welcome to JoyFund, ${data.user.name}! Please log in to continue.`, 'success');
+      router.push('/login');
 
     } catch {
       setError('Connection error. Please try again.');
@@ -106,7 +104,7 @@ export default function RegisterPage() {
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Phone (MTN / Orange)</label>
             <input type="tel" required value={form.phone} onChange={set('phone')}
-              placeholder="e.g. 677 000 000"
+              placeholder="e.g. +237 677 000 000"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
           </div>
 

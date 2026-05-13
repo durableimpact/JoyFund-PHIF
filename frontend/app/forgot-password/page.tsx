@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
         setStep('sent');
       } else {
         const data = await res.json();
-        setError(data.message || 'Something went wrong. Please try again.');
+        setError(data.error || 'Something went wrong. Please try again.');
       }
     } catch {
       setError('Connection error. Please try again.');
