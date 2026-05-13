@@ -2,18 +2,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useStore } from '@/store/useStore';
+import { useStore, ROLE_HOME } from '@/store/useStore';
 import { Eye, EyeOff, Heart, Loader2 } from 'lucide-react';
 
-const ROLE_REDIRECTS: Record<string, string> = {
-  donor: '/dashboard',
-  contributor: '/explore',
-  social_worker: '/social-worker/dashboard',
-  receptionist: '/hospital/receptionist',
-  nurse: '/hospital/nurse',
-  hospital_admin: '/hospital-admin/dashboard',
-  admin: '/admin/dashboard',
-};
+function getRedirectPath(role: string | undefined) {
+  return ROLE_HOME[role as keyof typeof ROLE_HOME] ?? '/dashboard';
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,7 +39,7 @@ export default function LoginPage() {
 
       login(data); // { access, refresh, user }
       showToast(`Welcome back, ${data.user.name}! ✅`, 'success');
-      router.push(ROLE_REDIRECTS[data.user.role] ?? '/');
+      router.push(getRedirectPath(data.user.role));
 
     } catch {
       setError('Connection error. Please try again.');

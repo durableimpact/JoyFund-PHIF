@@ -124,11 +124,20 @@ export async function POST(req: NextRequest) {
     const tokens = await obtainToken(email, password);
     const user = await fetchCurrentUser(tokens.access);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       access: tokens.access,
       refresh: tokens.refresh,
       user,
     });
+
+    response.cookies.set('joyfund_token', tokens.access, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     const message = error instanceof Error ? error.message : 'Login failed';
