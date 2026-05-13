@@ -97,13 +97,29 @@ class HospitalViewSet(viewsets.ModelViewSet):
     )
     @invalidate_cache("view_cache:*")
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        
-        # Return full detail representation with id
-        detail_serializer = HospitalDetailSerializer(instance)
-        return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            
+            # Return full detail representation with id
+            detail_serializer = HospitalDetailSerializer(instance)
+            return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Log the exception for debugging
+            LogService.error(
+                request,
+                "hospital.create_failed",
+                user=request.user if request.user.is_authenticated else None,
+                description=f"Hospital creation failed: {str(e)}",
+                metadata={"error": str(e), "data": request.data},
+            )
+            raise  # Re-raise to let DRF handle it, or return a generic error
+            # For now, let's return a generic error to match the original behavior but we can change
+            # return Response(
+            #     {"detail": "An unexpected error occurred"},
+            #     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            # )
 
     @swagger_auto_schema(
         tags=_TAG,
