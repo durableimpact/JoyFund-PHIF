@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useStore, ROLE_HOME } from '@/store/useStore';
 import { Eye, EyeOff, Heart, Loader2 } from 'lucide-react';
@@ -12,6 +12,8 @@ function getRedirectPath(role: string | undefined) {
 export default function LoginPage() {
   const router = useRouter();
   const { login, showToast } = useStore();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams?.get('redirect') || undefined;
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +41,17 @@ export default function LoginPage() {
 
       login(data); // { access, refresh, user }
       showToast(`Welcome back, ${data.user.name}! ✅`, 'success');
-      router.push(getRedirectPath(data.user.role));
+      // If a redirect query param is present, prefer it. Otherwise use role-based home.
+      if (redirectParam) {
+        try {
+          const dest = decodeURIComponent(redirectParam);
+          router.push(dest);
+        } catch {
+          router.push(getRedirectPath(data.user.role));
+        }
+      } else {
+        router.push(getRedirectPath(data.user.role));
+      }
 
     } catch {
       setError('Connection error. Please try again.');

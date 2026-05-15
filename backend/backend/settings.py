@@ -424,6 +424,23 @@ CAMPAY_PERMANENT_TOKEN = os.environ.get("CAMPAY_PERMANENT_TOKEN", "")
 CAMPAY_WEBHOOK_SECRET = os.environ.get("CAMPAY_WEBHOOK_SECRET", "")
 CAMPAY_ENVIRONMENT = os.environ.get("CAMPAY_ENVIRONMENT", "DEV")
 
+# Ensure the logs directory exists before Django configures file-based logging.
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+def _ensure_log_file(filename):
+    path = LOG_DIR / filename
+    try:
+        path.touch(exist_ok=True)
+        if os.access(path, os.W_OK):
+            return str(path)
+    except OSError:
+        return None
+    return None
+
+DJANGO_LOG_FILE = _ensure_log_file("django.log")
+CELERY_LOG_FILE = _ensure_log_file("celery.log")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Logging Configuration
 # ─────────────────────────────────────────────────────────────────────────────
@@ -457,7 +474,7 @@ LOGGING = {
         "file": {
             "level": "WARNING",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs" / "django.log",
+            "filename": DJANGO_LOG_FILE or str(LOG_DIR / "django.log"),
             "maxBytes": 1024 * 1024 * 10,  # 10MB
             "backupCount": 10,
             "formatter": "verbose",
@@ -465,33 +482,29 @@ LOGGING = {
         "celery_file": {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs" / "celery.log",
+            "filename": CELERY_LOG_FILE or str(LOG_DIR / "celery.log"),
             "maxBytes": 1024 * 1024 * 10,  # 10MB
             "backupCount": 5,
             "formatter": "verbose",
         },
     },
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"] + (["file"] if DJANGO_LOG_FILE else []),
         "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"] + (["file"] if DJANGO_LOG_FILE else []),
             "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
             "propagate": False,
         },
         "celery": {
-            "handlers": ["console", "celery_file"],
+            "handlers": ["console"] + (["celery_file"] if CELERY_LOG_FILE else []),
             "level": "INFO",
             "propagate": False,
         },
     },
 }
-
-# Create logs directory if it doesn't exist
-if not (BASE_DIR / "logs").exists():
-    (BASE_DIR / "logs").mkdir(exist_ok=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field

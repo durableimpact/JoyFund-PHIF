@@ -1,5 +1,6 @@
-'use client';
-import { useState } from 'react';
+ 'use client';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { Check, ArrowLeft, ArrowRight, Share2 } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
@@ -20,6 +21,7 @@ const COLORS = ['#1DB1DB', '#1D38DB', '#471DDB', '#1CDBC9', '#1D75DB'];
 export default function CreateCampaignPage() {
   const router = useRouter();
   const { currentUser, addCampaign, showToast } = useStore();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [eventType, setEventType] = useState('birthday');
   const [story, setStory] = useState('');
@@ -34,6 +36,17 @@ export default function CreateCampaignPage() {
   const goalXAF = goalDeliveries * 60000;
 
   const handlePublish = () => {
+    // If not authenticated, save draft and redirect to login preserving intent
+    if (!currentUser) {
+      const draft = { eventType, story, goalDeliveries, coverColor };
+      try {
+        localStorage.setItem('pending_campaign', JSON.stringify(draft));
+      } catch {}
+      const redirectTo = encodeURIComponent('/create?publishDraft=1');
+      window.location.href = `/login?redirect=${redirectTo}`;
+      return;
+    }
+
     const id = generateId('camp');
     setCampaignId(id);
     const campaign: Campaign = {
@@ -58,6 +71,46 @@ export default function CreateCampaignPage() {
     showToast('Your JoyFund is live! 🎉', 'success');
     setStep(4);
   };
+
+  // Auto-publish a pending draft after returning from login
+  useEffect(() => {
+    const publishDraft = searchParams?.get('publishDraft');
+    if (publishDraft !== '1') return;
+    try {
+      const raw = localStorage.getItem('pending_campaign');
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      // ensure we have a logged-in user
+      if (!currentUser) return;
+
+      const id = generateId('camp');
+      setCampaignId(id);
+      const campaign: Campaign = {
+        id,
+        donorId: currentUser?.id || 'donor-001',
+        donorName: currentUser?.name || donorName,
+        donorAvatar: donorInitials,
+        title: `${(currentUser?.name || donorName).split(' ')[0]}'s ${EVENT_TYPES.find(e=>e.id===draft.eventType)?.label || 'Celebration'} JoyFund`,
+        eventType: draft.eventType,
+        story: draft.story,
+        goalDeliveries: draft.goalDeliveries,
+        raisedXAF: 0,
+        goalXAF: draft.goalDeliveries * 60000,
+        contributors: 0,
+        status: 'active',
+        createdAt: new Date().toISOString().split('T')[0],
+        expiresAt: new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0],
+        slug: (currentUser?.name || donorName).split(' ')[0] + (EVENT_TYPES.find(e=>e.id===draft.eventType)?.label || ''),
+        coverColor: draft.coverColor,
+      };
+      addCampaign(campaign);
+      showToast('Your JoyFund is live! 🎉', 'success');
+      localStorage.removeItem('pending_campaign');
+      setStep(4);
+    } catch (e) {
+      // ignore parse errors
+    }
+  }, [searchParams, currentUser, addCampaign, showToast]);
 
   const steps = ['Event Type', 'Your Story', 'Impact Goal', 'Preview & Publish'];
 
