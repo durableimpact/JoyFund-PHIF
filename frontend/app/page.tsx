@@ -32,53 +32,93 @@ export default function HomePage() {
       <Navbar transparent />
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ background: 'linear-gradient(135deg, #1A1A2E 0%, #1D38DB 55%, #1DB1DB 100%)' }}>
-        <div className="absolute top-24 right-16 w-72 h-72 rounded-full opacity-10" style={{ background: 'var(--primary)' }} />
-        <div className="absolute bottom-24 left-10 w-56 h-56 rounded-full opacity-10" style={{ background: 'var(--success)' }} />
-        <div className="absolute top-48 left-1/3 w-36 h-36 rounded-full opacity-5 bg-white" />
+      {/* ── Hero ── */}
+<section className="relative min-h-screen flex flex-col overflow-hidden">
+  {/* Background photo */}
+  <div
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+    style={{
+      backgroundImage:
+        "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1600&auto=format&fit=crop')",
+    }}
+  />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-20">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-xs mb-8">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
-            <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span>
-          </div>
+  {/* Soft gradient overlay: dark at top, fades to page bg at bottom */}
+  <div
+    className="absolute inset-0"
+    style={{
+      background:
+        'linear-gradient(to bottom, rgba(10,20,60,0.58) 0%, rgba(15,30,90,0.38) 38%, rgba(249,250,251,0.90) 80%, #F9FAFB 100%)',
+    }}
+  />
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6">
-            Turn your{' '}
-            <span style={{ color: 'var(--success)' }}>celebration</span>
-            {' '}into<br />someone&apos;s safe delivery
-          </h1>
-          <p className="text-white/75 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-            JoyFund digitises Cameroon&apos;s Njangi solidarity — redirecting birthday gifts and wedding contributions into a transparent People&apos;s Health Insurance Fund for vulnerable pregnant women.
-          </p>
+  {/* Navbar sits on top of everything */}
+  <Navbar transparent />
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
-            <Link href="/create" className="btn-secondary text-base px-8 py-4">Start a JoyFund 🎉</Link>
-            <Link href="/explore" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-white border-2 border-white/40 hover:bg-white/10 transition-all">Explore Campaigns</Link>
-          </div>
+  {/* Hero content */}
+  <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-24">
 
-          <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-            {[
-              { v: platformStats.totalLivesSupported, l: 'Lives Supported', i: '❤️' },
-              { v: platformStats.activeCampaigns, l: 'Active Campaigns', i: '🎉' },
-              { v: '18.4M', l: 'XAF Raised', i: '💰' },
-            ].map(s => (
-              <div key={s.l} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/10">
-                <div className="text-xl mb-1">{s.i}</div>
-                <div className="text-lg font-black">{s.v}</div>
-                <div className="text-xs opacity-70">{s.l}</div>
-              </div>
-            ))}
-          </div>
+    {/* Live toast pill */}
+    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-xs mb-8">
+      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+      <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
+      <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span>
+    </div>
+
+    {/* Headline */}
+    <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md" style={{ letterSpacing: '-1px' }}>
+      Turn your{' '}
+      <span style={{ color: '#7de8c0' }}>celebration</span>
+      {' '}into<br />someone&apos;s safe delivery
+    </h1>
+
+    {/* Subtext */}
+    <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
+      JoyFund digitalises Cameroon&apos;s Njangi solidarity — redirecting birthday gifts and wedding contributions into a transparent People&apos;s Health Insurance Fund for vulnerable pregnant women.
+    </p>
+
+    {/* CTAs */}
+    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
+      <Link
+        href="/create"
+        className="btn-secondary text-base px-8 py-4"
+      >
+        Start a JoyFund 🎉
+      </Link>
+      <Link
+        href="#how-it-works"
+        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-white border-2 border-white/40 hover:bg-white/10 transition-all"
+      >
+        How it works
+      </Link>
+    </div>
+
+    {/* Stats */}
+    <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
+      {[
+        { v: platformStats.totalLivesSupported, l: 'Lives Supported', i: '❤️' },
+        { v: platformStats.activeCampaigns,      l: 'Active Campaigns', i: '🎉' },
+        { v: '18.4M',                            l: 'XAF Raised',       i: '💰' },
+      ].map(s => (
+        <div
+          key={s.l}
+          className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20"
+        >
+          <div className="text-xl mb-1">{s.i}</div>
+          <div className="text-lg font-black">{s.v}</div>
+          <div className="text-xs opacity-70">{s.l}</div>
         </div>
+      ))}
+    </div>
+  </div>
 
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 40C360 80 1080 0 1440 40V80H0V40Z" fill="#F9FAFB" />
-          </svg>
-        </div>
-      </section>
+  {/* Smooth wave into next section */}
+  <div className="absolute bottom-0 left-0 right-0">
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 40C360 80 1080 0 1440 40V80H0V40Z" fill="#F9FAFB" />
+    </svg>
+  </div>
+</section>
 
       {/* ── How It Works ── */}
       <section id="how-it-works" className="py-20 px-4">
