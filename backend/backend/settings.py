@@ -12,30 +12,31 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+import environ
 import sentry_sdk
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
+SECRET_KEY = env(
     "SECRET_KEY",
-    "django-insecure-qdt8$ejtchowb+mz_2)e8+ind*l0q_*%fpb4ku^=hegbxs$zcm",
+    default="django-insecure-qdt8$ejtchowb+mz_2)e8+ind*l0q_*%fpb4ku^=hegbxs$zcm",
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = env.bool("DEBUG", default=True)
 
 # Accept all hosts in development
-ALLOWED_HOSTS = ["*"] if DEBUG else os.environ.get("ALLOWED_HOSTS", "localhost").split()
+ALLOWED_HOSTS = ["*"] if DEBUG else env.list("ALLOWED_HOSTS", default=["localhost"])
 
 
 # Application definition
@@ -114,14 +115,14 @@ ASGI_APPLICATION = "backend.asgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.contrib.gis.db.backends.postgis"),
-        "NAME": os.environ.get("DB_NAME", "joyfund"),
-        "USER": os.environ.get("DB_USER", "joyfund"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "joyfund"),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+        "ENGINE": env("DB_ENGINE", default="django.contrib.gis.db.backends.postgis"),
+        "NAME": env("DB_NAME", default="joyfund"),
+        "USER": env("DB_USER", default="joyfund"),
+        "PASSWORD": env("DB_PASSWORD", default="joyfund"),
+        "HOST": env("DB_HOST", default="localhost"),
+        "PORT": env("DB_PORT", default="5432"),
         # Connection pooling for production
-        "CONN_MAX_AGE": int(os.environ.get("DB_CONN_MAX_AGE", 600)),
+        "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
         "OPTIONS": {
             "connect_timeout": 10,
             "options": "-c statement_timeout=30000 -c idle_in_transaction_session_timeout=60000",
@@ -129,19 +130,19 @@ DATABASES = {
         "ATOMIC_REQUESTS": False,  # Avoid long-running transactions
     }
 }
-
+print("Envs : ", env("DB_USER", default="joyfund"), env("DB_PASSWORD", default="joyfund"), env("DB_HOST", default="localhost"), env("DB_PORT", default="5432"))
 # SpatiaLite path — only used when DB_ENGINE is set to the spatialite backend
 # (local development without Docker)
-SPATIALITE_LIBRARY_PATH = os.environ.get(
+SPATIALITE_LIBRARY_PATH = env(
     "SPATIALITE_LIBRARY_PATH",
-    "/usr/lib/x86_64-linux-gnu/mod_spatialite.so.8.1.0",
+    default="/usr/lib/x86_64-linux-gnu/mod_spatialite.so.8.1.0",
 )
 
 # GeoDjango geo library paths
 # Set automatically in Docker via Dockerfile ENV; on Linux these are usually
 # found automatically — only override when needed.
-_gdal_lib = os.environ.get("GDAL_LIBRARY_PATH")
-_geos_lib = os.environ.get("GEOS_LIBRARY_PATH")
+_gdal_lib = env("GDAL_LIBRARY_PATH", default=None)
+_geos_lib = env("GEOS_LIBRARY_PATH", default=None)
 if _gdal_lib:
     GDAL_LIBRARY_PATH = _gdal_lib
 if _geos_lib:
@@ -212,15 +213,15 @@ REST_FRAMEWORK = {
     ),
     # Pagination required for all list endpoints
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": int(os.environ.get("REST_PAGE_SIZE", 20)),
+    "PAGE_SIZE": env.int("REST_PAGE_SIZE", default=20),
     # Rate limiting to prevent abuse
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": os.environ.get("THROTTLE_ANON", "100/hour"),
-        "user": os.environ.get("THROTTLE_USER", "1000/hour"),
+        "anon": env("THROTTLE_ANON", default="100/hour"),
+        "user": env("THROTTLE_USER", default="1000/hour"),
     },
     # Custom exception handler with logging
     "EXCEPTION_HANDLER": "logs.exceptions.custom_exception_handler",
@@ -228,18 +229,14 @@ REST_FRAMEWORK = {
     "COMPACT_JSON": True,
 }
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", "")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get(
-    "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", ""
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", default="")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env(
+    "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", default=""
 )
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["openid", "email", "profile"]
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = [
-    domain
-    for domain in os.environ.get(
-        "SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS", ""
-    ).split(",")
-    if domain
-]
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = env.list(
+    "SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS", default=[]
+)
 
 SOCIAL_AUTH_ASSOCIATE_BY_EMAIL = True
 SOCIAL_AUTH_PIPELINE = (
@@ -274,8 +271,8 @@ OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
 OAUTH2_PROVIDER_GRANT_MODEL = "oauth2_provider.Grant"
 
 OAUTH2_PROVIDER = {
-    "ACCESS_TOKEN_EXPIRE_SECONDS": int(
-        os.environ.get("OAUTH2_ACCESS_TOKEN_EXPIRE_SECONDS", 36000)
+    "ACCESS_TOKEN_EXPIRE_SECONDS": env.int(
+        "OAUTH2_ACCESS_TOKEN_EXPIRE_SECONDS", default=36000
     ),
     "REFRESH_TOKEN_EXPIRE_SECONDS": 30 * 24 * 60 * 60,  # 30 days
     # "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
@@ -312,7 +309,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get("CACHE_LOCATION", "redis://localhost:6379/2"),
+        "LOCATION": env("CACHE_LOCATION", default="redis://localhost:6379/2"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "SOCKET_CONNECT_TIMEOUT": 5,
@@ -330,11 +327,11 @@ CACHES = {
 # ─────────────────────────────────────────────────────────────────────────────
 # Use localhost for development (when running outside Docker)
 # Use service names (rabbitmq, redis) when running inside Docker (via env vars)
-CELERY_BROKER_URL = os.environ.get(
-    "CELERY_BROKER_URL", "amqp://joyfund:joyfund@localhost:5672//"
+CELERY_BROKER_URL = env(
+    "CELERY_BROKER_URL", default="amqp://joyfund:joyfund@localhost:5672//"
 )
-CELERY_RESULT_BACKEND = os.environ.get(
-    "CELERY_RESULT_BACKEND", "redis://localhost:6379/1"
+CELERY_RESULT_BACKEND = env(
+    "CELERY_RESULT_BACKEND", default="redis://localhost:6379/1"
 )
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -362,7 +359,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get("CHANNEL_LAYER_HOST", "redis://localhost:6379/0")],
+            "hosts": [env("CHANNEL_LAYER_HOST", default="redis://localhost:6379/0")],
             # Capacity: number of messages that can be stored in a group
             "capacity": 1500,
             # Expiry: seconds before a message expires in a group
@@ -387,7 +384,7 @@ CHANX = {
 # Configure Redis as the backend
 RATELIMIT_BACKEND = "redis"
 RATELIMIT_REDIS = {
-    "host": os.environ.get("REDIS_HOST", "localhost"),
+    "host": env("REDIS_HOST", default="localhost"),
     "port": 6379,
     "db": 3,
 }
@@ -407,22 +404,22 @@ CSRF_COOKIE_SECURE = not DEBUG
 # Email settings
 # ─────────────────────────────────────────────────────────────────────────────
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.example.com")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "your-email@example.com")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "your-email-password")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "webmaster@example.com")
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.example.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="your-email@example.com")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="your-email-password")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@example.com")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CamPay Payment Gateway Configuration
 # ─────────────────────────────────────────────────────────────────────────────
-CAMPAY_APP_ID = os.environ.get("CAMPAY_APP_ID", "")
-CAMPAY_APP_USERNAME = os.environ.get("CAMPAY_APP_USERNAME", "")
-CAMPAY_APP_PASSWORD = os.environ.get("CAMPAY_APP_PASSWORD", "")
-CAMPAY_PERMANENT_TOKEN = os.environ.get("CAMPAY_PERMANENT_TOKEN", "")
-CAMPAY_WEBHOOK_SECRET = os.environ.get("CAMPAY_WEBHOOK_SECRET", "")
-CAMPAY_ENVIRONMENT = os.environ.get("CAMPAY_ENVIRONMENT", "DEV")
+CAMPAY_APP_ID = env("CAMPAY_APP_ID", default="")
+CAMPAY_APP_USERNAME = env("CAMPAY_APP_USERNAME", default="")
+CAMPAY_APP_PASSWORD = env("CAMPAY_APP_PASSWORD", default="")
+CAMPAY_PERMANENT_TOKEN = env("CAMPAY_PERMANENT_TOKEN", default="")
+CAMPAY_WEBHOOK_SECRET = env("CAMPAY_WEBHOOK_SECRET", default="")
+CAMPAY_ENVIRONMENT = env("CAMPAY_ENVIRONMENT", default="DEV")
 
 # Ensure the logs directory exists before Django configures file-based logging.
 LOG_DIR = BASE_DIR / "logs"
@@ -495,7 +492,7 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["console"] + (["file"] if DJANGO_LOG_FILE else []),
-            "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+            "level": env("DJANGO_LOG_LEVEL", default="INFO"),
             "propagate": False,
         },
         "celery": {
@@ -512,7 +509,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Frontend URL for password reset links and other redirects
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 
 # Sentry
 
