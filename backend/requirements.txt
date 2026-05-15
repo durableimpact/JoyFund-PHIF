@@ -33,6 +33,7 @@ defusedxml==0.7.1
 Django==6.0.2
 django-asyncapi==0.3.2
 django-celery-beat==2.9.0
+django-environ==0.13.0
 django-filter==25.2
 django-model2puml==0.5.1
 django-oauth-toolkit==3.2.0
