@@ -82,8 +82,37 @@ def oauth2_token_view(request):
     
     The actual OAuth2 token logic is handled by drf-social-oauth2.
     """
+    import json
     from oauth2_provider.views import TokenView
+    from oauth2_provider.models import AccessToken
     
+    # If the request is JSON, parse it and populate request.POST
+    if request.content_type == 'application/json':
+        try:
+            from django.http import QueryDict
+            body_data = json.loads(request.body)
+            q = QueryDict('', mutable=True)
+            q.update(body_data)
+            request.POST = q
+        except Exception:
+            pass
+            
     # Delegate to the actual OAuth2 token view
     token_view = TokenView.as_view()
-    return token_view(request)
+    response = token_view(request)
+    
+    # If the token request is successful, inject the user's role
+    if response.status_code == 200:
+        try:
+            data = json.loads(response.content)
+            access_token = data.get("access_token")
+            if access_token:
+                token_obj = AccessToken.objects.filter(token=access_token).select_related('user').first()
+                if token_obj and token_obj.user:
+                    data['role'] = token_obj.user.role
+                    response.content = json.dumps(data).encode("utf-8")
+        except Exception:
+            # Silently fallback to original response if anything fails
+            pass
+            
+    return response
