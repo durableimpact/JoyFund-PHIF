@@ -13,6 +13,7 @@ from accounts.serializers import (
     HospitalAdminUpdateSerializer,
 )
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache, make_cache_key
+from accounts.filters import HospitalAdminFilter
 
 _TAG = ['Hospital Admins']
 
@@ -37,17 +38,7 @@ class HospitalAdminViewSet(
     queryset = HospitalAdmin.objects.select_related('user', 'enrolled_by__user', 'hospital').all().order_by('-user__created_at')
     lookup_field = 'id'
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = {
-        'id': ['exact'],
-        'hospital_id': ['exact', 'isnull'],
-        'enrolled_by_id': ['exact'],
-        'national_id_number': ['exact', 'icontains'],
-        'user__email': ['exact', 'icontains'],
-        'user__phone_number': ['exact', 'icontains'],
-        'user__is_verified': ['exact'],
-        'user__is_active': ['exact'],
-        'user__created_at': ['date', 'gte', 'lte'],
-    }
+    filterset_class = HospitalAdminFilter
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'national_id_number']
     ordering_fields = ['user__created_at']
 
