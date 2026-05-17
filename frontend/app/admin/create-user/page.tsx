@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authenticatedFetch } from "@/lib/api";
 import { useStore } from "@/store/useStore";
@@ -23,30 +23,84 @@ export default function AdminCreateUserPage() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [hospitalId, setHospitalId] = useState("");
+  const [hospitals, setHospitals] = useState<any[]>([]);
+  const [nationalId, setNationalId] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [regionAssigned, setRegionAssigned] = useState("");
+  const [frontIdFile, setFrontIdFile] = useState<File | null>(null);
+  const [backIdFile, setBackIdFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      const endpoint = ROLE_ENDPOINT[role];
-      if (!endpoint) throw new Error("Unsupported role");
+      // Basic client-side validation
+      if (!firstName || !lastName) throw new Error('First and last name are required.');
+      if (!email) throw new Error('Email is required.');
+      if (!password || password.length < 8) throw new Error('Password is required (min 8 characters).');
 
-      const payload: any = {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        password,
-        phone_number: phone || undefined,
-      };
+      // If creating a hospital_admin, social_worker, or receptionist, send multipart/form-data with ID images
+      if (role === 'hospital_admin' || role === 'social_worker' || role === 'receptionist') {
+        if (!nationalId) throw new Error('National ID number is required for hospital_admins, social workers, and receptionists.');
+        if (!frontIdFile) throw new Error('Front image of national ID is required.');
+        if (!backIdFile) throw new Error('Back image of national ID is required.');
+        if (role === 'social_worker') {
+          if (!organization) throw new Error('Organization is required for social workers.');
+          if (!regionAssigned) throw new Error('Region assigned is required for social workers.');
+        }
 
-      if (hospitalId) payload.hospital = hospitalId;
+        const form = new FormData();
+        form.append('role', role);
+        form.append('first_name', firstName);
+        form.append('last_name', lastName);
+        form.append('email', email);
+        form.append('password', password);
+        if (phone) form.append('phone_number', phone);
+        if (hospitalId) form.append('hospital', hospitalId);
+        form.append('national_id_number', nationalId);
+        form.append('front_national_id_image', frontIdFile as File);
+        form.append('back_national_id_image', backIdFile as File);
+        if (role === 'social_worker') {
+          form.append('organization', organization);
+          form.append('region_assigned', regionAssigned);
+        }
 
-      await authenticatedFetch(endpoint, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" },
-      });
+        const res = await fetch(`/api/admin/create-user?role=${encodeURIComponent(role)}`, {
+          method: 'POST',
+          body: form,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          // Surface full error JSON for easier debugging
+          const errMsg = err?.detail || err?.message || JSON.stringify(err) || `Create user failed: ${res.status}`;
+          throw new Error(errMsg);
+        }
+      } else {
+        const payload: any = {
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          password,
+          phone_number: phone || undefined,
+        };
+
+        if (hospitalId) payload.hospital = hospitalId;
+
+        // Use server-side proxy to avoid CORS preflight and rely on httpOnly cookie
+        const res = await fetch('/api/admin/create-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role, payload }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          const errMsg = err?.detail || err?.message || JSON.stringify(err) || `Create user failed: ${res.status}`;
+          throw new Error(errMsg);
+        }
+      }
 
       showToast("User created successfully", "success");
       setFirstName("");
@@ -55,12 +109,35 @@ export default function AdminCreateUserPage() {
       setPassword("");
       setPhone("");
       setHospitalId("");
+      setNationalId("");
+      setOrganization("");
+      setRegionAssigned("");
+      setFrontIdFile(null);
+      setBackIdFile(null);
     } catch (err: any) {
       showToast(err?.message || "Failed to create user", "error");
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/hospitals');
+        const data = await res.json().catch(() => ({}));
+        const list = Array.isArray(data) ? data : data?.results || [];
+        if (!mounted) return;
+        setHospitals(list);
+        const seed = list.find((h: any) => h.email === 'info@generalhospital.com' || (h.name || '').toLowerCase().includes('general'));
+        if (seed) setHospitalId(seed.id);
+      } catch (e) {
+        // ignore — leave hospitalId editable
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <div>
@@ -98,6 +175,7 @@ export default function AdminCreateUserPage() {
                   <input
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name (e.g. John)"
                     className="mt-1 block w-full rounded-md border px-3 py-2"
                   />
                 </div>
@@ -106,6 +184,7 @@ export default function AdminCreateUserPage() {
                   <input
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name (e.g. Doe)"
                     className="mt-1 block w-full rounded-md border px-3 py-2"
                   />
                 </div>
@@ -118,6 +197,7 @@ export default function AdminCreateUserPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="user@example.com"
                   className="mt-1 block w-full rounded-md border px-3 py-2"
                 />
               </div>
@@ -129,6 +209,7 @@ export default function AdminCreateUserPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 8 characters"
                   className="mt-1 block w-full rounded-md border px-3 py-2"
                 />
               </div>
@@ -140,23 +221,146 @@ export default function AdminCreateUserPage() {
                 <input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+237 6XXXXXXXX"
                   className="mt-1 block w-full rounded-md border px-3 py-2"
                 />
               </div>
+
+              {role === 'social_worker' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Organization
+                    </label>
+                    <input
+                      value={organization}
+                      onChange={(e) => setOrganization(e.target.value)}
+                      placeholder="Organization name"
+                      className="mt-1 block w-full rounded-md border px-3 py-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Region assigned
+                    </label>
+                    <input
+                      value={regionAssigned}
+                      onChange={(e) => setRegionAssigned(e.target.value)}
+                      placeholder="Region, district or area"
+                      className="mt-1 block w-full rounded-md border px-3 py-2"
+                    />
+                  </div>
+                </>
+              )}
 
               {(role === "hospital_admin" ||
                 role === "receptionist" ||
                 role === "nurse") && (
                 <div>
                   <label className="block text-sm font-medium">
-                    Hospital ID (UUID)
+                    Hospital
                   </label>
-                  <input
-                    value={hospitalId}
-                    onChange={(e) => setHospitalId(e.target.value)}
-                    className="mt-1 block w-full rounded-md border px-3 py-2"
-                  />
+                  {hospitals.length > 0 ? (
+                    <select
+                      value={hospitalId}
+                      onChange={(e) => setHospitalId(e.target.value)}
+                      className="mt-1 block w-full rounded-md border px-3 py-2"
+                    >
+                      <option value="">-- Select hospital (name — id) --</option>
+                      {hospitals.map((h) => (
+                        <option key={h.id} value={h.id}>
+                          {h.name} — {h.id}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      value={hospitalId}
+                      onChange={(e) => setHospitalId(e.target.value)}
+                      placeholder="Hospital UUID (e.g. 123e4567-e89b-12d3-a456-426614174000)"
+                      className="mt-1 block w-full rounded-md border px-3 py-2"
+                    />
+                  )}
                 </div>
+              )}
+
+              {(role === 'social_worker' || role === 'receptionist') && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium">
+                      National ID number
+                    </label>
+                    <input
+                      value={nationalId}
+                      onChange={(e) => setNationalId(e.target.value)}
+                      placeholder="National ID (e.g. NID-12345)"
+                      className="mt-1 block w-full rounded-md border px-3 py-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Front of national ID (image)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setFrontIdFile(e.target.files?.[0] ?? null)}
+                      className="mt-1 block w-full"
+                      title="Upload front image of national ID (jpg/png, max 5MB)"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Back of national ID (image)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setBackIdFile(e.target.files?.[0] ?? null)}
+                      className="mt-1 block w-full"
+                      title="Upload back image of national ID (jpg/png, max 5MB)"
+                    />
+                  </div>
+                </>
+              )}
+
+              {role === 'hospital_admin' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium">National ID number</label>
+                    <input
+                      value={nationalId}
+                      onChange={(e) => setNationalId(e.target.value)}
+                      placeholder="National ID (e.g. NID-12345)"
+                      className="mt-1 block w-full rounded-md border px-3 py-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium">Front of national ID (image)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setFrontIdFile(e.target.files?.[0] ?? null)}
+                      className="mt-1 block w-full"
+                      title="Upload front image of national ID (jpg/png, max 5MB)"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium">Back of national ID (image)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setBackIdFile(e.target.files?.[0] ?? null)}
+                      className="mt-1 block w-full"
+                      title="Upload back image of national ID (jpg/png, max 5MB)"
+                    />
+                  </div>
+                </>
               )}
 
               <div className="flex items-center justify-end">
