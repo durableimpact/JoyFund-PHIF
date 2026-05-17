@@ -9,7 +9,7 @@ from django.conf import settings
 import logging
 
 from accounts.models import User
-from accounts.models import Donor, HospitalAdmin, Receptionist, SocialWorker, SystemAdmin
+from accounts.models import Donor, HospitalAdmin, Receptionist, SocialWorker, SystemAdmin, Role
 from accounts.tasks.send_mail import send_email
 from accounts.tasks import notify_admin_user_created
 
@@ -21,7 +21,7 @@ def create_system_admin_profile_after_user_account_created(sender,instance,creat
     """
     Create a system admin profile after a user with role of SYSTEM_ADMIN created
     """
-    if created:
+    if created and instance.role == Role.SYSTEM_ADMIN:
         SystemAdmin.objects.get_or_create(user=instance)
 
 
