@@ -1,11 +1,9 @@
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework import status
-from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework import status, viewsets, mixins
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from accounts.models import Receptionist, Role
 from accounts.serializers import (
@@ -14,6 +12,7 @@ from accounts.serializers import (
     ReceptionistUpdateSerializer,
 )
 from accounts.utils import IsHospitalAdmin, IsOwnerOrHospitalAdmin, cache_response, invalidate_cache, make_cache_key
+from accounts.filters import ReceptionistFilter
 
 _TAG = ['Receptionists']
 
@@ -29,66 +28,19 @@ class IsHospitalAdminOrSystemAdmin(BasePermission):
         )
 
 
-class ReceptionistCreateView(APIView):
+class ReceptionistViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
     """
-    POST /api/accounts/receptionists/
-    Only HOSPITAL_ADMIN can create a Receptionist account.
-    The `enrolled_by` field is automatically set to the requesting hospital admin.
+    ViewSet for Receptionist management.
     """
-
-    permission_classes = [IsAuthenticated, IsHospitalAdmin]
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        request_body=ReceptionistCreateSerializer,
-        responses={201: ReceptionistDetailSerializer},
-        operation_description="Create a new Receptionist account. Only accessible by HOSPITAL_ADMIN.",
-    )
-    @invalidate_cache(make_cache_key('receptionist_list'))
-    def post(self, request):
-        try:
-            enrolled_by = request.user.hospitaladmin
-        except Exception:
-            return Response(
-                {'detail': 'Requesting user does not have a HospitalAdmin profile.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        serializer = ReceptionistCreateSerializer(
-            data=request.data,
-            context={'enrolled_by': enrolled_by},
-        )
-        serializer.is_valid(raise_exception=True)
-        receptionist = serializer.save()
-        return Response(
-            ReceptionistDetailSerializer(receptionist).data,
-            status=status.HTTP_201_CREATED,
-        )
-
-
-class ReceptionistListView(ListAPIView):
-    """
-    GET /api/accounts/receptionists/list/
-    Accessible by HOSPITAL_ADMIN and SYSTEM_ADMIN.
-    
-    Supports filtering, searching, and ordering via query parameters.
-    Different queries generate different cache keys.
-    """
-
-    serializer_class = ReceptionistDetailSerializer
-    permission_classes = [IsAuthenticated, IsHospitalAdminOrSystemAdmin]
+    lookup_field = 'id'
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = {
-        'id': ['exact'],
-        'hospital_id': ['exact', 'isnull'],
-        'enrolled_by_id': ['exact'],
-        'national_id_number': ['exact', 'icontains'],
-        'user__email': ['exact', 'icontains'],
-        'user__phone_number': ['exact', 'icontains'],
-        'user__is_verified': ['exact'],
-        'user__is_active': ['exact'],
-        'user__created_at': ['date', 'gte', 'lte'],
-    }
+    filterset_class = ReceptionistFilter
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'national_id_number']
     ordering_fields = ['user__created_at']
 
@@ -102,28 +54,57 @@ class ReceptionistListView(ListAPIView):
             return queryset
         return queryset.filter(enrolled_by__user=self.request.user)
 
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsAuthenticated(), IsHospitalAdmin()]
+        elif self.action == 'list':
+            return [IsAuthenticated(), IsHospitalAdminOrSystemAdmin()]
+        elif self.action in ['retrieve', 'update', 'partial_update']:
+            return [IsAuthenticated(), IsOwnerOrHospitalAdmin()]
+        return [IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return ReceptionistCreateSerializer
+        elif self.action in ['update', 'partial_update']:
+            return ReceptionistUpdateSerializer
+        return ReceptionistDetailSerializer
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=ReceptionistCreateSerializer,
+        responses={201: ReceptionistDetailSerializer},
+        operation_description="Create a new Receptionist account. Only accessible by HOSPITAL_ADMIN.",
+    )
+    @invalidate_cache(make_cache_key('receptionist_list'))
+    def create(self, request, *args, **kwargs):
+        try:
+            enrolled_by = request.user.hospitaladmin
+        except Exception:
+            return Response(
+                {'detail': 'Requesting user does not have a HospitalAdmin profile.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(
+            data=request.data,
+            context={'enrolled_by': enrolled_by},
+        )
+        serializer.is_valid(raise_exception=True)
+        receptionist = serializer.save()
+        return Response(
+            ReceptionistDetailSerializer(receptionist).data,
+            status=status.HTTP_201_CREATED,
+        )
+
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: ReceptionistDetailSerializer(many=True)},
         operation_description='List Receptionist profiles with filtering and search support. SYSTEM_ADMIN sees all; HOSPITAL_ADMIN sees only their enrolled receptionists.',
     )
     @cache_response(timeout=5 * 60)
-    def get(self, request, *args, **kwargs):
-        """Cache includes all query parameters (filters, search, ordering) and user."""
-        return super().get(request, *args, **kwargs)
-
-
-class ReceptionistDetailView(RetrieveAPIView):
-    """
-    GET /api/accounts/receptionists/<id>/
-    Accessible by the receptionist themselves, their enrolling hospital admin,
-    or a SYSTEM_ADMIN.
-    """
-
-    queryset = Receptionist.objects.select_related('user', 'enrolled_by__user', 'hospital')
-    serializer_class = ReceptionistDetailSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrHospitalAdmin]
-    lookup_field = 'id'
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -131,23 +112,8 @@ class ReceptionistDetailView(RetrieveAPIView):
         operation_description="Retrieve a Receptionist profile. Accessible by the receptionist, their hospital admin, or a SYSTEM_ADMIN.",
     )
     @cache_response(timeout=10 * 60)
-    def get(self, request, *args, **kwargs):
-        """Cache key includes the receptionist ID."""
-        return super().get(request, *args, **kwargs)
-
-
-class ReceptionistUpdateView(UpdateAPIView):
-    """
-    PATCH /api/accounts/receptionists/<id>/update/
-    Accessible by the receptionist themselves, their enrolling hospital admin,
-    or a SYSTEM_ADMIN.
-    """
-
-    queryset = Receptionist.objects.select_related('user')
-    serializer_class = ReceptionistUpdateSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrHospitalAdmin]
-    lookup_field = 'id'
-    http_method_names = ['patch', 'head', 'options']
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -156,6 +122,15 @@ class ReceptionistUpdateView(UpdateAPIView):
         operation_description="Partially update a Receptionist profile. Accessible by the receptionist, their hospital admin, or a SYSTEM_ADMIN.",
     )
     @invalidate_cache(make_cache_key('receptionist_list'))
-    def patch(self, request, *args, **kwargs):
-        """Invalidates the receptionist list cache when a profile is updated."""
-        return super().patch(request, *args, **kwargs)
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=ReceptionistUpdateSerializer,
+        responses={200: ReceptionistDetailSerializer},
+        operation_description="Fully update a Receptionist profile. Accessible by the receptionist, their hospital admin, or a SYSTEM_ADMIN.",
+    )
+    @invalidate_cache(make_cache_key('receptionist_list'))
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
