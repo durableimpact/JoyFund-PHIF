@@ -9,15 +9,9 @@ from accounts.views import (
     DonorInfoView,
     HospitalAdminViewSet,
     HospitalAdminInfoView,
-    ReceptionistCreateView,
-    ReceptionistDetailView,
-    ReceptionistListView,
-    ReceptionistUpdateView,
+    ReceptionistViewSet,
     ReceptionistInfoView,
-    SocialWorkerCreateView,
-    SocialWorkerDetailView,
-    SocialWorkerListView,
-    SocialWorkerUpdateView,
+    SocialWorkerViewSet,
     SocialWorkerInfoView,
     SystemAdminInfoView,
     VerifyEmailView,
@@ -32,6 +26,8 @@ app_name = 'accounts'
 # Router for Hospital Admin ViewSet
 router = SimpleRouter()
 router.register(r'hospital-admins', HospitalAdminViewSet, basename='hospital-admin')
+router.register(r'social-workers', SocialWorkerViewSet, basename='social-worker')
+router.register(r'receptionists', ReceptionistViewSet, basename='receptionist')
 
 urlpatterns = [
     # -----------------------------------------------------------------------
@@ -65,23 +61,6 @@ urlpatterns = [
     path('donors/<uuid:id>/update/', DonorUpdateView.as_view(), name='donor-update'),
 
     # -----------------------------------------------------------------------
-    # Hospital Admins (created by SYSTEM_ADMIN) - ViewSet Router
+    # ViewSet Router URLs (Hospital Admins, Social Workers, Receptionists)
     # -----------------------------------------------------------------------
-] + router.urls + [
-
-    # -----------------------------------------------------------------------
-    # Receptionists  (created by HOSPITAL_ADMIN)
-    # -----------------------------------------------------------------------
-    path('receptionists/', ReceptionistListView.as_view(), name='receptionist-list'),
-    path('receptionists/', ReceptionistCreateView.as_view(), name='receptionist-create'),
-    path('receptionists/<uuid:id>/', ReceptionistDetailView.as_view(), name='receptionist-detail'),
-    path('receptionists/<uuid:id>/update/', ReceptionistUpdateView.as_view(), name='receptionist-update'),
-
-    # -----------------------------------------------------------------------
-    # Social Workers  (created by SYSTEM_ADMIN)
-    # -----------------------------------------------------------------------
-    path('social-workers/', SocialWorkerListView.as_view(), name='social-worker-list'),
-    path('social-workers/', SocialWorkerCreateView.as_view(), name='social-worker-create'),
-    path('social-workers/<uuid:id>/', SocialWorkerDetailView.as_view(), name='social-worker-detail'),
-    path('social-workers/<uuid:id>/update/', SocialWorkerUpdateView.as_view(), name='social-worker-update'),
-]
+] + router.urls
