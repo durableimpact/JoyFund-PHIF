@@ -1,3 +1,4 @@
+import { logoutUser } from '@/lib/auth';
 import { useStore } from '../store/useStore';
 import { DJANGO_API_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET } from '@/lib/apiClient';
 
@@ -51,8 +52,8 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
       console.error('Token refresh failed:', error);
     }
 
-    // Refresh failed, logout
-    store.logout();
+    // Refresh failed, logout both local state and server cookie
+    await logoutUser();
     throw new Error('Session expired. Please log in again.');
   }
 
