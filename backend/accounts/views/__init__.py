@@ -1,7 +1,7 @@
 from .donor import DonorRegisterView, DonorListView, DonorDetailView, DonorUpdateView
 from .hospital_admin_viewset import HospitalAdminViewSet
-from .receptionist import ReceptionistCreateView, ReceptionistListView, ReceptionistDetailView, ReceptionistUpdateView
-from .social_worker import SocialWorkerCreateView, SocialWorkerListView, SocialWorkerDetailView, SocialWorkerUpdateView
+from .receptionist import ReceptionistViewSet
+from .social_worker import SocialWorkerViewSet
 from .verification import VerifyEmailView, ResendVerificationView
 from .password import PasswordResetRequestView, PasswordResetConfirmView, PasswordChangeView
 from .info import (
@@ -18,14 +18,8 @@ __all__ = [
     'DonorDetailView',
     'DonorUpdateView',
     'HospitalAdminViewSet',
-    'ReceptionistCreateView',
-    'ReceptionistListView',
-    'ReceptionistDetailView',
-    'ReceptionistUpdateView',
-    'SocialWorkerCreateView',
-    'SocialWorkerListView',
-    'SocialWorkerDetailView',
-    'SocialWorkerUpdateView',
+    'ReceptionistViewSet',
+    'SocialWorkerViewSet',
     'DonorInfoView',
     'HospitalAdminInfoView',
     'ReceptionistInfoView',
