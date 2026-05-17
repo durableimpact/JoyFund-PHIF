@@ -14,6 +14,7 @@ from accounts.serializers import (
     DonorUpdateSerializer,
 )
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache, make_cache_key
+from accounts.filters import DonorFilter
 
 _TAG = ['Donors']
 
@@ -59,14 +60,7 @@ class DonorListView(ListAPIView):
     serializer_class = DonorDetailSerializer
     permission_classes = [IsAuthenticated, IsSystemAdmin]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = {
-        'id': ['exact'],
-        'user__email': ['exact', 'icontains'],
-        'user__phone_number': ['exact', 'icontains'],
-        'user__is_verified': ['exact'],
-        'user__is_active': ['exact'],
-        'user__created_at': ['date', 'gte', 'lte'],
-    }
+    filterset_class = DonorFilter
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'user__phone_number']
     ordering_fields = ['user__created_at']
 
