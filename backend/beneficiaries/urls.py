@@ -33,7 +33,7 @@ urlpatterns = [
         name="health-issue-detail",
     ),
     path(
-        "health-issues/<int:id>/<str:action>/",
+        "health-issues/<int:id>/action/",
         HealthIssueStatusActionView.as_view(),
         name="health-issue-status-action",
     ),
