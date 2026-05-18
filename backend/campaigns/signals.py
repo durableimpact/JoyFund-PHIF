@@ -60,12 +60,19 @@ def create_campaign_transaction_on_donation_success(sender, instance:Donation, c
 
 @receiver(post_save, sender=Campaign)
 def invalidate_campaign_caches_on_save(sender, instance, created, **kwargs):
-    """Invalidate campaign caches when a campaign is created or updated"""
-    # Always invalidate the list cache
+    """
+    1. Invalidate campaign caches when a campaign is created or updated
+    2. Generate impact certificate if campaign goal is reached
+    """
+    # Invalidate the list cache
     cache.delete('campaign_list')
     
     # Invalidate the detail cache for this campaign
     cache.delete(f'campaign_detail_{instance.id}')
+    
+    # Generate impact certificate if goal is reached
+    if instance.goal_reached and not instance.certificate_generated:
+        instance.generate_impact_certificate()
 
 
 @receiver(post_delete, sender=Campaign)
