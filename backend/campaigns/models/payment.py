@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from decimal import Decimal
+from utils.models import BaseEvent
 
 class Payment(models.Model):
     PAYMENT_METHODS = [
@@ -46,7 +47,12 @@ class Payment(models.Model):
     def __str__(self):
         return f"{self.payment_id} - {self.amount} XAF ({self.payment_status})"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_payment_status = self.payment_status
+
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
 
         # auto-calculate aggregator fee
         self.aggregator_fee = (
@@ -54,3 +60,25 @@ class Payment(models.Model):
         )
 
         super().save(*args, **kwargs)
+
+        if is_new or self.payment_status != self._initial_payment_status:
+            if is_new:
+                notes = f"Payment status initially set to {self.payment_status}"
+            else:
+                notes = f"Payment status changed from {self._initial_payment_status} to {self.payment_status}"
+            self.events.create(
+                status=self.payment_status,
+                notes=notes
+            )
+            self._initial_payment_status = self.payment_status
+
+
+class PaymentEvent(BaseEvent):
+    """
+    Tracks all the payment_status changes that happen on a Payment
+    """
+    payment = models.ForeignKey(
+        Payment, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )

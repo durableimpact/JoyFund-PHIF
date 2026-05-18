@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from decimal import Decimal, ROUND_HALF_UP
+from utils.models import BaseEvent
 from accounts.models import Donor
 from .campaign import Campaign
 from .payment import Payment
@@ -61,7 +62,13 @@ class Donation(models.Model):
             models.Index(fields=["donor"]),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_status = self.status
+
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
+
         # Automatically calculate platform fee and net amount on save
         # Calculate fee ONLY when status becomes SUCCESS and hasn't been calculated yet
         if self.status == "SUCCESS" and self.payment and self.platform_fee_amount == 0:
@@ -77,5 +84,28 @@ class Donation(models.Model):
 
         super().save(*args, **kwargs)
 
+        if is_new or self.status != self._initial_status:
+            if is_new:
+                notes = f"Donation status initially set to {self.status}"
+            else:
+                notes = f"Donation status changed from {self._initial_status} to {self.status}"
+            self.events.create(
+                status=self.status,
+                notes=notes
+            )
+            self._initial_status = self.status
+
     def __str__(self):
         return f"{self.amount} XAF to {self.campaign.title} by {self.donor_name}"
+
+
+class DonationEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a Donation
+    """
+    donation = models.ForeignKey(
+        Donation, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+

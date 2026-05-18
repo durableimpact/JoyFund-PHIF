@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from utils.models import BaseEvent
 from decimal import Decimal
 from accounts.models import Donor
 
@@ -110,5 +111,35 @@ class Campaign(models.Model):
             return (self.current_amount / self.goal_amount) * 100
         return 0
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_status = self.status
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
+        if is_new or self.status != self._initial_status:
+            if is_new:
+                notes = f"Campaign status initially set to {self.status}"
+            else:
+                notes = f"Campaign status changed from {self._initial_status} to {self.status}"
+            self.events.create(
+                status=self.status,
+                notes=notes
+            )
+            self._initial_status = self.status
+
     def __str__(self):
         return self.title
+
+
+class CampaignEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a Campaign
+    """
+    campaign = models.ForeignKey(
+        Campaign, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
