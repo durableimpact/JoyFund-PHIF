@@ -285,53 +285,55 @@ class Command(BaseCommand):
                 self.stdout.write(f'  • Hospital already exists: {hospital.name}')
 
             # Create Hospital Admin if not exists
-            try:
-                hosp_admin = HospitalAdmin.objects.get(hospital=hospital)
-            except HospitalAdmin.DoesNotExist:
-                hosp_admin_user, _ = User.objects.get_or_create(
-                    email=f'admin-{hospital.id}@joyfund.com',
-                    defaults={
-                        'first_name': f'{hospital.name} Admin',
-                        'last_name': 'Account',
-                        'phone_number': f'+237{random.randint(600000000, 699999999)}',
-                        'role': Role.HOSPITAL_ADMIN,
-                        'is_active': True,
-                        'is_verified': True,
-                    },
-                )
+            hosp_admin_user, user_created = User.objects.get_or_create(
+                email=f'admin-{hospital.id}@joyfund.com',
+                defaults={
+                    'first_name': f'{hospital.name} Admin',
+                    'last_name': 'Account',
+                    'phone_number': f'+237{random.randint(600000000, 699999999)}',
+                    'role': Role.HOSPITAL_ADMIN,
+                    'is_active': True,
+                    'is_verified': True,
+                },
+            )
+            if user_created:
                 hosp_admin_user.set_password('password')
                 hosp_admin_user.save()
 
-                hosp_admin = HospitalAdmin.objects.create(
-                    user=hosp_admin_user,
-                    hospital=hospital,
-                    enrolled_by=sys_admin,
-                )
+            hosp_admin, admin_created = HospitalAdmin.objects.get_or_create(
+                user=hosp_admin_user,
+                defaults={
+                    'hospital': hospital,
+                    'enrolled_by': sys_admin,
+                },
+            )
+            if admin_created:
                 self.stdout.write(f'    ✓ Created Hospital Admin for {hospital.name}')
 
             # Create Receptionist if not exists
-            try:
-                Receptionist.objects.get(hospital=hospital)
-            except Receptionist.DoesNotExist:
-                receptionist_user, _ = User.objects.get_or_create(
-                    email=f'receptionist-{hospital.id}@joyfund.com',
-                    defaults={
-                        'first_name': 'Receptionist',
-                        'last_name': hospital.name.split()[0],
-                        'phone_number': f'+237{random.randint(600000000, 699999999)}',
-                        'role': Role.RECEPTIONIST,
-                        'is_active': True,
-                        'is_verified': True,
-                    },
-                )
+            receptionist_user, user_created = User.objects.get_or_create(
+                email=f'receptionist-{hospital.id}@joyfund.com',
+                defaults={
+                    'first_name': 'Receptionist',
+                    'last_name': hospital.name.split()[0],
+                    'phone_number': f'+237{random.randint(600000000, 699999999)}',
+                    'role': Role.RECEPTIONIST,
+                    'is_active': True,
+                    'is_verified': True,
+                },
+            )
+            if user_created:
                 receptionist_user.set_password('password')
                 receptionist_user.save()
 
-                Receptionist.objects.create(
-                    user=receptionist_user,
-                    hospital=hospital,
-                    enrolled_by=hosp_admin,
-                )
+            receptionist, receptionist_created = Receptionist.objects.get_or_create(
+                user=receptionist_user,
+                defaults={
+                    'hospital': hospital,
+                    'enrolled_by': hosp_admin,
+                },
+            )
+            if receptionist_created:
                 self.stdout.write(f'    ✓ Created Receptionist for {hospital.name}')
 
     def seed_beneficiaries(self):
@@ -571,11 +573,12 @@ class Command(BaseCommand):
             # Fallback to regular delete if TRUNCATE doesn't work
             Beneficiary.objects.all().delete()
         
-        # Delete test receptionist and hospital admin users
-        Receptionist.objects.filter(user__email__contains='receptionist-').delete()
-        HospitalAdmin.objects.filter(user__email__contains='admin-').delete()
+        # Delete test users (cascades delete their associated Receptionist and HospitalAdmin records)
+        # Delete hospital staff first
+        User.objects.filter(email__contains='receptionist-').delete()
+        User.objects.filter(email__contains='admin-').delete()
         
-        # Delete test users
+        # Delete test donors and social workers
         User.objects.filter(email__contains='example').delete()
         User.objects.filter(email__contains='socialworker').delete()
         User.objects.filter(email__contains='donor').delete()
