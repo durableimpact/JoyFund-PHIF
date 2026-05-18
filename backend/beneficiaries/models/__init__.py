@@ -1,6 +1,6 @@
 from .beneficiary import Beneficiary, Gender, BeneficiaryCategory, UrgencyLevel, GeographicRemoteness
 from .document import BeneficiaryDocument
-from .health_issue import HealthIssue, HealthIssueCategoryChoices, HealthIssueSeverityLevel, HealthIssueStatus
+from .health_issue import HealthIssue, HealthIssueCategoryChoices, HealthIssueSeverityLevel, HealthIssueStatus, HealthIssueEvent
 
 __all__ = [
     'Beneficiary',
@@ -13,4 +13,5 @@ __all__ = [
     'HealthIssueCategoryChoices',
     'HealthIssueSeverityLevel',
     'HealthIssueStatus',
+    'HealthIssueEvent',
 ]
