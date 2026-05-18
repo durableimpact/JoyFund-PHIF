@@ -92,7 +92,7 @@ class VoucherTopUpRequestApproveView(APIView):
         success, message = approve_top_up_request_and_allocate_funds(
             top_up_request=top_up_request,
             system_admin=request.user.system_admin,
-            campaign_allocations=serializer.validated_data["campaign_allocations"],
+            campaign_allocations=serializer.validated_data.get("campaign_allocations"),
             review_notes=serializer.validated_data.get("review_notes", ""),
         )
 
@@ -152,7 +152,7 @@ class VoucherTopUpRequestRejectView(APIView):
         success, message = reject_top_up_request(
             top_up_request=top_up_request,
             system_admin=request.user.system_admin,
-            review_notes=serializer.validated_data["review_notes"],
+            review_notes=serializer.validated_data.get("review_notes")],
         )
 
         if not success:
@@ -165,7 +165,7 @@ class VoucherTopUpRequestRejectView(APIView):
             voucher_top_up_request=top_up_request,
             status=top_up_request.status,
             changed_by=request.user,
-            notes=f"Voucher top-up request rejected. Reason: {serializer.validated_data['review_notes']}",
+            notes=f"Voucher top-up request rejected. Reason: {serializer.validated_data.get("review_notes")}",
         )
 
         return Response(
