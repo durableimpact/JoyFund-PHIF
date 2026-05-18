@@ -1,6 +1,7 @@
 from .Voucher import Voucher
 from campaigns.models import Campaign
 from django.db import models
+from utils.models import BaseEvent
 import uuid
 
 
@@ -53,3 +54,15 @@ class VoucherFunding(models.Model):
             models.Index(fields=["committed_at"]),
             models.Index(fields=["campaign"]),
         ]
+
+
+class VoucherFundingEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a VoucherFunding
+    """
+    voucher_funding = models.ForeignKey(
+        VoucherFunding, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+

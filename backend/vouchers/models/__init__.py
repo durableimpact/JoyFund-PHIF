@@ -1,5 +1,5 @@
-from .Voucher import Voucher
-from .VoucherFunding import VoucherFunding
+from .Voucher import Voucher,VoucherEvent
+from .VoucherFunding import VoucherFunding,VoucherFundingEvent
 from .VoucherNotification import VoucherNotification
 
-__all__ = ['Voucher', 'VoucherFunding', 'VoucherNotification']
+__all__ = ['Voucher','VoucherEvent', 'VoucherFunding','VoucherFundingEvent', 'VoucherNotification']
