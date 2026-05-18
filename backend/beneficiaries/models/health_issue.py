@@ -1,4 +1,5 @@
 from django.db import models
+from utils.models import BaseEvent
 from accounts.models import SocialWorker, SystemAdmin
 from .beneficiary import Beneficiary
 
@@ -70,3 +71,15 @@ class HealthIssue(models.Model):
 
     def __str__(self):
         return f"Health Issue for {self.beneficiary.digital_health_id}: {self.description[:30]}..."
+
+
+class HealthIssueEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a HealthIssue
+    """
+    health_issue = models.ForeignKey(
+        HealthIssue, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+
