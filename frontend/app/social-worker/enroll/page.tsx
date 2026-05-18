@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
-import { generateId, generateHealthId } from '@/lib/utils';
 import { Beneficiary } from '@/lib/mockData';
 
 export default function EnrollPage() {
@@ -12,17 +11,101 @@ export default function EnrollPage() {
   const { addBeneficiary, showToast, currentUser } = useStore();
   const [submitted, setSubmitted] = useState(false);
   const [healthId, setHealthId] = useState('');
-  const [form, setForm] = useState({ fullName: '', age: '', phone: '', community: '', gestationalWeek: '', complications: '', noInsurance: false, lowIncome: false, noPrevEnroll: false });
+  const [form, setForm] = useState({
+    fullName: '',
+    dateOfBirth: '',
+    gender: 'FEMALE',
+    category: 'MATERNAL',
+    phone: '',
+    email: '',
+    region: '',
+    city: '',
+    address: '',
+    nationalId: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    emergencyContactRelationship: '',
+    complications: '',
+    noInsurance: false,
+    lowIncome: false,
+    noPrevEnroll: false,
+  });
   const set = (k: string, v: string | boolean) => setForm(f => ({ ...f, [k]: v }));
-  const isValid = form.fullName && form.age && form.phone && form.community && form.gestationalWeek && form.noInsurance && form.lowIncome && form.noPrevEnroll;
+  const isValid =
+    form.fullName &&
+    form.dateOfBirth &&
+    form.phone &&
+    form.region &&
+    form.city &&
+    form.address &&
+    form.nationalId &&
+    form.emergencyContactName &&
+    form.emergencyContactPhone &&
+    form.emergencyContactRelationship &&
+    form.noInsurance &&
+    form.lowIncome &&
+    form.noPrevEnroll;
 
-  const handleSubmit = () => {
-    if (!isValid) { showToast('Please fill all required fields and confirm eligibility', 'error'); return; }
-    const hid = generateHealthId();
-    setHealthId(hid);
-    const b: Beneficiary = { id: generateId('ben'), healthId: hid, fullName: form.fullName, age: parseInt(form.age), phone: form.phone, community: form.community, gestationalWeek: parseInt(form.gestationalWeek), complications: form.complications || 'None reported', enrolledBy: currentUser?.name || 'SW-Alphonse', enrolledAt: new Date().toISOString().split('T')[0], status: 'awaiting_match', notes: '' };
-    addBeneficiary(b);
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    if (!isValid) {
+      showToast('Please fill all required fields and confirm eligibility', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/beneficiaries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          full_name: form.fullName,
+          date_of_birth: form.dateOfBirth,
+          gender: form.gender,
+          category: form.category,
+          phone: form.phone,
+          email: form.email || undefined,
+          region: form.region,
+          city: form.city,
+          address: form.address,
+          national_id_number: form.nationalId,
+          emergency_contact_name: form.emergencyContactName,
+          emergency_contact_phone: form.emergencyContactPhone,
+          emergency_contact_relationship: form.emergencyContactRelationship,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const message = data.detail || data.error || JSON.stringify(data) || 'Unable to enroll beneficiary';
+        throw new Error(message);
+      }
+
+      const generatedHealthId = data.digital_health_id || data.health_id || '';
+      setHealthId(generatedHealthId);
+
+      const beneficiary = {
+        id: data.id,
+        healthId: generatedHealthId,
+        fullName: data.full_name,
+        age: new Date().getFullYear() - new Date(data.date_of_birth).getFullYear(),
+        phone: data.phone,
+        community: `${data.city}, ${data.region}`,
+        gestationalWeek: 0,
+        complications: form.complications || 'None reported',
+        enrolledBy: currentUser?.name || 'Social Worker',
+        enrolledAt: new Date().toISOString().split('T')[0],
+        status: 'awaiting_match',
+        notes: '',
+      } as Beneficiary;
+
+      addBeneficiary(beneficiary);
+      setSubmitted(true);
+      showToast('Beneficiary enrolled successfully', 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to enroll beneficiary', 'error');
+    }
   };
 
   if (submitted) return (
@@ -37,7 +120,7 @@ export default function EnrollPage() {
         </div>
         <div className="flex flex-col gap-3">
           <button className="btn-primary w-full" onClick={() => router.push('/social-worker/dashboard')}>Back to Dashboard</button>
-          <button className="btn-outline w-full" onClick={() => { setSubmitted(false); setForm({ fullName: '', age: '', phone: '', community: '', gestationalWeek: '', complications: '', noInsurance: false, lowIncome: false, noPrevEnroll: false }); }}>Enroll Another</button>
+          <button className="btn-outline w-full" onClick={() => { setSubmitted(false); setForm({ fullName: '', dateOfBirth: '', gender: 'FEMALE', category: 'MATERNAL', phone: '', email: '', region: '', city: '', address: '', nationalId: '', emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelationship: '', complications: '', noInsurance: false, lowIncome: false, noPrevEnroll: false }); }}>Enroll Another</button>
         </div>
       </div>
     </div>
@@ -55,18 +138,79 @@ export default function EnrollPage() {
             <div>
               <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Personal Information</h3>
               <div className="space-y-3">
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Full Name *</label><input className="input-field" placeholder="e.g. Marie Solange Ateba" value={form.fullName} onChange={e => set('fullName', e.target.value)} /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Age *</label><input className="input-field" type="number" placeholder="24" value={form.age} onChange={e => set('age', e.target.value)} /></div>
-                  <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Phone *</label><input className="input-field" type="tel" placeholder="6XX XXX XXX" value={form.phone} onChange={e => set('phone', e.target.value)} /></div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Full Name *</label>
+                  <input className="input-field" placeholder="e.g. Marie Solange Ateba" value={form.fullName} onChange={e => set('fullName', e.target.value)} />
                 </div>
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Community *</label><input className="input-field" placeholder="e.g. Mbalmayo, Centre Region" value={form.community} onChange={e => set('community', e.target.value)} /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Date of Birth *</label>
+                    <input className="input-field" type="date" value={form.dateOfBirth} onChange={e => set('dateOfBirth', e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Phone *</label>
+                    <input className="input-field" type="tel" placeholder="6XX XXX XXX" value={form.phone} onChange={e => set('phone', e.target.value)} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Gender *</label>
+                    <select className="input-field" value={form.gender} onChange={e => set('gender', e.target.value)}>
+                      <option value="FEMALE">Female</option>
+                      <option value="MALE">Male</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Category *</label>
+                    <select className="input-field" value={form.category} onChange={e => set('category', e.target.value)}>
+                      <option value="MATERNAL">Pregnant Woman</option>
+                      <option value="ELDERLY">Elderly</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Email</label>
+                  <input className="input-field" type="email" placeholder="Optional email" value={form.email} onChange={e => set('email', e.target.value)} />
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Location & ID</h3>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Region *</label>
+                    <input className="input-field" placeholder="e.g. Centre Region" value={form.region} onChange={e => set('region', e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">City *</label>
+                    <input className="input-field" placeholder="e.g. Yaoundé" value={form.city} onChange={e => set('city', e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Address *</label>
+                  <input className="input-field" placeholder="Street address or neighborhood" value={form.address} onChange={e => set('address', e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">National ID Number *</label>
+                  <input className="input-field" placeholder="e.g. CM1234567890" value={form.nationalId} onChange={e => set('nationalId', e.target.value)} />
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Emergency Contact *</h3>
+              <div className="space-y-3">
+                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Contact name</label><input className="input-field" placeholder="e.g. John Doe" value={form.emergencyContactName} onChange={e => set('emergencyContactName', e.target.value)} /></div>
+                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Contact phone</label><input className="input-field" type="tel" placeholder="e.g. 6XX XXX XXX" value={form.emergencyContactPhone} onChange={e => set('emergencyContactPhone', e.target.value)} /></div>
+                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Relationship</label><input className="input-field" placeholder="e.g. Spouse, Friend" value={form.emergencyContactRelationship} onChange={e => set('emergencyContactRelationship', e.target.value)} /></div>
               </div>
             </div>
             <div>
               <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Health Context</h3>
               <div className="space-y-3">
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Gestational Age (weeks) *</label><input className="input-field" type="number" placeholder="28" min={1} max={42} value={form.gestationalWeek} onChange={e => set('gestationalWeek', e.target.value)} /></div>
+                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Gestational Age (weeks)</label><input className="input-field" type="number" placeholder="28" min={1} max={42} value={form.gestationalWeek} onChange={e => set('gestationalWeek', e.target.value)} /></div>
                 <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Complications Noted</label><textarea className="input-field" rows={2} placeholder="e.g. Mild anaemia, or leave blank" value={form.complications} onChange={e => set('complications', e.target.value)} /></div>
               </div>
             </div>

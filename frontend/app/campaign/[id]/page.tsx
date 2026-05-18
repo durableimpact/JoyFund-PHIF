@@ -1,19 +1,44 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Users, Calendar, Heart, Share2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Users, Share2, ArrowLeft, CheckCircle } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
-import { formatXAF, getProgressPercent, eventTypeLabel, formatDate } from '@/lib/utils';
-import { contributions as allContributions } from '@/lib/mockData';
+import { formatXAF, getProgressPercent, eventTypeLabel, formatDate, normalizeCampaignResponse } from '@/lib/utils';
+import { contributions as allContributions, Campaign } from '@/lib/mockData';
 
 export default function CampaignPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { campaigns } = useStore();
-  const campaign = campaigns.find(c => c.id === id);
+  const initialCampaign = campaigns.find(c => c.id === id);
+  const [campaign, setCampaign] = useState<Campaign | undefined>(initialCampaign);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (!id) {
+      return;
+    }
+
+    fetch(`/api/campaigns/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!mounted) return;
+        if (data && !data.detail && data.id) {
+          setCampaign(normalizeCampaignResponse(data));
+        }
+      })
+      .catch(() => {
+        // Keep local campaign state if backend is unavailable
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
   if (!campaign) return (
     <div className="min-h-screen flex items-center justify-center">

@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Phone, MapPin, Calendar } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
@@ -9,7 +10,34 @@ export default function BeneficiaryProfile() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { beneficiaries, vouchers } = useStore();
-  const b = beneficiaries.find(x => x.id === id);
+  const [backendBeneficiary, setBackendBeneficiary] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    fetch(`/api/beneficiaries/${id}`)
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => {
+        setBackendBeneficiary({
+          ...data,
+          healthId: data.digital_health_id,
+          community: data.city && data.region ? `${data.city}, ${data.region}` : data.region || data.city || '',
+          age: data.date_of_birth ? new Date().getFullYear() - new Date(data.date_of_birth).getFullYear() : undefined,
+          enrolledAt: data.created_at?.split('T')[0] || '',
+          status: 'awaiting_match',
+          gestationalWeek: data.gestational_week || 0,
+          complications: data.complications || 'No reported complications',
+          notes: data.notes || '',
+        });
+      })
+      .catch(() => {
+        setBackendBeneficiary(null);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const b = backendBeneficiary || beneficiaries.find(x => x.id === id);
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-sm text-gray-500">Loading beneficiary details…</div></div>;
   if (!b) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="text-4xl mb-3">🔍</div><h2 className="font-bold mb-2">Not found</h2><button onClick={() => router.back()} className="btn-primary">Go Back</button></div></div>;
   const voucher = b.voucherId ? vouchers.find(v => v.id === b.voucherId) : null;
   const timeline = [

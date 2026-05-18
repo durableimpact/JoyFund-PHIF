@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
@@ -7,12 +8,36 @@ import { statusColor, statusLabel } from '@/lib/utils';
 
 export default function SocialWorkerDashboard() {
   const { beneficiaries, currentUser } = useStore();
+  const [backendBeneficiaries, setBackendBeneficiaries] = useState<any[]>([]);
   const name = currentUser?.name || 'Alphonse Kamga';
+
+  useEffect(() => {
+    fetch('/api/beneficiaries')
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => {
+        const rawList = Array.isArray(data) ? data : data?.results || [];
+        setBackendBeneficiaries(
+          rawList.map((item: any) => ({
+            ...item,
+            healthId: item.digital_health_id,
+            community: item.city && item.region ? `${item.city}, ${item.region}` : item.region || item.city || '',
+            status: 'awaiting_match',
+            gestationalWeek: item.gestational_week || 0,
+            enrolledAt: item.created_at?.split('T')[0] || '',
+          }))
+        );
+      })
+      .catch(() => {
+        // fallback to local store data
+      });
+  }, []);
+
+  const activeBeneficiaries = backendBeneficiaries.length ? backendBeneficiaries : beneficiaries;
   const stats = [
-    { label: 'Enrolled', value: beneficiaries.length, color: 'var(--primary)' },
-    { label: 'Awaiting Match', value: beneficiaries.filter(b => b.status === 'awaiting_match').length, color: '#f59e0b' },
-    { label: 'Voucher Issued', value: beneficiaries.filter(b => b.status === 'voucher_issued').length, color: 'var(--secondary)' },
-    { label: 'Care Received', value: beneficiaries.filter(b => b.status === 'care_received').length, color: 'var(--success)' },
+    { label: 'Enrolled', value: activeBeneficiaries.length, color: 'var(--primary)' },
+    { label: 'Awaiting Match', value: activeBeneficiaries.filter(b => b.status === 'awaiting_match').length, color: '#f59e0b' },
+    { label: 'Voucher Issued', value: activeBeneficiaries.filter(b => b.status === 'voucher_issued').length, color: 'var(--secondary)' },
+    { label: 'Care Received', value: activeBeneficiaries.filter(b => b.status === 'care_received').length, color: 'var(--success)' },
   ];
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
@@ -40,7 +65,7 @@ export default function SocialWorkerDashboard() {
           <h2 className="text-xl font-bold text-gray-900 mb-1">My Caseload</h2>
           <p className="text-sm text-gray-500 mb-4">All beneficiaries under your management</p>
           <div className="space-y-3">
-            {beneficiaries.map(b => (
+            {activeBeneficiaries.map(b => (
               <Link key={b.id} href={`/social-worker/beneficiary/${b.id}`} className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow block">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                   {b.fullName.charAt(0)}

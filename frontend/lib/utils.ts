@@ -1,5 +1,59 @@
+import { Campaign } from './mockData';
+
 export function formatXAF(amount: number): string {
   return new Intl.NumberFormat('fr-CM', { style: 'decimal', maximumFractionDigits: 0 }).format(amount) + ' XAF';
+}
+
+export function normalizeCampaignResponse(raw: any): Campaign {
+  const eventType = (raw.event_type || raw.eventType || 'other').toLowerCase();
+  const title = raw.title || raw.name || 'JoyFund Campaign';
+  const donorName = raw.donor_name || raw.donorName || raw.donor_id || 'JoyFund';
+  const donorAvatar = (raw.donor_avatar || raw.donorAvatar || donorName)
+    .toString()
+    .split(' ')
+    .map((part: string) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+  const coverColor = raw.cover_color || raw.coverColor || getColorFromString(raw.id || title || donorName);
+  const goalXAF = Number(raw.goal_amount ?? raw.goalAmount ?? raw.goalXAF ?? 0);
+  const raisedXAF = Number(raw.current_amount ?? raw.currentAmount ?? raw.raisedXAF ?? 0);
+  const createdAt = raw.created_at || raw.start_date || raw.createdAt || new Date().toISOString().split('T')[0];
+  const expiresAt = raw.end_date || raw.expiresAt || raw.expiresAt || '';
+  const story = raw.description || raw.story || '';
+  const contributors = Number(raw.contributors ?? 0);
+  const goalDeliveries = Number(raw.goal_deliveries ?? raw.goalDeliveries ?? Math.max(1, Math.round(goalXAF / 60000)));
+  const status = ['active', 'completed', 'draft'].includes(raw.status) ? raw.status : raw.status === 'inactive' ? 'completed' : 'active';
+  const slug = raw.slug || title.replace(/\s+/g, '') || raw.id || '';
+
+  return {
+    id: raw.id || raw.uuid || slug,
+    donorId: raw.donor_id || raw.donorId || 'donor-unknown',
+    donorName,
+    donorAvatar,
+    title,
+    eventType: ['birthday', 'wedding', 'graduation', 'promotion'].includes(eventType) ? eventType as Campaign['eventType'] : 'other',
+    story,
+    goalDeliveries,
+    raisedXAF,
+    goalXAF,
+    contributors,
+    status: status as Campaign['status'],
+    createdAt,
+    expiresAt,
+    slug,
+    coverColor,
+  };
+}
+
+function getColorFromString(value: string): string {
+  const colors = ['#1DB1DB', '#1D38DB', '#471DDB', '#1CDBC9', '#1D75DB'];
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return colors[Math.abs(hash) % colors.length];
 }
 
 export function formatDate(dateStr: string): string {

@@ -17,6 +17,7 @@ class BeneficiaryDetailSerializer(serializers.ModelSerializer):
         model = Beneficiary
         fields = [
             "id",
+            "digital_health_id",
             "full_name",
             "date_of_birth",
             "gender",
@@ -31,6 +32,7 @@ class BeneficiaryDetailSerializer(serializers.ModelSerializer):
             "emergency_contact_phone",
             "emergency_contact_relationship",
             "enrolled_by_id",
+            "created_at",
             "documents",
             "health_issues",
         ]

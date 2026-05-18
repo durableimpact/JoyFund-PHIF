@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { useStore } from '@/store/useStore';
+import { normalizeCampaignResponse } from '@/lib/utils';
 
 const EVENT_TYPES = ['All', 'birthday', 'wedding', 'graduation', 'promotion', 'other'];
 
@@ -12,8 +13,30 @@ export default function ExplorePage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [campaignList, setCampaignList] = useState(campaigns);
 
-  const filtered = campaigns.filter(c => {
+  useEffect(() => {
+    let mounted = true;
+
+    fetch('/api/campaigns')
+      .then(res => res.json())
+      .then(data => {
+        if (!mounted) return;
+        const rawList = Array.isArray(data) ? data : data?.results || [];
+        if (rawList.length) {
+          setCampaignList(rawList.map((item: any) => normalizeCampaignResponse(item)));
+        }
+      })
+      .catch(() => {
+        // keep using mock data if backend is unreachable
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filtered = campaignList.filter(c => {
     const matchSearch = c.title.toLowerCase().includes(search.toLowerCase()) || c.donorName.toLowerCase().includes(search.toLowerCase());
     const matchType = filter === 'All' || c.eventType === filter;
     const matchStatus = statusFilter === 'all' || c.status === statusFilter;

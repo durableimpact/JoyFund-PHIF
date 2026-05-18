@@ -1,12 +1,12 @@
 'use client';
-import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
-import { formatXAF, getProgressPercent, generateId } from '@/lib/utils';
-import { Contribution } from '@/lib/mockData';
+import { formatXAF, getProgressPercent, normalizeCampaignResponse } from '@/lib/utils';
+import { Campaign } from '@/lib/mockData';
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
 
@@ -15,8 +15,10 @@ type Step = 'amount' | 'payment' | 'processing' | 'success';
 export default function DonatePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { campaigns, addContribution, showToast } = useStore();
-  const campaign = campaigns.find(c => c.id === id);
+  const searchParams = useSearchParams();
+  const { campaigns, showToast } = useStore();
+  const storeCampaign = campaigns.find(c => c.id === id);
+  const [campaign, setCampaign] = useState<Campaign | null>(storeCampaign ?? null);
 
   const [step, setStep] = useState<Step>('amount');
   const [amount, setAmount] = useState<number>(1000);
@@ -25,32 +27,97 @@ export default function DonatePage() {
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [anonymous, setAnonymous] = useState(false);
+  const [message, setMessage] = useState('');
   const [reference, setReference] = useState('');
+  const [paymentLink, setPaymentLink] = useState('');
 
   if (!campaign) return <div className="min-h-screen flex items-center justify-center"><Link href="/explore" className="btn-primary">Back to Explore</Link></div>;
 
   const finalAmount = customAmount ? parseInt(customAmount) || 0 : amount;
 
-  const handlePay = () => {
-    if (!phone || phone.length < 9) { showToast('Please enter a valid phone number', 'error'); return; }
+  useEffect(() => {
+    const status = searchParams?.get('status');
+    if (status === 'success') {
+      setStep('success');
+    } else if (status === 'error') {
+      setStep('payment');
+      showToast('Payment failed or was cancelled. Please try again.', 'error');
+    }
+  }, [searchParams, showToast]);
+
+  useEffect(() => {
+    let mounted = true;
+    if (!id) return;
+
+    fetch(`/api/campaigns/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!mounted) return;
+        if (data && !data.detail && data.id) {
+          setCampaign(normalizeCampaignResponse(data));
+        }
+      })
+      .catch(() => {
+        // keep local state if backend is unreachable
+      });
+
+    return () => { mounted = false; };
+  }, [id]);
+
+  const handlePay = async () => {
+    if (!phone || phone.length < 9) {
+      showToast('Please enter a valid phone number', 'error');
+      return;
+    }
+
+    if (finalAmount < 100) {
+      showToast('Please choose at least 100 XAF.', 'error');
+      return;
+    }
+
     setStep('processing');
     const ref = 'REF-' + Date.now();
     setReference(ref);
-    setTimeout(() => {
-      const contrib: Contribution = {
-        id: generateId('cont'),
-        campaignId: campaign.id,
-        contributorName: anonymous ? 'Anonymous' : (name || 'Contributor'),
-        amountXAF: finalAmount,
-        timestamp: new Date().toISOString(),
-        paymentMethod: method,
-        phone,
-        anonymous,
-        reference: ref,
+
+    try {
+      const payload = {
+        donor_name: anonymous ? 'Anonymous' : (name || 'Contributor'),
+        amount: finalAmount,
+        message,
+        is_anonymous: anonymous,
+        payment_method: method,
+        phone_number: phone,
+        success_url: `${window.location.origin}/donate/${campaign.id}?status=success`,
+        failure_url: `${window.location.origin}/donate/${campaign.id}?status=error`,
       };
-      addContribution(contrib);
+
+      const res = await fetch(`/api/campaigns/${campaign.id}/donate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const errMsg = data.error || data.detail || data.message || `Donation failed: ${res.status}`;
+        throw new Error(errMsg);
+      }
+
+      if (data.payment_link) {
+        setPaymentLink(data.payment_link);
+        window.location.href = data.payment_link;
+        return;
+      }
+
+      showToast('Donation submitted. Redirecting to payment...', 'success');
       setStep('success');
-    }, 2500);
+    } catch (error: any) {
+      setStep('payment');
+      showToast(error?.message || 'Unable to process donation.', 'error');
+    }
   };
 
   const pct = getProgressPercent(campaign.raisedXAF, campaign.goalXAF);
@@ -149,9 +216,21 @@ export default function DonatePage() {
               <div className="mb-6">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Your name (optional)</label>
                 <input className="input-field" placeholder="Leave blank to appear as Anonymous" value={name} onChange={e => setName(e.target.value)} />
-                <label className="flex items-center gap-2 mt-2 cursor-pointer">
+              </div>
+              <div className="mb-6">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Message (optional)</label>
+                <textarea
+                  className="input-field resize-none"
+                  rows={3}
+                  placeholder="Add a dedication or message for this gift"
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                />
+              </div>
+              <div className="mb-6">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-500">
                   <input type="checkbox" checked={anonymous} onChange={e => setAnonymous(e.target.checked)} className="rounded" />
-                  <span className="text-sm text-gray-500">Donate anonymously</span>
+                  <span>Donate anonymously</span>
                 </label>
               </div>
               <button
