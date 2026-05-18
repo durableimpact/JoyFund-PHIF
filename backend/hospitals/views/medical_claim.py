@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
 
-from hospitals.models import MedicalClaim, MedicalClaimProof, VoucherTopUpRequest
+from hospitals.models import MedicalClaim,MedicalClaimEvent, MedicalClaimProof,MedicalClaimProofEvent, VoucherTopUpRequest
 from hospitals.serializers.medical_claim import (
     MedicalClaimCreateSerializer,
     MedicalClaimDetailSerializer,
@@ -85,6 +85,11 @@ class MedicalClaimCreateView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         medical_claim = serializer.save(submitted_by=request.user.receptionist)
+        MedicalClaimEvent.objects.create(
+            medical_claim=medical_claim,
+            status=medical_claim.claim_status,
+            notes="Medical claim created with initial items.",
+        )
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_201_CREATED,
@@ -516,8 +521,10 @@ class MedicalClaimApproveView(APIView):
         responses={200: MedicalClaimDetailSerializer},
     )
     def post(self, request, medical_claim_id):
+        old_status = ''
         try:
             medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
+            old_status = medical_claim.claim_status
         except MedicalClaim.DoesNotExist:
             return Response(
                 {"detail": "Medical claim not found."},
@@ -546,6 +553,13 @@ class MedicalClaimApproveView(APIView):
                 "reviewed_at",
                 "rejection_reason",
             ]
+        )
+
+        MedicalClaimEvent.objects.create(
+            medical_claim=medical_claim,
+            status=medical_claim.claim_status,
+            notes=f"MedicalClaim status changed from {old_status} to {medical_claim.claim_status}",
+            changed_by=request.user.system_admin,
         )
 
         return Response(
@@ -597,7 +611,12 @@ class MedicalClaimRejectView(APIView):
                 "rejection_reason",
             ]
         )
-
+        MedicalClaimEvent.objects.create(
+            medical_claim=medical_claim,
+            status=medical_claim.claim_status,
+            notes=f"MedicalClaim status changed from PENDING to REJECTED. Reason: {medical_claim.rejection_reason}",
+            changed_by=request.user.system_admin,
+        )
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_200_OK,
