@@ -59,7 +59,7 @@ class MedicalClaim(models.Model):
 
 
     def __str__(self):
-        return f"Claim for Voucher {self.voucher.id} at {self.hospital.name if self.hospital else 'Unknown Hospital'}"
+        return f"Claim for Voucher {self.voucher.pk} at {self.hospital.name if self.hospital else 'Unknown Hospital'}"
 
 
 class ClaimItem(models.Model):
