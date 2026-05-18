@@ -100,6 +100,7 @@ class MedicalClaimCreateView(CreateAPIView):
             medical_claim=medical_claim,
             status=medical_claim.claim_status,
             notes="Medical claim created with initial items.",
+            changed_by=request.user,
         )
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
@@ -218,6 +219,12 @@ class MedicalClaimProofListCreateView(ListCreateAPIView):
         proof = serializer.save(
             medical_claim=medical_claim, uploaded_by=request.user.receptionist
         )
+        MedicalClaimProofEvent.objects.create(
+            medical_claim_proof=proof,
+            status=proof.verification_status,
+            notes="Proof document uploaded.",
+            changed_by=request.user,
+        )
         return Response(
             MedicalClaimProofSerializer(proof).data,
             status=status.HTTP_201_CREATED,
@@ -315,6 +322,13 @@ class MedicalClaimProofVerifyView(APIView):
         proof.rejection_reason = None
         proof.save()
 
+        MedicalClaimProofEvent.objects.create(
+            medical_claim_proof=proof,
+            status=proof.verification_status,
+            notes="Proof document verified and approved.",
+            changed_by=request.user,
+        )
+
         return Response(
             MedicalClaimProofSerializer(proof).data,
             status=status.HTTP_200_OK,
@@ -360,6 +374,13 @@ class MedicalClaimProofRejectView(APIView):
         proof.rejection_reason = serializer.validated_data["rejection_reason"]
         proof.save()
 
+        MedicalClaimProofEvent.objects.create(
+                medical_claim_proof=proof,
+                status=proof.verification_status,
+                notes=f"Proof document rejected. Reason: {proof.rejection_reason}",
+                changed_by=request.user,
+            )
+
         return Response(
             MedicalClaimProofSerializer(proof).data,
             status=status.HTTP_200_OK,
@@ -404,6 +425,13 @@ class MedicalClaimProofFlagView(APIView):
         proof.verified_at = timezone.now()
         proof.rejection_reason = serializer.validated_data["rejection_reason"]
         proof.save()
+
+        MedicalClaimProofEvent.objects.create(
+                medical_claim_proof=proof,
+                status=proof.verification_status,
+                notes=f"Proof document flagged for review. Reason: {proof.rejection_reason}",
+                changed_by=request.user,
+            )
 
         return Response(
             MedicalClaimProofSerializer(proof).data,
@@ -603,7 +631,7 @@ class MedicalClaimApproveView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        if medical_claim.claim_status != "PENDING":
+        if medical_claim.cMedicalClaimProofEventlaim_status != "PENDING":
             return Response(
                 {
                     "detail": f"Cannot approve claim with status {medical_claim.claim_status}. Only PENDING claims can be approved.",
