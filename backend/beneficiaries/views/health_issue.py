@@ -8,9 +8,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from django.utils import timezone
 
-from beneficiaries.models.health_issue import HealthIssue, HealthIssueStatus
+from beneficiaries.models.health_issue import HealthIssue, HealthIssueStatus, HealthIssueEvent
 from beneficiaries.models.document import BeneficiaryDocument
 from beneficiaries.serializers.health_issue import (
     HealthIssueSerializer,
@@ -64,6 +65,15 @@ class HealthIssueListCreateView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+    def perform_create(self, serializer):
+        health_issue = serializer.save()
+        HealthIssueEvent.objects.create(
+            health_issue=health_issue,
+            status=health_issue.status,
+            notes="Health issue reported.",
+            changed_by=self.request.user,
+        )
+
 
 class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
     """
@@ -109,6 +119,17 @@ class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        old_status = serializer.instance.status
+        health_issue = serializer.save()
+        if old_status != health_issue.status:
+            HealthIssueEvent.objects.create(
+                health_issue=health_issue,
+                status=health_issue.status,
+                notes=f"Health issue status updated from {old_status} to {health_issue.status}.",
+                changed_by=self.request.user,
+            )
+
     @swagger_auto_schema(tags=_TAG, operation_description="Delete a health issue record (System Admin only).")
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
@@ -136,10 +157,18 @@ class HealthIssueVerifyView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        old_status = health_issue.status
         health_issue.status = HealthIssueStatus.VALIDATED
         health_issue.validated_by = request.user.systemadmin
         health_issue.rejection_reason = None
         health_issue.save()
+
+        HealthIssueEvent.objects.create(
+            health_issue=health_issue,
+            status=health_issue.status,
+            notes=f"Health issue verified and validated. Status changed from {old_status} to {health_issue.status}.",
+            changed_by=request.user,
+        )
 
         return Response(
             HealthIssueDetailSerializer(health_issue).data,
@@ -174,10 +203,18 @@ class HealthIssueRejectView(APIView):
         serializer = HealthIssueRejectSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        old_status = health_issue.status
         health_issue.status = HealthIssueStatus.REJECTED
         health_issue.validated_by = request.user.systemadmin
-        health_issue.rejection_reason = serializer.validated_data["rejection_reason"]
+        health_issue.rejection_reason = serializer.validated_data.get("rejection_reason", "")
         health_issue.save()
+
+        HealthIssueEvent.objects.create(
+            health_issue=health_issue,
+            status=health_issue.status,
+            notes=f"Health issue rejected. Reason: {health_issue.rejection_reason}. Status changed from {old_status} to {health_issue.status}.",
+            changed_by=request.user,
+        )
 
         return Response(
             HealthIssueDetailSerializer(health_issue).data,
@@ -197,20 +234,31 @@ class HealthIssueStatusActionView(GenericAPIView):
 
     @swagger_auto_schema(
         tags=_TAG,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'action': openapi.Schema(type=openapi.TYPE_STRING, enum=['validate', 'reject'])
+            },
+            required=['action']
+        ),
         responses={200: HealthIssueDetailSerializer},
         operation_description="Validate or reject a reported health issue. Only accessible by SYSTEM_ADMIN.",
     )
-    def post(self, request, id, action):
+    def post(self, request, id):
         health_issue = self.get_object()
+        action = request.data.get("action", "").lower()
 
+        old_status = health_issue.status
         if action == "validate":
             health_issue.status = HealthIssueStatus.VALIDATED
             if hasattr(request.user, "systemadmin"):
                 health_issue.validated_by = request.user.systemadmin
+            notes = f"Health issue validated. Status changed from {old_status} to {health_issue.status}."
         elif action == "reject":
             health_issue.status = HealthIssueStatus.REJECTED
             if hasattr(request.user, "systemadmin"):
                 health_issue.validated_by = request.user.systemadmin
+            notes = f"Health issue rejected. Status changed from {old_status} to {health_issue.status}."
         else:
             return Response(
                 {"detail": "Invalid action. Use 'validate' or 'reject'."},
@@ -218,6 +266,14 @@ class HealthIssueStatusActionView(GenericAPIView):
             )
 
         health_issue.save()
+
+        HealthIssueEvent.objects.create(
+            health_issue=health_issue,
+            status=health_issue.status,
+            notes=notes,
+            changed_by=request.user,
+        )
+
         return Response(self.get_serializer(health_issue).data)
 
 
