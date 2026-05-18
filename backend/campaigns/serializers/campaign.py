@@ -13,10 +13,13 @@ class CampaignTransactionSerializer(serializers.ModelSerializer):
         exclude = ['campaign']
 
 class CampaignDetailSerializer(serializers.ModelSerializer):
+    from vouchers.serializers.voucher_funding import VoucherFundingDetailSerializer
+
     donor_id = serializers.UUIDField(source="donor.id", read_only=True)
     progress_percentage = serializers.SerializerMethodField()
     events = CampaignEventSerializer(many=True, read_only=True)
     transactions = CampaignTransactionSerializer(many=True, read_only=True)
+    voucher_fundings = VoucherFundingDetailSerializer(many=True, read_only=True)
 
     class Meta:
         model = Campaign
@@ -38,6 +41,7 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "progress_percentage",
             "events",
             "transactions",
+            "voucher_fundings",
         ]
 
     def get_progress_percentage(self, obj):
