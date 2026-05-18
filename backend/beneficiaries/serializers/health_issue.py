@@ -1,10 +1,15 @@
 from rest_framework import serializers
-from beneficiaries.models.health_issue import HealthIssue
+from beneficiaries.models.health_issue import HealthIssue,HealthIssueEvent
 from beneficiaries.models.document import BeneficiaryDocument
 from accounts.serializers.social_worker import (
     SocialWorkerMinimalSerializer,
     SystemAdminMinimalSerializer,
 )
+
+class HealthIssueEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HealthIssueEvent
+        exclude = ["health_issue"]
 
 
 class HealthIssueSerializer(serializers.ModelSerializer):
@@ -23,6 +28,7 @@ class HealthIssueSerializer(serializers.ModelSerializer):
 class HealthIssueDetailSerializer(serializers.ModelSerializer):
     social_worker = SocialWorkerMinimalSerializer(read_only=True)
     validated_by = SystemAdminMinimalSerializer(read_only=True)
+    events = HealthIssueEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = HealthIssue
