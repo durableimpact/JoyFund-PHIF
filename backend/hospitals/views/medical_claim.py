@@ -14,7 +14,13 @@ from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
 
 from utils.serializers import ErrorResponseSerializer
-from hospitals.models import MedicalClaim,MedicalClaimEvent, MedicalClaimProof,MedicalClaimProofEvent, VoucherTopUpRequest
+from hospitals.models import (
+    MedicalClaim,
+    MedicalClaimEvent,
+    MedicalClaimProof,
+    MedicalClaimProofEvent,
+    VoucherTopUpRequest,
+)
 from hospitals.serializers.medical_claim import (
     MedicalClaimCreateSerializer,
     MedicalClaimDetailSerializer,
@@ -79,12 +85,16 @@ class MedicalClaimCreateView(CreateAPIView):
         operation_description="Create a new medical claim with initial claim items. Receptionist endpoint.",
         responses={
             201: MedicalClaimDetailSerializer,
-            400: "Validation error (missing items, invalid voucher, etc)",
+            400: ErrorResponseSerializer,
         },
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         medical_claim = serializer.save(submitted_by=request.user.receptionist)
         MedicalClaimEvent.objects.create(
             medical_claim=medical_claim,
@@ -112,7 +122,7 @@ class MedicalClaimDetailView(RetrieveUpdateAPIView):
     @swagger_auto_schema(
         tags=["Medical Claims"],
         operation_description="Retrieve a medical claim with all items and proofs.",
-        responses={200: MedicalClaimDetailSerializer},
+        responses={200: MedicalClaimDetailSerializer, 404: ErrorResponseSerializer},
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -121,12 +131,20 @@ class MedicalClaimDetailView(RetrieveUpdateAPIView):
         tags=["Medical Claims"],
         operation_description="Add more items to an existing medical claim. Total cost is automatically updated.",
         request_body=MedicalClaimAddItemsSerializer,
-        responses={200: MedicalClaimDetailSerializer},
+        responses={
+            200: MedicalClaimDetailSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         medical_claim = serializer.save()
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
@@ -137,7 +155,11 @@ class MedicalClaimDetailView(RetrieveUpdateAPIView):
         tags=["Medical Claims"],
         operation_description="Partially add items to a medical claim.",
         request_body=MedicalClaimAddItemsSerializer,
-        responses={200: MedicalClaimDetailSerializer},
+        responses={
+            200: MedicalClaimDetailSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def patch(self, request, *args, **kwargs):
         kwargs["partial"] = True
@@ -173,7 +195,8 @@ class MedicalClaimProofListCreateView(ListCreateAPIView):
         request_body=MedicalClaimProofCreateSerializer,
         responses={
             201: MedicalClaimProofSerializer,
-            400: "Validation error (invalid document_type, missing file, etc)",
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
         },
     )
     def post(self, request, *args, **kwargs):
@@ -182,12 +205,16 @@ class MedicalClaimProofListCreateView(ListCreateAPIView):
             medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
         except MedicalClaim.DoesNotExist:
             return Response(
-                {"detail": "Medical claim not found."},
+                {"detail": "Medical claim not found.", "error_code": "CLAIM_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         proof = serializer.save(
             medical_claim=medical_claim, uploaded_by=request.user.receptionist
         )
@@ -217,7 +244,7 @@ class MedicalClaimProofDetailView(RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(
         tags=["Medical Claims - Proofs"],
         operation_description="Retrieve details of a proof document.",
-        responses={200: MedicalClaimProofSerializer},
+        responses={200: MedicalClaimProofSerializer, 404: ErrorResponseSerializer},
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -226,7 +253,11 @@ class MedicalClaimProofDetailView(RetrieveUpdateDestroyAPIView):
         tags=["Medical Claims - Proofs"],
         operation_description="Update a proof document (e.g., re-upload if rejected).",
         request_body=MedicalClaimProofCreateSerializer,
-        responses={200: MedicalClaimProofSerializer},
+        responses={
+            200: MedicalClaimProofSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -235,7 +266,11 @@ class MedicalClaimProofDetailView(RetrieveUpdateDestroyAPIView):
         tags=["Medical Claims - Proofs"],
         operation_description="Replace a proof document entirely.",
         request_body=MedicalClaimProofCreateSerializer,
-        responses={200: MedicalClaimProofSerializer},
+        responses={
+            200: MedicalClaimProofSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
@@ -243,7 +278,7 @@ class MedicalClaimProofDetailView(RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(
         tags=["Medical Claims - Proofs"],
         operation_description="Delete a proof document.",
-        responses={204: "Document deleted successfully"},
+        responses={204: "Document deleted successfully", 404: ErrorResponseSerializer},
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
@@ -259,8 +294,8 @@ class MedicalClaimProofVerifyView(APIView):
         operation_description="Verify and approve a proof document. System Admin endpoint.",
         responses={
             200: MedicalClaimProofSerializer,
-            404: "Proof not found",
-            400: "Bad request",
+            404: ErrorResponseSerializer,
+            400: ErrorResponseSerializer,
         },
     )
     def post(self, request, medical_claim_id, pk):
@@ -270,7 +305,7 @@ class MedicalClaimProofVerifyView(APIView):
             )
         except MedicalClaimProof.DoesNotExist:
             return Response(
-                {"detail": "Proof document not found."},
+                {"detail": "Proof document not found.", "error_code": "PROOF_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -297,8 +332,8 @@ class MedicalClaimProofRejectView(APIView):
         request_body=MedicalClaimProofRejectSerializer,
         responses={
             200: MedicalClaimProofSerializer,
-            404: "Proof not found",
-            400: "Bad request",
+            404: ErrorResponseSerializer,
+            400: ErrorResponseSerializer,
         },
     )
     def post(self, request, medical_claim_id, pk):
@@ -308,12 +343,16 @@ class MedicalClaimProofRejectView(APIView):
             )
         except MedicalClaimProof.DoesNotExist:
             return Response(
-                {"detail": "Proof document not found."},
+                {"detail": "Proof document not found.", "error_code": "PROOF_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = MedicalClaimProofRejectSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         proof.verification_status = "REJECTED"
         proof.verified_by = request.user.system_admin
@@ -338,8 +377,8 @@ class MedicalClaimProofFlagView(APIView):
         request_body=MedicalClaimProofFlagSerializer,
         responses={
             200: MedicalClaimProofSerializer,
-            404: "Proof not found",
-            400: "Bad request",
+            404: ErrorResponseSerializer,
+            400: ErrorResponseSerializer,
         },
     )
     def post(self, request, medical_claim_id, pk):
@@ -349,12 +388,16 @@ class MedicalClaimProofFlagView(APIView):
             )
         except MedicalClaimProof.DoesNotExist:
             return Response(
-                {"detail": "Proof document not found."},
+                {"detail": "Proof document not found.", "error_code": "PROOF_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = MedicalClaimProofFlagSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         proof.verification_status = "FLAGGED"
         proof.verified_by = request.user.system_admin
@@ -377,9 +420,15 @@ class VoucherTopUpRequestCreateView(CreateAPIView):
     @swagger_auto_schema(
         tags=["Voucher Top-Up"],
         operation_description="Submit a top-up request for insufficient voucher funding.",
-        responses={201: VoucherTopUpRequestSerializer},
+        responses={201: VoucherTopUpRequestSerializer, 400: ErrorResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return super().post(request, *args, **kwargs)
 
 
@@ -394,8 +443,8 @@ class VoucherTopUpRequestApproveView(APIView):
         request_body=VoucherTopUpRequestApproveSerializer,
         responses={
             200: VoucherTopUpRequestSerializer,
-            400: "Validation error",
-            404: "Top-up request not found",
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
         },
     )
     def post(self, request, top_up_request_id):
@@ -403,12 +452,19 @@ class VoucherTopUpRequestApproveView(APIView):
             top_up_request = VoucherTopUpRequest.objects.get(id=top_up_request_id)
         except VoucherTopUpRequest.DoesNotExist:
             return Response(
-                {"detail": "Top-up request not found."},
+                {
+                    "detail": "Top-up request not found.",
+                    "error_code": "TOPUP_REQUEST_NOT_FOUND",
+                },
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = VoucherTopUpRequestApproveSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         success, message = approve_top_up_request_and_allocate_funds(
             top_up_request=top_up_request,
@@ -419,7 +475,7 @@ class VoucherTopUpRequestApproveView(APIView):
 
         if not success:
             return Response(
-                {"detail": message},
+                {"detail": message, "error_code": "APPROVAL_FAILED"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -440,8 +496,8 @@ class VoucherTopUpRequestRejectView(APIView):
         request_body=VoucherTopUpRequestRejectSerializer,
         responses={
             200: VoucherTopUpRequestSerializer,
-            400: "Validation error",
-            404: "Top-up request not found",
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
         },
     )
     def post(self, request, top_up_request_id):
@@ -449,12 +505,19 @@ class VoucherTopUpRequestRejectView(APIView):
             top_up_request = VoucherTopUpRequest.objects.get(id=top_up_request_id)
         except VoucherTopUpRequest.DoesNotExist:
             return Response(
-                {"detail": "Top-up request not found."},
+                {
+                    "detail": "Top-up request not found.",
+                    "error_code": "TOPUP_REQUEST_NOT_FOUND",
+                },
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = VoucherTopUpRequestRejectSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         success, message = reject_top_up_request(
             top_up_request=top_up_request,
@@ -464,7 +527,7 @@ class VoucherTopUpRequestRejectView(APIView):
 
         if not success:
             return Response(
-                {"detail": message},
+                {"detail": message, "error_code": "REJECTION_FAILED"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -482,14 +545,18 @@ class MedicalClaimMarkCompleteView(APIView):
     @swagger_auto_schema(
         tags=["Medical Claims"],
         operation_description="Mark medical services as complete and ready for final admin verification. No request body needed.",
-        responses={200: MedicalClaimDetailSerializer},
+        responses={
+            200: MedicalClaimDetailSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def post(self, request, medical_claim_id):
         try:
             medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
         except MedicalClaim.DoesNotExist:
             return Response(
-                {"detail": "Medical claim not found."},
+                {"detail": "Medical claim not found.", "error_code": "CLAIM_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -500,7 +567,7 @@ class MedicalClaimMarkCompleteView(APIView):
 
         if not success:
             return Response(
-                {"detail": message},
+                {"detail": message, "error_code": "MARK_COMPLETE_FAILED"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -519,29 +586,38 @@ class MedicalClaimApproveView(APIView):
         tags=["Medical Claims"],
         operation_description="Admin approves a medical claim. Optional approval_notes for audit trail.",
         request_body=MedicalClaimApproveSerializer,
-        responses={200: MedicalClaimDetailSerializer},
+        responses={
+            200: MedicalClaimDetailSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def post(self, request, medical_claim_id):
-        old_status = ''
+        old_status = ""
         try:
             medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
             old_status = medical_claim.claim_status
         except MedicalClaim.DoesNotExist:
             return Response(
-                {"detail": "Medical claim not found."},
+                {"detail": "Medical claim not found.", "error_code": "CLAIM_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         if medical_claim.claim_status != "PENDING":
             return Response(
                 {
-                    "detail": f"Cannot approve claim with status {medical_claim.claim_status}. Only PENDING claims can be approved."
+                    "detail": f"Cannot approve claim with status {medical_claim.claim_status}. Only PENDING claims can be approved.",
+                    "error_code": "INVALID_STATUS",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer = MedicalClaimApproveSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         medical_claim.claim_status = "APPROVED"
         medical_claim.reviewed_by = request.user
@@ -578,27 +654,36 @@ class MedicalClaimRejectView(APIView):
         tags=["Medical Claims"],
         operation_description="Admin rejects a medical claim with a reason.",
         request_body=MedicalClaimRejectSerializer,
-        responses={200: MedicalClaimDetailSerializer},
+        responses={
+            200: MedicalClaimDetailSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def post(self, request, medical_claim_id):
         try:
             medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
         except MedicalClaim.DoesNotExist:
             return Response(
-                {"detail": "Medical claim not found."},
+                {"detail": "Medical claim not found.", "error_code": "CLAIM_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         if medical_claim.claim_status != "PENDING":
             return Response(
                 {
-                    "detail": f"Cannot reject claim with status {medical_claim.claim_status}. Only PENDING claims can be rejected."
+                    "detail": f"Cannot reject claim with status {medical_claim.claim_status}. Only PENDING claims can be rejected.",
+                    "error_code": "INVALID_STATUS",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer = MedicalClaimRejectSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         medical_claim.claim_status = "REJECTED"
         medical_claim.reviewed_by = request.user
@@ -766,7 +851,7 @@ class VoucherTopUpRequestDetailView(RetrieveAPIView):
     @swagger_auto_schema(
         tags=["Voucher Top-Up"],
         operation_description="Retrieve details of a specific voucher top-up request.",
-        responses={200: VoucherTopUpRequestSerializer},
+        responses={200: VoucherTopUpRequestSerializer, 404: ErrorResponseSerializer},
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -781,7 +866,11 @@ class VoucherApproveView(APIView):
         tags=["Vouchers"],
         operation_description="Admin approves a voucher, transitioning it from ACTIVE to PENDING_CONFIRMATION.",
         request_body=VoucherApproveSerializer,
-        responses={200: "Voucher approved successfully"},
+        responses={
+            200: "Voucher approved successfully",
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def post(self, request, voucher_id):
         try:
@@ -790,12 +879,16 @@ class VoucherApproveView(APIView):
             voucher = Voucher.objects.get(id=voucher_id)
         except Voucher.DoesNotExist:
             return Response(
-                {"detail": "Voucher not found."},
+                {"detail": "Voucher not found.", "error_code": "VOUCHER_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = VoucherApproveSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         success, message = approve_voucher(
             voucher=voucher,
@@ -804,7 +897,7 @@ class VoucherApproveView(APIView):
 
         if not success:
             return Response(
-                {"detail": message},
+                {"detail": message, "error_code": "APPROVAL_FAILED"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -823,7 +916,11 @@ class VoucherConfirmPinView(APIView):
         tags=["Vouchers"],
         operation_description="Receptionist confirms PIN provided by beneficiary. Transitions voucher from PENDING_CONFIRMATION to USED.",
         request_body=VoucherConfirmPinSerializer,
-        responses={200: "PIN confirmed successfully"},
+        responses={
+            200: "PIN confirmed successfully",
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def post(self, request, voucher_id):
         try:
@@ -832,12 +929,16 @@ class VoucherConfirmPinView(APIView):
             voucher = Voucher.objects.get(id=voucher_id)
         except Voucher.DoesNotExist:
             return Response(
-                {"detail": "Voucher not found."},
+                {"detail": "Voucher not found.", "error_code": "VOUCHER_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = VoucherConfirmPinSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         success, message = confirm_voucher_pin(
             voucher=voucher,
@@ -847,7 +948,7 @@ class VoucherConfirmPinView(APIView):
 
         if not success:
             return Response(
-                {"detail": message},
+                {"detail": message, "error_code": "PIN_CONFIRMATION_FAILED"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
