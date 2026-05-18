@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import Receptionist, SystemAdmin
+from utils.models import BaseEvent
 from .medical_claim import MedicalClaim
 
 
@@ -50,3 +51,15 @@ class VoucherTopUpRequest(models.Model):
 
     def __str__(self):
         return f"TopUp Request {self.id}: {self.requested_amount} XAF for Claim {self.medical_claim.id}"
+
+
+class VoucherTopUpRequestEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a VoucherTopUpRequest
+    """
+    voucher_top_up_request = models.ForeignKey(
+        VoucherTopUpRequest, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+

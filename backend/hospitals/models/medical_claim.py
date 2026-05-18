@@ -1,6 +1,7 @@
 from .hospital import Hospital
 from vouchers.models import Voucher
 from django.db import models
+from utils.models import BaseEvent
 from accounts.models import Receptionist, SystemAdmin
 
 
@@ -55,6 +56,25 @@ class MedicalClaim(models.Model):
             models.Index(fields=["submitted_at"]),
             models.Index(fields=["hospital"]),
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_claim_status = self.claim_status
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
+        if is_new or self.claim_status != self._initial_claim_status:
+            if is_new:
+                notes = f"MedicalClaim status initially set to {self.claim_status}"
+            else:
+                notes = f"MedicalClaim status changed from {self._initial_claim_status} to {self.claim_status}"
+            self.events.create(
+                status=self.claim_status,
+                notes=notes
+            )
+            self._initial_claim_status = self.claim_status
 
     def __str__(self):
         return f"Claim for Voucher {self.voucher.id} at {self.hospital.name if self.hospital else 'Unknown Hospital'}"
@@ -128,3 +148,26 @@ class MedicalClaimProof(models.Model):
 
     def __str__(self):
         return f"Document for Claim {self.medical_claim.id}"
+
+
+class MedicalClaimEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a MedicalClaim
+    """
+    medical_claim = models.ForeignKey(
+        MedicalClaim, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+
+
+class MedicalClaimProofEvent(BaseEvent):
+    """
+    Tracks all the verification_status changes that happen on a MedicalClaimProof
+    """
+    medical_claim_proof = models.ForeignKey(
+        MedicalClaimProof, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+

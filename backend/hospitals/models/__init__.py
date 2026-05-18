@@ -7,6 +7,8 @@ from .medical_claim import (
     MedicalClaimProof,
     VerificationStatus,
     DocumentType,
+    MedicalClaimEvent,
+    MedicalClaimProofEvent
 )
 from .voucher_top_up_request import VoucherTopUpRequest, VoucherTopUpRequestStatus
 
@@ -23,4 +25,6 @@ __all__ = [
     "ServiceCategory",
     "VoucherTopUpRequest",
     "VoucherTopUpRequestStatus",
+    "MedicalClaimEvent",
+    "MedicalClaimProofEvent",
 ]

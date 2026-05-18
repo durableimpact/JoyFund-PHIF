@@ -1,6 +1,7 @@
 import uuid
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
+from utils.models import BaseEvent
 
 
 class PartnershipStatus(models.TextChoices):
@@ -41,7 +42,13 @@ class Hospital(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_partnership_status = self.partnership_status
+
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
+
         if self.gps_coordinates:
             self.lat = self.gps_coordinates.y
             self.lng = self.gps_coordinates.x
@@ -53,6 +60,17 @@ class Hospital(models.Model):
             self.gps_coordinates = Point(float(self.lng), float(self.lat), srid=4326)
         super().save(*args, **kwargs)
 
+        if is_new or self.partnership_status != self._initial_partnership_status:
+            if is_new:
+                notes = f"Hospital partnership_status initially set to {self.partnership_status}"
+            else:
+                notes = f"Hospital partnership_status changed from {self._initial_partnership_status} to {self.partnership_status}"
+            self.events.create(
+                status=self.partnership_status,
+                notes=notes
+            )
+            self._initial_partnership_status = self.partnership_status
+
     class Meta:
         indexes = [
             models.Index(fields=["partnership_status"]),
@@ -62,3 +80,15 @@ class Hospital(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class HospitalEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a Hospital
+    """
+    hospital = models.ForeignKey(
+        Hospital, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+
