@@ -110,6 +110,40 @@ class Campaign(models.Model):
         if self.goal_amount > 0:
             return (self.current_amount / self.goal_amount) * 100
         return 0
+    
+    @property
+    def goal_reached(self):
+        """Check if campaign has reached its goal amount."""
+        return self.total_net_raised >= self.goal_amount
+    
+    def generate_impact_certificate(self):
+        """
+        Generate and save impact certificate PDF if campaign goal is reached.
+        Returns: True if certificate generated/updated, False otherwise
+        """
+        if not self.goal_reached:
+            return False
+        
+        if self.certificate_generated and self.certificate_file:
+            return False  # Already generated
+        
+        try:
+            from utils.pdf_generator import create_impact_certificate
+            
+            filename, pdf_file = create_impact_certificate(self)
+            
+            if pdf_file:
+                # Save the PDF file
+                self.certificate_file.save(filename, pdf_file, save=True)
+                self.certificate_generated = True
+                self.save(update_fields=['certificate_generated', 'certificate_file'])
+                return True
+            return False
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error generating certificate for campaign {self.id}: {str(e)}")
+            return False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
