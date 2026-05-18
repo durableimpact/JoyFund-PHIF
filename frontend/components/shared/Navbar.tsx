@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { logoutUser } from '@/lib/auth';
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -37,6 +38,11 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
 
   const isLoggedIn = currentRole !== 'guest';
   const useDark = (transparent || pathname === '/') && !scrolled && !mobileOpen;
+
+  const handleSignOut = async () => {
+    await logoutUser();
+    router.push('/');
+  };
 
   return (
     <nav
@@ -93,7 +99,7 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                 </Link>
               )}
               <button
-                onClick={() => { logout(); router.push('/'); }}
+                onClick={handleSignOut}
                 className={`text-sm font-medium transition-colors px-3 py-2 ${
                   useDark ? 'text-white/85 hover:text-white' : 'text-gray-600 hover:text-[#1D38DB]'
                 }`}
@@ -159,7 +165,10 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                   </Link>
                 )}
                 <button
-                  onClick={() => { logout(); setMobileOpen(false); router.push('/'); }}
+                  onClick={async () => {
+                    setMobileOpen(false);
+                    await handleSignOut();
+                  }}
                   className="border border-gray-200 text-gray-700 font-semibold px-5 py-3 rounded-full text-center"
                 >
                   Sign Out

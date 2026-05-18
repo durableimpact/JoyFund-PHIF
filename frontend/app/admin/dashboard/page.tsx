@@ -23,7 +23,12 @@ export default function AdminDashboard() {
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <div className="py-4 px-6 flex items-center justify-between" style={{ background: '#471DDB' }}>
         <div className="flex items-center gap-3"><span className="text-xl">⚙️</span><div><p className="font-black text-sm text-white">JoyFund System Admin</p><p className="text-xs text-white opacity-60">Full platform oversight</p></div></div>
-        <div className="flex gap-4">{nav.map(n => <Link key={n.label} href={n.href} className="text-white opacity-70 text-xs font-medium hover:opacity-100 hidden sm:block">{n.label}</Link>)}<Link href="/" className="text-white opacity-60 text-xs hover:opacity-100">Public Site</Link></div>
+        <div className="flex gap-4 items-center">
+          {nav.map(n => <Link key={n.label} href={n.href} className="text-white opacity-70 text-xs font-medium hover:opacity-100 hidden sm:block">{n.label}</Link>)}
+          {/* <Link href="/admin/create-user" className="btn-admin text-sm">Create User</Link> */}
+          <Link href="/admin/create-user" className="text-white opacity-60 text-xs hover:opacity-100">Create User</Link>
+          <Link href="/" className="text-white opacity-60 text-xs hover:opacity-100">Public Site</Link>
+        </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-6"><h1 className="text-2xl font-black text-gray-900">System Overview</h1><p className="text-gray-500 text-sm">Real-time platform health dashboard</p></div>
