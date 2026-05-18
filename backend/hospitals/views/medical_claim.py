@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
 
+from utils.serializers import ErrorResponseSerializer
 from hospitals.models import MedicalClaim,MedicalClaimEvent, MedicalClaimProof,MedicalClaimProofEvent, VoucherTopUpRequest
 from hospitals.serializers.medical_claim import (
     MedicalClaimCreateSerializer,
@@ -630,9 +631,25 @@ class MedicalClaimFinalVerifyView(APIView):
 
     @swagger_auto_schema(
         tags=["Medical Claims"],
-        operation_description="Final verification and approval - triggers fund disbursement to hospital. Optional approval_notes for audit trail.",
+        operation_description="""
+Final verification and approval - triggers fund disbursement to hospital.
+Optional approval_notes for audit trail.
+
+**Possible Error Codes:**
+- `CLAIM_NOT_FOUND`: The specified medical claim ID does not exist.
+- `SERVICE_NOT_COMPLETE`: The medical service hasn't been marked as completed yet.
+- `CLAIM_STATUS_NOT_APPROVED`: Only claims with 'APPROVED' status can be finalized.
+- `VOUCHER_STATUS_NOT_USED`: The associated voucher must be in 'USED' status (PIN confirmed).
+- `FUNDING_EXCEEDS_COST`: The committed funds exceed the actual claim cost.
+- `DISBURSEMENT_FAILED`: An error occurred during the fund disbursement process.
+- `VALIDATION_ERROR`: The request body failed validation.
+        """,
         request_body=MedicalClaimFinalVerifySerializer,
-        responses={200: MedicalClaimDetailSerializer},
+        responses={
+            200: MedicalClaimDetailSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
     )
     def post(self, request, medical_claim_id):
         from django.db.models import Sum
@@ -643,7 +660,7 @@ class MedicalClaimFinalVerifyView(APIView):
             medical_claim = MedicalClaim.objects.get(id=medical_claim_id)
         except MedicalClaim.DoesNotExist:
             return Response(
-                {"detail": "Medical claim not found."},
+                {"detail": "Medical claim not found.", "error_code": "CLAIM_NOT_FOUND"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -651,7 +668,8 @@ class MedicalClaimFinalVerifyView(APIView):
         if medical_claim.service_completed_at is None:
             return Response(
                 {
-                    "detail": "Service must be marked complete before final verification."
+                    "detail": "Service must be marked complete before final verification.",
+                    "error_code": "SERVICE_NOT_COMPLETE",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -660,7 +678,8 @@ class MedicalClaimFinalVerifyView(APIView):
         if medical_claim.claim_status != "APPROVED":
             return Response(
                 {
-                    "detail": f"Claim status must be APPROVED before final verification. Current status: {medical_claim.claim_status}"
+                    "detail": f"Claim status must be APPROVED before final verification. Current status: {medical_claim.claim_status}",
+                    "error_code": "CLAIM_STATUS_NOT_APPROVED",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -670,7 +689,8 @@ class MedicalClaimFinalVerifyView(APIView):
         if voucher.status != Voucher.Status.USED:
             return Response(
                 {
-                    "detail": f"Voucher must be USED (PIN confirmed) before final verification. Current status: {voucher.status}"
+                    "detail": f"Voucher must be USED (PIN confirmed) before final verification. Current status: {voucher.status}",
+                    "error_code": "VOUCHER_STATUS_NOT_USED",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -683,22 +703,29 @@ class MedicalClaimFinalVerifyView(APIView):
         if total_funded > medical_claim.total_cost:
             return Response(
                 {
-                    "detail": f"Voucher funding ({total_funded:.2f} XAF) exceeds medical claim cost ({medical_claim.total_cost:.2f} XAF). "
-                    f"Cannot finalize until funding is reduced or claim cost is updated."
+                    "detail": f"Voucher funding ({total_funded:.2f} XAF) exceeds medical claim cost ({medical_claim.total_cost:.2f} XAF).",
+                    "error_code": "FUNDING_EXCEEDS_COST",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Validate request body with optional approval_notes
         serializer = MedicalClaimFinalVerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": serializer.errors, "error_code": "VALIDATION_ERROR"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Settle voucher and disburse funds
         success, message = settle_voucher_with_campaign_updates(voucher)
 
         if not success:
             return Response(
-                {"detail": f"Disbursement failed: {message}"},
+                {
+                    "detail": f"Disbursement failed: {message}",
+                    "error_code": "DISBURSEMENT_FAILED",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
