@@ -50,7 +50,7 @@ class VoucherTopUpRequest(models.Model):
         ]
 
     def __str__(self):
-        return f"TopUp Request {self.id}: {self.requested_amount} XAF for Claim {self.medical_claim.id}"
+        return f"TopUp Request {self.pk}: {self.requested_amount} XAF for Claim {self.medical_claim.pk}"
 
 
 class VoucherTopUpRequestEvent(BaseEvent):
