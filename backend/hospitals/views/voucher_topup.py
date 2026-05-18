@@ -152,7 +152,7 @@ class VoucherTopUpRequestRejectView(APIView):
         success, message = reject_top_up_request(
             top_up_request=top_up_request,
             system_admin=request.user.system_admin,
-            review_notes=serializer.validated_data.get("review_notes")],
+            review_notes=serializer.validated_data.get("review_notes"),
         )
 
         if not success:
