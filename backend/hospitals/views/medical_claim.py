@@ -65,6 +65,25 @@ class IsSystemAdmin(IsAuthenticated):
             super().has_permission(request, view)
             and request.user.role == Role.SYSTEM_ADMIN
         )
+    
+class IsSystemOrHospitalAdminOrReceptionist(BasePermission):
+    message = "Only System Admins, Receptionist or Hospital Admins can perform this action."
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in {Role.SYSTEM_ADMIN, Role.HOSPITAL_ADMIN, Role.RECEPTIONIST}
+        )
+
+class IsHospitalAdminOrReceptionist(IsAuthenticated):
+    """Permission to check if user is a Hospital Admin or Receptionist."""
+
+    def has_permission(self, request, view):
+        return (
+            super().has_permission(request, view)
+            and request.user.role in {Role.HOSPITAL_ADMIN, Role.RECEPTIONIST}
+        )
 
 
 class MedicalClaimCreateView(CreateAPIView):
@@ -104,7 +123,7 @@ class MedicalClaimCreateView(CreateAPIView):
 class MedicalClaimDetailView(RetrieveUpdateAPIView):
     """View and add items to a medical claim."""
 
-    permission_classes = [IsReceptionist]
+    permission_classes = [IsSystemOrHospitalAdminOrReceptionist]
     queryset = MedicalClaim.objects.prefetch_related("claim_items", "proofs")
     lookup_field = "pk"
 
@@ -364,7 +383,7 @@ class MedicalClaimProofRejectView(APIView):
         proof.verification_status = "REJECTED"
         proof.verified_by = request.user.system_admin
         proof.verified_at = timezone.now()
-        proof.rejection_reason = serializer.validated_data["rejection_reason"]
+        proof.rejection_reason = serializer.validated_data.get("rejection_reason")
         proof.save()
 
         MedicalClaimProofEvent.objects.create(
@@ -416,7 +435,7 @@ class MedicalClaimProofFlagView(APIView):
         proof.verification_status = "FLAGGED"
         proof.verified_by = request.user.system_admin
         proof.verified_at = timezone.now()
-        proof.rejection_reason = serializer.validated_data["rejection_reason"]
+        proof.rejection_reason = serializer.validated_data.get("rejection_reason")
         proof.save()
 
         MedicalClaimProofEvent.objects.create(
@@ -501,7 +520,7 @@ class MedicalClaimApproveView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        if medical_claim.cMedicalClaimProofEventlaim_status != "PENDING":
+        if medical_claim.claim_status != "PENDING":
             return Response(
                 {
                     "detail": f"Cannot approve claim with status {medical_claim.claim_status}. Only PENDING claims can be approved.",
@@ -586,7 +605,7 @@ class MedicalClaimRejectView(APIView):
         medical_claim.claim_status = "REJECTED"
         medical_claim.reviewed_by = request.user
         medical_claim.reviewed_at = timezone.now()
-        medical_claim.rejection_reason = serializer.validated_data["rejection_reason"]
+        medical_claim.rejection_reason = serializer.validated_data.get("rejection_reason")
         medical_claim.save(
             update_fields=[
                 "claim_status",
@@ -809,7 +828,7 @@ class VoucherConfirmPinView(APIView):
 
         success, message = confirm_voucher_pin(
             voucher=voucher,
-            provided_pin=serializer.validated_data["patient_pin"],
+            provided_pin=serializer.validated_data.get("patient_pin"),
             receptionist=request.user,
         )
 
