@@ -61,7 +61,8 @@ class Beneficiary(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.digital_health_id:
-            last_beneficiary = Beneficiary.objects.all().order_by('id').last()
+            # Get the last beneficiary by created_at (not id, since id is UUID and not sequential)
+            last_beneficiary = Beneficiary.objects.all().order_by('-created_at').first()
             if last_beneficiary and last_beneficiary.digital_health_id:
                 try:
                     last_id_num = int(last_beneficiary.digital_health_id.split('-')[1])
