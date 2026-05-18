@@ -1,11 +1,22 @@
 from rest_framework import serializers
 
-from campaigns.models import Campaign
+from campaigns.models import Campaign,CampaignEvent,CampaignTransaction
 
+class CampaignEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignEvent
+        exclude = ['campaign']
+
+class CampaignTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignTransaction
+        exclude = ['campaign']
 
 class CampaignDetailSerializer(serializers.ModelSerializer):
     donor_id = serializers.UUIDField(source="donor.id", read_only=True)
     progress_percentage = serializers.SerializerMethodField()
+    events = CampaignEventSerializer(many=True, read_only=True)
+    transactions = CampaignTransactionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Campaign
@@ -25,6 +36,8 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "is_active",
             "created_at",
             "progress_percentage",
+            "events",
+            "transactions",
         ]
 
     def get_progress_percentage(self, obj):

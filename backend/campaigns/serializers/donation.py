@@ -3,10 +3,17 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from campaigns.models import Donation,Payment
+from campaigns.models import Donation,Payment,DonationEvent,PaymentEvent
 
+
+class PaymentEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentEvent
+        exclude = ['payment']
 
 class PaymentSerializer(serializers.ModelSerializer):
+    events = PaymentEventSerializer(many=True, read_only=True)
+
     class Meta:
         model = Payment
         fields = [
@@ -16,16 +23,22 @@ class PaymentSerializer(serializers.ModelSerializer):
             'amount',
             'payment_status',
             'payment_reference',
+            'events',
             'created_at',
             'updated_at',
         ]
 
+class DonationEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DonationEvent
+        exclude = ['donation']
 
 class DonationDetailSerializer(serializers.ModelSerializer):
     campaign_id = serializers.UUIDField(source='campaign.id', read_only=True)
     donor_id = serializers.UUIDField(source='donor.id', read_only=True, allow_null=True)
 
     payment = PaymentSerializer(read_only=True)
+    events = DonationEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = Donation
@@ -38,6 +51,7 @@ class DonationDetailSerializer(serializers.ModelSerializer):
             'status',
             'message',
             'payment',
+            'events',
             'is_anonymous',
             'created_at',
             'updated_at',
