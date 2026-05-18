@@ -8,17 +8,19 @@ from .medical_claim import (
     MedicalClaimProofVerifyView,
     MedicalClaimProofRejectView,
     MedicalClaimProofFlagView,
-    VoucherTopUpRequestCreateView,
-    VoucherTopUpRequestListView,
-    VoucherTopUpRequestDetailView,
     VoucherApproveView,
-    VoucherTopUpRequestApproveView,
-    VoucherTopUpRequestRejectView,
     VoucherConfirmPinView,
     MedicalClaimMarkCompleteView,
     MedicalClaimApproveView,
     MedicalClaimRejectView,
     MedicalClaimFinalVerifyView,
+)
+from .voucher_topup import (
+    VoucherTopUpRequestCreateView,
+    VoucherTopUpRequestListView,
+    VoucherTopUpRequestDetailView,
+    VoucherTopUpRequestApproveView,
+    VoucherTopUpRequestRejectView,
 )
 
 __all__ = [
