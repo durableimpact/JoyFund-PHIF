@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from utils.models import BaseEvent
 from campaigns.models import Donation
 from .account import Account
 from .gateway import PaymentGateway
@@ -78,3 +79,15 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"[{self.direction}] {self.type} — {self.amount} {self.currency} ({self.status})"
+
+
+class TransactionEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a Transaction
+    """
+    transaction = models.ForeignKey(
+        Transaction, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+
