@@ -1,4 +1,5 @@
 from django.db import models
+from utils.models import BaseEvent
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta, date
@@ -109,3 +110,15 @@ class Voucher(models.Model):
 
     def __str__(self):
         return f"{self.voucher_code} — {self.beneficiary.full_name}"
+
+
+class VoucherEvent(BaseEvent):
+    """
+    Tracks all the status changes that happen on a Voucher
+    """
+    voucher = models.ForeignKey(
+        Voucher, 
+        on_delete=models.CASCADE, 
+        related_name="events"
+    )
+
