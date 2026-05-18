@@ -1,7 +1,17 @@
-from hospitals.models import MedicalClaim, ClaimItem, MedicalClaimProof
+from hospitals.models import MedicalClaim, ClaimItem, MedicalClaimProof,MedicalClaimEvent,MedicalClaimProofEvent
 from rest_framework import serializers
 from django.db import transaction
 
+
+class MedicalClaimEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicalClaimEvent
+        exclude = ["medical_claim"]
+
+class MedicalClaimProofEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicalClaimProofEvent
+        exclude = ["medical_claim_proof"]
 
 class ClaimItemSerializer(serializers.ModelSerializer):
     class Meta:

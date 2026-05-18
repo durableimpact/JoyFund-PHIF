@@ -14,6 +14,8 @@ from .medical_claim import (
     MedicalClaimProofVerifySerializer,
     MedicalClaimProofRejectSerializer,
     MedicalClaimProofFlagSerializer,
+    MedicalClaimEventSerializer,
+    MedicalClaimProofEventSerializer,
 )
 from .voucher_topup import (
     VoucherTopUpRequestSerializer,
@@ -43,6 +45,8 @@ __all__ = [
     "MedicalClaimProofVerifySerializer",
     "MedicalClaimProofRejectSerializer",
     "MedicalClaimProofFlagSerializer",
+    "MedicalClaimEventSerializer",
+    "MedicalClaimProofEventSerializer",
     "VoucherTopUpRequestSerializer",
     "VoucherTopUpRequestCreateSerializer",
     "CampaignAllocationNestedSerializer",

@@ -4,12 +4,19 @@ from hospitals.models import (
     VoucherTopUpRequest,
     VoucherTopUpRequestStatus,
     MedicalClaim,
+    VoucherTopUpRequestEvent
 )
 from campaigns.models import Campaign
 
+class VoucherTopUpRequestEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VoucherTopUpRequestEvent
+        exclude = ["voucher_top_up_request"]
 
 class VoucherTopUpRequestSerializer(serializers.ModelSerializer):
     """View existing top-up requests."""
+
+    events = VoucherTopUpRequestEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = VoucherTopUpRequest
@@ -24,6 +31,7 @@ class VoucherTopUpRequestSerializer(serializers.ModelSerializer):
             "review_notes",
             "created_at",
             "reviewed_at",
+            "events"
         ]
         read_only_fields = ["id", "created_at", "reviewed_at", "reviewed_by"]
 
