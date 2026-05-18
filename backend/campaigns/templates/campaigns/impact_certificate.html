@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoyFund Impact Certificate - {{ campaign.title }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .certificate {
+            width: 297mm;
+            height: 210mm;
+            margin: 0 auto;
+            padding: 40px 60px 20px 60px;
+            background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+            border: 3px solid #2c5aa0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            page-break-after: always;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #2c5aa0 0%, #1e9b47 50%, #2c5aa0 100%);
+        }
+        
+        .certificate::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #2c5aa0 0%, #1e9b47 50%, #2c5aa0 100%);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2c5aa0;
+            padding-bottom: 12px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .certificate-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e9b47;
+            margin: 15px 0 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .content {
+            text-align: center;
+            margin: 15px 0;
+            line-height: 1.6;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .intro {
+            font-size: 11px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .campaign-info {
+            background-color: #f0f4f8;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            border-left: 4px solid #2c5aa0;
+        }
+        
+        .campaign-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 5px;
+        }
+        
+        .campaign-description {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .impact-stats {
+            display: table;
+            width: 100%;
+            margin: 15px 0;
+        }
+        
+        .stat {
+            display: table-cell;
+            text-align: center;
+            padding: 10px 8px;
+            border-right: 1px solid #ddd;
+        }
+        
+        .stat:last-child {
+            border-right: none;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e9b47;
+        }
+        
+        .stat-label {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
+        }
+        
+        .donors-section {
+            margin: 12px 0;
+        }
+        
+        .donors-header {
+            font-size: 11px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 5px;
+        }
+        
+        .donor-count {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .impact-statement {
+            background-color: #e8f5e9;
+            border-left: 4px solid #1e9b47;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 4px;
+            font-size: 10px;
+            line-height: 1.5;
+            color: #333;
+        }
+        
+        .impact-statement strong {
+            color: #1e9b47;
+            display: block;
+            margin-bottom: 6px;
+        }
+        
+        .footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 9px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .certificate-number {
+            font-size: 9px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        
+        .generated-date {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .seal {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 10px;
+            color: #1e9b47;
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 16px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2c5aa0, #1e9b47);
+            width: {{ progress_percentage }}%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="header">
+            <div class="logo">🌟 JoyFund</div>
+            <div class="subtitle">Impact Certificate - Chain of Life</div>
+        </div>
+        
+        <div class="certificate-title">Certificate of Impact</div>
+        
+        <div class="content">
+            <div class="intro">
+                This certifies that the campaign below has successfully achieved its fundraising goal
+                and positively impacted lives within our community.
+            </div>
+            
+            <div class="campaign-info">
+                <div class="campaign-title">{{ campaign.title }}</div>
+                <div class="campaign-description">{{ campaign.description }}</div>
+            </div>
+            
+            <div class="impact-stats">
+                <div class="stat">
+                    <div class="stat-value">{{ total_raised|floatformat:0 }} XAF</div>
+                    <div class="stat-label">Amount Raised</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ goal_amount|floatformat:0 }} XAF</div>
+                    <div class="stat-label">Goal Amount</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ progress_percentage|floatformat:0 }}%</div>
+                    <div class="stat-label">Achievement</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ total_donors }}</div>
+                    <div class="stat-label">Contributors</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            
+            <div class="donors-section">
+                <div class="donors-header">Community Contributors</div>
+                <div class="donor-count">
+                    {% if total_donors == 1 %}
+                        1 generous donor contributed to this campaign
+                    {% else %}
+                        {{ total_donors }} generous donors contributed to this campaign
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="impact-statement">
+                <strong>Our Impact</strong>
+                This campaign has reached its goal and will now create meaningful impact in our community. 
+                Through the generosity of {{ total_donors }} contributor{% if total_donors != 1 %}s{% endif %}, 
+                we have successfully raised {{ total_raised|floatformat:0 }} XAF to address critical health needs.
+                
+                <br><br>
+                
+                Every contribution brings us closer to our mission of ensuring equitable access to healthcare for all. 
+                Your support demonstrates the power of community solidarity and collective action.
+            </div>
+            
+            <div class="footer">
+                <div class="certificate-number">
+                    Certificate ID: {{ campaign.id|truncatechars:10 }}
+                </div>
+                <div class="generated-date">
+                    Generated: {{ generation_date }}
+                </div>
+                <div class="seal">
+                    ✓ Verified Impact Certificate
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
