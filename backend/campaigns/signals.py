@@ -19,8 +19,11 @@ def update_campaign_amount_on_donation_success(sender, instance: Donation, creat
         return
     
     # Guard: skip if we've already processed this donation's success
-    # (check if CampaignTransaction exists, which is created right after this)
-    if CampaignTransaction.objects.filter(donation=instance).exists():
+    # (check if a DONATION-type CampaignTransaction exists, which is created right after this)
+    if CampaignTransaction.objects.filter(
+        campaign=instance.campaign, 
+        transaction_type=CampaignTransaction.TransactionType.DONATION
+    ).exists():
         return
     
     campaign = instance.campaign
@@ -38,11 +41,6 @@ def create_campaign_transaction_on_donation_success(sender, instance:Donation, c
     When a donation is successfully completed:
     1. Create a CampaignTransaction record to log the contribution
     2. This serves as the financial record for the campaign's progress
-    
-    Acceptance Criteria (D-004):
-    - CampaignTransaction created within 30 seconds of donation success ✓ (Celery async task)
-    - Links to the correct campaign and donation ✓ (foreign keys)
-    - Records the contribution amount and donor name ✓ (fields in model)
     """
     # Only process if created and status is SUCCESS
     if not created or instance.status != 'SUCCESS':
@@ -50,14 +48,12 @@ def create_campaign_transaction_on_donation_success(sender, instance:Donation, c
     
     # Get campaign data
     campaign = instance.campaign
-    donor_name = instance.donor_name
     
-    # 1. Create CampaignTransaction record in database
+    # Create CampaignTransaction record in database
     CampaignTransaction.objects.create(
         campaign=campaign,
-        donation=instance,
         amount=instance.amount,
-        donor_name=donor_name,
+        description=f"Donation from {instance.donor_name or 'Anonymous'}",
         transaction_type=CampaignTransaction.TransactionType.DONATION,
     )
 
