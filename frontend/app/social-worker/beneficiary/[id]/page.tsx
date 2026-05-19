@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Phone, MapPin, Calendar } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
-import { statusColor, statusLabel, formatDate } from '@/lib/utils';
+import { normalizeBeneficiaryResponse, statusColor, statusLabel, formatDate } from '@/lib/utils';
 
 export default function BeneficiaryProfile() {
   const { id } = useParams<{ id: string }>();
@@ -18,17 +18,7 @@ export default function BeneficiaryProfile() {
     fetch(`/api/beneficiaries/${id}`)
       .then(r => r.ok ? r.json() : Promise.reject(r))
       .then(data => {
-        setBackendBeneficiary({
-          ...data,
-          healthId: data.digital_health_id,
-          community: data.city && data.region ? `${data.city}, ${data.region}` : data.region || data.city || '',
-          age: data.date_of_birth ? new Date().getFullYear() - new Date(data.date_of_birth).getFullYear() : undefined,
-          enrolledAt: data.created_at?.split('T')[0] || '',
-          status: 'awaiting_match',
-          gestationalWeek: data.gestational_week || 0,
-          complications: data.complications || 'No reported complications',
-          notes: data.notes || '',
-        });
+        setBackendBeneficiary(normalizeBeneficiaryResponse(data));
       })
       .catch(() => {
         setBackendBeneficiary(null);

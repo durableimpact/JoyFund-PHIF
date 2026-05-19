@@ -1,15 +1,54 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import {
-  campaigns as initialCampaigns,
-  contributions as initialContributions,
-  beneficiaries as initialBeneficiaries,
-  vouchers as initialVouchers,
-  Campaign,
-  Contribution,
-  Beneficiary,
-  Voucher,
-} from '@/lib/mockData';
+import { normalizeCampaignResponse, normalizeBeneficiaryResponse } from '@/lib/utils';
+
+// Local lightweight types (avoid runtime dependency on mockData)
+export interface Campaign {
+  id: string;
+  donorId?: string;
+  donorName?: string;
+  donorAvatar?: string;
+  title: string;
+  story?: string;
+  eventType?: string;
+  raisedXAF: number;
+  goalXAF: number;
+  contributors?: number;
+  goalDeliveries?: number;
+  status?: string;
+  coverColor?: string;
+  createdAt?: string;
+  expiresAt?: string;
+  slug?: string;
+}
+
+export interface Contribution {
+  id: string;
+  campaignId: string;
+  amountXAF: number;
+  donorName?: string;
+  createdAt?: string;
+}
+
+export interface Beneficiary {
+  id: string;
+  fullName?: string;
+  healthId?: string;
+  community?: string;
+  age?: number;
+  enrolledAt?: string;
+  status?: string;
+  gestationalWeek?: number;
+  complications?: string;
+  notes?: string;
+}
+
+export interface Voucher {
+  id: string;
+  amountXAF?: number;
+  hospitalId?: string;
+  status?: string;
+}
 
 // ─────────────────────────────────────────────
 // Types
@@ -83,6 +122,9 @@ interface AppState {
   addVoucher: (voucher: Voucher) => void;
   updateVoucher: (id: string, updates: Partial<Voucher>) => void;
 
+  // Hydrate store from backend APIs
+  loadInitialData: () => Promise<void>;
+
   // ── UI ────────────────────────────────────
   toast: { message: string; type: 'success' | 'error' | 'info' } | null;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
@@ -140,7 +182,7 @@ export const useStore = create<AppState>()(
       setAccessToken: (token) => set({ accessToken: token }),
 
       // ── Campaigns ───────────────────────────
-      campaigns: initialCampaigns,
+      campaigns: [],
 
       addCampaign: (campaign) =>
         set((s) => ({ campaigns: [campaign, ...s.campaigns] })),
@@ -153,7 +195,7 @@ export const useStore = create<AppState>()(
         })),
 
       // ── Contributions ───────────────────────
-      contributions: initialContributions,
+      contributions: [],
 
       addContribution: (contribution) =>
         set((s) => {
@@ -161,8 +203,8 @@ export const useStore = create<AppState>()(
             c.id === contribution.campaignId
               ? {
                   ...c,
-                  raisedXAF:    c.raisedXAF + contribution.amountXAF,
-                  contributors: c.contributors + 1,
+                  raisedXAF:    (c.raisedXAF ?? 0) + contribution.amountXAF,
+                  contributors: (c.contributors ?? 0) + 1,
                 }
               : c
           );
@@ -173,7 +215,7 @@ export const useStore = create<AppState>()(
         }),
 
       // ── Beneficiaries ───────────────────────
-      beneficiaries: initialBeneficiaries,
+      beneficiaries: [],
 
       addBeneficiary: (b) =>
         set((s) => ({ beneficiaries: [b, ...s.beneficiaries] })),
@@ -186,7 +228,66 @@ export const useStore = create<AppState>()(
         })),
 
       // ── Vouchers ────────────────────────────
-      vouchers: initialVouchers,
+      vouchers: [],
+
+      // Hydration: load initial data from backend APIs and normalize
+      loadInitialData: async () => {
+        try {
+          // Campaigns
+          const campRes = await fetch('/api/campaigns');
+          if (campRes.ok) {
+            const json = await campRes.json();
+            const raw = Array.isArray(json) ? json : json.results || [];
+            const camps = raw.map((r: any) => normalizeCampaignResponse(r));
+            set({ campaigns: camps });
+          }
+
+          // Beneficiaries
+          const benRes = await fetch('/api/beneficiaries');
+          if (benRes.ok) {
+            const json = await benRes.json();
+            const raw = Array.isArray(json) ? json : json.results || [];
+            const bens = raw.map((r: any) => normalizeBeneficiaryResponse(r));
+            set({ beneficiaries: bens });
+          }
+
+          // Contributions (best-effort, many backends expose this under different names)
+          try {
+            const contribRes = await fetch('/api/contributions');
+            if (contribRes.ok) {
+              const json = await contribRes.json();
+              const raw = Array.isArray(json) ? json : json.results || [];
+              const contribs = raw.map((r: any) => ({
+                id: r.id || r.uuid || `${r.campaign_id || r.campaignId}-${Math.random()}`,
+                campaignId: r.campaign_id || r.campaignId || r.campaign || '',
+                amountXAF: Number(r.amount ?? r.amountXAF ?? 0),
+                donorName: r.donor_name || r.donorName || 'Anonymous',
+                createdAt: r.created_at || r.createdAt || '',
+              }));
+              set({ contributions: contribs });
+            }
+          } catch (e) {
+            // ignore contributions if not exposed
+          }
+
+          // Vouchers (optional)
+          try {
+            const vRes = await fetch('/api/vouchers');
+            if (vRes.ok) {
+              const json = await vRes.json();
+              const raw = Array.isArray(json) ? json : json.results || [];
+              const vouchers = raw.map((r: any) => ({ id: r.id || r.uuid || '', amountXAF: Number(r.amount ?? r.amountXAF ?? 0), hospitalId: r.hospital_id || r.hospitalId || '', status: r.status || '' }));
+              set({ vouchers });
+            }
+          } catch (e) {
+            // ignore if not available
+          }
+        } catch (err) {
+          // swallow — components can fallback or show error toast
+          // eslint-disable-next-line no-console
+          console.error('loadInitialData error', err);
+        }
+      },
 
       addVoucher: (v) =>
         set((s) => ({ vouchers: [v, ...s.vouchers] })),

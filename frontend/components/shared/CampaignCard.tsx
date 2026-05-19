@@ -1,6 +1,19 @@
 import Link from 'next/link';
 import { Users, Calendar } from 'lucide-react';
-import { Campaign } from '@/lib/mockData';
+type Campaign = {
+  id: string;
+  coverColor: string;
+  raisedXAF: number;
+  goalXAF: number;
+  donorAvatar?: string;
+  donorName?: string;
+  status?: string;
+  title: string;
+  story?: string;
+  eventType?: string;
+  goalDeliveries?: number;
+  contributors?: number;
+};
 import { formatXAF, getProgressPercent, eventTypeLabel, statusColor, statusLabel } from '@/lib/utils';
 
 export default function CampaignCard({ campaign }: { campaign: Campaign }) {

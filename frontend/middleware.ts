@@ -50,6 +50,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // If the route allows guest access, make it public and skip token checks
+  const allowedRoles = ROUTE_PERMISSIONS[matchedRoute] || [];
+  if (allowedRoles.includes('guest')) {
+    return NextResponse.next();
+  }
+
   // If no token, redirect to login
   if (!token) {
     const loginUrl = new URL('/login', req.url);

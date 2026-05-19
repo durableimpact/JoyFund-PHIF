@@ -1,38 +1,19 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
-import { statusColor, statusLabel } from '@/lib/utils';
+import { normalizeBeneficiaryResponse, statusColor, statusLabel } from '@/lib/utils';
 
 export default function SocialWorkerDashboard() {
-  const { beneficiaries, currentUser } = useStore();
-  const [backendBeneficiaries, setBackendBeneficiaries] = useState<any[]>([]);
+  const { beneficiaries, loadInitialData, currentUser } = useStore();
   const name = currentUser?.name || 'Alphonse Kamga';
-
   useEffect(() => {
-    fetch('/api/beneficiaries')
-      .then(r => r.ok ? r.json() : Promise.reject(r))
-      .then(data => {
-        const rawList = Array.isArray(data) ? data : data?.results || [];
-        setBackendBeneficiaries(
-          rawList.map((item: any) => ({
-            ...item,
-            healthId: item.digital_health_id,
-            community: item.city && item.region ? `${item.city}, ${item.region}` : item.region || item.city || '',
-            status: 'awaiting_match',
-            gestationalWeek: item.gestational_week || 0,
-            enrolledAt: item.created_at?.split('T')[0] || '',
-          }))
-        );
-      })
-      .catch(() => {
-        // fallback to local store data
-      });
-  }, []);
+    loadInitialData?.();
+  }, [loadInitialData]);
 
-  const activeBeneficiaries = backendBeneficiaries.length ? backendBeneficiaries : beneficiaries;
+  const activeBeneficiaries = beneficiaries;
   const stats = [
     { label: 'Enrolled', value: activeBeneficiaries.length, color: 'var(--primary)' },
     { label: 'Awaiting Match', value: activeBeneficiaries.filter(b => b.status === 'awaiting_match').length, color: '#f59e0b' },
@@ -68,15 +49,15 @@ export default function SocialWorkerDashboard() {
             {activeBeneficiaries.map(b => (
               <Link key={b.id} href={`/social-worker/beneficiary/${b.id}`} className="card p-4 flex items-center gap-4 hover:shadow-md transition-shadow block">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                  {b.fullName.charAt(0)}
+                  {b.fullName?.charAt(0) ?? '?'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 text-sm">{b.fullName}</p>
-                  <p className="text-xs text-gray-500">{b.healthId} · {b.community} · Week {b.gestationalWeek}</p>
+                  <p className="font-bold text-gray-900 text-sm">{b.fullName ?? 'Unknown'}</p>
+                  <p className="text-xs text-gray-500">{b.healthId ?? 'N/A'} · {b.community ?? 'Unknown'} · Week {b.gestationalWeek ?? '0'}</p>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <p className="text-xs text-gray-400 hidden sm:block">{b.enrolledAt}</p>
-                  <span className={`badge ${statusColor(b.status)}`}>{statusLabel(b.status)}</span>
+                  <p className="text-xs text-gray-400 hidden sm:block">{b.enrolledAt ?? ''}</p>
+                  <span className={`badge ${statusColor(b.status ?? 'pending')}`}>{statusLabel(b.status ?? 'pending')}</span>
                 </div>
               </Link>
             ))}

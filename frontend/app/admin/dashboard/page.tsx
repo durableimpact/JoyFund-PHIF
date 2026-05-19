@@ -1,9 +1,18 @@
 'use client';
 import Link from 'next/link';
 import { TrendingUp, Activity, Clock, CheckCircle } from 'lucide-react';
-import { platformStats, activityFeed, hospitals } from '@/lib/mockData';
+import { useEffect, useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { formatXAF, statusColor, statusLabel } from '@/lib/utils';
+
+type PlatformStats = {
+  escrowBalanceXAF?: number;
+  activeCampaigns?: number;
+  pendingMatches?: number;
+  vouchersThisMonth?: number;
+  vouchersRedeemed?: number;
+  totalLivesSupported?: number;
+};
 
 export default function AdminDashboard() {
   const { campaigns, beneficiaries, showToast } = useStore();

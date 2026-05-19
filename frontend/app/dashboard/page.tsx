@@ -5,15 +5,15 @@ import Navbar from '@/components/shared/Navbar';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { useStore } from '@/store/useStore';
 import { formatXAF } from '@/lib/utils';
-import { contributions as allContribs } from '@/lib/mockData';
+
 
 export default function DonorDashboard() {
-  const { campaigns, currentUser } = useStore();
+  const { campaigns, currentUser, contributions } = useStore();
   const donorName = currentUser?.name || 'Jean-Pierre Mbarga';
   const donorId = currentUser?.id || 'donor-001';
   const myCampaigns = campaigns.filter(c => c.donorId === donorId);
   const totalRaised = myCampaigns.reduce((s, c) => s + c.raisedXAF, 0);
-  const myContribs = allContribs.filter(c => myCampaigns.some(m => m.id === c.campaignId)).slice(0, 5);
+  const myContribs = contributions.filter(c => myCampaigns.some(m => m.id === c.campaignId)).slice(0, 5);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
@@ -83,12 +83,12 @@ export default function DonorDashboard() {
                   <p className="text-gray-500 text-sm text-center py-4">No contributions yet</p>
                 ) : myContribs.map(c => (
                   <div key={c.id} className="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
-                      {c.anonymous ? '?' : c.contributorName.charAt(0)}
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
+                      {(c.anonymous ?? false) ? '?' : (c.donorName || 'A').charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#1A1A2E] truncate">{c.anonymous ? 'Anonymous' : c.contributorName}</p>
-                      <p className="text-xs text-gray-400">{c.paymentMethod === 'mtn_momo' ? 'MTN MoMo' : 'Orange Money'}</p>
+                      <p className="text-sm font-medium text-[#1A1A2E] truncate">{(c.anonymous ?? false) ? 'Anonymous' : (c.donorName || 'Anonymous')}</p>
+                      <p className="text-xs text-gray-400">{(c.paymentMethod || 'mtn_momo') === 'mtn_momo' ? 'MTN MoMo' : 'Orange Money'}</p>
                     </div>
                     <span className="text-sm font-bold flex-shrink-0" style={{ color: 'var(--primary)' }}>{formatXAF(c.amountXAF)}</span>
                   </div>

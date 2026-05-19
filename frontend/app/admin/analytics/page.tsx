@@ -1,26 +1,71 @@
 'use client';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
-import { platformStats, leaderboard, hospitals } from '@/lib/mockData';
-import { formatXAF } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
+import { formatXAF } from '@/lib/utils';
+
+type Hospital = {
+  id: string;
+  name: string;
+  status: string;
+};
+
+type LeaderboardItem = {
+  rank: number;
+  name: string;
+  eventType: string;
+  raisedXAF: number;
+  lives: number;
+};
+
+const defaultRegions = [
+  { name: 'Centre (Yaoundé)', pct: 60, count: 187 },
+  { name: 'Littoral (Douala)', pct: 20, count: 64 },
+  { name: 'Ouest (Bafoussam)', pct: 10, count: 31 },
+  { name: 'Nord-Ouest', pct: 7, count: 21 },
+  { name: 'Other Regions', pct: 3, count: 9 },
+];
 
 export default function AdminAnalytics() {
-  const { campaigns, showToast } = useStore();
+  const { campaigns, beneficiaries, vouchers, showToast } = useStore();
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+
+  useEffect(() => {
+    async function loadHospitals() {
+      try {
+        const res = await fetch('/api/hospitals/');
+        if (!res.ok) return;
+        const data = await res.json();
+        setHospitals(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadHospitals();
+  }, []);
+
   const totalRaised = campaigns.reduce((s, c) => s + c.raisedXAF, 0);
+  const vouchersRedeemed = vouchers.filter((v) => v.status === 'redeemed').length;
   const metrics = [
-    { label: 'Deliveries Funded', value: platformStats.vouchersRedeemed, icon: '👶' },
-    { label: 'Women Served', value: platformStats.totalLivesSupported, icon: '🤱' },
-    { label: 'Avg Cost/Delivery', value: formatXAF(Math.round(totalRaised / Math.max(platformStats.vouchersRedeemed, 1))), icon: '💰' },
-    { label: 'Partner Hospitals', value: hospitals.filter(h => h.status === 'active').length, icon: '🏥' },
+    { label: 'Deliveries Funded', value: vouchersRedeemed, icon: '👶' },
+    { label: 'Women Served', value: beneficiaries.length, icon: '🤱' },
+    { label: 'Avg Cost/Delivery', value: formatXAF(Math.round(totalRaised / Math.max(vouchersRedeemed, 1))), icon: '💰' },
+    { label: 'Partner Hospitals', value: hospitals.filter((h) => h.status === 'active').length, icon: '🏥' },
   ];
-  const regions = [
-    { name: 'Centre (Yaoundé)', pct: 60, count: 187 },
-    { name: 'Littoral (Douala)', pct: 20, count: 64 },
-    { name: 'Ouest (Bafoussam)', pct: 10, count: 31 },
-    { name: 'Nord-Ouest', pct: 7, count: 21 },
-    { name: 'Other Regions', pct: 3, count: 9 },
-  ];
+
+  const leaderboard: LeaderboardItem[] = [...campaigns]
+    .sort((a, b) => b.raisedXAF - a.raisedXAF)
+    .slice(0, 5)
+    .map((campaign, index) => ({
+      rank: index + 1,
+      name: campaign.title,
+      eventType: campaign.eventType || 'other',
+      raisedXAF: campaign.raisedXAF,
+      lives: campaign.goalDeliveries ?? 0,
+    }));
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <div className="py-4 px-6 flex items-center justify-between" style={{ background: '#471DDB' }}>
@@ -37,7 +82,7 @@ export default function AdminAnalytics() {
           <button className="btn-admin text-sm flex items-center gap-2" onClick={() => showToast('Monthly report generated! PDF ready.', 'success')}><Download size={16} /> Export Report</button>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {metrics.map(m => (
+          {metrics.map((m) => (
             <div key={m.label} className="card p-5 text-center">
               <div className="text-3xl mb-2">{m.icon}</div>
               <div className="text-2xl font-black" style={{ color: '#471DDB' }}>{m.value}</div>
@@ -66,13 +111,13 @@ export default function AdminAnalytics() {
             <div className="mt-3 flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ background: 'var(--primary)' }} />
               <span className="text-xs text-gray-500">Escrow balance (XAF)</span>
-              <span className="ml-auto font-bold text-sm" style={{ color: 'var(--primary)' }}>{formatXAF(platformStats.escrowBalanceXAF)}</span>
+              <span className="ml-auto font-bold text-sm" style={{ color: 'var(--primary)' }}>{formatXAF(totalRaised)}</span>
             </div>
           </div>
           <div className="card p-6">
             <h3 className="font-bold text-gray-900 mb-4">Beneficiaries by Region</h3>
             <div className="space-y-4">
-              {regions.map(r => (
+              {defaultRegions.map((r) => (
                 <div key={r.name}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-700">{r.name}</span>
@@ -87,11 +132,17 @@ export default function AdminAnalytics() {
             <h3 className="font-bold text-gray-900 mb-4">Top Campaigns by Funds Raised</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead><tr className="border-b border-gray-100">{['Rank','Campaign','Event Type','Raised','Lives'].map(h => <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>)}</tr></thead>
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    {['Rank', 'Campaign', 'Event Type', 'Raised', 'Lives'].map((h) => (
+                      <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
                 <tbody>
-                  {leaderboard.map(l => (
+                  {leaderboard.map((l) => (
                     <tr key={l.rank} className="border-b border-gray-50">
-                      <td className="py-3 font-black text-xl" style={{ color: l.rank===1?'#f59e0b':l.rank===2?'#94a3b8':l.rank===3?'#b45309':'#1A1A2E' }}>#{l.rank}</td>
+                      <td className="py-3 font-black text-xl" style={{ color: l.rank === 1 ? '#f59e0b' : l.rank === 2 ? '#94a3b8' : l.rank === 3 ? '#b45309' : '#1A1A2E' }}>#{l.rank}</td>
                       <td className="py-3 font-medium text-gray-900">{l.name}</td>
                       <td className="py-3 text-gray-500 capitalize">{l.eventType}</td>
                       <td className="py-3 font-bold" style={{ color: 'var(--primary)' }}>{formatXAF(l.raisedXAF)}</td>

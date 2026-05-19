@@ -6,7 +6,15 @@ import Link from 'next/link';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
 import { formatXAF, getProgressPercent, normalizeCampaignResponse } from '@/lib/utils';
-import { Campaign } from '@/lib/mockData';
+
+type Campaign = {
+  id: string;
+  title: string;
+  coverColor?: string;
+  donorAvatar?: string;
+  raisedXAF: number;
+  goalXAF: number;
+};
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
 

@@ -1,4 +1,4 @@
-import { Campaign } from './mockData';
+import type { Campaign } from './mockData';
 
 export function formatXAF(amount: number): string {
   return new Intl.NumberFormat('fr-CM', { style: 'decimal', maximumFractionDigits: 0 }).format(amount) + ' XAF';
@@ -43,6 +43,28 @@ export function normalizeCampaignResponse(raw: any): Campaign {
     expiresAt,
     slug,
     coverColor,
+  };
+}
+
+export function normalizeBeneficiaryResponse(raw: any) {
+  const dateOfBirth = raw.date_of_birth || raw.dateOfBirth || '';
+  const createdAt = raw.created_at || raw.createdAt || '';
+  const city = raw.city || '';
+  const region = raw.region || '';
+  const community = city && region ? `${city}, ${region}` : region || city || '';
+
+  return {
+    ...raw,
+    id: raw.id || raw.uuid || '',
+    fullName: raw.full_name || raw.fullName || '',
+    healthId: raw.digital_health_id || raw.health_id || raw.healthId || '',
+    community,
+    age: dateOfBirth ? new Date().getFullYear() - new Date(dateOfBirth).getFullYear() : 0,
+    enrolledAt: createdAt.split('T')[0] || '',
+    status: raw.status || 'awaiting_match',
+    gestationalWeek: Number(raw.gestational_week ?? raw.gestationalWeek ?? 0),
+    complications: raw.complications || 'No reported complications',
+    notes: raw.notes || '',
   };
 }
 

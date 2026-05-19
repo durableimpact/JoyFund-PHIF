@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DJANGO_API_URL } from '@/lib/apiClient';
 
+function buildAuthHeaders(req: NextRequest) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  const token = req.cookies.get('joyfund_token')?.value;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { campaignId } = req.nextUrl.pathname.match(/\/api\/campaigns\/(?<campaignId>[^/]+)\/donate\/?/)?.groups || {};
@@ -12,9 +23,7 @@ export async function POST(req: NextRequest) {
 
     const response = await fetch(`${DJANGO_API_URL}/api/campaigns/${campaignId}/donate/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: buildAuthHeaders(req),
       body: JSON.stringify(body),
     });
 

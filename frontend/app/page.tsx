@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Heart, ArrowRight, Star, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import CampaignCard from '@/components/shared/CampaignCard';
-import { campaigns, platformStats, activityFeed } from '@/lib/mockData';
+import { normalizeCampaignResponse } from '@/lib/utils';
 
 const steps = [
   { icon: '🎂', step: '01', title: 'Celebrate', desc: 'Create a JoyFund campaign for your birthday, wedding, promotion, or graduation instead of asking for traditional gifts.' },
@@ -20,12 +20,38 @@ const testimonials = [
 
 export default function HomePage() {
   const [feedIdx, setFeedIdx] = useState(0);
+  const [campaignList, setCampaignList] = useState<any[]>([]);
+  const [platformStats, setPlatformStats] = useState<any>({ totalLivesSupported: 0, activeCampaigns: 0, escrowBalanceXAF: 0, vouchersRedeemed: 0, vouchersThisMonth: 0 });
+  const activityFeed = [
+    { id: 1, type: 'donation', message: '20 XAF contributed to Solange & Eric\'s Wedding JoyFund', timeAgo: '3 hours ago' },
+    { id: 2, type: 'voucher', message: 'Voucher JF3R8T generated for BEN-0071', timeAgo: '4 hours ago' },
+  ];
+
   useEffect(() => {
     const t = setInterval(() => setFeedIdx(i => (i + 1) % activityFeed.length), 3000);
     return () => clearInterval(t);
   }, []);
 
-  const activeCampaigns = campaigns.filter(c => c.status === 'active').slice(0, 3);
+  useEffect(() => {
+    fetch('/api/campaigns')
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => {
+        const rawList = Array.isArray(data) ? data : data?.results || [];
+        setCampaignList(rawList.map((it: any) => normalizeCampaignResponse(it)));
+      })
+      .catch(() => {
+        // leave empty list if backend unavailable
+      });
+
+    fetch('/api/platform-stats')
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => setPlatformStats(data))
+      .catch(() => {
+        // keep defaults
+      });
+  }, []);
+
+  const activeCampaigns = campaignList.filter(c => c.status === 'active').slice(0, 3);
 
   return (
     <div className="min-h-screen">

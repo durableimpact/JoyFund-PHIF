@@ -6,12 +6,27 @@ import { Users, Share2, ArrowLeft, CheckCircle } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
 import { formatXAF, getProgressPercent, eventTypeLabel, formatDate, normalizeCampaignResponse } from '@/lib/utils';
-import { contributions as allContributions, Campaign } from '@/lib/mockData';
+
+type Campaign = {
+  id: string;
+  title: string;
+  slug?: string;
+  coverColor?: string;
+  donorAvatar?: string;
+  donorName?: string;
+  eventType?: string;
+  createdAt?: string;
+  raisedXAF: number;
+  goalXAF: number;
+  contributors?: number;
+  goalDeliveries?: number;
+  story?: string;
+};
 
 export default function CampaignPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { campaigns } = useStore();
+  const { campaigns, contributions } = useStore();
   const initialCampaign = campaigns.find(c => c.id === id);
   const [campaign, setCampaign] = useState<Campaign | undefined>(initialCampaign);
   const [copied, setCopied] = useState(false);
@@ -51,7 +66,7 @@ export default function CampaignPage() {
   );
 
   const pct = getProgressPercent(campaign.raisedXAF, campaign.goalXAF);
-  const campContribs = allContributions.filter(c => c.campaignId === id).slice(0, 6);
+  const campContribs = contributions.filter(c => c.campaignId === id).slice(0, 6);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`https://joyfund.cm/${campaign.slug}`);
@@ -122,11 +137,11 @@ export default function CampaignPage() {
                       <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                            {c.anonymous ? '?' : c.contributorName.charAt(0)}
+                            {(c.anonymous ?? false) ? '?' : (c.donorName || 'A').charAt(0)}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-[#1A1A2E]">{c.anonymous ? 'Anonymous' : c.contributorName}</p>
-                            <p className="text-xs text-gray-400">{c.paymentMethod === 'mtn_momo' ? '📱 MTN MoMo' : '🟠 Orange Money'}</p>
+                            <p className="text-sm font-medium text-[#1A1A2E]">{(c.anonymous ?? false) ? 'Anonymous' : (c.donorName || 'Anonymous')}</p>
+                            <p className="text-xs text-gray-400">{(c.paymentMethod || 'mtn_momo') === 'mtn_momo' ? '📱 MTN MoMo' : '🟠 Orange Money'}</p>
                           </div>
                         </div>
                         <span className="font-bold text-sm" style={{ color: 'var(--primary)' }}>{formatXAF(c.amountXAF)}</span>

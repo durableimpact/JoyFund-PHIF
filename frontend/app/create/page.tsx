@@ -6,7 +6,7 @@ import { Check, ArrowLeft, ArrowRight, Share2 } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
 import { generateId } from '@/lib/utils';
-import { Campaign } from '@/lib/mockData';
+import type { Campaign } from '@/store/useStore';
 
 const EVENT_TYPES = [
   { id: 'birthday', label: 'Birthday', icon: '🎂', desc: 'Celebrate another year' },

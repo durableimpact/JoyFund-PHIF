@@ -4,7 +4,21 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { useStore } from '@/store/useStore';
-import { Beneficiary } from '@/lib/mockData';
+
+type Beneficiary = {
+  id: string;
+  healthId?: string;
+  fullName: string;
+  age?: number;
+  phone?: string;
+  community?: string;
+  gestationalWeek?: number;
+  complications?: string;
+  enrolledBy?: string;
+  enrolledAt?: string;
+  status?: string;
+  notes?: string;
+};
 
 export default function EnrollPage() {
   const router = useRouter();

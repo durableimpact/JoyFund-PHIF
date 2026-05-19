@@ -13,11 +13,13 @@ export default function ExplorePage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [campaignList, setCampaignList] = useState(campaigns);
+  const [campaignList, setCampaignList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
 
+    setLoading(true);
     fetch('/api/campaigns')
       .then(res => res.json())
       .then(data => {
@@ -29,7 +31,8 @@ export default function ExplorePage() {
       })
       .catch(() => {
         // keep using mock data if backend is unreachable
-      });
+      })
+      .finally(() => setLoading(false));
 
     return () => {
       mounted = false;
@@ -91,18 +94,23 @@ export default function ExplorePage() {
           </div>
 
           {/* Results */}
-          <p className="text-sm text-gray-500 mb-5">{filtered.length} campaign{filtered.length !== 1 ? 's' : ''} found</p>
-
-          {filtered.length === 0 ? (
-            <div className="card p-16 text-center">
-              <div className="text-5xl mb-4">🔍</div>
-              <h3 className="font-bold text-lg text-[#1A1A2E] mb-2">No campaigns found</h3>
-              <p className="text-gray-500 text-sm">Try adjusting your search or filters.</p>
-            </div>
+          {loading ? (
+            <div className="card p-8 text-center">Loading campaigns…</div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map(c => <CampaignCard key={c.id} campaign={c} />)}
-            </div>
+            <>
+              <p className="text-sm text-gray-500 mb-5">{filtered.length} campaign{filtered.length !== 1 ? 's' : ''} found</p>
+              {filtered.length === 0 ? (
+                <div className="card p-16 text-center">
+                  <div className="text-5xl mb-4">🔍</div>
+                  <h3 className="font-bold text-lg text-[#1A1A2E] mb-2">No campaigns found</h3>
+                  <p className="text-gray-500 text-sm">Try adjusting your search or filters.</p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filtered.map(c => <CampaignCard key={c.id} campaign={c} />)}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
