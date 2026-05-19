@@ -283,24 +283,51 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
             phone_number = validated_data['phone_number']
             success_url = validated_data['success_url']
             failure_url = validated_data['failure_url']
-            donor_name = validated_data['donor_name']
+            donor_name = validated_data.get('donor_name', '')
             amount = validated_data['amount']
             message = validated_data['message']
             is_anonymous = validated_data['is_anonymous']
 
+            normalized_phone = phone_number.replace('+', '').replace(' ', '').replace('-', '')
+            if normalized_phone.startswith('0') and len(normalized_phone) == 10:
+                normalized_phone = normalized_phone[1:]
+            if len(normalized_phone) == 9:
+                normalized_phone = f'237{normalized_phone}'
+
+            if not (normalized_phone.startswith('237') and len(normalized_phone) == 12):
+                return Response(
+                    {'error': 'Invalid Cameroon phone number format. Use 237XXXXXXXXX or local 9-digit format.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            payment_method = payment_method.strip().upper()
+            if payment_method in ['MTN_MOMO', 'MTN']:
+                payment_method = 'MTN'
+            elif payment_method in ['ORANGE_MONEY', 'ORANGE']:
+                payment_method = 'ORANGE'
+            else:
+                return Response(
+                    {'error': 'Unsupported payment method. Use MTN or ORANGE.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             # Create payment record
             payment = Payment.objects.create(
                 payment_method=payment_method,
-                phone_number=phone_number,
+                phone_number=normalized_phone,
                 amount=amount,
             )
 
-            # Determine donor name
-            donor_display_name = "Anonymous"
-            if donor and not is_anonymous:
-                donor_display_name = f"{donor.user.last_name}".strip()
-            if is_anonymous:
-                donor_display_name = "Anonymous"
+            # Determine donor name for donation records
+            donor_name = validated_data.get('donor_name', '').strip()
+            donor_display_name = 'Anonymous'
+            if not is_anonymous:
+                if donor:
+                    donor_display_name = ' '.join(
+                        part for part in [donor.user.first_name, donor.user.last_name] if part
+                    ).strip() or donor.user.email or 'Anonymous'
+                else:
+                    donor_display_name = donor_name or 'Anonymous'
 
             # Create donation
             donation = Donation.objects.create(
@@ -339,7 +366,7 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                     first_name=donor.user.first_name if donor else None,
                     last_name=donor.user.last_name if donor else None,
                     email=donor.user.email if donor else None,
-                    phone=phone_number.replace('+', ''),
+                    phone=normalized_phone,
                     payment_options="MOMO,CARD"
                 )
                 

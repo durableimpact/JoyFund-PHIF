@@ -34,6 +34,17 @@ export default function DonatePage() {
   const [method, setMethod] = useState<'mtn_momo' | 'orange_money'>('mtn_momo');
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
+
+  const normalizeCameroonPhone = (value: string) => {
+    let digits = value.replace(/\D/g, '');
+    if (digits.startsWith('0') && digits.length === 10) {
+      digits = digits.slice(1);
+    }
+    if (digits.length === 9) {
+      digits = `237${digits}`;
+    }
+    return digits;
+  };
   const [anonymous, setAnonymous] = useState(false);
   const [message, setMessage] = useState('');
   const [reference, setReference] = useState('');
@@ -73,13 +84,14 @@ export default function DonatePage() {
   }, [id]);
 
   const handlePay = async () => {
-    if (!phone || phone.length < 9) {
-      showToast('Please enter a valid phone number', 'error');
+    const normalizedPhone = normalizeCameroonPhone(phone);
+    if (!/^(237\d{9})$/.test(normalizedPhone)) {
+      showToast('Please enter a valid Cameroon phone number like 650000000 or +237650000000.', 'error');
       return;
     }
 
-    if (finalAmount < 100) {
-      showToast('Please choose at least 100 XAF.', 'error');
+    if (finalAmount < 25) {
+      showToast('Please choose at least 25 XAF.', 'error');
       return;
     }
 
@@ -93,8 +105,8 @@ export default function DonatePage() {
         amount: finalAmount,
         message,
         is_anonymous: anonymous,
-        payment_method: method,
-        phone_number: phone,
+        payment_method: method === 'orange_money' ? 'ORANGE' : 'MTN',
+        phone_number: normalizedPhone,
         success_url: `${window.location.origin}/donate/${campaign.id}?status=success`,
         failure_url: `${window.location.origin}/donate/${campaign.id}?status=error`,
       };
@@ -271,7 +283,7 @@ export default function DonatePage() {
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Mobile Number</label>
                 <input
                   className="input-field"
-                  placeholder={method === 'mtn_momo' ? '6XX XXX XXX' : '9XX XXX XXX'}
+                  placeholder={method === 'mtn_momo' ? '650000000 or +237650000000' : '950000000 or +237950000000'}
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   type="tel"

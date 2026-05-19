@@ -200,7 +200,68 @@ class TestCampaignCreateView:
 
 @pytest.mark.django_db
 @pytest.mark.api
-class TestCampaignDetailView:
+class TestCampaignDonationView:
+    """Test campaign donation endpoint and guest donation flow."""
+
+    def test_create_guest_donation_uses_provided_name(self, client, campaign, monkeypatch):
+        """Test that a guest donation uses the provided donor name in the donation record."""
+        def fake_create_payment_link(self, amount, description, external_reference, redirect_url, failure_redirect_url, first_name, last_name, email, phone, payment_options, currency='XAF'):
+            return {'link': 'https://campay.test/link'}
+
+        monkeypatch.setattr('campaigns.views.donation.CamPayManager.create_payment_link', fake_create_payment_link)
+
+        data = {
+            'payment_method': 'MTN',
+            'phone_number': '237650000000',
+            'amount': '20.00',
+            'message': 'Thank you for your good work',
+            'is_anonymous': False,
+            'donor_name': 'Guest Helper',
+            'success_url': 'https://example.com/success',
+            'failure_url': 'https://example.com/failure',
+        }
+
+        response = client.post(f'/api/campaigns/{campaign.id}/donate/', data, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['payment_link'] == 'https://campay.test/link'
+
+        donation = Donation.objects.filter(campaign=campaign).first()
+        assert donation is not None
+        assert donation.donor is None
+        assert donation.donor_name == 'Guest Helper'
+        assert donation.is_anonymous is False
+
+    def test_create_guest_donation_with_local_phone_and_gateway_alias(self, client, campaign, monkeypatch):
+        """Test that local phone numbers and gateway aliases are normalized correctly."""
+        def fake_create_payment_link(self, amount, description, external_reference, redirect_url, failure_redirect_url, first_name, last_name, email, phone, payment_options, currency='XAF'):
+            assert phone == '237650000000'
+            assert payment_options == 'MOMO,CARD'
+            return {'link': 'https://campay.test/link'}
+
+        monkeypatch.setattr('campaigns.views.donation.CamPayManager.create_payment_link', fake_create_payment_link)
+
+        data = {
+            'payment_method': 'mtn_momo',
+            'phone_number': '650000000',
+            'amount': '20.00',
+            'message': 'Thank you for your good work',
+            'is_anonymous': False,
+            'donor_name': 'Guest Helper',
+            'success_url': 'https://example.com/success',
+            'failure_url': 'https://example.com/failure',
+        }
+
+        response = client.post(f'/api/campaigns/{campaign.id}/donate/', data, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['payment_link'] == 'https://campay.test/link'
+
+        donation = Donation.objects.filter(campaign=campaign).first()
+        assert donation is not None
+        assert donation.donor is None
+        assert donation.donor_name == 'Guest Helper'
+        assert donation.is_anonymous is False
+        assert donation.payment.payment_method == 'MTN'
+        assert donation.payment.phone_number == '237650000000'
     """Test campaign detail endpoint."""
 
     def test_retrieve_campaign(self, donor_client, campaign):
