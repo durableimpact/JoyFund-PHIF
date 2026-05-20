@@ -16,7 +16,8 @@ type Campaign = {
   goalXAF: number;
 };
 
-const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
+const QUICK_AMOUNTS = [25, 100, 500, 1000];
+const MIN_DONATION_AMOUNT = 25;
 
 type Step = 'amount' | 'payment' | 'processing' | 'success';
 
@@ -90,8 +91,8 @@ export default function DonatePage() {
       return;
     }
 
-    if (finalAmount < 25) {
-      showToast('Please choose at least 25 XAF.', 'error');
+    if (finalAmount < MIN_DONATION_AMOUNT) {
+      showToast(`Please choose at least ${MIN_DONATION_AMOUNT} XAF.`, 'error');
       return;
     }
 
@@ -255,7 +256,7 @@ export default function DonatePage() {
               </div>
               <button
                 className="btn-primary w-full"
-                disabled={finalAmount < 100}
+                disabled={finalAmount < MIN_DONATION_AMOUNT}
                 onClick={() => setStep('payment')}
               >
                 Continue → Pay {formatXAF(finalAmount)}
