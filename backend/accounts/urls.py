@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 from accounts.views import (
@@ -66,4 +66,9 @@ urlpatterns = [
     # -----------------------------------------------------------------------
     # ViewSet Router URLs (Hospital Admins, Social Workers, Receptionists)
     # -----------------------------------------------------------------------
-] + router.urls
+] + router.urls + [
+    # -----------------------------------------------------------------------
+    # System Admin Dashboard
+    # -----------------------------------------------------------------------
+    path('system-admins/dashboard/', include('accounts.urls_admin_dashboard')),
+]
