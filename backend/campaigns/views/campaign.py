@@ -76,7 +76,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
     ordering = ["-created_at"]
 
     def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
+        if self.action in ["list", "retrieve", "leaderboard"]:
             return [AllowAny()]
         elif self.action == "create":
             return [IsAuthenticated(), IsDonor()]
@@ -209,6 +209,39 @@ class CampaignViewSet(viewsets.ModelViewSet):
         cache.delete('campaign_list')
         cache.delete(f"campaign_detail_{campaign_id}")
         return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[AllowAny],
+        url_path="leaderboard",
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: CampaignDetailSerializer(many=True)},
+        operation_description="Get public campaigns sorted by total net raised (leaderboard).",
+    )
+    def leaderboard(self, request, *args, **kwargs):
+        """
+        Get campaigns sorted by total net raised.
+        """
+        queryset = Campaign.objects.select_related("donor__user").annotate(
+            total_net_raised_calc=Coalesce(
+                Sum(
+                    "donations__net_amount",
+                    filter=Q(donations__status="SUCCESS"),
+                ),
+                Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
+            )
+        ).filter(is_public=True, is_active=True).order_by("-total_net_raised_calc")
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @action(
         detail=False,
