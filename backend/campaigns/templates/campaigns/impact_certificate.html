@@ -37,7 +37,7 @@
         .certificate::before {
             content: "";
             position: absolute;
-            inset: 12px;
+            top: 12px; left: 12px; right: 12px; bottom: 12px;
             border: 2px solid #c8a96b;
             pointer-events: none;
         }
@@ -45,7 +45,7 @@
         .certificate::after {
             content: "";
             position: absolute;
-            inset: 22px;
+            top: 22px; left: 22px; right: 22px; bottom: 22px;
             border: 1px solid rgba(200, 169, 107, 0.5);
             pointer-events: none;
         }
@@ -68,9 +68,6 @@
             position: relative;
             z-index: 2;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
 
         /* Header */
@@ -120,122 +117,67 @@
         /* Campaign Section */
         .campaign-section {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 1px;
         }
 
         .presented-text {
-            font-size: 18px;
+            font-size: 16px;
             color: #666;
-            margin-bottom: 18px;
+            margin-bottom: 10px;
         }
 
         .campaign-title {
-            font-size: 34px;
+            font-size: 30px;
             color: #0f3d2e;
             font-weight: bold;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             line-height: 1.3;
         }
 
         .campaign-description {
-            font-size: 15px;
+            font-size: 14px;
             color: #555;
-            line-height: 1.8;
+            line-height: 1.6;
             max-width: 950px;
             margin: auto;
         }
 
         /* Stats */
         .stats-container {
-            margin-top: 35px;
+            margin-top: 20px;
             display: flex;
             justify-content: space-between;
-            gap: 20px;
+            gap: 15px;
         }
 
         .stat-box {
             flex: 1;
-            border: 1px solid #d8d8d8;
-            padding: 18px 12px;
+            padding: 15px 10px;
             text-align: center;
-            border-radius: 10px;
+            border-radius: 8px;
             background: #fafafa;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             color: #0f3d2e;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .stat-label {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: #777;
         }
 
-        /* Progress */
-        .progress-wrapper {
-            margin-top: 28px;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 18px;
-            background: #e6e6e6;
-            border-radius: 50px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            width: {{ progress_percentage }}%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                #0f3d2e 0%,
-                #1d7c5d 100%
-            );
-            border-radius: 50px;
-        }
-
-        /* Impact Statement */
-        .impact-box {
-            margin-top: 30px;
-            padding: 22px;
-            border-left: 5px solid #c8a96b;
-            background: #faf8f3;
-            border-radius: 8px;
-        }
-
-        .impact-title {
-            font-size: 18px;
-            color: #0f3d2e;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .impact-text {
-            font-size: 14px;
-            color: #555;
-            line-height: 1.8;
-        }
-
         /* Footer */
         .footer {
-            margin-top: 35px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            /*margin-top: 60px;*/
+            position: absolute;
+            bottom: -60px;
+            width: 100%;
         }
 
         .certificate-info {
@@ -266,29 +208,76 @@
             margin-top: 3px;
         }
 
-        /* Seal */
-        .seal {
-            position: absolute;
-            bottom: 30px;
-            right: 40px;
-            width: 110px;
-            height: 110px;
-            border: 4px solid #c8a96b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: #0f3d2e;
-            font-weight: bold;
-            font-size: 12px;
-            background: rgba(255,255,255,0.95);
-            transform: rotate(-12deg);
-            z-index: 3;
+        /* Donor Info */
+        .donor-section {
+            background: #f0f8f5b9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
-        .seal span {
-            line-height: 1.5;
+        .donor-label {
+            font-size: 11px;
+            color: #777;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .donor-name {
+            font-size: 26px;
+            color: #0f3d2e;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .donor-title {
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* QR Code */
+        .qr-code-section {
+            display: inline-block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .qr-code-image {
+            width: 100px;
+            height: 100px;
+            padding: 5px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .qr-code-label {
+            font-size: 10px;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+
+        /* Enhanced Footer Layout */
+        .signature-box {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .signature-line-enhanced {
+            width: 100%;
+            border-top: 2px solid #444;
+            margin-bottom: 8px;
+        }
+
+        .sig-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #0f3d2e;
+            margin-bottom: 4px;
         }
     </style>
 </head>
@@ -324,8 +313,21 @@
             <!-- Campaign -->
             <div class="campaign-section">
 
+                <!-- Donor Info -->
+                <div class="donor-section">
+                    <div class="donor-label">
+                        Certificate Presented To
+                    </div>
+                    <div class="donor-name">
+                        {{ donor_name }}
+                    </div>
+                    <div class="donor-title">
+                        Campaign Organizer
+                    </div>
+                </div>
+
                 <div class="presented-text">
-                    Presented to the campaign
+                    For the campaign
                 </div>
 
                 <div class="campaign-title">
@@ -381,83 +383,46 @@
 
                 </div>
 
-                <!-- Progress -->
-                <div class="progress-wrapper">
-
-                    <div class="progress-header">
-                        <span>Campaign Progress</span>
-                        <span>{{ progress_percentage|floatformat:0 }}%</span>
-                    </div>
-
-                    <div class="progress-bar">
-                        <div class="progress-fill"></div>
-                    </div>
-
+                <!-- QR Code (Replaced Progress & Impact) -->
+                {% if qr_code_image %}
+                <div class="qr-code-section">
+                    <img src="{{ qr_code_image }}" alt="Campaign QR Code" class="qr-code-image" />
+                    <div class="qr-code-label">Scan to View</div>
                 </div>
-
-                <!-- Impact -->
-                <div class="impact-box">
-
-                    <div class="impact-title">
-                        Community Impact
-                    </div>
-
-                    <div class="impact-text">
-                        Through the support of
-                        {{ total_donors }} contributor{% if total_donors != 1 %}s{% endif %},
-                        this campaign successfully raised
-                        {{ total_raised|floatformat:0 }} XAF
-                        to support critical healthcare and humanitarian needs.
-
-                        <br /><br />
-
-                        This achievement reflects the strength of community solidarity,
-                        compassion, and collective action toward building a healthier
-                        and more equitable future for all.
-                    </div>
-
-                </div>
+                {% endif %}
 
             </div>
 
             <!-- Footer -->
             <div class="footer">
+                <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                    <tr>
+                        <!-- Certificate Info (Left) -->
+                        <td style="vertical-align: bottom; text-align: left; width: 50%;">
+                            <div class="certificate-info">
+                                <div>
+                                    <strong>Generated:</strong><br />
+                                    {{ generation_date }}
+                                </div>
+                            </div>
+                        </td>
 
-                <div class="certificate-info">
-                    <div>
-                        Certificate ID:
-                        {{ campaign.id|truncatechars:10 }}
-                    </div>
-
-                    <div>
-                        Generated on:
-                        {{ generation_date }}
-                    </div>
-                </div>
-
-                <div class="signature-section">
-                    <div class="signature-line"></div>
-
-                    <div class="signature-name">
-                        JoyFund Administration
-                    </div>
-
-                    <div class="signature-role">
-                        Authorized Signature
-                    </div>
-                </div>
-
+                        <!-- Signature (Right) -->
+                        <td style="vertical-align: bottom; text-align: right; width: 50%;">
+                            <div class="signature-box" style="display: inline-block; width: 220px; float: right;">
+                                <div style="text-align: center; height: 40px; margin-bottom: 5px;">
+                                    <svg width="150" height="40" viewBox="0 0 150 40">
+                                        <path d="M 10 30 Q 20 10 40 20 T 80 25 T 130 15" stroke="#0f3d2e" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="signature-line-enhanced"></div>
+                                <div class="sig-name">JoyFund Administration</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
-        </div>
-
-        <!-- Seal -->
-        <div class="seal">
-            <span>
-                VERIFIED<br />
-                IMPACT<br />
-                CERTIFICATE
-            </span>
         </div>
 
     </div>
