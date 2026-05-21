@@ -12,6 +12,12 @@ from .donor import (
     DonorDetailSerializer,
     DonorUpdateSerializer,
 )
+from .dashboard import (
+    DonorDashboardSerializer,
+    SocialWorkerDashboardSerializer,
+    MatchedBeneficiarySerializer,
+    DonationContributionSerializer,
+)
 from .hospital_admin import (
     HospitalAdminCreateSerializer,
     HospitalAdminDetailSerializer,
@@ -39,6 +45,10 @@ __all__ = [
     'DonorRegisterSerializer',
     'DonorDetailSerializer',
     'DonorUpdateSerializer',
+    'DonorDashboardSerializer',
+    'SocialWorkerDashboardSerializer',
+    'MatchedBeneficiarySerializer',
+    'DonationContributionSerializer',
     'HospitalAdminCreateSerializer',
     'HospitalAdminDetailSerializer',
     'HospitalAdminUpdateSerializer',
