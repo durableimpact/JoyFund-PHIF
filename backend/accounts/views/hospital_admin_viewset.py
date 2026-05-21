@@ -11,9 +11,12 @@ from accounts.serializers import (
     HospitalAdminCreateSerializer,
     HospitalAdminDetailSerializer,
     HospitalAdminUpdateSerializer,
+    HospitalAdminDashboardSerializer,
 )
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache, make_cache_key
 from accounts.filters import HospitalAdminFilter
+from vouchers.models.Voucher import Voucher
+from hospitals.models import MedicalClaim
 
 _TAG = ['Hospital Admins']
 
@@ -128,3 +131,62 @@ class HospitalAdminViewSet(
     def update(self, request, *args, **kwargs):
         """Fully update a hospital admin."""
         return super().update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated, IsOwnerOrSystemAdmin],
+        url_path="dashboard",
+    )
+    @swagger_auto_schema(
+        tags=["Dashboard"],
+        operation_description="Get dashboard statistics for a hospital admin.",
+        responses={200: HospitalAdminDashboardSerializer()},
+    )
+    def dashboard(self, request, id=None):
+        hospital_admin = self.get_object()
+        hospital = hospital_admin.hospital
+
+        if not hospital:
+            return Response({
+                "redeemed_vouchers": 0,
+                "issued_vouchers": 0,
+                "total_claims": 0,
+                "pending_claims": 0,
+                "number_of_staff": 0,
+            })
+
+        redeemed_vouchers = Voucher.objects.filter(
+            hospital=hospital,
+            status=Voucher.Status.USED,
+        ).count()
+
+        issued_vouchers = Voucher.objects.filter(
+            hospital=hospital,
+        ).count()
+
+        total_claims = MedicalClaim.objects.filter(
+            hospital=hospital,
+        ).count()
+
+        pending_claims = MedicalClaim.objects.filter(
+            hospital=hospital,
+            claim_status="PENDING",
+        ).count()
+
+        from accounts.models import Receptionist
+        admin_count = HospitalAdmin.objects.filter(
+            hospital=hospital,
+            is_active=True,
+        ).count()
+        receptionist_count = Receptionist.objects.filter(
+            hospital=hospital,
+        ).count()
+
+        return Response({
+            "redeemed_vouchers": redeemed_vouchers,
+            "issued_vouchers": issued_vouchers,
+            "total_claims": total_claims,
+            "pending_claims": pending_claims,
+            "number_of_staff": admin_count + receptionist_count,
+        })
