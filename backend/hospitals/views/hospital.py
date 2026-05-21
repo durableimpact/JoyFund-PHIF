@@ -9,7 +9,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
-from accounts.models import Role
+from accounts.models import HospitalAdmin, Receptionist, Role
 from accounts.serializers import ReceptionistDetailSerializer
 from accounts.utils import cache_response, invalidate_cache
 from hospitals.models import Hospital
@@ -17,6 +17,7 @@ from hospitals.serializers import (
     HospitalCreateUpdateSerializer,
     HospitalDetailSerializer,
     HospitalListSerializer,
+    StaffSerializer,
 )
 from logs.services import LogService
 from vouchers.models import Voucher
@@ -263,4 +264,53 @@ class HospitalViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = ReceptionistDetailSerializer(receptionists, many=True)
+        return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated, IsSystemOrHospitalAdmin],
+        url_path="staff",
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: StaffSerializer(many=True)},
+        operation_description="Get all staff (admins and receptionists) for a specific hospital.",
+    )
+    def staff(self, request, pk=None):
+        hospital = self.get_object()
+
+        admins = hospital.admins.select_related("user").filter(is_active=True)
+        receptionists = hospital.receptionists.select_related("user").filter(is_active=True)
+
+        staff_list = []
+
+        for admin in admins:
+            staff_list.append({
+                "id": admin.id,
+                "name": admin.user.get_full_name or admin.user.email,
+                "email": admin.user.email,
+                "profile_picture": admin.user.profile_picture.url if admin.user.profile_picture else None,
+                "is_active": admin.is_active,
+                "role": "hospital_admin",
+            })
+
+        for receptionist in receptionists:
+            staff_list.append({
+                "id": receptionist.id,
+                "name": receptionist.user.get_full_name or receptionist.user.email,
+                "email": receptionist.user.email,
+                "profile_picture": receptionist.user.profile_picture.url if receptionist.user.profile_picture else None,
+                "is_active": receptionist.is_active,
+                "role": "receptionist",
+            })
+
+        staff_list.sort(key=lambda s: s["name"])
+
+        page = self.paginate_queryset(staff_list)
+        if page is not None:
+            serializer = StaffSerializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = StaffSerializer(staff_list, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
