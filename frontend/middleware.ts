@@ -98,8 +98,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Check if user's role is allowed to access this route
-  const allowedRoles = ROUTE_PERMISSIONS[matchedRoute];
-
+  // reuse previously computed `allowedRoles` from above
   if (!allowedRoles.includes(userRole)) {
     // User is authenticated but not authorized — redirect to their home page
     const homeUrl = ROLE_HOME[userRole] || '/';
