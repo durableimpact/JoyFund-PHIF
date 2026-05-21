@@ -13,6 +13,15 @@ from .info import (
     SocialWorkerInfoView,
     SystemAdminInfoView,
 )
+from .admin_dashboard import (
+    AdminOverviewView,
+    AdminFinancialView,
+    AdminDonationTrendsView,
+    AdminUserAnalyticsView,
+    AdminBeneficiaryVoucherView,
+    AdminOrganizationView,
+    AdminTrendsReportView,
+)
 
 __all__ = [
     'DonorRegisterView',
@@ -34,4 +43,11 @@ __all__ = [
     'PasswordResetRequestView',
     'PasswordResetConfirmView',
     'PasswordChangeView',
+    'AdminOverviewView',
+    'AdminFinancialView',
+    'AdminDonationTrendsView',
+    'AdminUserAnalyticsView',
+    'AdminBeneficiaryVoucherView',
+    'AdminOrganizationView',
+    'AdminTrendsReportView',
 ]
