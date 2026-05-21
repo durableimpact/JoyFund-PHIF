@@ -12,6 +12,7 @@ class Receptionist(BaseProfile, NationalIDMixin):
         on_delete=models.CASCADE,
         related_name='receptionists',
     )
+    is_active = models.BooleanField(default=True)
     hospital = models.ForeignKey(
         'hospitals.Hospital',
         on_delete=models.CASCADE,
