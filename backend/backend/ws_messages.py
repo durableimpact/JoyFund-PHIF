@@ -22,12 +22,12 @@ from datetime import datetime
 
 class CampaignPayload(BaseModel):
     """Payload for campaign-related messages."""
-    campaign_id: int = Field(..., description="Campaign ID")
+    campaign_id: str = Field(..., description="Campaign UUID as string")
 
 
 class NotificationPayload(BaseModel):
     """Payload for notification operations."""
-    notification_id: int = Field(..., description="Notification ID")
+    notification_id: str = Field(..., description="Notification UUID as string")
 
 
 class ErrorPayload(BaseModel):
@@ -142,8 +142,8 @@ class UserCreatedMessage(BaseMessage):
 
 class DonationPayload(BaseModel):
     """Payload for donation event."""
-    donation_id: int
-    campaign_id: int
+    donation_id: str  # UUID as string
+    campaign_id: str  # UUID as string
     campaign_name: str
     donor_name: str
     amount: float
@@ -161,12 +161,12 @@ class DonationCreatedMessage(BaseMessage):
 
 class VoucherPayload(BaseModel):
     """Payload for voucher creation/redemption events."""
-    voucher_id: int
+    voucher_id: str  # UUID as string
     voucher_code: str
     beneficiary_name: str
-    campaign_id: int
+    campaign_id: str  # UUID as string
     campaign_name: str
-    hospital_id: int
+    hospital_id: str  # UUID as string
     hospital_name: str = ""
     amount: float
     currency: str = "XAF"

@@ -66,7 +66,7 @@ def logout_view(request):
 
 @require_http_methods(["POST"])
 @csrf_exempt
-@rate_limit(key='user_or_ip', rate='10/h')
+# @rate_limit(key='user_or_ip', rate='10/h')
 def oauth2_token_view(request):
     """
     Rate-limited OAuth2 token endpoint wrapper.
