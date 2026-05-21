@@ -4,6 +4,8 @@ from .receptionist import ReceptionistViewSet
 from .social_worker import SocialWorkerViewSet
 from .verification import VerifyEmailView, ResendVerificationView
 from .password import PasswordResetRequestView, PasswordResetConfirmView, PasswordChangeView
+from .donor_dashboard import DonorDashboardView
+from .social_worker_dashboard import SocialWorkerDashboardView
 from .info import (
     DonorInfoView,
     HospitalAdminInfoView,
@@ -17,6 +19,8 @@ __all__ = [
     'DonorListView',
     'DonorDetailView',
     'DonorUpdateView',
+    'DonorDashboardView',
+    'SocialWorkerDashboardView',
     'HospitalAdminViewSet',
     'ReceptionistViewSet',
     'SocialWorkerViewSet',
