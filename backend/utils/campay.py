@@ -19,12 +19,17 @@ class CamPayManager:
         """
         if environment not in ["DEV", "PROD"]:
             raise ValueError("Environment must be either 'DEV' or 'PROD'")
-            
-        self.client = CamPayClient({
-            "app_username": app_username,
-            "app_password": app_password,
-            "environment": environment
-        })
+
+        self.environment = environment
+        self.mock_mode = (environment == "DEV" and not app_username and not app_password)
+        if self.mock_mode:
+            self.client = None
+        else:
+            self.client = CamPayClient({
+                "app_username": app_username,
+                "app_password": app_password,
+                "environment": environment
+            })
 
     def validate_phone_number(self, phone: str) -> bool:
         """
@@ -77,6 +82,13 @@ class CamPayManager:
             "external_reference": external_reference
         }
 
+        if self.mock_mode:
+            return {
+                "status": "SUCCESS",
+                "message": "Mock payment collected successfully.",
+                "reference": external_reference or "MOCK-REF"
+            }
+
         if wait_for_completion:
             return self.client.collect(payment_data)
         return self.client.initCollect(payment_data)
@@ -124,6 +136,13 @@ class CamPayManager:
         except ValueError:
             raise ValueError("Invalid amount provided")
             
+        if self.mock_mode:
+            mock_url = redirect_url
+            separator = '&' if '?' in mock_url else '?'
+            return {
+                "link": f"{mock_url}{separator}mock_payment=1&environment=DEV&reference={external_reference}"
+            }
+
         try:
             # Call the CamPay API
             response = self.client.get_payment_link({
@@ -190,6 +209,13 @@ class CamPayManager:
             amount = str(float(amount))
         except ValueError:
             raise ValueError("Invalid amount provided")
+
+        if self.mock_mode:
+            return {
+                "status": "SUCCESS",
+                "message": "Mock disbursement completed successfully.",
+                "reference": external_reference or "MOCK-DISBURSE-REF"
+            }
 
         return self.client.disburse({
             "amount": amount,
