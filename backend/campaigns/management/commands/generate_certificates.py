@@ -5,10 +5,12 @@ Usage:
     python manage.py generate_certificates                    # Generate for all campaigns at goal
     python manage.py generate_certificates <campaign_id>      # Generate for specific campaign
     python manage.py generate_certificates --force            # Regenerate even if already exists
+    python manage.py generate_certificates --async            # Queue for background Celery processing
 """
 
 from django.core.management.base import BaseCommand, CommandError
 from campaigns.models import Campaign
+from campaigns.tasks import generate_impact_certificates
 
 
 class Command(BaseCommand):
@@ -26,12 +28,30 @@ class Command(BaseCommand):
             action='store_true',
             help='Regenerate certificates even if they already exist',
         )
+        parser.add_argument(
+            '--async',
+            action='store_true',
+            help='Queue for background Celery processing (non-blocking)',
+        )
 
     def handle(self, *args, **options):
         force = options.get('force', False)
         campaign_id = options.get('campaign_id')
+        use_async = options.get('async', False)
 
         try:
+            if use_async:
+                # Queue the task for async processing
+                result = generate_impact_certificates.delay()
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f'✓ Certificate generation queued for background processing\n'
+                        f'  Task ID: {result.id}\n'
+                        f'  Make sure your Celery worker is running!'
+                    )
+                )
+                return
+
             if campaign_id:
                 # Generate for specific campaign
                 try:
@@ -52,7 +72,7 @@ class Command(BaseCommand):
                         )
                     )
                 else:
-                    if campaign.generate_impact_certificate():
+                    if campaign.generate_impact_certificate(force=force):
                         self.stdout.write(
                             self.style.SUCCESS(
                                 f'  ✓ Generated certificate for: {campaign.title}'
@@ -79,7 +99,7 @@ class Command(BaseCommand):
                         skipped_count += 1
                         continue
 
-                    if campaign.generate_impact_certificate():
+                    if campaign.generate_impact_certificate(force=force):
                         self.stdout.write(
                             self.style.SUCCESS(
                                 f'  ✓ Generated certificate for: {campaign.title}'
