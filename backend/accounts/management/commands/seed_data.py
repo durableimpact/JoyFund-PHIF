@@ -2,13 +2,14 @@
 Management command to seed the database with realistic test data.
 
 Usage:
-    python manage.py seed_data                           # Seeds all data
+    python manage.py seed_data                           # Seeds all data + OAuth app
     python manage.py seed_data --users                   # Seeds only users
     python manage.py seed_data --hospitals               # Seeds only hospitals
     python manage.py seed_data --beneficiaries           # Seeds only beneficiaries
     python manage.py seed_data --campaigns               # Seeds only campaigns
     python manage.py seed_data --full                    # Full realistic flow
     python manage.py seed_data --clear                   # Clear all seeded data first
+    python manage.py seed_data --oauth-app               # Seeds only the OAuth application
 """
 
 from django.core.management.base import BaseCommand, CommandError
@@ -67,21 +68,34 @@ class Command(BaseCommand):
             action='store_true',
             help='Clear all seeded data before seeding',
         )
+        parser.add_argument(
+            '--oauth-app',
+            action='store_true',
+            help='Seed only the Django OAuth application',
+        )
 
     def handle(self, *args, **options):
+        # Handle oauth-app only mode
+        if options['oauth_app']:
+            self.seed_oauth_app()
+            return
+
         # Clear OUTSIDE atomic transaction so TRUNCATE works properly
         if options['clear']:
             self.clear_seeded_data()
 
         # Determine what to seed
         seed_users = options['users'] or options['full'] or not any(
-            options[key] for key in ['users', 'hospitals', 'beneficiaries', 'campaigns', 'full']
+            options[key] for key in ['users', 'hospitals', 'beneficiaries', 'campaigns', 'full', 'oauth_app']
         )
         seed_hospitals = options['hospitals'] or options['full'] or not any(
-            options[key] for key in ['users', 'hospitals', 'beneficiaries', 'campaigns', 'full']
+            options[key] for key in ['users', 'hospitals', 'beneficiaries', 'campaigns', 'full', 'oauth_app']
         )
         seed_beneficiaries = options['beneficiaries'] or options['full']
         seed_campaigns = options['campaigns'] or options['full']
+
+        # Always ensure oauth app exists on default/full runs
+        self.seed_oauth_app()
 
         try:
             # Wrap seeding in atomic transaction
@@ -625,6 +639,32 @@ class Command(BaseCommand):
                         self.stdout.write(f'      ✓ Settled Voucher: {settle_amount} XAF used, {refund_amount} refunded')
 
         self.stdout.write(self.style.SUCCESS('✓ Campaigns, donations, and vouchers seeded successfully'))
+
+    def seed_oauth_app(self):
+        """Create the Django OAuth Toolkit application if it doesn't exist."""
+        from oauth2_provider.models import Application
+
+        client_id = 'xPqWEK4yb6UuPYGXnIauJRIExSRXFj1yBuNkxP3K'
+        client_secret = 'dsQ7RlWgr9ySTdkhI56uICEa00A8uzANznfLc1QR0JMWG02PkximuSVEuZsS5PkmdFwPTOpyhOjFQjWrICxs1Vr0D3SIYhsQ09IgfhI9o0PtKkOvvt0RRb75fSkpEuTs'
+
+        app, created = Application.objects.get_or_create(
+            client_id=client_id,
+            defaults={
+                'user': None,
+                'client_type': Application.CLIENT_CONFIDENTIAL,
+                'authorization_grant_type': Application.GRANT_PASSWORD,
+                'name': 'JoyFund Password Grant App',
+                'hash_client_secret': False,
+                'skip_authorization': True,
+            },
+        )
+
+        if created:
+            app.client_secret = client_secret
+            app.save(update_fields=['client_secret'])
+            self.stdout.write(self.style.SUCCESS(f'  ✓ Created OAuth App: {app.name}'))
+        else:
+            self.stdout.write(f'  • OAuth App already exists: {app.name}')
 
     def clear_seeded_data(self):
         """Clear test data."""
