@@ -26,9 +26,9 @@ from accounts.models.hospital_admin import HospitalAdmin
 from accounts.models.receptionist import Receptionist
 from accounts.models.social_worker import SocialWorker
 from accounts.models.donor import Donor
-from hospitals.models import Hospital, PartnershipStatus, Services
+from hospitals.models import Hospital, PartnershipStatus, Services, MedicalClaim, ClaimItem, MedicalClaimProof, ClaimStatus, VerificationStatus, DocumentType
 from beneficiaries.models import Beneficiary, HealthIssue
-from campaigns.models import Campaign, Donation, Payment
+from campaigns.models import Campaign, Donation, Payment, CampaignTransaction
 from vouchers.models import Voucher, VoucherFunding
 from payments.models import Transaction
 
@@ -432,6 +432,7 @@ class Command(BaseCommand):
             raise CommandError('Beneficiaries must exist. Run seed_data --beneficiaries first.')
 
         hospitals = Hospital.objects.all()
+        sys_admin = SystemAdmin.objects.first()
 
         campaign_titles = [
             'Help Amara Recover from Malaria',
@@ -443,7 +444,6 @@ class Command(BaseCommand):
 
         for title in campaign_titles:
             donor = random.choice(donors)
-            beneficiary = random.choice(beneficiaries)
             goal_amount = Decimal(random.randint(100000, 500000))  # XAF
 
             campaign, created = Campaign.objects.get_or_create(
@@ -453,6 +453,8 @@ class Command(BaseCommand):
                     'description': f'Medical campaign to help those in need',
                     'goal_amount': goal_amount,
                     'current_amount': Decimal(0),
+                    'total_disbursed': Decimal(0),
+                    'currently_allocated': Decimal(0),
                     'status': Campaign.CampaignStatus.ACTIVE,
                     'event_type': random.choice([c[0] for c in Campaign.EventType.choices]),
                     'end_date': timezone.now() + timedelta(days=random.randint(30, 90)),
@@ -478,7 +480,7 @@ class Command(BaseCommand):
                         phone_number=f'+237{random.randint(100000000, 999999999)}',
                     )
 
-                    # Create donation directly (not get_or_create since it needs a Payment)
+                    # Create donation directly (signals handle campaign.current_amount and CampaignTransaction)
                     donation = Donation.objects.create(
                         campaign=campaign,
                         donor=donation_donor,
@@ -489,8 +491,9 @@ class Command(BaseCommand):
                         net_amount=donation_amount * Decimal('0.95'),
                     )
 
-                    campaign.current_amount += donation.net_amount
-                    campaign.save()
+                    # Refresh campaign from DB to get updated current_amount from signals
+                    campaign.refresh_from_db()
+                    
                     self.stdout.write(
                         f'    ✓ Created Donation: {donation_donor.user.email} → {donation_amount} XAF'
                     )
@@ -498,7 +501,6 @@ class Command(BaseCommand):
                 # Create vouchers for beneficiaries
                 selected_beneficiaries = random.sample(list(beneficiaries), k=min(3, len(beneficiaries)))
                 for beneficiary in selected_beneficiaries:
-                    # Get health issues for this beneficiary
                     health_issues = list(beneficiary.health_issues.all())
                     if not health_issues:
                         continue
@@ -507,38 +509,120 @@ class Command(BaseCommand):
                     hospital = random.choice(hospitals)
                     voucher_amount = Decimal(random.randint(50000, 200000))
                     
-                    # Create unique voucher code
+                    # Ensure campaign has enough funds for this voucher
+                    available = campaign.current_amount - campaign.total_disbursed - campaign.currently_allocated
+                    if available < voucher_amount:
+                        voucher_amount = available * Decimal('0.8')
+                        if voucher_amount < 5000: continue
+
                     voucher_code = f"VCH-{uuid.uuid4().hex[:8].upper()}"
                     
-                    voucher, created = Voucher.objects.get_or_create(
+                    voucher = Voucher.objects.create(
                         voucher_code=voucher_code,
-                        defaults={
-                            'beneficiary': beneficiary,
-                            'health_issue': health_issue,
-                            'hospital': hospital,
-                            'status': Voucher.Status.AVAILABLE,
-                            'expiry_date': timezone.now().date() + timedelta(days=30),
-                        },
+                        beneficiary=beneficiary,
+                        health_issue=health_issue,
+                        hospital=hospital,
+                        status=Voucher.Status.ACTIVE,
+                        expiry_date=timezone.now().date() + timedelta(days=30),
                     )
 
-                    if created:
-                        self.stdout.write(f'    ✓ Created Voucher: {voucher.voucher_code}')
+                    self.stdout.write(f'    ✓ Created Voucher: {voucher.voucher_code}')
+                    
+                    # Create Funding Record
+                    voucher_funding = VoucherFunding.objects.create(
+                        voucher=voucher,
+                        campaign=campaign,
+                        committed_amount=voucher_amount,
+                        utilized_amount=Decimal('0'),
+                        refund_amount=Decimal('0'),
+                        status=VoucherFunding.FundingStatus.COMMITTED,
+                    )
+                    
+                    # Update Campaign - Manual update as in vouchers/services.py
+                    campaign.currently_allocated += voucher_amount
+                    campaign.save(update_fields=['currently_allocated'])
+
+                    # Log Transaction
+                    CampaignTransaction.objects.create(
+                        campaign=campaign,
+                        voucher_funding=voucher_funding,
+                        transaction_type=CampaignTransaction.TransactionType.VOUCHER_ALLOCATED,
+                        amount=voucher_amount,
+                        description=f"Allocated {voucher_amount:.2f} XAF to voucher {voucher.voucher_code} for health issue #{health_issue.id}",
+                    )
+                    
+                    self.stdout.write(f'      ✓ Funded Voucher: {voucher_amount} XAF')
+
+                    # Randomly settle some vouchers (50% chance)
+                    if random.random() > 0.5:
+                        settle_amount = voucher_amount * Decimal(str(random.uniform(0.7, 1.0)))
+                        settle_amount = settle_amount.quantize(Decimal('0.01'))
                         
-                        # Fund the voucher from campaign
-                        voucher_funding, created = VoucherFunding.objects.get_or_create(
+                        # Create Medical Claim
+                        receptionist = Receptionist.objects.filter(hospital=hospital).first()
+                        medical_claim = MedicalClaim.objects.create(
                             voucher=voucher,
-                            defaults={
-                                'campaign': campaign,
-                                'committed_amount': voucher_amount,
-                                'utilized_amount': Decimal('0'),
-                                'refund_amount': Decimal('0'),
-                            },
+                            hospital=hospital,
+                            service_description="Seeded medical services",
+                            total_cost=settle_amount,
+                            claim_status=ClaimStatus.APPROVED,
+                            submitted_by=receptionist,
+                            reviewed_by=sys_admin,
+                            reviewed_at=timezone.now(),
+                            service_completed_at=timezone.now(),
                         )
                         
-                        if created:
-                            self.stdout.write(
-                                f'      ✓ Funded Voucher: {voucher_amount} XAF'
+                        # Add Claim Item
+                        ClaimItem.objects.create(
+                            medical_claim=medical_claim,
+                            name="General Treatment",
+                            amount=settle_amount
+                        )
+                        
+                        # Add Proof
+                        MedicalClaimProof.objects.create(
+                            medical_claim=medical_claim,
+                            document_type=DocumentType.BILL,
+                            verification_status=VerificationStatus.VERIFIED,
+                            uploaded_by=receptionist,
+                            verified_by=sys_admin,
+                            verified_at=timezone.now(),
+                        )
+                        
+                        # Settle logic - replicate vouchers/services.py
+                        refund_amount = voucher_amount - settle_amount
+                        
+                        voucher_funding.utilized_amount = settle_amount
+                        voucher_funding.refund_amount = refund_amount
+                        voucher_funding.utilized_at = timezone.now()
+                        voucher_funding.status = VoucherFunding.FundingStatus.UTILIZED
+                        voucher_funding.save()
+                        
+                        campaign.currently_allocated -= voucher_amount
+                        campaign.total_disbursed += settle_amount
+                        campaign.save(update_fields=['currently_allocated', 'total_disbursed'])
+                        
+                        # Log settlement transaction
+                        CampaignTransaction.objects.create(
+                            campaign=campaign,
+                            voucher_funding=voucher_funding,
+                            transaction_type=CampaignTransaction.TransactionType.HOSPITAL_SETTLED,
+                            amount=settle_amount,
+                            description=f"Funds settled: {settle_amount:.2f} XAF to {hospital.name} for voucher {voucher.voucher_code}",
+                        )
+                        
+                        if refund_amount > 0:
+                            CampaignTransaction.objects.create(
+                                campaign=campaign,
+                                voucher_funding=voucher_funding,
+                                transaction_type=CampaignTransaction.TransactionType.SURPLUS_REFUND,
+                                amount=refund_amount,
+                                description=f"Refunded {refund_amount:.2f} XAF surplus from voucher {voucher.voucher_code}",
                             )
+
+                        voucher.status = Voucher.Status.USED
+                        voucher.save()
+                        self.stdout.write(f'      ✓ Settled Voucher: {settle_amount} XAF used, {refund_amount} refunded')
 
         self.stdout.write(self.style.SUCCESS('✓ Campaigns, donations, and vouchers seeded successfully'))
 

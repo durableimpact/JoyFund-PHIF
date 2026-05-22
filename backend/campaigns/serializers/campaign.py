@@ -1,21 +1,25 @@
 from rest_framework import serializers
 
-from campaigns.models import Campaign,CampaignEvent,CampaignTransaction
+from campaigns.models import Campaign, CampaignEvent, CampaignTransaction
+
 
 class CampaignEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignEvent
-        exclude = ['campaign']
+        exclude = ["campaign"]
+
 
 class CampaignTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignTransaction
-        exclude = ['campaign']
+        exclude = ["campaign"]
+
 
 class CampaignDetailSerializer(serializers.ModelSerializer):
     from vouchers.serializers.voucher_funding import VoucherFundingDetailSerializer
 
     donor_id = serializers.UUIDField(source="donor.id", read_only=True)
+    total_net_raised = serializers.SerializerMethodField()
     progress_percentage = serializers.SerializerMethodField()
     events = CampaignEventSerializer(many=True, read_only=True)
     transactions = CampaignTransactionSerializer(many=True, read_only=True)
@@ -27,11 +31,13 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "id",
             "donor_id",
             "title",
+            "slug",
             "description",
             "cover_image",
             "event_type",
             "goal_amount",
-            "current_amount",
+            "available_balance",
+            "total_net_raised",
             "start_date",
             "end_date",
             "is_public",
@@ -43,6 +49,10 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "transactions",
             "voucher_fundings",
         ]
+
+    def get_total_net_raised(self, obj):
+        # Use annotated value if available for performance, else fallback to property
+        return getattr(obj, "total_net_raised_calc", obj.total_net_raised)
 
     def get_progress_percentage(self, obj):
         return obj.progress_percentage

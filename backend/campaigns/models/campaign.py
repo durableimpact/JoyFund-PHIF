@@ -3,6 +3,7 @@ import uuid
 from utils.models import BaseEvent
 from decimal import Decimal
 from accounts.models import Donor
+from django.utils.text import slugify
 
 
 class Campaign(models.Model):
@@ -28,6 +29,7 @@ class Campaign(models.Model):
     )
 
     title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, null=True, blank=True, db_index=True)
     description = models.TextField()
     cover_image = models.ImageField(upload_to='campaigns/', null=True, blank=True)
 
@@ -116,7 +118,7 @@ class Campaign(models.Model):
         """Check if campaign has reached its goal amount."""
         return self.total_net_raised >= self.goal_amount
     
-    def generate_impact_certificate(self):
+    def generate_impact_certificate(self, force=False):
         """
         Generate and save impact certificate PDF if campaign goal is reached.
         Returns: True if certificate generated/updated, False otherwise
@@ -124,7 +126,7 @@ class Campaign(models.Model):
         if not self.goal_reached:
             return False
         
-        if self.certificate_generated and self.certificate_file:
+        if self.certificate_generated and self.certificate_file and not force:
             return False  # Already generated
         
         try:
@@ -150,6 +152,17 @@ class Campaign(models.Model):
         self._initial_status = self.status
 
     def save(self, *args, **kwargs):
+        # Generate slug on creation if not provided
+        if self._state.adding and not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            # Ensure slug uniqueness
+            while Campaign.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+
         is_new = self._state.adding
         super().save(*args, **kwargs)
 

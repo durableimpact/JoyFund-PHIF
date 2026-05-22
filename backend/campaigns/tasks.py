@@ -7,6 +7,8 @@ from accounts.models import User
 from utils.pdf_generator import create_impact_certificate
 from django.core.asgi import get_asgi_application
 from asgiref.sync import async_to_sync
+from django.utils.text import slugify
+from django.db import models
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +36,8 @@ def broadcast_donation_notification(donation_id, campaign_id, campaign_name, don
         
         # Create the donation payload
         donation_payload = DonationPayload(
-            donation_id=int(donation_id),
-            campaign_id=int(campaign_id),
+            donation_id=donation_id,
+            campaign_id=campaign_id,
             campaign_name=campaign_name,
             donor_name=donor_name,
             amount=float(amount),
@@ -118,21 +120,66 @@ def send_anniversary_reminders():
 @shared_task
 def generate_impact_certificates():
     """
-    Scans for closed/funded campaigns that haven't had their impact certificate generated.
+    Scans for campaigns that have reached their goal but haven't had 
+    their impact certificate generated yet.
     """
-    campaigns = Campaign.objects.filter(status='CLOSED', certificate_generated=False)
+    # Find campaigns that reached their goal but certificate not yet generated
+    # Check campaigns where current_amount >= goal_amount
+    campaigns = Campaign.objects.filter(
+        current_amount__gte=models.F('goal_amount'),
+        certificate_generated=False
+    ).exclude(
+        # Exclude campaigns still in draft/inactive state
+        status__in=['DRAFT', 'INACTIVE']
+    )
     
     count = 0
     for campaign in campaigns:
-        # 1. Generate the PDF
-        filename, content_file = create_impact_certificate(campaign)
-        
-        # 2. Save to model
-        campaign.certificate_file.save(filename, content_file, save=False)
-        campaign.certificate_generated = True
-        campaign.save()
-        
-        logger.info(f"Generated Impact Certificate for Campaign #{campaign.id}")
-        count += 1
+        try:
+            # Double-check the campaign goal is actually reached
+            if campaign.goal_reached:
+                # 1. Generate the PDF
+                filename, content_file = create_impact_certificate(campaign)
+                
+                if content_file:
+                    # 2. Save to model
+                    campaign.certificate_file.save(filename, content_file, save=False)
+                    campaign.certificate_generated = True
+                    campaign.save(update_fields=['certificate_generated', 'certificate_file'])
+                    
+                    logger.info(f"Generated Impact Certificate for Campaign #{campaign.id}")
+                    count += 1
+        except Exception as e:
+            logger.error(f"Failed to generate certificate for campaign {campaign.id}: {str(e)}")
+            continue
         
     return f"Generated {count} impact certificates."
+
+
+@shared_task
+def generate_missing_campaign_slugs():
+    """
+    Background task to generate slugs for existing campaigns that don't have one.
+    This is run at startup to populate the slug field for existing records.
+    """
+    campaigns_without_slug = Campaign.objects.filter(slug__isnull=True)
+    
+    count = 0
+    for campaign in campaigns_without_slug:
+        base_slug = slugify(campaign.title)
+        slug = base_slug
+        counter = 1
+        
+        # Ensure slug uniqueness
+        while Campaign.objects.filter(slug=slug).exclude(id=campaign.id).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        
+        campaign.slug = slug
+        campaign.save(update_fields=['slug'])
+        
+        logger.info(f"Generated slug '{slug}' for Campaign #{campaign.id} ('{campaign.title}')")
+        count += 1
+    
+    logger.info(f"Generated {count} missing campaign slugs")
+    return f"Generated {count} campaign slugs."

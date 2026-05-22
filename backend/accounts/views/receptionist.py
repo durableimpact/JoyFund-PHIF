@@ -2,6 +2,7 @@ from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import status, viewsets, mixins
+from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
@@ -10,9 +11,12 @@ from accounts.serializers import (
     ReceptionistCreateSerializer,
     ReceptionistDetailSerializer,
     ReceptionistUpdateSerializer,
+    ReceptionistDashboardSerializer,
 )
 from accounts.utils import IsHospitalAdmin, IsOwnerOrHospitalAdmin, cache_response, invalidate_cache, make_cache_key
 from accounts.filters import ReceptionistFilter
+from hospitals.models import MedicalClaim, MedicalClaimProof
+from vouchers.models.Voucher import Voucher
 
 _TAG = ['Receptionists']
 
@@ -134,3 +138,54 @@ class ReceptionistViewSet(
     @invalidate_cache(make_cache_key('receptionist_list'))
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated, IsOwnerOrHospitalAdmin],
+        url_path="dashboard",
+    )
+    @swagger_auto_schema(
+        tags=["Dashboard"],
+        operation_description="Get dashboard statistics for a receptionist.",
+        responses={200: ReceptionistDashboardSerializer()},
+    )
+    def dashboard(self, request, id=None):
+        receptionist = self.get_object()
+
+        redeemed_vouchers = Voucher.objects.filter(
+            medical_claim__submitted_by=receptionist,
+            status=Voucher.Status.USED,
+        ).count()
+
+        total_medical_claims = MedicalClaim.objects.filter(
+            submitted_by=receptionist,
+        ).count()
+
+        pending_claims = MedicalClaim.objects.filter(
+            submitted_by=receptionist,
+            claim_status="PENDING",
+        ).count()
+
+        approved_claims = MedicalClaim.objects.filter(
+            submitted_by=receptionist,
+            claim_status="APPROVED",
+        ).count()
+
+        rejected_claims = MedicalClaim.objects.filter(
+            submitted_by=receptionist,
+            claim_status="REJECTED",
+        ).count()
+
+        uploaded_proofs = MedicalClaimProof.objects.filter(
+            uploaded_by=receptionist,
+        ).count()
+
+        return Response({
+            "redeemed_vouchers": redeemed_vouchers,
+            "total_medical_claims": total_medical_claims,
+            "pending_claims": pending_claims,
+            "approved_claims": approved_claims,
+            "rejected_claims": rejected_claims,
+            "uploaded_proofs": uploaded_proofs,
+        })

@@ -22,6 +22,10 @@ from .voucher_topup import (
     VoucherTopUpRequestApproveView,
     VoucherTopUpRequestRejectView,
 )
+from .dashboard import (
+    HospitalDashboardView,
+    HospitalRedeemedDailyView,
+)
 
 __all__ = [
     "HospitalViewSet",
@@ -44,4 +48,6 @@ __all__ = [
     "MedicalClaimApproveView",
     "MedicalClaimRejectView",
     "MedicalClaimFinalVerifyView",
+    "HospitalDashboardView",
+    "HospitalRedeemedDailyView",
 ]

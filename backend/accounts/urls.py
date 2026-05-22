@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 from accounts.views import (
@@ -6,6 +6,7 @@ from accounts.views import (
     DonorListView,
     DonorRegisterView,
     DonorUpdateView,
+    DonorDashboardView,
     DonorInfoView,
     HospitalAdminViewSet,
     HospitalAdminInfoView,
@@ -57,10 +58,17 @@ urlpatterns = [
     # -----------------------------------------------------------------------
     path('donors/', DonorListView.as_view(), name='donor-list'),
     path('donors/register/', DonorRegisterView.as_view(), name='donor-register'),
+
     path('donors/<uuid:id>/', DonorDetailView.as_view(), name='donor-detail'),
     path('donors/<uuid:id>/update/', DonorUpdateView.as_view(), name='donor-update'),
+    path('donors/<uuid:id>/dashboard/', DonorDashboardView.as_view(), name='donor-dashboard'),
 
     # -----------------------------------------------------------------------
     # ViewSet Router URLs (Hospital Admins, Social Workers, Receptionists)
     # -----------------------------------------------------------------------
-] + router.urls
+] + router.urls + [
+    # -----------------------------------------------------------------------
+    # System Admin Dashboard
+    # -----------------------------------------------------------------------
+    path('system-admins/dashboard/', include('accounts.urls_admin_dashboard')),
+]

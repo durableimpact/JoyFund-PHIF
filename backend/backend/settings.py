@@ -344,8 +344,8 @@ CELERY_BROKER_CONNECTION_RETRY = True
 
 # Celery Beat (Scheduler)
 CELERY_BEAT_SCHEDULE = {
-    "run-matching-engine-every-5-minutes": {
-        "task": "vouchers.run_matching_engine_task",
+    "generate-missing-campaign-slugs-daily": {
+        "task": "campaigns.tasks.generate_missing_campaign_slugs",
         "schedule": 300.0,  # 300 seconds = 5 minutes
     },
 }

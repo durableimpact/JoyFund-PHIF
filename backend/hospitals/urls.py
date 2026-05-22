@@ -22,6 +22,8 @@ from hospitals.views import (
     MedicalClaimApproveView,
     MedicalClaimRejectView,
     MedicalClaimFinalVerifyView,
+    HospitalDashboardView,
+    HospitalRedeemedDailyView,
 )
 
 app_name = "hospitals"
@@ -130,6 +132,17 @@ urlpatterns = (
             "medical-claims/<uuid:medical_claim_id>/final-verify/",
             MedicalClaimFinalVerifyView.as_view(),
             name="medical-claim-final-verify",
+        ),
+        # Hospital dashboards
+        path(
+            "<uuid:hospital_id>/dashboard/",
+            HospitalDashboardView.as_view(),
+            name="hospital-dashboard",
+        ),
+        path(
+            "<uuid:hospital_id>/dashboard/redeemed-daily/",
+            HospitalRedeemedDailyView.as_view(),
+            name="hospital-redeemed-daily",
         ),
     ]
 )

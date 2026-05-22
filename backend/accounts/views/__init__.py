@@ -4,6 +4,8 @@ from .receptionist import ReceptionistViewSet
 from .social_worker import SocialWorkerViewSet
 from .verification import VerifyEmailView, ResendVerificationView
 from .password import PasswordResetRequestView, PasswordResetConfirmView, PasswordChangeView
+from .donor_dashboard import DonorDashboardView
+from .social_worker_dashboard import SocialWorkerDashboardView
 from .info import (
     DonorInfoView,
     HospitalAdminInfoView,
@@ -11,12 +13,23 @@ from .info import (
     SocialWorkerInfoView,
     SystemAdminInfoView,
 )
+from .admin_dashboard import (
+    AdminOverviewView,
+    AdminFinancialView,
+    AdminDonationTrendsView,
+    AdminUserAnalyticsView,
+    AdminBeneficiaryVoucherView,
+    AdminOrganizationView,
+    AdminTrendsReportView,
+)
 
 __all__ = [
     'DonorRegisterView',
     'DonorListView',
     'DonorDetailView',
     'DonorUpdateView',
+    'DonorDashboardView',
+    'SocialWorkerDashboardView',
     'HospitalAdminViewSet',
     'ReceptionistViewSet',
     'SocialWorkerViewSet',
@@ -30,4 +43,11 @@ __all__ = [
     'PasswordResetRequestView',
     'PasswordResetConfirmView',
     'PasswordChangeView',
+    'AdminOverviewView',
+    'AdminFinancialView',
+    'AdminDonationTrendsView',
+    'AdminUserAnalyticsView',
+    'AdminBeneficiaryVoucherView',
+    'AdminOrganizationView',
+    'AdminTrendsReportView',
 ]
