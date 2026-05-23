@@ -4,7 +4,7 @@ from celery import shared_task
 from django.utils import timezone
 from django.db import transaction
 from campaigns.models import Donation, Payment
-from payments.models import Transaction, HospitalAccount
+from payments.models import Transaction
 import json
 
 logger = logging.getLogger(__name__)
@@ -159,11 +159,11 @@ def process_disbursement_task(webhook_data: dict):
                     "transaction_id": str(tx.id),
                 }
             else:
-                # If failed, we need to refund the HospitalAccount
+                # If failed, we need to refund the source account
                 tx.status = "FAILED"
                 tx.save()
-                if tx.source and isinstance(tx.source, HospitalAccount):
-                    # Return funds to the hospital
+                if tx.source:
+                    # Return funds to the source account
                     tx.source.balance += tx.amount
                     tx.source.save()
                 return {
