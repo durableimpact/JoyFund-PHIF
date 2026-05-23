@@ -17,6 +17,7 @@ from vouchers.serializers.voucher_create import (
     VoucherCreateMultipleCampaignsSerializer,
 )
 from accounts.models import Role
+from vouchers.services import check_in_voucher
 
 
 class IsReceptionist(IsAuthenticated):
@@ -77,6 +78,7 @@ class VoucherCheckView(APIView):
             voucher = Voucher.objects.select_related("beneficiary").get(
                 voucher_code=code.upper()
             )
+            check_in_voucher(voucher, check_by=request.user)
         except Voucher.DoesNotExist:
             return Response(
                 {"detail": "Voucher not found."}, status=status.HTTP_404_NOT_FOUND
