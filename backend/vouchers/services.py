@@ -1,4 +1,4 @@
-from vouchers.models import Voucher, VoucherFunding
+from vouchers.models import Voucher, VoucherFunding,VoucherEvent
 from campaigns.models import Campaign, CampaignTransaction
 from hospitals.models import (
     Hospital,
@@ -15,6 +15,8 @@ from beneficiaries.models import (
     HealthIssueCategoryChoices,
 )
 from logs.models import ActivityLog, ErrorLog
+from django.contrib.auth import get_user_model
+from accounts.models import User
 
 from django.db import transaction
 from django.utils import timezone
@@ -33,6 +35,8 @@ from typing import Optional, Literal, Any, Dict
 
 logger = logging.getLogger(__name__)
 
+
+# User = get_user_model()
 
 # ---------------------------------------------------------------------------
 # Internal logging helpers
@@ -83,6 +87,47 @@ def _log_error(
     except Exception as exc:
         logger.error("Failed to write ErrorLog: %s", exc)
 
+
+def check_in_voucher(voucher: Voucher,check_by:User) -> bool:
+    """
+    Check-in a voucher when the beneficiary arrives at the hospital.
+    This can be used to track voucher usage and update status if needed.
+    """
+
+    if voucher.status != Voucher.Status.ACTIVE:
+        _log_activity(
+            action="voucher.check_in.failed",
+            description=(
+                f"Check-in failed for voucher {voucher.voucher_code}: "
+                f"status is '{voucher.status}', expected 'ACTIVE'."
+            ),
+            level="WARNING",
+            target_type="Voucher",
+            target_id=voucher.pk,
+            target_label=voucher.voucher_code,
+        )
+        return False
+
+    voucher.status = Voucher.Status.ACTIVE
+    voucher.save(update_fields=["status"])
+
+    VoucherEvent.objects.create(
+        voucher=voucher,
+        event_type=Voucher.Status.ACTIVE,
+        changed_by=check_by,
+        notes="Voucher checked in at hospital reception.",
+    )
+
+
+    _log_activity(
+        action="voucher.check_in.success",
+        description=f"Voucher {voucher.voucher_code} checked in successfully.",
+        level="INFO",
+        target_type="Voucher",
+        target_id=voucher.pk,
+        target_label=voucher.voucher_code,
+    )
+    return True
 
 # ---------------------------------------------------------------------------
 # Campaign balance helper
