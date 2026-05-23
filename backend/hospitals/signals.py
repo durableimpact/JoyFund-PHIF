@@ -3,7 +3,6 @@ from django.dispatch import receiver
 from django.core.cache import cache
 
 from hospitals.models import Hospital, Services, ClaimItem
-from payments.models import HospitalAccount
 from django.db.models import Sum
 
 
