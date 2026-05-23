@@ -131,7 +131,9 @@ class VoucherCreateMultipleCampaignsSerializer(serializers.ModelSerializer):
         decimal_places=2,
         write_only=True,
         min_value=Decimal("1.00"),
-        help_text="Total amount to allocate to the voucher",
+        required=False,
+        allow_null=True,
+        help_text="Total amount to allocate to the voucher. If not provided, will be calculated from campaign allocations.",
     )
     campaign_allocations = CampaignAllocationSerializer(
         many=True,
@@ -177,16 +179,41 @@ class VoucherCreateMultipleCampaignsSerializer(serializers.ModelSerializer):
                 "Duplicate campaigns in allocations. Each campaign can appear only once."
             )
 
-        # If percentages are used, verify they sum to <= 100
+        # Calculate total from fixed amounts if not provided
+        fixed_amounts = [
+            a.get("amount") for a in allocations if a.get("amount") is not None
+        ]
         percentages = [
             a.get("percentage") for a in allocations if a.get("percentage") is not None
         ]
+
+        # If percentages are used, verify they sum to <= 100
         if percentages:
             total_percentage = sum(percentages)
             if total_percentage > Decimal("100.00"):
                 raise serializers.ValidationError(
                     f"Total percentage {total_percentage}% exceeds 100%."
                 )
+
+        # Calculate total_amount if not provided
+        if not total_amount:
+            if fixed_amounts:
+                # Use sum of fixed amounts as total
+                calculated_total = sum(fixed_amounts)
+                data["total_amount"] = calculated_total
+            else:
+                # All percentages but no total_amount provided
+                raise serializers.ValidationError(
+                    "total_amount is required when using percentage-based allocations."
+                )
+        else:
+            # Verify fixed amounts don't exceed provided total_amount
+            if fixed_amounts:
+                sum_fixed = sum(fixed_amounts)
+                if sum_fixed > total_amount:
+                    raise serializers.ValidationError(
+                        f"Sum of fixed amounts ({sum_fixed}) exceeds total_amount ({total_amount})."
+                    )
 
         return data
 
