@@ -10,7 +10,7 @@ from .models import (
     Transaction,
     FeeSplit,
     WebhookEvent,
-    HospitalAccount,
+    Disbursement,
 )
 
 
@@ -174,17 +174,61 @@ class FeeAccountAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(HospitalAccount)
-class HospitalAccountAdmin(admin.ModelAdmin):
-    list_display = ["hospital", "balance", "updated_at"]
-    readonly_fields = ["id", "hospital", "created_at", "updated_at"]
-    search_fields = ["hospital__name"]
-    ordering = ["hospital__name"]
-
-    def has_add_permission(self, request):
-        # Accounts are created automatically via signals when hospitals are created
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        # Prevent accidental deletion of hospital ledger accounts
-        return False
+@admin.register(Disbursement)
+class DisbursementAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "hospital",
+        "amount",
+        "currency",
+        "payment_method",
+        "status",
+        "disbursed_at",
+        "created_at",
+    ]
+    list_filter = ["status", "payment_method", "currency", "created_at"]
+    search_fields = [
+        "hospital__name",
+        "external_reference",
+        "gateway_transaction_id",
+    ]
+    readonly_fields = [
+        "id",
+        "created_at",
+        "updated_at",
+        "created_by",
+    ]
+    fieldsets = (
+        ("Hospital & Amount", {
+            "fields": ("hospital", "amount", "currency")
+        }),
+        ("Payment Details", {
+            "fields": (
+                "payment_method",
+                "recipient_phone",
+                "recipient_account",
+            )
+        }),
+        ("Status & References", {
+            "fields": (
+                "status",
+                "external_reference",
+                "gateway_transaction_id",
+                "transaction",
+            )
+        }),
+        ("Additional Information", {
+            "fields": (
+                "notes",
+                "error_message",
+                "metadata",
+                "disbursed_at",
+            ),
+            "classes": ("collapse",),
+        }),
+        ("Metadata", {
+            "fields": ("created_by", "created_at", "updated_at"),
+            "classes": ("collapse",),
+        }),
+    )
+    ordering = ["-created_at"]
