@@ -70,21 +70,3 @@ class EscrowAccount(SingletonAccountMixin, Account):
 class FeeAccount(SingletonAccountMixin, Account):
     def __str__(self):
         return f"{self.name} - Balance: {self.balance} XAF"
-
-class HospitalAccount(Account):
-    """
-    Individual ledger account for a partner hospital.
-    Funds are initially moved from the EscrowAccount into this account
-    when a Care Voucher's service is marked as completed (and PIN verified).
-    Hospitals can then initiate a withdrawal (Disbursement) from this balance
-    to their corporate MoMo number.
-    """
-    hospital = models.OneToOneField(
-        'hospitals.Hospital',
-        on_delete=models.CASCADE,
-        related_name='ledger_account',
-        help_text="The hospital this account belongs to."
-    )
-
-    def __str__(self):
-        return f"{self.hospital.name} Account - Balance: {self.balance} XAF"
