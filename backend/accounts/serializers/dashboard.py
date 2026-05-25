@@ -48,3 +48,15 @@ class HospitalAdminDashboardSerializer(serializers.Serializer):
     total_claims = serializers.IntegerField()
     pending_claims = serializers.IntegerField()
     number_of_staff = serializers.IntegerField()
+
+
+class SystemAdminDashboardSerializer(serializers.Serializer):
+    total_users = serializers.IntegerField()
+    total_hospitals = serializers.IntegerField()
+    total_donors = serializers.IntegerField()
+    total_beneficiaries = serializers.IntegerField()
+    total_donations = serializers.FloatField()
+    total_vouchers_issued = serializers.IntegerField()
+    total_vouchers_redeemed = serializers.IntegerField()
+    pending_claims = serializers.IntegerField()
+    escrow_balance = serializers.FloatField()
