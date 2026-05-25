@@ -5,6 +5,14 @@ declare type USER_ROLE =
   | "SOCIAL_WORKER"
   | "DONOR";
 
+declare enum UserRole {
+  SYSTEM_ADMIN = "SYSTEM_ADMIN",
+  HOSPITAL_ADMIN = "HOSPITAL_ADMIN",
+  SOCIAL_WORKER = "SOCIAL_WORKER",
+  RECEPTIONIST = "RECEPTIONIST",
+  DONOR = "DONOR",
+}
+
 declare interface User {
   id: string;
   email: string;
@@ -71,6 +79,8 @@ declare interface Donor {
 
 // types for creating account
 
+// region Donor
+
 declare interface DonorRegister {
   email: string;
   password: string;
@@ -84,4 +94,58 @@ declare interface DonorUpdate {
   first_name?: string;
   last_name?: string;
   phone_number?: string;
+}
+
+// region Social Worker
+
+declare interface SocialWorkerRegister {
+    email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  national_id_number: string;
+  front_national_id_image: File;
+  back_national_id_image: File;
+  organization: string;
+  region_assigned: string;
+}
+
+
+
+// region Hospital Admin
+
+declare interface HospitalAdminRegister {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  national_id_number: string;
+  front_national_id_image: File;
+  back_national_id_image: File;
+  hospital?: string | null;
+}
+
+// region Receptionist
+declare interface ReceptionistRegister {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  national_id_number: string;
+  front_national_id_image: File;
+  back_national_id_image: File;
+  hospital?: string | null;
+}
+
+// region System Admin
+
+declare interface SystemAdminRegister {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
 }
