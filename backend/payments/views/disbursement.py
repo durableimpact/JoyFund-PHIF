@@ -54,7 +54,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         return DisbursementSerializer
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='List Disbursements',
         operation_description=(
             'List all disbursement records with optional filtering and search.\n\n'
@@ -67,7 +67,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='Create Disbursement Record',
         operation_description=(
             'Create a new disbursement record to document payments already made outside the system.\n\n'
@@ -119,7 +119,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         return response
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='Get Disbursement Details',
         operation_description='Retrieve detailed information about a specific disbursement including related events and transaction details.',
     )
@@ -127,7 +127,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='Update Disbursement',
         operation_description='Partially update a disbursement record. Commonly used to update status, add error messages, or link to transactions.',
         request_body=DisbursementUpdateSerializer,
@@ -136,7 +136,17 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
+        operation_summary='Update Disbursement (Full)',
+        operation_description='Fully update/replace a disbursement record.',
+        request_body=DisbursementSerializer,
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+
+    @swagger_auto_schema(
+        tags=['Disbursement'],
         operation_summary='Delete Disbursement',
         operation_description='Delete a disbursement record (only for incomplete/test records).',
     )
@@ -144,7 +154,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='Mark as Completed',
         operation_description='Mark a disbursement as completed. Since disbursements default to COMPLETED, this is rarely needed except for correcting a previously failed entry or updating a PENDING record.',
         methods=['post'],
@@ -175,7 +185,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         )
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='Mark as Failed',
         operation_description='Mark a disbursement as failed and record error details. Use this to correct a record if a payment you recorded actually failed or was rejected.',
         methods=['post'],
@@ -209,7 +219,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         )
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='Get Disbursements by Hospital',
         operation_description='Get all disbursements for a specific hospital.',
         methods=['get'],
@@ -234,7 +244,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        tags=['Payments — Disbursements'],
+        tags=['Disbursement'],
         operation_summary='Get Statistics',
         operation_description='Get aggregated disbursement statistics by status and payment method.',
         methods=['get'],
