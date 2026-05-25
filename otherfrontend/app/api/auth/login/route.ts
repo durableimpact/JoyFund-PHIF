@@ -18,6 +18,8 @@ async function obtainToken(email: string, password: string) {
     client_secret: OAUTH_CLIENT_SECRET,
   });
 
+  console.log(params)
+
   const response = await fetch(`${DJANGO_API_URL}/auth/token/`, {
     method: 'POST',
     headers: {
