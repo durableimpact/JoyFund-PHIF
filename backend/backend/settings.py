@@ -274,7 +274,7 @@ OAUTH2_PROVIDER_GRANT_MODEL = "oauth2_provider.Grant"
 
 OAUTH2_PROVIDER = {
     "ACCESS_TOKEN_EXPIRE_SECONDS": env.int(
-        "OAUTH2_ACCESS_TOKEN_EXPIRE_SECONDS", default=36000
+        "OAUTH2_ACCESS_TOKEN_EXPIRE_SECONDS", default=3600
     ),
     "REFRESH_TOKEN_EXPIRE_SECONDS": 30 * 24 * 60 * 60,  # 30 days
     # "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
