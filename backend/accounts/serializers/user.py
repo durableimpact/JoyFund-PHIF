@@ -88,6 +88,7 @@ class DonorInfoSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "profile_picture",
             "phone_number",
             
             "role",
@@ -114,6 +115,7 @@ class HospitalAdminInfoSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "profile_picture",
             "phone_number",
             
             "role",
@@ -153,6 +155,7 @@ class ReceptionistInfoSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "profile_picture",
             "phone_number",
             
             "role",
@@ -191,6 +194,7 @@ class SocialWorkerInfoSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "profile_picture",
             "phone_number",
             
             "role",
@@ -216,6 +220,7 @@ class SystemAdminInfoSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "profile_picture",
             "phone_number",
             
             "role",
