@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.gis",
     # Third party apps
+    "corsheaders",
     "channels",
     "chanx.channels",
     "rest_framework",
@@ -80,6 +81,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Logging middleware - must be after SessionMiddleware to have access to session
     "logs.middleware.LoggingMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -300,6 +302,56 @@ SWAGGER_SETTINGS = {
     "OPERATIONS_SORTER": "alpha",
     "TAGS_SORTER": "alpha",
 }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CORS Configuration (django-cors-headers)
+# ─────────────────────────────────────────────────────────────────────────────
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS",
+    default=[
+        "http://localhost:3000",      # Next.js dev server
+        "http://localhost:3001",      # Alternative Next.js port
+        "http://localhost:8000",      # Django dev server
+        "http://127.0.0.1:3000",      # Next.js dev server (127.0.0.1)
+        "http://127.0.0.1:8000",      # Django dev server (127.0.0.1)
+    ] if DEBUG else []  # Empty in production - use ALLOWED_HOSTS env var
+)
+
+# Allow credentials (cookies, authorization headers) in CORS requests
+CORS_ALLOW_CREDENTIALS = True
+
+# Specific methods allowed in CORS requests
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "HEAD",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# Specific headers allowed in CORS requests
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+# Expose headers to the frontend
+CORS_EXPOSE_HEADERS = [
+    "content-type",
+    "x-csrftoken",
+]
+
+# Maximum age (in seconds) for CORS preflight responses
+CORS_PREFLIGHT_MAX_AGE = 86400  # 1 day
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

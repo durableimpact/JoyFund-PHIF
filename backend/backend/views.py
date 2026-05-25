@@ -155,49 +155,85 @@ def oauth2_token_view(request):
     Rate Limiting:
     - 10 token requests per hour per IP/user
     - Applies to password grant, refresh token, and other flows
-    shoul
+    
     The actual OAuth2 token logic is handled by drf-social-oauth2.
     """
     import json
     from oauth2_provider.views import TokenView
     from oauth2_provider.models import AccessToken
-    from django.test import RequestFactory
+    from django.http import QueryDict
     
-    # Create a new request for the OAuth2 TokenView
-    factory = RequestFactory()
-    
-    # Handle both JSON and form-encoded request bodies
-    if request.content_type == 'application/json':
-        import urllib.parse
-        body_data = json.loads(request.body)
-        encoded_data = urllib.parse.urlencode(body_data)
-        oauth_request = factory.post('/auth/token/', data=encoded_data, content_type='application/x-www-form-urlencoded')
-    else:
-        oauth_request = factory.post('/auth/token/', data=request.POST.dict())
-    
-    # Copy authentication info from original request
-    oauth_request.user = request.user
-    oauth_request.META = request.META
-    
-    # Delegate to the actual OAuth2 token view
-    token_view = TokenView.as_view()
-    response = token_view(oauth_request)
-    
-    # If the token request is successful, inject the user's role
-    if response.status_code == 200:
+    try:
+        # Get the underlying Django request from the DRF Request object
+        django_request = request._request
+        
+        # Handle JSON content type by converting to form data
+        if request.content_type == 'application/json':
+            try:
+                body_data = json.loads(request.body)
+            except json.JSONDecodeError:
+                return Response(
+                    {'error': 'Invalid JSON in request body'},
+                    status=400
+                )
+            
+            # Convert JSON data to QueryDict (form data format)
+            # Create a mutable QueryDict and update it with the JSON data
+            query_dict = QueryDict(mutable=True)
+            for key, value in body_data.items():
+                query_dict[key] = value
+            
+            # Set the POST data on the underlying Django request
+            django_request.POST = query_dict
+            
+            # Update content type to form-encoded since OAuth2 expects form data
+            django_request.META['CONTENT_TYPE'] = 'application/x-www-form-urlencoded'
+        
+        # Delegate to the actual OAuth2 token view
+        token_view = TokenView.as_view()
+        response = token_view(django_request)
+        
+        # Log the response for debugging
+        print(f"OAuth2 Response Status: {response.status_code}")
+        print(f"OAuth2 Response Content: {response.content}")
+        
+        # If the token request is successful, inject the user's role
+        if response.status_code == 200:
+            try:
+                response_data = json.loads(response.content.decode('utf-8'))
+                access_token = response_data.get("access_token")
+                
+                if access_token:
+                    token_obj = AccessToken.objects.filter(
+                        token=access_token
+                    ).select_related('user').first()
+                    
+                    if token_obj and token_obj.user:
+                        response_data['role'] = token_obj.user.role
+                        return Response(response_data, status=200)
+                
+                return Response(response_data, status=200)
+            except (json.JSONDecodeError, Exception) as e:
+                # If role injection fails, return original response
+                return response
+        
+        # Handle error responses
         try:
-            data = json.loads(response.content)
-            access_token = data.get("access_token")
-            if access_token:
-                token_obj = AccessToken.objects.filter(token=access_token).select_related('user').first()
-                if token_obj and token_obj.user:
-                    data['role'] = token_obj.user.role
-                    return Response(data, status=200)
-        except Exception:
-            pass
+            error_data = json.loads(response.content.decode('utf-8'))
+            return Response(error_data, status=response.status_code)
+        except json.JSONDecodeError:
+            return Response(
+                {'error': 'Invalid response from token server'},
+                status=response.status_code
+            )
     
-    # Return the original response for errors or if role injection fails
-    if response.status_code == 200:
-        return Response(json.loads(response.content), status=response.status_code)
-    else:
-        return Response(json.loads(response.content) if response.content else {}, status=response.status_code)
+    except Exception as e:
+        import traceback
+        # Log the full error for debugging
+        print(f"OAuth2 Token Error: {str(e)}")
+        print(traceback.format_exc())
+        
+        return Response(
+            {'error': 'Internal server error during token generation'},
+            status=500
+        )
