@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Figtree } from "next/font/google";
+import localFont from "next/font/local";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { SessionProvider } from "next-auth/react";
 
-const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const montserrat = localFont({
+  src: "../public/font/Montserrat-VariableFont_wght.ttf",
+  variable: "--font-sans",
 });
 
 const geistMono = Geist_Mono({
@@ -28,9 +28,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", figtree.variable)}
+      suppressHydrationWarning suppressContentEditableWarning
+      className={cn("h-full", montserrat.variable)}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body suppressHydrationWarning suppressContentEditableWarning className={cn("min-h-full flex flex-col antialiased font-sans", geistMono.variable)}>
+        <SessionProvider>
+          {children}
+        </SessionProvider>
+      </body>
     </html>
   );
 }
