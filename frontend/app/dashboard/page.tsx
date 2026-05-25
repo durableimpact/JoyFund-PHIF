@@ -1,55 +1,83 @@
 'use client';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, TrendingUp, Users, Heart, Bell } from 'lucide-react';
+import { Plus, TrendingUp, Users, Heart, History } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { useStore } from '@/store/useStore';
-import { formatXAF } from '@/lib/utils';
-
+import { formatXAF, formatDate, normalizeCampaignResponse } from '@/lib/utils';
+import { authenticatedFetch } from '@/lib/api';
 
 export default function DonorDashboard() {
-  const { campaigns, currentUser, contributions } = useStore();
-  const donorName = currentUser?.name || 'Jean-Pierre Mbarga';
-  const donorId = currentUser?.id || 'donor-001';
-  const myCampaigns = campaigns.filter(c => c.donorId === donorId);
-  const totalRaised = myCampaigns.reduce((s, c) => s + c.raisedXAF, 0);
-  const myContribs = contributions.filter(c => myCampaigns.some(m => m.id === c.campaignId)).slice(0, 5);
+  const router = useRouter();
+  const { currentUser, showToast } = useStore();
+  const [campaigns, setCampaigns]   = useState<any[]>([]);
+  const [donations, setDonations]   = useState<any[]>([]);
+  const [loading, setLoading]       = useState(true);
+
+  useEffect(() => {
+    if (!currentUser) { router.replace('/login?redirect=/dashboard'); return; }
+    Promise.allSettled([
+      authenticatedFetch('/api/campaigns/'),
+      authenticatedFetch('/api/campaigns/donations/my-donations/'),
+    ]).then(([cRes, dRes]) => {
+      if (cRes.status === 'fulfilled') {
+        const all = Array.isArray(cRes.value) ? cRes.value : cRes.value.results || [];
+        // Show campaigns where the donor is the creator
+        const donorId = currentUser?.id;
+        const mine = all.filter((c: any) =>
+          c.donor === donorId ||
+          c.donor_id === donorId ||
+          c.created_by === donorId ||
+          c.donor?.id === donorId
+        );
+        setCampaigns(mine.map(normalizeCampaignResponse));
+      }
+      if (dRes.status === 'fulfilled') {
+        setDonations(Array.isArray(dRes.value) ? dRes.value : dRes.value.results || []);
+      }
+    }).catch(() => showToast('Failed to load some data', 'error'))
+      .finally(() => setLoading(false));
+  }, [currentUser]);
+
+  const name = currentUser?.name || 'Donor';
+  const totalRaised = campaigns.reduce((s, c) => s + (c.raisedXAF || 0), 0);
+  const totalContributors = campaigns.reduce((s, c) => s + (c.contributors || 0), 0);
+  const totalDonated = donations.reduce((s, d) => s + Number(d.amount ?? 0), 0);
+
+  const stats = [
+    { label: 'Total Raised',    value: formatXAF(totalRaised),      icon: TrendingUp, color: 'var(--primary)' },
+    { label: 'My JoyFunds',     value: campaigns.length,            icon: Heart,      color: 'var(--secondary)' },
+    { label: 'Contributors',    value: totalContributors,           icon: Users,      color: 'var(--success)' },
+    { label: "I've Donated",    value: formatXAF(totalDonated),     icon: Heart,      color: '#471DDB' },
+  ];
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <Navbar />
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
-          {/* Header */}
           <div className="flex items-start justify-between mb-8">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Welcome back 👋</p>
-              <h1 className="text-2xl font-black text-[#1A1A2E]">{donorName.split(' ')[0]}&apos;s Dashboard</h1>
+              <p className="text-sm text-gray-500 mb-1">Welcome back</p>
+              <h1 className="text-2xl font-black text-[#1A1A2E]">{name.split(' ')[0]}&apos;s Dashboard</h1>
             </div>
-            <Link href="/create" className="btn-primary text-sm gap-2">
+            <Link href="/create" className="btn-primary text-sm">
               <Plus size={16} /> New JoyFund
             </Link>
           </div>
 
-          {/* Notification banner */}
-          <div className="rounded-2xl p-4 mb-6 flex items-center gap-3 text-sm" style={{ background: 'linear-gradient(135deg, #1DB1DB15, #1CDBC915)', border: '1px solid #1DB1DB30' }}>
-            <Bell size={18} style={{ color: 'var(--primary)' }} />
-            <span className="text-gray-700">Your gift is now being used - <strong>Mama Celestine</strong> checked in at Hôpital de District de Biyem-Assi 🏥</span>
-          </div>
-
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: 'Total Raised', value: formatXAF(totalRaised), icon: TrendingUp, color: 'var(--primary)' },
-              { label: 'My Campaigns', value: myCampaigns.length, icon: Heart, color: 'var(--secondary)' },
-              { label: 'Contributors', value: myCampaigns.reduce((s, c) => s + c.contributors, 0), icon: Users, color: 'var(--success)' },
-              { label: 'Lives Impacted', value: myCampaigns.filter(c => c.status === 'completed').length * 2 + 1, icon: Heart, color: '#471DDB' },
-            ].map(s => (
+            {stats.map(s => (
               <div key={s.label} className="card p-5">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: s.color + '15' }}>
                   <s.icon size={18} style={{ color: s.color }} />
                 </div>
-                <div className="text-xl font-black" style={{ color: s.color }}>{s.value}</div>
+                <div className="text-xl font-black" style={{ color: s.color }}>
+                  {loading ? <span className="inline-block w-10 h-5 bg-gray-100 rounded animate-pulse" /> : s.value}
+                </div>
                 <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
               </div>
             ))}
@@ -58,54 +86,60 @@ export default function DonorDashboard() {
           <div className="grid md:grid-cols-3 gap-6">
             {/* My Campaigns */}
             <div className="md:col-span-2">
-              <h2 className="section-title text-xl mb-1">My JoyFunds</h2>
-              <p className="section-sub">Your active and past campaigns</p>
-              {myCampaigns.length === 0 ? (
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-black text-[#1A1A2E]">My JoyFunds</h2>
+                <Link href="/create" className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>+ New</Link>
+              </div>
+              {loading ? (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {[1,2].map(i=><div key={i} className="card h-44 animate-pulse bg-gray-50"/>)}
+                </div>
+              ) : campaigns.length === 0 ? (
                 <div className="card p-10 text-center">
-                  <div className="text-4xl mb-3">🎉</div>
+                  <Heart size={32} className="mx-auto mb-3 text-gray-200" />
                   <h3 className="font-bold text-[#1A1A2E] mb-2">No campaigns yet</h3>
-                  <p className="text-gray-500 text-sm mb-4">Create your first JoyFund and turn your celebration into impact.</p>
+                  <p className="text-gray-500 text-sm mb-4">Turn your next celebration into impact for Cameroonian mothers.</p>
                   <Link href="/create" className="btn-primary">Start a JoyFund</Link>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {myCampaigns.map(c => <CampaignCard key={c.id} campaign={c} />)}
+                  {campaigns.map(c => <CampaignCard key={c.id} campaign={c} />)}
                 </div>
               )}
             </div>
 
-            {/* Activity feed */}
+            {/* Recent Donations */}
             <div>
-              <h2 className="section-title text-xl mb-1">Live Activity</h2>
-              <p className="section-sub">Recent contributions</p>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-black text-[#1A1A2E]">Recent Gifts</h2>
+                <Link href="/history" className="text-xs font-semibold flex items-center gap-1" style={{ color: 'var(--primary)' }}>
+                  <History size={12} /> All
+                </Link>
+              </div>
               <div className="card p-4 space-y-3">
-                {myContribs.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-4">No contributions yet</p>
-                ) : myContribs.map(c => (
-                  <div key={c.id} className="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0">
-                      {(c.anonymous ?? false) ? '?' : (c.donorName || 'A').charAt(0)}
+                {loading ? (
+                  [1,2,3].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)
+                ) : donations.length === 0 ? (
+                  <div className="text-center py-6 text-gray-400 text-sm">
+                    <p>No donations yet</p>
+                    <Link href="/explore" className="text-xs font-semibold mt-1 block" style={{ color: 'var(--primary)' }}>Explore campaigns</Link>
+                  </div>
+                ) : donations.slice(0, 6).map((d: any) => (
+                  <div key={d.id} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: 'var(--primary)' }}>
+                      <Heart size={11} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#1A1A2E] truncate">{(c.anonymous ?? false) ? 'Anonymous' : (c.donorName || 'Anonymous')}</p>
-                      <p className="text-xs text-gray-400">{(c.paymentMethod || 'mtn_momo') === 'mtn_momo' ? 'MTN MoMo' : 'Orange Money'}</p>
+                      <p className="text-xs font-medium text-gray-800 truncate">
+                        {d.campaign_title || d.campaign?.title || `Campaign`}
+                      </p>
+                      <p className="text-xs text-gray-400">{d.created_at ? formatDate(d.created_at) : '—'}</p>
                     </div>
-                    <span className="text-sm font-bold flex-shrink-0" style={{ color: 'var(--primary)' }}>{formatXAF(c.amountXAF)}</span>
+                    <span className="text-xs font-bold flex-shrink-0" style={{ color: 'var(--primary)' }}>
+                      {formatXAF(Number(d.amount ?? 0))}
+                    </span>
                   </div>
                 ))}
-              </div>
-
-              {/* Matched beneficiary */}
-              <div className="card p-4 mt-4" style={{ border: '1px solid #1DB1DB30' }}>
-                <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--primary)' }}>Matched Beneficiary</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg">👩</div>
-                  <div>
-                    <p className="font-bold text-sm text-[#1A1A2E]">Mama Celestine O.</p>
-                    <p className="text-xs text-gray-500">BEN-0056 · Week 28</p>
-                    <span className="badge bg-cyan-100 text-cyan-700 text-xs mt-1">Voucher Issued</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

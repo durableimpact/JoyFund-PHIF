@@ -1,109 +1,210 @@
 'use client';
 import { useState } from 'react';
+import { LayoutDashboard, Search, CheckCircle, XCircle, Ticket, Loader2, ClipboardList } from 'lucide-react';
+import DashboardShell, { NavItem } from '@/components/layout/DashboardShell';
 import { useStore } from '@/store/useStore';
 import { formatXAF, statusColor, statusLabel } from '@/lib/utils';
-import { CheckCircle, XCircle, Lock, Clock } from 'lucide-react';
+import { authenticatedFetch } from '@/lib/api';
+import Link from 'next/link';
 
-type Stage = 'entry' | 'valid' | 'invalid' | 'locked';
+const NAV: NavItem[] = [
+  { label: 'Voucher Validation', href: '/hospital/receptionist', icon: <Ticket size={16} /> },
+  { label: 'Medical Claims',     href: '/hospital/claims',       icon: <ClipboardList size={16} /> },
+];
 
 export default function ReceptionistPage() {
-  const { vouchers, updateVoucher, showToast } = useStore();
-  const [code, setCode] = useState('');
-  const [stage, setStage] = useState<Stage>('entry');
-  const [foundVoucher, setFoundVoucher] = useState<typeof vouchers[0] | null>(null);
+  const { showToast } = useStore();
+  const [code, setCode]               = useState('');
+  const [checking, setChecking]       = useState(false);
+  const [result, setResult]           = useState<any>(null);
+  const [approving, setApproving]     = useState(false);
+  const [confirmingPin, setConfirmingPin] = useState(false);
+  const [pin, setPin]                 = useState('');
+  const [showPinInput, setShowPinInput] = useState(false);
 
-  const handleNumpad = (val: string) => {
-    if (val === 'DEL') { setCode(c => c.slice(0, -1)); return; }
-    if (code.length < 6) setCode(c => c + val);
+  // VoucherCheckView uses GET ?code= — NOT POST
+  const handleCheck = async () => {
+    if (!code.trim()) { showToast('Enter a voucher code', 'error'); return; }
+    setChecking(true); setResult(null); setShowPinInput(false); setPin('');
+    try {
+      const data = await authenticatedFetch(
+        `/api/vouchers/check/?code=${encodeURIComponent(code.trim().toUpperCase())}`
+      );
+      setResult(data);
+    } catch (e: any) {
+      showToast(e?.message || 'Voucher not found or invalid', 'error');
+    } finally {
+      setChecking(false);
+    }
   };
 
-  const handleValidate = () => {
-    const v = vouchers.find(x => x.code === code.toUpperCase() && x.status === 'issued');
-    if (v) { setFoundVoucher(v); setStage('valid'); }
-    else { setStage('invalid'); setTimeout(() => { setStage('entry'); setCode(''); }, 2500); }
+  // Approve voucher — only works when status is ACTIVE → transitions to PENDING_CONFIRMATION
+  const handleApprove = async () => {
+    if (!result?.id) return;
+    setApproving(true);
+    try {
+      await authenticatedFetch(`/api/hospitals/vouchers/${result.id}/approve/`, { method: 'POST' });
+      showToast('Voucher approved — now ask the patient for her PIN', 'success');
+      setResult((p: any) => ({ ...p, status: 'PENDING_CONFIRMATION' }));
+      setShowPinInput(true);
+    } catch (e: any) {
+      showToast(e?.message || 'Failed to approve voucher', 'error');
+    } finally {
+      setApproving(false);
+    }
   };
 
-  const handleLock = () => {
-    if (!foundVoucher) return;
-    updateVoucher(foundVoucher.id, { status: 'redeemed' });
-    showToast('Funds locked! Donor notified 🔔', 'success');
-    setStage('locked');
+  // Confirm PIN — transitions PENDING_CONFIRMATION → USED
+  const handleConfirmPin = async () => {
+    if (!pin || pin.length < 4) { showToast('Enter the 4-digit PIN', 'error'); return; }
+    if (!result?.id) return;
+    setConfirmingPin(true);
+    try {
+      await authenticatedFetch(`/api/hospitals/vouchers/${result.id}/confirm-pin/`, {
+        method: 'POST',
+        body: JSON.stringify({ patient_pin: pin }),
+      });
+      showToast('PIN confirmed — service can proceed!', 'success');
+      setResult((p: any) => ({ ...p, status: 'USED' }));
+      setShowPinInput(false);
+    } catch (e: any) {
+      showToast(e?.message || 'Invalid PIN', 'error');
+    } finally {
+      setConfirmingPin(false);
+    }
   };
 
-  const todayVouchers = vouchers.filter(v => v.status === 'redeemed').slice(0, 4);
+  const isValid    = result && (result.status === 'ACTIVE');
+  const isPending  = result && result.status === 'PENDING_CONFIRMATION';
+  const isUsed     = result && result.status === 'USED';
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <div className="py-4 px-6 text-white flex items-center gap-3" style={{ background: 'var(--secondary)' }}>
-        <div className="w-8 h-8 rounded-lg bg-white opacity-20 absolute" />
-        <span className="text-xl">🏥</span>
-        <div><p className="font-black text-sm">Centre Hospitalier d&apos;Essos</p><p className="text-xs opacity-60">Receptionist Portal · {new Date().toLocaleDateString()}</p></div>
-      </div>
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        {(stage === 'entry' || stage === 'invalid') && (
-          <div className="card p-6 text-center">
-            <h2 className="text-xl font-black text-gray-900 mb-1">Voucher Check-In</h2>
-            <p className="text-gray-500 text-sm mb-6">Enter the 6-digit JoyFund Care Code from the patient&apos;s SMS</p>
-            <div className={`flex justify-center gap-2 mb-6 ${stage === 'invalid' ? 'animate-bounce' : ''}`}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className={`w-12 h-14 rounded-xl border-2 flex items-center justify-center text-2xl font-black transition-all ${stage === 'invalid' ? 'border-red-400 text-red-500' : ''}`} style={code[i] && stage !== 'invalid' ? { borderColor: 'var(--primary)', color: 'var(--primary)' } : { borderColor: '#e5e7eb', background: '#f9fafb' }}>
-                  {code[i] || ''}
+    <DashboardShell navItems={NAV} accentColor="#0D9488" brandLabel="Receptionist" brandSub="Voucher validation">
+      <div className="max-w-lg mx-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl font-black text-gray-900">Voucher Validation</h1>
+          <p className="text-gray-500 text-sm">Enter a beneficiary voucher code to verify eligibility for care</p>
+        </div>
+
+        {/* Search */}
+        <div className="card p-6 mb-5">
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Voucher Code</label>
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <Ticket size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                className="input-field pl-10 font-mono uppercase tracking-widest"
+                placeholder="e.g. JF-00A1B2C3"
+                value={code}
+                onChange={e => setCode(e.target.value.toUpperCase())}
+                onKeyDown={e => e.key === 'Enter' && handleCheck()}
+              />
+            </div>
+            <button
+              className="px-5 py-2.5 rounded-xl font-bold text-sm text-white flex-shrink-0 disabled:opacity-60"
+              style={{ background: '#0D9488' }}
+              onClick={handleCheck}
+              disabled={checking}
+            >
+              {checking ? <Loader2 size={16} className="animate-spin" /> : 'Verify'}
+            </button>
+          </div>
+        </div>
+
+        {/* Result */}
+        {result && (
+          <div className={`card p-6 border-2 ${isValid ? 'border-emerald-400' : isPending ? 'border-blue-400' : isUsed ? 'border-gray-300' : 'border-red-300'}`}>
+            <div className="flex items-center gap-3 mb-5">
+              {(isValid || isPending || isUsed)
+                ? <CheckCircle size={28} className="text-emerald-500 flex-shrink-0" />
+                : <XCircle size={28} className="text-red-400 flex-shrink-0" />
+              }
+              <div className="flex-1">
+                <p className="font-black text-gray-900">
+                  {isValid ? 'Valid Voucher' : isPending ? 'Awaiting PIN Confirmation' : isUsed ? 'Already Used' : 'Invalid / Expired'}
+                </p>
+                <p className="text-xs text-gray-500 font-mono">{result.voucher_code || code}</p>
+              </div>
+              <span className={`badge ${statusColor(result.status || 'void')}`}>
+                {statusLabel(result.status || 'void')}
+              </span>
+            </div>
+
+            {/* Details */}
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm mb-5">
+              {[
+                ['Beneficiary',   result.beneficiary?.full_name || result.beneficiary_name || '—'],
+                ['Health ID',     result.beneficiary?.digital_health_id || '—'],
+                ['Amount',        formatXAF(Number(result.amount ?? result.face_value ?? 0))],
+                ['Hospital',      result.hospital?.name || '—'],
+                ['Valid Until',   result.expires_at ? new Date(result.expires_at).toLocaleDateString('fr-CM') : '—'],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between">
+                  <span className="text-gray-500">{k}</span>
+                  <span className="font-semibold text-gray-900 text-right max-w-[60%] truncate">{v}</span>
                 </div>
               ))}
             </div>
-            {stage === 'invalid' && <div className="flex items-center justify-center gap-2 text-red-500 text-sm mb-4"><XCircle size={16} /> Invalid or already redeemed code.</div>}
-            <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto mb-5">
-              {['1','2','3','4','5','6','7','8','9','*','0','DEL'].map(k => (
-                <button key={k} onClick={() => handleNumpad(k)} className={`h-14 rounded-2xl font-bold text-lg transition-all active:scale-95 ${k === 'DEL' ? 'bg-gray-100 text-gray-600' : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}`}>{k}</button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400 mb-3">Or type directly:</p>
-            <input className="input-field text-center text-xl font-bold tracking-widest mb-5 uppercase" placeholder="e.g. JF9M4P" value={code} onChange={e => setCode(e.target.value.toUpperCase().slice(0, 6))} maxLength={6} />
-            <button className="btn-secondary w-full" onClick={handleValidate} disabled={code.length < 6}>Validate Voucher</button>
+
+            {/* Actions */}
+            {isValid && (
+              <button
+                className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-60"
+                style={{ background: '#0D9488' }}
+                onClick={handleApprove}
+                disabled={approving}
+              >
+                {approving ? 'Approving…' : 'Approve — Admit Patient'}
+              </button>
+            )}
+
+            {(isPending || showPinInput) && (
+              <div className="space-y-3">
+                <p className="text-sm text-blue-700 font-semibold text-center">
+                  Ask the patient for her 4-digit secret PIN
+                </p>
+                <input
+                  className="input-field font-mono text-center text-2xl tracking-[0.5em] text-center"
+                  placeholder="••••"
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={pin}
+                  onChange={e => setPin(e.target.value.replace(/\D/g, ''))}
+                />
+                <button
+                  className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-60"
+                  style={{ background: '#0D9488' }}
+                  onClick={handleConfirmPin}
+                  disabled={confirmingPin}
+                >
+                  {confirmingPin ? 'Confirming…' : 'Confirm PIN & Start Care'}
+                </button>
+              </div>
+            )}
+
+            {isUsed && (
+              <p className="text-center text-gray-500 text-sm font-medium py-2">
+                This voucher has already been redeemed.
+              </p>
+            )}
+
+            {!isValid && !isPending && !isUsed && result && (
+              <p className="text-center text-red-500 text-sm font-semibold">
+                This voucher cannot be used. Status: {statusLabel(result.status || 'void')}
+              </p>
+            )}
           </div>
         )}
-        {stage === 'valid' && foundVoucher && (
-          <div className="animate-fade-up card p-6" style={{ border: '2px solid var(--success)' }}>
-            <div className="flex items-center gap-2 mb-4"><CheckCircle size={20} style={{ color: 'var(--success)' }} /><span className="font-bold text-gray-900">Valid — {foundVoucher.code}</span></div>
-            <div className="bg-gray-50 rounded-2xl p-4 mb-5">
-              <p className="text-xs text-gray-400 mb-1">Patient</p>
-              <p className="font-black text-xl text-gray-900">Mama {foundVoucher.beneficiaryName}</p>
-            </div>
-            <div className="mb-5">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Services Covered</p>
-              <div className="space-y-2">{foundVoucher.services.map(s => (<div key={s} className="flex items-center gap-2 text-sm"><div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-xs" style={{ background: 'var(--success)' }}>✓</div>{s}</div>))}</div>
-            </div>
-            <div className="flex justify-between items-center p-3 rounded-xl mb-5" style={{ background: 'rgba(29,177,219,0.1)' }}>
-              <span className="text-sm font-semibold text-gray-700">Fund Value</span>
-              <span className="font-black text-lg" style={{ color: 'var(--secondary)' }}>{formatXAF(foundVoucher.amountXAF)}</span>
-            </div>
-            <button className="btn-secondary w-full flex items-center justify-center gap-2" onClick={handleLock}><Lock size={16} /> Lock Funds & Proceed</button>
-          </div>
-        )}
-        {stage === 'locked' && (
-          <div className="card p-8 text-center animate-fade-up">
-            <div className="text-5xl mb-4">🔒</div>
-            <h2 className="text-xl font-black text-gray-900 mb-2">Funds Locked — Care in Progress</h2>
-            <p className="text-gray-500 text-sm mb-5">Provide care, then the nurse confirms PIN to release payment.</p>
-            <div className="badge bg-cyan-100 text-cyan-700 text-sm px-4 py-2 mb-5">Awaiting PIN Confirmation</div>
-            <div className="bg-amber-50 rounded-xl p-3 text-xs text-amber-700 mb-5">📱 Donor notification sent</div>
-            <button className="btn-primary w-full" onClick={() => { setStage('entry'); setCode(''); setFoundVoucher(null); }}>Validate Another Voucher</button>
-          </div>
-        )}
-        {stage === 'entry' && todayVouchers.length > 0 && (
-          <div className="card p-5 mt-5">
-            <h3 className="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2"><Clock size={14} /> Today&apos;s Validated Vouchers</h3>
-            <div className="space-y-2">
-              {todayVouchers.map(v => (
-                <div key={v.id} className="flex items-center justify-between text-sm py-2 border-b border-gray-50 last:border-0">
-                  <div><span className="font-mono font-bold text-gray-900">{v.code}</span><span className="text-gray-400 ml-2">{v.beneficiaryName}</span></div>
-                  <span className={`badge ${statusColor(v.status)}`}>{statusLabel(v.status)}</span>
-                </div>
-              ))}
-            </div>
+
+        {!result && (
+          <div className="card p-6 text-center text-sm text-gray-500">
+            <Ticket size={32} className="mx-auto mb-3 text-gray-200" />
+            <p className="font-semibold text-gray-700 mb-1">How to validate</p>
+            <p>Enter the voucher code from the patient's SMS or card, press <strong>Verify</strong>, then approve to admit.</p>
           </div>
         )}
       </div>
-    </div>
+    </DashboardShell>
   );
 }

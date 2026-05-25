@@ -1,114 +1,176 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Plus, UserX, UserCheck } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, TrendingUp, UserPlus, X } from 'lucide-react';
+import DashboardShell, { NavItem } from '@/components/layout/DashboardShell';
 import { useStore } from '@/store/useStore';
+import { authenticatedFetch } from '@/lib/api';
 
-type Hospital = {
-  id: string;
-  name: string;
-};
-
-type StaffMember = {
-  id: string;
-  hospitalId: string;
-  name: string;
-  role: 'receptionist' | 'nurse' | 'hospital_admin';
-  staffId: string;
-  status: 'active' | 'inactive';
-  lastActive: string;
-};
-
-const staffMembers: StaffMember[] = [
-  { id: 'staff-1', hospitalId: 'hospital-default', name: 'Brigitte Talla', role: 'receptionist', staffId: 'HS-001', status: 'active', lastActive: '2 hrs ago' },
-  { id: 'staff-2', hospitalId: 'hospital-default', name: 'Nurse Emmanuel', role: 'nurse', staffId: 'HS-002', status: 'active', lastActive: 'Yesterday' },
-  { id: 'staff-3', hospitalId: 'hospital-default', name: 'Dr. Mireille Ondoa', role: 'hospital_admin', staffId: 'HS-003', status: 'active', lastActive: '2 days ago' },
+const NAV: NavItem[] = [
+  { label: 'Dashboard', href: '/hospital-admin/dashboard', icon: <LayoutDashboard size={16} /> },
+  { label: 'Medical Claims', href: '/hospital-admin/claims', icon: <FileText size={16} /> },
+  { label: 'Top-Up Requests', href: '/hospital-admin/top-up', icon: <TrendingUp size={16} /> },
+  { label: 'Staff', href: '/hospital-admin/staff', icon: <Users size={16} /> },
+  { label: 'Transactions', href: '/hospital-admin/transactions', icon: <TrendingUp size={16} /> },
 ];
 
-const defaultHospital: Hospital = {
-  id: 'hospital-default',
-  name: 'Hôpital de la Paix',
+const roleColors: Record<string, string> = {
+  receptionist: 'bg-blue-100 text-blue-700',
+  nurse: 'bg-emerald-100 text-emerald-700',
+  hospital_admin: 'bg-purple-100 text-purple-700',
 };
 
 export default function HospitalStaff() {
   const { showToast } = useStore();
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
-  const [showInvite, setShowInvite] = useState(false);
-  const [form, setForm] = useState({ name: '', role: 'receptionist', email: '' });
-  const roleColors: Record<string, string> = { receptionist: 'var(--primary)', nurse: 'var(--success)', hospital_admin: '#471DDB' };
+  const [receptionists, setReceptionists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [addRole, setAddRole] = useState<'receptionist'>('receptionist');
+  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone_number: '', password: '', password2: '' });
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function loadHospitals() {
-      try {
-        const res = await fetch('/api/hospitals/');
-        if (!res.ok) return;
-        const data = await res.json();
-        setHospitals(data);
-      } catch (error) {
-        console.error(error);
-      }
+  const load = async () => {
+    setLoading(true);
+    try {
+      const data = await authenticatedFetch('/api/accounts/receptionists/');
+      setReceptionists(Array.isArray(data) ? data : data.results || []);
+    } catch {
+      showToast('Failed to load staff', 'error');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    loadHospitals();
-  }, []);
+  useEffect(() => { load(); }, []);
 
-  const hospital = hospitals[0] ?? defaultHospital;
-  const myStaff = staffMembers.filter((s) => s.hospitalId === hospital.id);
+  const handleAdd = async () => {
+    if (!form.first_name || !form.email || !form.password) {
+      showToast('First name, email, and password are required', 'error');
+      return;
+    }
+    if (form.password !== form.password2) { showToast('Passwords do not match', 'error'); return; }
+    setSubmitting(true);
+    try {
+      await authenticatedFetch('/api/accounts/receptionists/', {
+        method: 'POST',
+        body: JSON.stringify(form),
+      });
+      showToast('Staff member added', 'success');
+      setShowAdd(false);
+      setForm({ first_name: '', last_name: '', email: '', phone_number: '', password: '', password2: '' });
+      load();
+    } catch (e: any) {
+      showToast(e?.message || 'Failed to add staff member', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const allStaff = [
+    ...receptionists.map(s => ({ ...s, role: 'receptionist' })),
+  ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <div className="py-4 px-6 flex items-center justify-between" style={{ background: 'var(--secondary)' }}>
-        <div className="flex items-center gap-3"><span className="text-xl">👥</span><p className="font-black text-sm text-white">Staff Management</p></div>
-        <div className="flex gap-4 text-white opacity-70 text-xs"><Link href="/hospital-admin/dashboard" className="hover:opacity-100">Dashboard</Link><Link href="/hospital-admin/transactions" className="hover:opacity-100">Transactions</Link></div>
-      </div>
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div><h1 className="text-xl font-black text-gray-900">Staff Members</h1><p className="text-gray-500 text-sm">{hospital.name} · {myStaff.length} accounts</p></div>
-          <button className="btn-secondary text-sm" onClick={() => setShowInvite(!showInvite)}><Plus size={16} /> Invite Staff</button>
+    <DashboardShell navItems={NAV} accentColor="#1D75DB" brandLabel="Hospital Admin">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900">Staff Management</h1>
+          <p className="text-gray-500 text-sm">{allStaff.length} staff members</p>
         </div>
-        {showInvite && (
-          <div className="card p-5 mb-6 animate-fade-up" style={{ border: '1px solid rgba(29,177,219,0.3)' }}>
-            <h3 className="font-bold text-gray-900 mb-4 text-sm">Invite New Staff Member</h3>
-            <div className="grid gap-3">
-              <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Full Name *</label><input className="input-field" placeholder="e.g. Dr. Amina Bello" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></div>
-              <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Role *</label><select className="input-field" value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as typeof form.role }))}><option value="receptionist">Receptionist</option><option value="nurse">Nurse</option><option value="hospital_admin">Hospital Admin</option></select></div>
-              <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Email / Phone</label><input className="input-field" placeholder="email or phone number" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} /></div>
-              <div className="flex gap-3"><button className="btn-primary text-sm" onClick={() => { showToast(`Invitation sent to ${form.name || 'new staff'}! 📧`, 'success'); setShowInvite(false); }}>Send Invitation</button><button className="btn-outline text-sm" onClick={() => setShowInvite(false)}>Cancel</button></div>
+        <button onClick={() => setShowAdd(true)} className="btn-secondary text-sm flex items-center gap-2">
+          <UserPlus size={16} /> Add Staff
+        </button>
+      </div>
+
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                {['Staff Member', 'Email', 'Phone', 'Role', 'Status'].map(h => (
+                  <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? [...Array(4)].map((_, i) => (
+                <tr key={i} className="border-b border-gray-50">
+                  {[...Array(5)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
+                </tr>
+              )) : allStaff.length === 0 ? (
+                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">No staff members yet</td></tr>
+              ) : allStaff.map(s => (
+                <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {(s.first_name || '?').charAt(0)}
+                      </div>
+                      <span className="font-semibold text-gray-900">{s.first_name} {s.last_name}</span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-gray-600 text-xs">{s.email || '—'}</td>
+                  <td className="p-4 text-gray-600 text-xs">{s.phone_number || s.phone || '—'}</td>
+                  <td className="p-4">
+                    <span className={`badge text-xs capitalize ${roleColors[s.role] || 'bg-gray-100 text-gray-600'}`}>
+                      {s.role?.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span className="badge bg-emerald-100 text-emerald-700 text-xs">Active</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {showAdd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-black text-gray-900">Add Staff Member</h2>
+              <button onClick={() => setShowAdd(false)}><X size={20} className="text-gray-400" /></button>
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">First Name *</label>
+                  <input className="input-field" placeholder="First name" value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Last Name</label>
+                  <input className="input-field" placeholder="Last name" value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Email *</label>
+                <input className="input-field" type="email" placeholder="staff@hospital.cm" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Phone</label>
+                <input className="input-field" type="tel" value={form.phone_number} onChange={e => setForm(p => ({ ...p, phone_number: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Password *</label>
+                  <input className="input-field" type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Confirm *</label>
+                  <input className="input-field" type="password" value={form.password2} onChange={e => setForm(p => ({ ...p, password2: e.target.value }))} />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button className="btn-outline flex-1" onClick={() => setShowAdd(false)}>Cancel</button>
+              <button className="btn-secondary flex-1" onClick={handleAdd} disabled={submitting}>
+                {submitting ? 'Adding...' : 'Add Staff'}
+              </button>
             </div>
           </div>
-        )}
-        <div className="space-y-3">
-          {myStaff.map((s) => (
-            <div key={s.id} className="card p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-lg flex-shrink-0" style={{ background: roleColors[s.role] || 'var(--primary)' }}>{s.name.charAt(0)}</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5"><p className="font-bold text-gray-900">{s.name}</p><span className="badge bg-gray-100 text-gray-600 text-xs capitalize">{s.role.replace('_', ' ')}</span></div>
-                <p className="text-xs text-gray-500">Staff ID: {s.staffId} · Last active: {s.lastActive}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`badge text-xs ${s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>{s.status}</span>
-                {s.status === 'active' ? <button className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 font-medium" onClick={() => showToast(`${s.name} deactivated`, 'error')}><UserX size={14} /> Deactivate</button> : <button className="flex items-center gap-1 text-xs font-medium" style={{ color: 'var(--success)' }} onClick={() => showToast(`${s.name} reactivated`, 'success')}><UserCheck size={14} /> Activate</button>}
-              </div>
-            </div>
-          ))}
         </div>
-        <div className="card p-5 mt-6">
-          <h3 className="font-bold text-gray-900 mb-4 text-sm">Recent Staff Activity</h3>
-          <div className="space-y-3 text-sm">
-            {[
-              { name: 'Brigitte Talla', action: 'Validated voucher JF9M4P', time: '2 hrs ago' },
-              { name: 'Nurse Emmanuel', action: 'Confirmed PIN for Mama Rosine', time: 'Yesterday' },
-              { name: 'Dr. Mireille Ondoa', action: 'Generated monthly report', time: '2 days ago' },
-            ].map((a, i) => (
-              <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">{a.name.charAt(0)}</div>
-                <div className="flex-1"><span className="font-medium text-gray-900">{a.name}</span><span className="text-gray-500"> {a.action}</span></div>
-                <span className="text-xs text-gray-400 flex-shrink-0">{a.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+      )}
+    </DashboardShell>
   );
 }

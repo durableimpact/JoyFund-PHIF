@@ -1,12 +1,12 @@
 'use client';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Loader2, Eye, EyeOff, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 type Step = 'code' | 'password' | 'done';
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   const router = useRouter();
   const params = useSearchParams();
   const emailFromQuery = params.get('email') ?? '';
@@ -361,5 +361,13 @@ export default function ResetPasswordPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#1DB1DB] border-t-transparent rounded-full animate-spin" /></div>}>
+      <ResetPasswordPageContent />
+    </Suspense>
   );
 }

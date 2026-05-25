@@ -1,31 +1,140 @@
 'use client';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useStore } from '@/store/useStore';
+import { Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useStore, ROLE_HOME } from '@/store/useStore';
 
-export default function HospitalLogin() {
+type HospitalRole = 'receptionist' | 'hospital_admin';
+
+const ROLE_OPTIONS: { value: HospitalRole; label: string; desc: string }[] = [
+  { value: 'hospital_admin', label: 'Hospital Admin',  desc: 'Manage hospital portal' },
+  { value: 'receptionist',   label: 'Receptionist',    desc: 'Validate vouchers' },
+];
+
+export default function HospitalLoginPage() {
   const router = useRouter();
-  const { setRole, showToast } = useStore();
-  const login = (role: 'receptionist' | 'nurse') => {
-    const names = { receptionist: 'Brigitte Talla', nurse: 'Nurse Emmanuel Manga' };
-    const ids = { receptionist: 'staff-001', nurse: 'staff-002' };
-    setRole(role, { name: names[role], id: ids[role] });
-    showToast(`Signed in as ${names[role]}`, 'success');
-    router.push(`/hospital/${role}`);
+  const { login, showToast } = useStore();
+  const [role, setRole]         = useState<HospitalRole>('receptionist');
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw]     = useState(false);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) { setError('Enter email and password'); return; }
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Invalid credentials'); return; }
+
+      login(data); // { access, refresh, user }
+      showToast(`Welcome, ${data.user.name}!`, 'success');
+      router.push(ROLE_HOME[data.user.role as keyof typeof ROLE_HOME] || '/hospital/receptionist');
+    } catch {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
+
+        {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl" style={{ background: 'var(--secondary)' }}>🏥</div>
-          <h1 className="text-xl font-black text-gray-900">Hospital Staff Portal</h1>
-          <p className="text-gray-500 text-sm mt-1">Centre Hospitalier d&apos;Essos</p>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white" style={{ background: '#1D75DB' }}>
+            <Building2 size={28} />
+          </div>
+          <h1 className="text-2xl font-black text-[#1A1A2E]">Hospital Portal</h1>
+          <p className="text-gray-500 text-sm mt-1">Sign in to access your hospital dashboard</p>
         </div>
-        <div className="card p-6 space-y-4">
-          <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Staff ID</label><input className="input-field" defaultValue="REC-001" /></div>
-          <div><label className="text-xs font-semibold text-gray-500 mb-1 block">PIN</label><input className="input-field" type="password" defaultValue="1234" /></div>
-          <p className="text-xs text-gray-400 text-center">Select your role (demo)</p>
-          <button className="btn-primary w-full" onClick={() => login('receptionist')}>Sign In as Receptionist</button>
-          <button className="btn-secondary w-full" onClick={() => login('nurse')}>Sign In as Nurse</button>
+
+        <form onSubmit={handleLogin} className="card p-8 space-y-5">
+
+          {error && (
+            <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">
+              {error}
+            </div>
+          )}
+
+          {/* Role selector */}
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Select Your Role</label>
+            <div className="grid grid-cols-2 gap-2">
+              {ROLE_OPTIONS.map(r => (
+                <button
+                  key={r.value}
+                  type="button"
+                  onClick={() => setRole(r.value)}
+                  className={`p-3 rounded-xl border-2 text-left transition-all ${role === r.value ? 'text-white' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                  style={role === r.value ? { background: '#1D75DB', borderColor: '#1D75DB' } : {}}
+                >
+                  <div className={`font-bold text-sm ${role === r.value ? 'text-white' : 'text-gray-900'}`}>{r.label}</div>
+                  <div className={`text-xs mt-0.5 ${role === r.value ? 'text-white/75' : 'text-gray-500'}`}>{r.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-[#1A1A2E] mb-1.5 block">Email address</label>
+            <input
+              type="email"
+              required
+              className="input-field"
+              placeholder="you@hospital.cm"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-[#1A1A2E] mb-1.5 block">Password</label>
+            <div className="relative">
+              <input
+                type={showPw ? 'text' : 'password'}
+                required
+                className="input-field pr-11"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <button type="button" onClick={() => setShowPw(p => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-opacity disabled:opacity-60"
+            style={{ background: '#1D75DB' }}
+          >
+            {loading ? <><Loader2 size={16} className="animate-spin" /> Signing in…</> : 'Sign In to Hospital Portal'}
+          </button>
+
+          <p className="text-center text-sm text-gray-500">
+            Not hospital staff?{' '}
+            <a href="/login" className="font-semibold" style={{ color: '#1D75DB' }}>Main login</a>
+          </p>
+        </form>
+
+        {/* Seed credentials hint for dev */}
+        <div className="mt-6 card p-4 text-xs text-gray-500 space-y-1">
+          <p className="font-semibold text-gray-700 mb-2">Dev credentials (after seed):</p>
+          <p>Hospital Admin: <span className="font-mono">hospital_admin@joyfund.com</span> / <span className="font-mono">password</span></p>
+          <p>Receptionist: <span className="font-mono">receptionist@joyfund.com</span> / <span className="font-mono">password</span></p>
         </div>
       </div>
     </div>

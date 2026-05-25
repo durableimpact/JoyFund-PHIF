@@ -103,6 +103,9 @@ interface AppState {
   /** Update access token after a silent refresh (djangorestframework-simplejwt /token/refresh/) */
   setAccessToken: (token: string) => void;
 
+  /** Update refresh token */
+  setRefreshToken: (token: string) => void;
+
   // ── Campaigns ─────────────────────────────
   campaigns: Campaign[];
   addCampaign: (campaign: Campaign) => void;
@@ -180,6 +183,8 @@ export const useStore = create<AppState>()(
         }),
 
       setAccessToken: (token) => set({ accessToken: token }),
+
+      setRefreshToken: (token) => set({ refreshToken: token }),
 
       // ── Campaigns ───────────────────────────
       campaigns: [],

@@ -1,381 +1,301 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { authenticatedFetch } from "@/lib/api";
-import { useStore } from "@/store/useStore";
-import Navbar from "@/components/shared/Navbar";
+'use client';
+import { useEffect, useState } from 'react';
+import { LayoutDashboard, Users, Building2, Ticket, BarChart2, FileText, Check, Upload } from 'lucide-react';
+import DashboardShell, { NavItem } from '@/components/layout/DashboardShell';
+import { useStore } from '@/store/useStore';
+import { DJANGO_API_URL } from '@/lib/apiClient';
 
-const ROLE_ENDPOINT: Record<string, string> = {
-  hospital_admin: "/api/accounts/hospital-admins/",
-  social_worker: "/api/accounts/social-workers/",
-  receptionist: "/api/accounts/receptionists/",
-  donor: "/api/accounts/donors/register/",
+const NAV: NavItem[] = [
+  { label: 'Dashboard',    href: '/admin/dashboard',    icon: <LayoutDashboard size={16} /> },
+  { label: 'Hospitals',    href: '/admin/hospitals',    icon: <Building2 size={16} /> },
+  { label: 'Vouchers',     href: '/admin/vouchers',     icon: <Ticket size={16} /> },
+  { label: 'Beneficiaries',href: '/admin/beneficiaries',icon: <Users size={16} /> },
+  { label: 'Analytics',    href: '/admin/analytics',    icon: <BarChart2 size={16} /> },
+  { label: 'Logs',         href: '/admin/logs',         icon: <FileText size={16} /> },
+  { label: 'Create User',  href: '/admin/create-user',  icon: <Users size={16} /> },
+];
+
+const ROLES = [
+  { value: 'donor',         label: 'Donor',         desc: 'Creates campaigns & donates' },
+  { value: 'social_worker', label: 'Social Worker',  desc: 'Enrolls beneficiaries' },
+  { value: 'hospital_admin',label: 'Hospital Admin', desc: 'Manages hospital portal' },
+  { value: 'receptionist',  label: 'Receptionist',   desc: 'Validates vouchers at hospital' },
+];
+
+const CAMEROON_REGIONS = ['Adamawa','Centre','East','Far North','Littoral','North','North West','South','South West','West'];
+
+const ENDPOINTS: Record<string, string> = {
+  donor:          '/api/accounts/donors/register/',
+  social_worker:  '/api/accounts/social-workers/',
+  hospital_admin: '/api/accounts/hospital-admins/',
+  receptionist:   '/api/accounts/receptionists/',
 };
 
-export default function AdminCreateUserPage() {
-  const router = useRouter();
-  const { showToast } = useStore();
-
-  const [role, setRole] = useState<string>("hospital_admin");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [hospitalId, setHospitalId] = useState("");
+export default function AdminCreateUser() {
+  const { accessToken, showToast } = useStore();
+  const [role, setRole] = useState('donor');
   const [hospitals, setHospitals] = useState<any[]>([]);
-  const [nationalId, setNationalId] = useState("");
-  const [organization, setOrganization] = useState("");
-  const [regionAssigned, setRegionAssigned] = useState("");
-  const [frontIdFile, setFrontIdFile] = useState<File | null>(null);
-  const [backIdFile, setBackIdFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      // Basic client-side validation
-      if (!firstName || !lastName) throw new Error('First and last name are required.');
-      if (!email) throw new Error('Email is required.');
-      if (!password || password.length < 8) throw new Error('Password is required (min 8 characters).');
+  // Common fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
 
-      // If creating a hospital_admin, social_worker, or receptionist, send multipart/form-data with ID images
-      if (role === 'hospital_admin' || role === 'social_worker' || role === 'receptionist') {
-        if (!nationalId) throw new Error('National ID number is required for hospital_admins, social workers, and receptionists.');
-        if (!frontIdFile) throw new Error('Front image of national ID is required.');
-        if (!backIdFile) throw new Error('Back image of national ID is required.');
-        if (role === 'social_worker') {
-          if (!organization) throw new Error('Organization is required for social workers.');
-          if (!regionAssigned) throw new Error('Region assigned is required for social workers.');
-        }
+  // Social Worker extras
+  const [nationalId, setNationalId] = useState('');
+  const [frontId, setFrontId] = useState<File | null>(null);
+  const [backId, setBackId] = useState<File | null>(null);
+  const [organization, setOrganization] = useState('');
+  const [regionAssigned, setRegionAssigned] = useState('');
 
-        const form = new FormData();
-        form.append('role', role);
-        form.append('first_name', firstName);
-        form.append('last_name', lastName);
-        form.append('email', email);
-        form.append('password', password);
-        if (phone) form.append('phone_number', phone);
-        if (hospitalId) form.append('hospital', hospitalId);
-        form.append('national_id_number', nationalId);
-        form.append('front_national_id_image', frontIdFile as File);
-        form.append('back_national_id_image', backIdFile as File);
-        if (role === 'social_worker') {
-          form.append('organization', organization);
-          form.append('region_assigned', regionAssigned);
-        }
+  // Hospital Admin extras
+  const [hospitalId, setHospitalId] = useState('');
 
-        const res = await fetch(`/api/admin/create-user?role=${encodeURIComponent(role)}`, {
-          method: 'POST',
-          body: form,
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          // Surface full error JSON for easier debugging
-          const errMsg = err?.detail || err?.message || JSON.stringify(err) || `Create user failed: ${res.status}`;
-          throw new Error(errMsg);
-        }
-      } else {
-        const payload: any = {
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          password,
-          phone_number: phone || undefined,
-        };
-
-        if (hospitalId) payload.hospital = hospitalId;
-
-        // Use server-side proxy to avoid CORS preflight and rely on httpOnly cookie
-        const res = await fetch('/api/admin/create-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role, payload }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          const errMsg = err?.detail || err?.message || JSON.stringify(err) || `Create user failed: ${res.status}`;
-          throw new Error(errMsg);
-        }
-      }
-
-      showToast("User created successfully", "success");
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPassword("");
-      setPhone("");
-      setHospitalId("");
-      setNationalId("");
-      setOrganization("");
-      setRegionAssigned("");
-      setFrontIdFile(null);
-      setBackIdFile(null);
-    } catch (err: any) {
-      showToast(err?.message || "Failed to create user", "error");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [submitting, setSubmitting] = useState(false);
+  const [created, setCreated] = useState<any>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await fetch('/api/admin/hospitals');
-        const data = await res.json().catch(() => ({}));
-        const list = Array.isArray(data) ? data : data?.results || [];
-        if (!mounted) return;
-        setHospitals(list);
-        const seed = list.find((h: any) => h.email === 'info@generalhospital.com' || (h.name || '').toLowerCase().includes('general'));
-        if (seed) setHospitalId(seed.id);
-      } catch (e) {
-        // ignore — leave hospitalId editable
+    if (role === 'hospital_admin' || role === 'receptionist') {
+      fetch(`${DJANGO_API_URL}/api/hospitals/`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+        .then(r => r.json())
+        .then(d => setHospitals(Array.isArray(d) ? d : d.results || []))
+        .catch(() => {});
+    }
+  }, [role, accessToken]);
+
+  const handleSubmit = async () => {
+    setError('');
+    if (!firstName || !email || !password) { setError('First name, email, and password are required'); return; }
+    if (password !== password2) { setError('Passwords do not match'); return; }
+    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+
+    // Social worker & hospital admin need national ID images
+    if ((role === 'social_worker' || role === 'hospital_admin') && (!nationalId || !frontId || !backId)) {
+      setError('National ID number and both ID images are required for this role');
+      return;
+    }
+    if (role === 'social_worker' && (!organization || !regionAssigned)) {
+      setError('Organization and region assigned are required for Social Worker');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      let response: Response;
+      const endpoint = ENDPOINTS[role];
+
+      if (role === 'social_worker' || role === 'hospital_admin') {
+        // multipart/form-data for file uploads
+        const fd = new FormData();
+        fd.append('first_name', firstName);
+        fd.append('last_name', lastName);
+        fd.append('email', email);
+        fd.append('phone_number', phone);
+        fd.append('password', password);
+        fd.append('national_id_number', nationalId);
+        if (frontId) fd.append('front_national_id_image', frontId);
+        if (backId) fd.append('back_national_id_image', backId);
+        if (role === 'social_worker') {
+          fd.append('organization', organization);
+          fd.append('region_assigned', regionAssigned);
+        }
+        if (role === 'hospital_admin' && hospitalId) {
+          fd.append('hospital', hospitalId);
+        }
+        response = await fetch(`${DJANGO_API_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessToken}` },
+          body: fd,
+        });
+      } else {
+        // JSON for donor and receptionist
+        const payload: any = {
+          first_name: firstName, last_name: lastName,
+          email, phone_number: phone,
+          password, password2: password,
+        };
+        if (role === 'receptionist' && hospitalId) payload.hospital = hospitalId;
+        response = await fetch(`${DJANGO_API_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
       }
-    })();
-    return () => { mounted = false; };
-  }, []);
 
-  return (
-    <div>
-      <Navbar />
-      <div className="max-w-4xl mx-auto mt-20 p-6">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden -mt-6">
-          <div className="px-6 py-6 border-b">
-            <h1 className="text-2xl font-extrabold">Create User</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Quickly create platform accounts for hospitals, social workers,
-              receptionists, and donors.
-            </p>
+      const data = await response.json();
+      if (!response.ok) {
+        const msg = data.detail || data.email?.[0] || data.phone_number?.[0] || JSON.stringify(data);
+        throw new Error(msg);
+      }
+      setCreated({ ...data, role });
+      showToast(`${ROLES.find(r => r.value === role)?.label} account created!`, 'success');
+    } catch (e: any) {
+      setError(e?.message || 'Failed to create user');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (created) return (
+    <DashboardShell navItems={NAV} accentColor="#471DDB" brandLabel="System Admin" brandSub="Full platform oversight">
+      <div className="max-w-lg">
+        <div className="card p-8 text-center">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white" style={{ background: '#471DDB' }}>
+            <Check size={28} />
           </div>
-          <div className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium">Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mt-1 block w-full rounded-md border px-3 py-2"
-                >
-                  <option value="hospital_admin">Hospital Admin</option>
-                  <option value="social_worker">Social Worker</option>
-                  <option value="receptionist">Receptionist</option>
-                  <option value="donor">Donor</option>
-                </select>
+          <h2 className="text-xl font-black text-gray-900 mb-2">Account Created!</h2>
+          <p className="text-gray-500 text-sm mb-5">
+            {created.first_name || firstName} {created.last_name || lastName} is now registered as a <strong>{ROLES.find(r => r.value === role)?.label}</strong>.
+          </p>
+          <div className="bg-gray-50 rounded-xl p-4 text-left text-sm space-y-2 mb-5">
+            {[['Email', email], ['Role', ROLES.find(r => r.value === role)?.label]].map(([k,v]) => (
+              <div key={k} className="flex justify-between">
+                <span className="text-gray-500">{k}</span>
+                <span className="font-medium">{v}</span>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium">
-                    First name
-                  </label>
-                  <input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="First name (e.g. John)"
-                    className="mt-1 block w-full rounded-md border px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Last name</label>
-                  <input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last name (e.g. Doe)"
-                    className="mt-1 block w-full rounded-md border px-3 py-2"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Email</label>
-                <input
-                  required
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="user@example.com"
-                  className="mt-1 block w-full rounded-md border px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Password</label>
-                <input
-                  required
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
-                  className="mt-1 block w-full rounded-md border px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">
-                  Phone (optional)
-                </label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+237 6XXXXXXXX"
-                  className="mt-1 block w-full rounded-md border px-3 py-2"
-                />
-              </div>
-
-              {role === 'social_worker' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Organization
-                    </label>
-                    <input
-                      value={organization}
-                      onChange={(e) => setOrganization(e.target.value)}
-                      placeholder="Organization name"
-                      className="mt-1 block w-full rounded-md border px-3 py-2"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Region assigned
-                    </label>
-                    <input
-                      value={regionAssigned}
-                      onChange={(e) => setRegionAssigned(e.target.value)}
-                      placeholder="Region, district or area"
-                      className="mt-1 block w-full rounded-md border px-3 py-2"
-                    />
-                  </div>
-                </>
-              )}
-
-              {(role === "hospital_admin" ||
-                role === "receptionist" ||
-                role === "nurse") && (
-                <div>
-                  <label className="block text-sm font-medium">
-                    Hospital
-                  </label>
-                  {hospitals.length > 0 ? (
-                    <select
-                      value={hospitalId}
-                      onChange={(e) => setHospitalId(e.target.value)}
-                      className="mt-1 block w-full rounded-md border px-3 py-2"
-                    >
-                      <option value="">-- Select hospital (name — id) --</option>
-                      {hospitals.map((h) => (
-                        <option key={h.id} value={h.id}>
-                          {h.name} — {h.id}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      value={hospitalId}
-                      onChange={(e) => setHospitalId(e.target.value)}
-                      placeholder="Hospital UUID (e.g. 123e4567-e89b-12d3-a456-426614174000)"
-                      className="mt-1 block w-full rounded-md border px-3 py-2"
-                    />
-                  )}
-                </div>
-              )}
-
-              {(role === 'social_worker' || role === 'receptionist') && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium">
-                      National ID number
-                    </label>
-                    <input
-                      value={nationalId}
-                      onChange={(e) => setNationalId(e.target.value)}
-                      placeholder="National ID (e.g. NID-12345)"
-                      className="mt-1 block w-full rounded-md border px-3 py-2"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Front of national ID (image)
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setFrontIdFile(e.target.files?.[0] ?? null)}
-                      className="mt-1 block w-full"
-                      title="Upload front image of national ID (jpg/png, max 5MB)"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Back of national ID (image)
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setBackIdFile(e.target.files?.[0] ?? null)}
-                      className="mt-1 block w-full"
-                      title="Upload back image of national ID (jpg/png, max 5MB)"
-                    />
-                  </div>
-                </>
-              )}
-
-              {role === 'hospital_admin' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium">National ID number</label>
-                    <input
-                      value={nationalId}
-                      onChange={(e) => setNationalId(e.target.value)}
-                      placeholder="National ID (e.g. NID-12345)"
-                      className="mt-1 block w-full rounded-md border px-3 py-2"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium">Front of national ID (image)</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setFrontIdFile(e.target.files?.[0] ?? null)}
-                      className="mt-1 block w-full"
-                      title="Upload front image of national ID (jpg/png, max 5MB)"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium">Back of national ID (image)</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setBackIdFile(e.target.files?.[0] ?? null)}
-                      className="mt-1 block w-full"
-                      title="Upload back image of national ID (jpg/png, max 5MB)"
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="flex items-center justify-end">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-admin px-4 py-2"
-                >
-                  {loading ? "Creating…" : "Create User"}
-                </button>
-              </div>
-            </form>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            <button className="btn-outline flex-1" onClick={() => {
+              setCreated(null);
+              setFirstName(''); setLastName(''); setEmail(''); setPhone('');
+              setPassword(''); setPassword2(''); setNationalId('');
+              setFrontId(null); setBackId(null); setOrganization('');
+              setRegionAssigned(''); setHospitalId(''); setError('');
+            }}>Create Another</button>
+            <a href="/admin/dashboard" className="btn-admin flex-1 text-center text-sm py-2.5">Dashboard</a>
           </div>
         </div>
       </div>
-    </div>
+    </DashboardShell>
+  );
+
+  return (
+    <DashboardShell navItems={NAV} accentColor="#471DDB" brandLabel="System Admin" brandSub="Full platform oversight">
+      <div className="max-w-xl">
+        <div className="mb-6">
+          <h1 className="text-2xl font-black text-gray-900">Create User Account</h1>
+          <p className="text-gray-500 text-sm">Add a new platform user</p>
+        </div>
+
+        <div className="card p-6 space-y-5">
+          {/* Role picker */}
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 block">Role *</label>
+            <div className="grid grid-cols-2 gap-2">
+              {ROLES.map(r => (
+                <button key={r.value} type="button" onClick={() => { setRole(r.value); setError(''); }}
+                  className={`p-3 rounded-xl border-2 text-left transition-all ${role === r.value ? 'text-white' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                  style={role === r.value ? { background: '#471DDB', borderColor: '#471DDB' } : {}}>
+                  <div className={`font-bold text-sm ${role === r.value ? 'text-white' : 'text-gray-900'}`}>{r.label}</div>
+                  <div className={`text-xs mt-0.5 ${role === r.value ? 'text-white/75' : 'text-gray-500'}`}>{r.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>}
+
+          {/* Common fields */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-gray-500 mb-1 block">First Name *</label>
+              <input className="input-field" placeholder="Jean-Pierre" value={firstName} onChange={e => setFirstName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 mb-1 block">Last Name</label>
+              <input className="input-field" placeholder="Mbarga" value={lastName} onChange={e => setLastName(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block">Email *</label>
+            <input className="input-field" type="email" placeholder="user@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block">Phone <span className="font-normal text-gray-400">e.g. +237650537465</span></label>
+            <input className="input-field" type="tel" placeholder="+237 6XX XXX XXX" value={phone} onChange={e => setPhone(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-gray-500 mb-1 block">Password * <span className="font-normal text-gray-400">(min 8 chars)</span></label>
+              <input className="input-field" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 mb-1 block">Confirm Password *</label>
+              <input className="input-field" type="password" placeholder="••••••••" value={password2} onChange={e => setPassword2(e.target.value)} />
+            </div>
+          </div>
+
+          {/* Social Worker extras */}
+          {(role === 'social_worker' || role === 'hospital_admin') && (
+            <div className="space-y-3 pt-2 border-t border-gray-100">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">ID Verification (required)</p>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">National ID Number *</label>
+                <input className="input-field" placeholder="e.g. NID-123456 or CNI number" value={nationalId} onChange={e => setNationalId(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Front of ID *</label>
+                  <label className={`flex items-center gap-2 border-2 border-dashed rounded-xl p-3 cursor-pointer transition-colors ${frontId ? 'border-emerald-400 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <Upload size={16} className={frontId ? 'text-emerald-500' : 'text-gray-400'} />
+                    <span className="text-xs text-gray-600 truncate">{frontId ? frontId.name : 'Upload front image'}</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={e => setFrontId(e.target.files?.[0] || null)} />
+                  </label>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Back of ID *</label>
+                  <label className={`flex items-center gap-2 border-2 border-dashed rounded-xl p-3 cursor-pointer transition-colors ${backId ? 'border-emerald-400 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <Upload size={16} className={backId ? 'text-emerald-500' : 'text-gray-400'} />
+                    <span className="text-xs text-gray-600 truncate">{backId ? backId.name : 'Upload back image'}</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={e => setBackId(e.target.files?.[0] || null)} />
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {role === 'social_worker' && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Organization *</label>
+                <input className="input-field" placeholder="e.g. Ministry of Social Affairs" value={organization} onChange={e => setOrganization(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Region Assigned *</label>
+                <select className="input-field" value={regionAssigned} onChange={e => setRegionAssigned(e.target.value)}>
+                  <option value="">— Select Region —</option>
+                  {CAMEROON_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {(role === 'hospital_admin' || role === 'receptionist') && (
+            <div>
+              <label className="text-xs font-semibold text-gray-500 mb-1 block">
+                Hospital {role === 'receptionist' ? '(optional)' : '(optional)'}
+              </label>
+              <select className="input-field" value={hospitalId} onChange={e => setHospitalId(e.target.value)}>
+                <option value="">— Select Hospital —</option>
+                {hospitals.map(h => <option key={h.id} value={h.id}>{h.name} · {h.city}</option>)}
+              </select>
+              {hospitals.length === 0 && <p className="text-xs text-gray-400 mt-1">No hospitals loaded yet</p>}
+            </div>
+          )}
+
+          <button className="w-full py-3 rounded-xl font-bold text-sm text-white transition-opacity disabled:opacity-60"
+            style={{ background: '#471DDB' }} onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Creating…' : `Create ${ROLES.find(r => r.value === role)?.label}`}
+          </button>
+        </div>
+      </div>
+    </DashboardShell>
   );
 }

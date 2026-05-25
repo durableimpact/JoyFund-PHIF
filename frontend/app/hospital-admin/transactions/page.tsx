@@ -1,94 +1,94 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Download } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, TrendingUp, Download } from 'lucide-react';
+import DashboardShell, { NavItem } from '@/components/layout/DashboardShell';
 import { useStore } from '@/store/useStore';
 import { formatXAF, statusColor, statusLabel, formatDate } from '@/lib/utils';
+import { authenticatedFetch } from '@/lib/api';
 
-type Hospital = {
-  id: string;
-  name: string;
-};
-
-const defaultHospital: Hospital = {
-  id: 'hospital-default',
-  name: 'Hôpital de la Paix',
-};
+const NAV: NavItem[] = [
+  { label: 'Dashboard', href: '/hospital-admin/dashboard', icon: <LayoutDashboard size={16} /> },
+  { label: 'Medical Claims', href: '/hospital-admin/claims', icon: <FileText size={16} /> },
+  { label: 'Top-Up Requests', href: '/hospital-admin/top-up', icon: <TrendingUp size={16} /> },
+  { label: 'Staff', href: '/hospital-admin/staff', icon: <Users size={16} /> },
+  { label: 'Transactions', href: '/hospital-admin/transactions', icon: <TrendingUp size={16} /> },
+];
 
 export default function HospitalTransactions() {
-  const { vouchers, showToast } = useStore();
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const { showToast } = useStore();
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalIn, setTotalIn] = useState(0);
 
   useEffect(() => {
-    async function loadHospitals() {
-      try {
-        const res = await fetch('/api/hospitals/');
-        if (!res.ok) return;
-        const data = await res.json();
-        setHospitals(data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    loadHospitals();
+    authenticatedFetch('/api/payments/transactions/')
+      .then(d => {
+        const arr = Array.isArray(d) ? d : d.results || [];
+        setTransactions(arr);
+        setTotalIn(arr.filter((t: any) => t.type === 'payout' || t.transaction_type === 'payout').reduce((s: number, t: any) => s + Number(t.amount ?? 0), 0));
+      })
+      .catch(() => showToast('Failed to load transactions', 'error'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const hospital = hospitals[0] ?? defaultHospital;
-  const myVouchers = vouchers.filter((v) => v.hospitalId === hospital.id);
-  const filtered = myVouchers.filter((v) => statusFilter === 'all' || v.status === statusFilter);
-
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <div className="py-4 px-6 flex items-center justify-between" style={{ background: 'var(--secondary)' }}>
-        <div className="flex items-center gap-3"><span className="text-xl">📋</span><p className="font-black text-sm text-white">Transaction History</p></div>
-        <div className="flex gap-4 text-white opacity-70 text-xs"><Link href="/hospital-admin/dashboard" className="hover:opacity-100">Dashboard</Link><Link href="/hospital-admin/staff" className="hover:opacity-100">Staff</Link></div>
+    <DashboardShell navItems={NAV} accentColor="#1D75DB" brandLabel="Hospital Admin">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900">Transactions</h1>
+          <p className="text-gray-500 text-sm">Payment history for your hospital</p>
+        </div>
+        <button onClick={() => showToast('Exporting transactions...', 'info')} className="btn-outline text-sm flex items-center gap-2">
+          <Download size={14} /> Export
+        </button>
       </div>
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div><h1 className="text-xl font-black text-gray-900">Transaction Ledger</h1><p className="text-gray-500 text-sm">{hospital.name} · {myVouchers.length} total transactions</p></div>
-          <button className="btn-secondary text-sm flex items-center gap-2" onClick={() => showToast('Export ready! CSV downloaded.', 'success')}><Download size={16} /> Export CSV</button>
-        </div>
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
-          {['all', 'generated', 'issued', 'redeemed'].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)} className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${statusFilter === s ? 'text-white' : 'bg-white text-gray-600 border border-gray-200'}`} style={statusFilter === s ? { background: 'var(--secondary)' } : {}}>{s === 'all' ? 'All' : statusLabel(s)}</button>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {[{ label: 'Total Processed', value: formatXAF(myVouchers.reduce((s, v) => s + v.amountXAF, 0)), color: 'var(--primary)' }, { label: 'Redeemed', value: formatXAF(myVouchers.filter((v) => v.status === 'redeemed').reduce((s, v) => s + v.amountXAF, 0)), color: 'var(--success)' }, { label: 'Pending', value: formatXAF(myVouchers.filter((v) => v.status === 'issued').reduce((s, v) => s + v.amountXAF, 0)), color: '#f59e0b' }].map((s) => (
-            <div key={s.label} className="card p-4 text-center"><div className="font-black text-lg" style={{ color: s.color }}>{s.value}</div><div className="text-xs text-gray-500">{s.label}</div></div>
-          ))}
-        </div>
-        <div className="space-y-3">
-          {filtered.map((v) => (
-            <div key={v.id} className="card overflow-hidden">
-              <button className="w-full p-4 flex items-center gap-4 text-left hover:bg-gray-50 transition-colors" onClick={() => setExpanded(expanded === v.id ? null : v.id)}>
-                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">🎟️</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5"><span className="font-mono font-bold text-gray-900">{v.code}</span><span className={`badge ${statusColor(v.status)} text-xs`}>{statusLabel(v.status)}</span></div>
-                  <p className="text-xs text-gray-500">{v.beneficiaryName} · {formatDate(v.generatedAt)}</p>
-                </div>
-                <div className="text-right flex-shrink-0"><div className="font-bold" style={{ color: 'var(--primary)' }}>{formatXAF(v.amountXAF)}</div><div className="text-xs text-gray-400">{expanded === v.id ? '▲' : '▼'}</div></div>
-              </button>
-              {expanded === v.id && (
-                <div className="px-4 pb-4 border-t border-gray-100 pt-4 bg-gray-50 animate-fade-up">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div><p className="text-xs font-semibold text-gray-500 mb-2">Services Covered</p><ul className="space-y-1">{v.services.map((s) => <li key={s} className="flex items-center gap-2 text-xs text-gray-700"><span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: 'var(--success)' }} />{s}</li>)}</ul></div>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between"><span className="text-gray-500">Generated</span><span className="text-gray-700">{formatDate(v.generatedAt)}</span></div>
-                      {v.redeemedAt && <div className="flex justify-between"><span className="text-gray-500">Redeemed</span><span className="text-gray-700">{formatDate(v.redeemedAt)}</span></div>}
-                      <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-bold" style={{ color: 'var(--primary)' }}>{formatXAF(v.amountXAF)}</span></div>
-                    </div>
-                  </div>
-                </div>
-              )}
+
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {[
+          { label: 'Total Transactions', value: transactions.length, color: 'var(--secondary)' },
+          { label: 'Total Received (XAF)', value: formatXAF(totalIn), color: 'var(--success)' },
+          { label: 'Pending Payouts', value: transactions.filter(t => t.status === 'pending').length, color: '#f59e0b' },
+        ].map(s => (
+          <div key={s.label} className="card p-4">
+            <div className="text-lg font-black" style={{ color: s.color }}>
+              {loading ? <span className="inline-block w-12 h-5 bg-gray-100 rounded animate-pulse" /> : s.value}
             </div>
-          ))}
-          {filtered.length === 0 && <div className="card p-12 text-center"><div className="text-4xl mb-3">📋</div><p className="text-gray-500 text-sm">No transactions found</p></div>}
+            <div className="text-xs text-gray-500">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                {['Ref', 'Type', 'Amount', 'Date', 'Status'].map(h => (
+                  <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? [...Array(5)].map((_, i) => (
+                <tr key={i} className="border-b border-gray-50">
+                  {[...Array(5)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
+                </tr>
+              )) : transactions.length === 0 ? (
+                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">No transactions yet</td></tr>
+              ) : transactions.map(t => (
+                <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="p-4 font-mono text-xs text-gray-700">{t.reference || t.id?.toString().slice(-10)}</td>
+                  <td className="p-4 text-xs capitalize text-gray-600">{t.transaction_type || t.type || '—'}</td>
+                  <td className="p-4 font-semibold" style={{ color: 'var(--success)' }}>{formatXAF(Number(t.amount ?? 0))}</td>
+                  <td className="p-4 text-gray-400 text-xs">{t.created_at ? formatDate(t.created_at) : '—'}</td>
+                  <td className="p-4"><span className={`badge ${statusColor(t.status || 'completed')}`}>{statusLabel(t.status || 'completed')}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
+    </DashboardShell>
   );
 }
