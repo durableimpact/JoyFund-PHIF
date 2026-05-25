@@ -14,6 +14,7 @@ from accounts.views import (
     ReceptionistInfoView,
     SocialWorkerViewSet,
     SocialWorkerInfoView,
+    SystemAdminViewSet,
     SystemAdminInfoView,
     VerifyEmailView,
     ResendVerificationView,
@@ -29,6 +30,7 @@ router = SimpleRouter()
 router.register(r'hospital-admins', HospitalAdminViewSet, basename='hospital-admin')
 router.register(r'social-workers', SocialWorkerViewSet, basename='social-worker')
 router.register(r'receptionists', ReceptionistViewSet, basename='receptionist')
+router.register(r'system-admins', SystemAdminViewSet, basename='system-admin')
 
 urlpatterns = [
     # -----------------------------------------------------------------------
@@ -64,11 +66,11 @@ urlpatterns = [
     path('donors/<uuid:id>/dashboard/', DonorDashboardView.as_view(), name='donor-dashboard'),
 
     # -----------------------------------------------------------------------
-    # ViewSet Router URLs (Hospital Admins, Social Workers, Receptionists)
+    # ViewSet Router URLs (Hospital Admins, Social Workers, Receptionists, System Admins)
     # -----------------------------------------------------------------------
-] + router.urls + [
+] + [
     # -----------------------------------------------------------------------
-    # System Admin Dashboard
+    # System Admin Dashboard (must come before router.urls to avoid conflict)
     # -----------------------------------------------------------------------
     path('system-admins/dashboard/', include('accounts.urls_admin_dashboard')),
-]
+] + router.urls
