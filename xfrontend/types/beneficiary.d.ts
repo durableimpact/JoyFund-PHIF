@@ -1,4 +1,4 @@
-export interface Beneficiary {
+declare interface Beneficiary {
   id: string;
   digital_health_id?: string | null;
   picture?: any | null;
@@ -25,7 +25,7 @@ export interface Beneficiary {
   updated_at?: string;
 }
 
-export interface BeneficiaryDocument {
+declare interface BeneficiaryDocument {
   id?: number;
   beneficiary_id: string;
   document: any;
@@ -33,7 +33,7 @@ export interface BeneficiaryDocument {
   uploaded_at?: string;
 }
 
-export interface HealthIssue {
+declare interface HealthIssue {
   id?: number;
   beneficiary_id: string;
   social_worker_id?: string | null;
@@ -47,7 +47,7 @@ export interface HealthIssue {
   updated_at?: string;
 }
 
-export interface HealthIssueEvent {
+declare interface HealthIssueEvent {
   id: string;
   status: string;
   changed_by_id?: string | null;
