@@ -659,26 +659,53 @@ class Command(BaseCommand):
             },
         )
 
+        # Force update critical fields to ensure credentials match expectations
+        app.client_secret = client_secret
+        app.hash_client_secret = False
+        app.skip_authorization = True
+        app.authorization_grant_type = Application.GRANT_PASSWORD
+        app.client_type = Application.CLIENT_CONFIDENTIAL
+        app.save()
+
         if created:
-            app.client_secret = client_secret
-            app.save(update_fields=['client_secret'])
             self.stdout.write(self.style.SUCCESS(f'  ✓ Created OAuth App: {app.name}'))
         else:
-            self.stdout.write(f'  • OAuth App already exists: {app.name}')
+            self.stdout.write(self.style.SUCCESS(f'  ✓ Updated/Verified OAuth App: {app.name}'))
 
     def clear_seeded_data(self):
         """Clear test data."""
         self.stdout.write('Clearing seeded data...')
 
+        # Import all seeded models
+        from payments.models import Disbursement, Transaction, FeeSplit
+        from hospitals.models import Hospital, Services, MedicalClaim, ClaimItem, MedicalClaimProof, VoucherTopUpRequest
+        from campaigns.models import Campaign, Donation, Payment, CampaignTransaction
+        from vouchers.models import Voucher, VoucherFunding
+        from beneficiaries.models import Beneficiary, HealthIssue
+
         # Delete in correct order (respect foreign keys)
+        self.stdout.write('  • Deleting disbursements, claims, and transactions...')
+        Disbursement.objects.all().delete()
+        FeeSplit.objects.all().delete()
+        Transaction.objects.all().delete()
+
+        VoucherTopUpRequest.objects.all().delete()
+        MedicalClaimProof.objects.all().delete()
+        ClaimItem.objects.all().delete()
+        MedicalClaim.objects.all().delete()
+
         VoucherFunding.objects.all().delete()
         Voucher.objects.all().delete()
+
+        self.stdout.write('  • Deleting campaigns, donations, and payments...')
+        CampaignTransaction.objects.all().delete()
         Donation.objects.all().delete()
+        Payment.objects.all().delete()
         Campaign.objects.all().delete()
+
         HealthIssue.objects.all().delete()
-        
+
         # Truncate beneficiaries table to reset ID sequence completely
-        # This is necessary because digital_health_id is manually generated
         from django.db import connections
         try:
             with connections['default'].cursor() as cursor:
@@ -696,19 +723,28 @@ class Command(BaseCommand):
             self.stdout.write(f'  ! TRUNCATE failed: {e}, falling back to delete')
             # Fallback to regular delete if TRUNCATE doesn't work
             Beneficiary.objects.all().delete()
-        
+
+        self.stdout.write('  • Deleting hospitals and services...')
+        Services.objects.all().delete()
+        Hospital.objects.all().delete()
+
         # Delete test users (cascades delete their associated Receptionist and HospitalAdmin records)
+        self.stdout.write('  • Deleting test users...')
         # Delete hospital staff first
         User.objects.filter(email__contains='receptionist-').delete()
         User.objects.filter(email__contains='admin-').delete()
-        
+
         # Delete test donors and social workers
         User.objects.filter(email__contains='example').delete()
         User.objects.filter(email__contains='socialworker').delete()
         User.objects.filter(email__contains='donor').delete()
+
+        # Explicitly delete system admin so it is recreated with reset password
+        User.objects.filter(email='admin@joyfund.com').delete()
 
         self.stdout.write(self.style.SUCCESS('✓ Seeded data cleared'))
 
     def _reset_beneficiary_sequence(self):
         """Legacy method - no longer needed with TRUNCATE."""
         pass
+
