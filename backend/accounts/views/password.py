@@ -79,16 +79,16 @@ class PasswordResetConfirmView(APIView):
 
     @swagger_auto_schema(
         tags=['Password Management'],
-        operation_summary="Reset Password with Token",
-        operation_description="Complete the password reset process with a valid reset token.",
+        operation_summary="Reset Password with Code",
+        operation_description="Complete the password reset process with a valid reset code.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'token': openapi.Schema(type=openapi.TYPE_STRING, description='Password reset token from email'),
+                'code': openapi.Schema(type=openapi.TYPE_STRING, description='6-digit password reset code from email'),
                 'new_password': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_PASSWORD, description='New password (minimum 8 characters)'),
                 'confirm_password': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_PASSWORD, description='Confirm new password')
             },
-            required=['token', 'new_password', 'confirm_password']
+            required=['code', 'new_password', 'confirm_password']
         ),
         responses={
             200: openapi.Response(
@@ -100,8 +100,8 @@ class PasswordResetConfirmView(APIView):
                     }
                 )
             ),
-            400: 'Invalid token or passwords do not match',
-            401: 'Token has expired or is invalid'
+            400: 'Invalid code or passwords do not match',
+            401: 'Code has expired or is invalid'
         }
     )
     def post(self, request):
@@ -110,11 +110,11 @@ class PasswordResetConfirmView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        token = serializer.validated_data['token']
+        code = serializer.validated_data['code']
         new_password = serializer.validated_data['new_password']
         
-        # Validate token
-        is_valid, token_obj, error_message = validate_reset_token(token)
+        # Validate code
+        is_valid, token_obj, error_message = validate_reset_token(code)
         
         if not is_valid:
             return Response(
