@@ -1,5 +1,3 @@
-// region Donor
-
 declare interface DonorInfo {
   id: string;
   email?: string;
@@ -11,15 +9,13 @@ declare interface DonorInfo {
   is_verified?: boolean;
   created_at?: string;
   updated_at?: string;
-  profile?: {id:string} | null;
+  profile?: { id: string } | null;
 }
 
-// region System admin
 declare interface SystemAdminInfo {
   id?: string;
   email?: string;
   first_name?: string;
-  profile_picture?: any | null;
   last_name?: string;
   profile_picture?: any | null;
   phone_number?: string;
@@ -27,11 +23,10 @@ declare interface SystemAdminInfo {
   is_verified?: boolean;
   created_at?: string;
   updated_at?: string;
-  profile?: {id:string} | null;
+  profile?: { id: string } | null;
 }
 
-// region Social worker
-declare interface SocialWorkerInfoSerializer {
+declare interface SocialWorkerInfo {
   id?: string;
   email?: string;
   first_name?: string;
@@ -45,24 +40,22 @@ declare interface SocialWorkerInfoSerializer {
   profile?: SocialWorkerProfile | null;
 }
 
-
-interface CommonInfo{
-    national_id_number: string;
-    front_national_id_image: any;
-    back_national_id_image: any;
-    created_at:string;
-    updated_at:string;
+declare interface CommonInfo {
+  national_id_number: string;
+  front_national_id_image: any;
+  back_national_id_image: any;
+  created_at: string;
+  updated_at: string;
 }
 
-declare interface SocialWorkerProfile extends CommonInfo{
-    id: string;
-    organization: string;
-    region_assigned: boolean;
+declare interface SocialWorkerProfile extends CommonInfo {
+  id: string;
+  organization: string;
+  region_assigned: string;
+  is_approved?: boolean;
 }
 
-// region Hospital admin
-
-declare interface HospitalAdminInfo{
+declare interface HospitalAdminInfo {
   id?: string;
   email?: string;
   first_name?: string;
@@ -74,15 +67,12 @@ declare interface HospitalAdminInfo{
   created_at?: string;
   updated_at?: string;
   profile?: HospitalAdminProfile | null;
-  hospital?: sring | null;
+  hospital?: string | null;
 }
 
-declare interface HospitalAdminProfile extends CommonInfo{
-    id: string;
-
+declare interface HospitalAdminProfile extends CommonInfo {
+  id: string;
 }
-
-// region Receptionist
 
 declare interface ReceptionistInfo {
   id?: string;
@@ -99,6 +89,6 @@ declare interface ReceptionistInfo {
   hospital?: string | null;
 }
 
-declare interface ReceptionistProfile extends CommonInfo{
-    id: string;
+declare interface ReceptionistProfile extends CommonInfo {
+  id: string;
 }
