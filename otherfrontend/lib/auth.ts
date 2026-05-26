@@ -19,8 +19,8 @@ export async function getServerAccessToken(req: NextRequest): Promise<string> {
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.slice(7);
   }
-  // Fallback: check cookie-based session
-  const cookie = req.cookies.get('access_token');
+  // Fallback: check cookie-based session (should match the cookie set in login route)
+  const cookie = req.cookies.get('joyfund_token');
   if (cookie?.value) return cookie.value;
   return '';
 }
