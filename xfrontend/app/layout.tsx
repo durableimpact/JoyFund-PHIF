@@ -4,6 +4,7 @@ import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "next-auth/react";
+import ReactQueryProvider from "@/provider/react-query-provider";
 
 const montserrat = localFont({
   src: "../public/font/Montserrat-VariableFont_wght.ttf",
@@ -33,7 +34,9 @@ export default function RootLayout({
     >
       <body suppressHydrationWarning suppressContentEditableWarning className={cn("min-h-full flex flex-col antialiased font-sans", geistMono.variable)}>
         <SessionProvider>
-          {children}
+          <ReactQueryProvider>
+            {children}
+          </ReactQueryProvider>
         </SessionProvider>
       </body>
     </html>
