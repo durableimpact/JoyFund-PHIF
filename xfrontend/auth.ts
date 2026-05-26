@@ -102,7 +102,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           let userInfo:
             | DonorInfo
             | SystemAdminInfo
-            | SocialWorkerInfoSerializer
+            | SocialWorkerInfo
             | HospitalAdminInfo
             | ReceptionistInfo
             | null = null
@@ -126,7 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 })
                 break
               case "SOCIAL_WORKER":
-                userInfo = await fetchFromAPI<SocialWorkerInfoSerializer>(
+                userInfo = await fetchFromAPI<SocialWorkerInfo>(
                   "/api/accounts/social-worker/info/",
                   {
                     method: "GET",
@@ -215,9 +215,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             expiresAt: now + refreshedResponse.expires_in * 1000,
           }
         } catch (error) {
-          console.error("[auth] Token refresh failed:", error)
-          // If refresh fails, return the token as is (session will likely be invalidated)
-          return token
+          console.error("[auth] Token refresh failed - invalidating session:", error)
+          // If refresh fails, invalidate the session by returning null
+          // This will force the user to re-authenticate
+          return null
         }
       }
 
