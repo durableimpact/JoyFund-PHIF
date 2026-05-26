@@ -497,14 +497,15 @@ class PasswordResetTokenAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "get_email",
+        "code",
         "created_at",
         "expires_at",
         "is_used",
         "is_valid",
     )
     list_filter = ("is_used", "created_at", "expires_at")
-    search_fields = ("user__email", "token")
-    readonly_fields = ("id", "token", "created_at", "expires_at")
+    search_fields = ("user__email", "code")
+    readonly_fields = ("id", "code", "created_at", "expires_at")
     raw_id_fields = ("user",)
     ordering = ("-created_at",)
 
@@ -519,10 +520,10 @@ class PasswordResetTokenAdmin(admin.ModelAdmin):
 
 @admin.register(EmailVerificationToken)
 class EmailVerificationTokenAdmin(admin.ModelAdmin):
-    list_display = ("id", "get_email", "token", "created_at", "expires_at", "is_valid")
+    list_display = ("id", "get_email", "code", "created_at", "expires_at", "is_valid")
     list_filter = ("created_at", "expires_at")
-    search_fields = ("user__email", "token")
-    readonly_fields = ("id", "token", "created_at", "expires_at")
+    search_fields = ("user__email", "code")
+    readonly_fields = ("id", "code", "created_at", "expires_at")
     raw_id_fields = ("user",)
     ordering = ("-created_at",)
 
