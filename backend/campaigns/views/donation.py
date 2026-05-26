@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -94,13 +95,18 @@ class NestedDonationViewSet(
     )
     def list(self, request, *args, **kwargs):
         campaign_id = self.kwargs.get('campaign_pk')
-        cache_key = self._get_list_cache_key(campaign_id)
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data, status=status.HTTP_200_OK)
+        # Only cache unfiltered results to avoid cache conflicts with filters
+        has_filters = bool(request.GET)
+        
+        if not has_filters:
+            cache_key = self._get_list_cache_key(campaign_id)
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                return Response(cached_data, status=status.HTTP_200_OK)
         
         response = super().list(request, *args, **kwargs)
-        if response.status_code == 200:
+        if response.status_code == 200 and not has_filters:
+            cache_key = self._get_list_cache_key(campaign_id)
             cache.set(cache_key, response.data, CACHE_TIMEOUT)
         return response
 
@@ -256,8 +262,23 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
     @swagger_auto_schema(
         tags=_TAG,
         request_body=DonationCreateSerializer,
-        responses={201: DonationDetailSerializer},
-        operation_description='Create a donation for a campaign and initiate payment. Accessible to anyone.',
+        responses={
+            201: openapi.Response(
+                description='Donation created successfully with payment link',
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'payment_link': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description='CamPay payment link URL for completing the donation'
+                        )
+                    }
+                )
+            ),
+            400: openapi.Response(description='Invalid input or payment service error'),
+            404: openapi.Response(description='Campaign not found'),
+        },
+        operation_description='Create a donation for a campaign and initiate CamPay payment. Returns a payment link for the user to complete payment.',
     )
     def create(self, request, *args, **kwargs):
         """Create a donation for a campaign and initiate CamPay payment"""
