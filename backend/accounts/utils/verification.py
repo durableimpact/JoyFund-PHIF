@@ -11,19 +11,19 @@ def send_verification_email(user):
     # Delete any existing valid tokens to prevent confusion
     EmailVerificationToken.objects.filter(user=user).delete()
     
-    token_obj = EmailVerificationToken.objects.create(user=user)
+    verification = EmailVerificationToken.objects.create(user=user)
     
     subject = 'Verify Your Email - JoyFund'
     context = {
         'first_name': user.first_name,
         'app_name': 'JoyFund',
-        'otp_code': token_obj.token,
+        'otp_code': verification.code,
         'duration': 15,
     }
     
     try:
         # Check if email template exists, if not fallback to basic text body (though send_email expects html)
-        html_message = f"Hello {user.first_name},<br><br>Your email verification code is <b>{token_obj.token}</b>. It expires in 15 minutes."
+        html_message = f"Hello {user.first_name},<br><br>Your email verification code is <b>{verification.code}</b>. It expires in 15 minutes."
         try:
             html_message = render_to_string('emails/verify_email.html', context)
         except Exception:
