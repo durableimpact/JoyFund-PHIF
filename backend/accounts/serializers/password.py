@@ -18,8 +18,8 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
-    """Serializer for confirming password reset with token."""
-    token = serializers.CharField(required=True, min_length=32)
+    """Serializer for confirming password reset with 6-digit code."""
+    code = serializers.CharField(required=True, min_length=6, max_length=6)
     new_password = serializers.CharField(write_only=True, required=True, min_length=8)
     confirm_password = serializers.CharField(write_only=True, required=True)
 
