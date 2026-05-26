@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Tag, Calendar, Settings } from 'lucide-react';
+import { formatXAF } from '@/lib/utils';
 
 export default function CampaignDashboardCard({ campaign }: { campaign: any }) {
   const progress = campaign.progress_percentage || 0;
@@ -36,13 +37,13 @@ export default function CampaignDashboardCard({ campaign }: { campaign: any }) {
             <div>
               <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">Raised</p>
               <p className="text-sm font-black text-[#1DB1DB]">
-                {Number(campaign.total_net_raised).toLocaleString()} <span className="text-[10px]">XAF</span>
+                {formatXAF(Number(campaign.total_net_raised))}
               </p>
             </div>
             <div className="text-right">
               <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">Goal</p>
               <p className="text-sm font-bold text-gray-700">
-                {Number(campaign.goal_amount).toLocaleString()} <span className="text-[10px]">XAF</span>
+                {formatXAF(Number(campaign.goal_amount))}
               </p>
             </div>
           </div>
@@ -53,7 +54,7 @@ export default function CampaignDashboardCard({ campaign }: { campaign: any }) {
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
           </div>
-          <p className="text-[10px] text-right text-gray-400 font-bold">{Math.round(progress)}% Complete</p>
+          <p className="text-[10px] text-right text-gray-400 font-bold">{progress.toFixed(2)}% Complete</p>
         </div>
 
         <div className="flex items-center gap-2 text-gray-500">
