@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { verifyEmail, resentVerificationEmail } from '@/actions/auth';
+import { resendVerificationEmail, verifyEmail } from '@/actions/accounts';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 
@@ -42,7 +42,7 @@ export default function VerifyEmailPage() {
     setResendLoading(true);
 
     try {
-      await resentVerificationEmail(email);
+      await resendVerificationEmail(email);
       setResendSuccess(true);
       setResendCooldown(60); // 60 second cooldown
 
