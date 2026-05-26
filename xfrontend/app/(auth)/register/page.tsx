@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
-import { createDonorAccount } from '@/actions/auth';
+import {createDonorAccount} from "@/actions/accounts"
 import { Eye, EyeOff, Heart, Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
