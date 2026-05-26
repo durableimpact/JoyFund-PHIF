@@ -1,14 +1,21 @@
 import uuid
+import string
+import random
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from accounts.models.user import User
 
 
+def _generate_reset_code():
+    """Generates a random 6-digit reset code."""
+    return ''.join(random.choices(string.digits, k=6))
+
+
 class PasswordResetToken(models.Model):
     """
     Model for password reset tokens.
-    Each token is unique and expires after a set time (24 hours by default).
+    Each token is a 6-digit code and expires after a set time (24 hours by default).
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
@@ -16,10 +23,10 @@ class PasswordResetToken(models.Model):
         on_delete=models.CASCADE,
         related_name='password_reset_tokens'
     )
-    token = models.CharField(
-        max_length=255,
-        unique=True,
-        help_text="Unique token for password reset"
+    code = models.CharField(
+        max_length=6,
+        default=_generate_reset_code,
+        help_text="6-digit code for password reset"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -31,7 +38,7 @@ class PasswordResetToken(models.Model):
     class Meta:
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['token']),
+            models.Index(fields=['code']),
             models.Index(fields=['user', '-created_at']),
             models.Index(fields=['is_used', 'expires_at']),
         ]
