@@ -79,7 +79,7 @@ export default function VerifyEmailPage() {
     try {
       // Verify the email with the code
       await verifyEmail({
-        token: code,
+        code: code,
         email: email,
       });
 
