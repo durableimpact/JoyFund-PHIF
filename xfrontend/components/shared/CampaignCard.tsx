@@ -1,26 +1,16 @@
 import Link from 'next/link';
 import { Users } from 'lucide-react';
 
-type Campaign = {
-  id: string;
-  coverColor?: string;
-  raisedXAF?: number;
-  goalXAF?: number;
-  donorName?: string;
-  status?: string;
-  title: string;
-  story?: string;
-  contributors?: number;
-};
-
 export default function CampaignCard({ campaign }: { campaign: Campaign }) {
-  const raisedXAF = campaign.raisedXAF || 0;
-  const goalXAF = campaign.goalXAF || 100000;
-  const pct = Math.round((raisedXAF / goalXAF) * 100);
-  const color = campaign.coverColor || '#1DB1DB';
-  const avatar = (campaign.donorName || 'J').charAt(0).toUpperCase();
-  const donorName = campaign.donorName || 'Donor';
-  const coverImage = (campaign as any).cover_image;
+  const raisedXAF = Number(campaign.total_net_raised) || 0;
+  const goalXAF = Number(campaign.goal_amount) || 100000;
+  const pct = campaign.progress_percentage || 0;
+  const color = (campaign as any).coverColor || '#1DB1DB';
+  const donorName = (campaign as any).donor_name || 'JoyFund Donor';
+  const avatar = donorName.charAt(0).toUpperCase();
+  const coverImage = campaign.cover_image;
+  const story = campaign.description;
+  const contributors = (campaign as any).contributors ?? 0;
 
   return (
     <Link href={`/campaign/${campaign.id}`} className="card block hover:shadow-md transition-shadow duration-200 overflow-hidden group">
@@ -57,8 +47,8 @@ export default function CampaignCard({ campaign }: { campaign: Campaign }) {
         </h3>
 
         {/* Story excerpt */}
-        {campaign.story && (
-          <p className="text-xs text-gray-500 mb-4 line-clamp-2">{campaign.story}</p>
+        {story && (
+          <p className="text-xs text-gray-500 mb-4 line-clamp-2">{story}</p>
         )}
 
         {/* Progress */}
@@ -81,7 +71,7 @@ export default function CampaignCard({ campaign }: { campaign: Campaign }) {
         <div className="flex items-center justify-between pt-3 border-t border-gray-50">
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <Users size={12} />
-            <span>{campaign.contributors ?? 0} contributors</span>
+            <span>{contributors} contributors</span>
           </div>
           <span className="text-xs font-semibold text-white px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--primary)' }}>
             Give a Gift →
