@@ -23,18 +23,18 @@ class VerifyEmailView(APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'email': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_EMAIL),
-                'token': openapi.Schema(type=openapi.TYPE_STRING, description="6-digit OTP")
+                'code': openapi.Schema(type=openapi.TYPE_STRING, description="6-digit OTP")
             },
-            required=['email', 'token']
+            required=['email', 'code']
         ),
-        responses={200: "Email verified successfully", 400: "Invalid or expired token"}
+        responses={200: "Email verified successfully", 400: "Invalid or expired code"}
     )
     def post(self, request):
         email = request.data.get('email')
-        token = request.data.get('token')
+        code = request.data.get('code')
 
-        if not email or not token:
-            return Response({'error': 'Email and token are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not email or not code:
+            return Response({'error': 'Email and verification code are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(email=email)
@@ -44,10 +44,10 @@ class VerifyEmailView(APIView):
         if user.is_verified:
             return Response({'message': 'Email is already verified.'}, status=status.HTTP_200_OK)
 
-        # Get latest token
+        # Get latest verification code
         verification = EmailVerificationToken.objects.filter(user=user).order_by('-created_at').first()
 
-        if not verification or verification.token != str(token):
+        if not verification or verification.code != str(code):
             return Response({'error': 'Invalid verification code.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not verification.is_valid:
