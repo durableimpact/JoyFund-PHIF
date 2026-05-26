@@ -13,7 +13,7 @@ def _generate_otp():
 
 class EmailVerificationToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_verifications')
-    token = models.CharField(max_length=6, default=_generate_otp)
+    code = models.CharField(max_length=6, default=_generate_otp)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
