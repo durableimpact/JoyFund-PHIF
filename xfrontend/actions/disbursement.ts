@@ -9,10 +9,6 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
-function unwrap(data: any) {
-  return Array.isArray(data) ? data : (data?.results || []);
-}
-
 // ── Disbursements CRUD ──
 
 export const listDisbursements = async (access_token: string, params?: Record<string, string>) => {
@@ -21,7 +17,7 @@ export const listDisbursements = async (access_token: string, params?: Record<st
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
