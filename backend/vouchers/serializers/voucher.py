@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from vouchers.models.Voucher import Voucher
 from beneficiaries.serializers.beneficiary import BeneficiaryDetailSerializer
+from beneficiaries.serializers.health_issue import HealthIssueSerializer
 from hospitals.serializers.hospital import HospitalListSerializer
 from .voucher_funding import VoucherFundingSerializer
 from .voucher_base import VoucherEventSerializer, VoucherMinimalSerializer
@@ -48,6 +49,7 @@ class VoucherListSerializer(serializers.ModelSerializer):
 
 class VoucherDetailSerializer(serializers.ModelSerializer):
     beneficiary = BeneficiaryDetailSerializer(read_only=True)
+    health_issue = HealthIssueSerializer(read_only=True)
     hospital = HospitalListSerializer(read_only=True)
     events = VoucherEventSerializer(many=True, read_only=True)
     funding_records = VoucherFundingSerializer(many=True, read_only=True)
