@@ -1,7 +1,5 @@
 'use client';
-import {
-  
-} from 'lucide-react';
+import { Download } from 'lucide-react';
 import { formatXAF } from '@/lib/utils';
 import { listBeneficiaries } from '@/actions/beneficiaries';
 import { listCampaigns } from '@/actions/campaigns';
