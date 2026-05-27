@@ -9,58 +9,47 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
-// ── Vouchers CRUD ──
-
-export const listVouchers = async (access_token: string, params?: Record<string, string>) => {
+export const listVouchers = async (token: string) => {
   try {
-    const { data } = await api.get<Voucher[]>("/api/vouchers/", {
-      headers: { Authorization: `Bearer ${access_token}` },
-      params,
+    const { data } = await api.get("/api/vouchers/", {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    return data;
+    return Array.isArray(data) ? data : data?.results || [];
   } catch (e) { handleError(e); }
 };
 
-export const getVoucher = async (id: string, access_token: string) => {
+export const getVoucher = async (id: string, token: string) => {
   try {
     const { data } = await api.get<Voucher>(`/api/vouchers/${id}/`, {
-      headers: { Authorization: `Bearer ${access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return data;
   } catch (e) { handleError(e); }
 };
 
-export const createVoucher = async (access_token: string, data: VoucherCreatePayload) => {
+export const createVoucher = async (token: string, payload: VoucherCreatePayload) => {
   try {
-    const { data: voucher } = await api.post<Voucher>("/api/vouchers/create/", data, {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-    return voucher;
-  } catch (e) { handleError(e); }
-};
-
-export const createVouchersFromCampaigns = async (access_token: string, data: VoucherCreateFromCampaignsPayload) => {
-  try {
-    const { data } = await api.post<Voucher[]>("/api/vouchers/create-from-campaigns/", data, {
-      headers: { Authorization: `Bearer ${access_token}` },
+    const { data } = await api.post<Voucher>("/api/vouchers/create/", payload, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     return data;
   } catch (e) { handleError(e); }
 };
 
-export const checkVoucher = async (voucher_code: string) => {
+export const createVouchersFromCampaigns = async (token: string, payload: VoucherCreateFromCampaignsPayload) => {
+  try {
+    const { data } = await api.post<Voucher>("/api/vouchers/create-from-campaigns/", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return data;
+  } catch (e) { handleError(e); }
+};
+
+export const checkVoucher = async (token: string, code: string) => {
   try {
     const { data } = await api.get<VoucherCheckResponse>("/api/vouchers/check/", {
-      params: { code: voucher_code },
-    });
-    return data;
-  } catch (e) { handleError(e); }
-};
-
-export const getVoucherNotifications = async (voucherId: string, access_token: string) => {
-  try {
-    const { data } = await api.get<VoucherNotification[]>(`/api/vouchers/${voucherId}/notifications/`, {
-      headers: { Authorization: `Bearer ${access_token}` },
+      params: { code },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return data;
   } catch (e) { handleError(e); }
