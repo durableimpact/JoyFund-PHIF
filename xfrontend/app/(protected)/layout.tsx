@@ -1,9 +1,12 @@
-import React, { PropsWithChildren } from 'react'
+"use client";
 
-function ProtectedLayout({children}:PropsWithChildren) {
+import React from "react";
+import TokenRefreshProvider from "@/provider/token-refresh-provider";
+
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
-    <React.Fragment>{children}</React.Fragment>
-  )
+    <TokenRefreshProvider>
+      {children}
+    </TokenRefreshProvider>
+  );
 }
-
-export default ProtectedLayout
