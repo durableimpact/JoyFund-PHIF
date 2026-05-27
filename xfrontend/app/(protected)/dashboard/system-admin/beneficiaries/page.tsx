@@ -1,7 +1,6 @@
 'use client';
-import {
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
   Link
-} from 'lucide-react';
 
 export default function AdminBeneficiaries() {
   const { data: session } = useSession();
