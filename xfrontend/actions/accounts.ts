@@ -16,6 +16,10 @@ function handleError(error: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
+function unwrap(data: any) {
+  return Array.isArray(data) ? data : (data?.results || []);
+}
+
 // ── Info Endpoints (get authenticated user info after login) ──
 
 export const getDonorInfo = async (access_token: string) => {
@@ -70,11 +74,11 @@ export const getReceptionistInfo = async (access_token: string) => {
 
 export const listDonors = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<Donor[]>("/api/accounts/donors/", {
+    const { data } = await api.get("/api/accounts/donors/", {
       headers: getAuthHeader(access_token),
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -117,11 +121,11 @@ export const getDonorDashboard = async (id: string, access_token: string) => {
 
 export const listHospitalAdmins = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<HospitalAdmin[]>("/api/accounts/hospital-admins/", {
+    const { data } = await api.get("/api/accounts/hospital-admins/", {
       headers: getAuthHeader(access_token),
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -170,11 +174,11 @@ export const getHospitalAdminDashboard = async (id: string, access_token: string
 
 export const listReceptionists = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<Receptionist[]>("/api/accounts/receptionists/", {
+    const { data } = await api.get("/api/accounts/receptionists/", {
       headers: getAuthHeader(access_token),
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -223,11 +227,11 @@ export const getReceptionistDashboard = async (id: string, access_token: string)
 
 export const listSocialWorkers = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<SocialWorker[]>("/api/accounts/social-workers/", {
+    const { data } = await api.get("/api/accounts/social-workers/", {
       headers: getAuthHeader(access_token),
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -276,11 +280,11 @@ export const getSocialWorkerDashboard = async (id: string, access_token: string)
 
 export const listSystemAdmins = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<SystemAdmin[]>("/api/accounts/system-admins/", {
+    const { data } = await api.get("/api/accounts/system-admins/", {
       headers: getAuthHeader(access_token),
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
