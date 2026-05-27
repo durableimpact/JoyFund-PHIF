@@ -1,10 +1,7 @@
 'use client';
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useQuery } from '@tanstack/react-query';
-import { listActivityLogs, listRequestLogs, listErrorLogs, getLogStats } from '@/actions/logs';
-import { Activity, AlertCircle, FileText, Globe, RefreshCw } from 'lucide-react';
-
+import {
+  
+} from 'lucide-react';
 
 type LogTab = 'activity' | 'requests' | 'errors';
 
@@ -51,7 +48,6 @@ export default function AdminLogs() {
   };
 
   return (<>
-
 
           <div className="flex items-center justify-between mb-6">
         <div>
