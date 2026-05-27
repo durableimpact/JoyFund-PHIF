@@ -1,13 +1,7 @@
 'use client';
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { useQuery } from '@tanstack/react-query';
-import { statusColor, formatDate } from '@/lib/utils';
-import { getHospital, getHospitalStaff, getHospitalReceptionists } from '@/actions/hospital';
-import EditHospitalModal from '../_components/EditHospitalModal';
-import { ArrowLeft, CreditCard, Pencil, Users } from 'lucide-react';
-
+import {
+  EditHospitalModal
+} from 'lucide-react';
 
 type StaffTab = 'admins' | 'receptionists' | 'all';
 
@@ -39,7 +33,6 @@ export default function HospitalDetailPage() {
 
   if (isLoading) {
     return (<>
-
 
               <div className="space-y-4">
           <div className="h-8 bg-gray-100 rounded w-48 animate-pulse" />
