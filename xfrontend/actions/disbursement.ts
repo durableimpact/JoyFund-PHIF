@@ -9,15 +9,19 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
+function unwrap(data: any) {
+  return Array.isArray(data) ? data : (data?.results || []);
+}
+
 // ── Disbursements CRUD ──
 
 export const listDisbursements = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<Disbursement[]>("/api/payments/disbursements/", {
+    const { data } = await api.get<PaginationResponse<Disbursement>>("/api/payments/disbursements/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -81,7 +85,7 @@ export const markDisbursementFailed = async (id: string, access_token: string) =
 
 export const getDisbursementsByHospital = async (access_token: string) => {
   try {
-    const { data } = await api.get<Record<string, Disbursement[]>>(
+    const { data } = await api.get(
       "/api/payments/disbursements/by_hospital/",
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
