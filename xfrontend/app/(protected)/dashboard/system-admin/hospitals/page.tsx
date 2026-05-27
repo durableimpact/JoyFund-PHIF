@@ -6,6 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Building2,
   Calendar,
+  ChevronLeft,
+  ChevronRight,
   Loader2,
   Mail,
   MapPin,
@@ -13,54 +15,44 @@ import {
   Plus,
   Search
 } from 'lucide-react';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { statusColor } from '@/lib/utils';
 import { listHospitals } from '@/actions/hospital';
 import CreateHospitalModal from './_components/CreateHospitalModal';
+
+const PAGE_SIZE = 10;
 
 export default function AdminHospitals() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: hospitals = [], isLoading } = useQuery<Hospital[]>({
-    queryKey: ['hospitals', token],
-    queryFn: () => listHospitals(token),
+  const { data, isLoading } = useQuery({
+    queryKey: ['hospitals', token, currentPage, search],
+    queryFn: async () => {
+      const params: Record<string, string> = {
+        page: currentPage.toString(),
+        page_size: PAGE_SIZE.toString(),
+      };
+      if (search) params.search = search;
+      return await listHospitals(token, params);
+    },
     enabled: !!token,
   });
 
-  const filtered = search
-    ? hospitals.filter(
-        (h) =>
-          h.name.toLowerCase().includes(search.toLowerCase()) ||
-          h.city.toLowerCase().includes(search.toLowerCase()) ||
-          h.region.toLowerCase().includes(search.toLowerCase()) ||
-          h.email?.toLowerCase().includes(search.toLowerCase())
-      )
-    : hospitals;
+  const hospitals: Hospital[] = data?.results || [];
+  const totalCount = data?.count || 0;
+  const hasNextPage = !!data?.next;
+  const hasPreviousPage = !!data?.previous;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (<>
 
           <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-900">Hospitals</h1>
-          <p className="text-gray-500 text-sm">{hospitals.length} total hospitals</p>
+          <p className="text-gray-500 text-sm">{totalCount} total hospitals</p>
         </div>
         <button onClick={() => setShowCreate(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
           <Plus size={16} /> Add Hospital
@@ -69,7 +61,7 @@ export default function AdminHospitals() {
 
       <div className="relative mb-5">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input className="input-field pl-10" placeholder="Search by name, city, region, or email…" value={search} onChange={e => setSearch(e.target.value)} />
+        <input className="input-field pl-10" placeholder="Search by name, city, region, or email…" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }} />
       </div>
 
       <div className="card overflow-hidden">
@@ -85,9 +77,9 @@ export default function AdminHospitals() {
             <tbody>
               {isLoading ? (
                 <tr><td colSpan={5} className="text-center py-16"><Loader2 size={24} className="animate-spin mx-auto text-gray-400" /></td></tr>
-              ) : filtered.length === 0 ? (
+              ) : hospitals.length === 0 ? (
                 <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">{search ? 'No hospitals matching your search' : 'No hospitals yet'}</td></tr>
-              ) : filtered.map((h) => (
+              ) : hospitals.map((h) => (
                 <tr key={h.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
@@ -132,6 +124,55 @@ export default function AdminHospitals() {
             </tbody>
           </table>
         </div>
+
+        {totalCount > PAGE_SIZE && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div className="text-xs text-gray-600">
+              Showing <span className="font-semibold">{(currentPage - 1) * PAGE_SIZE + 1}</span> to <span className="font-semibold">{Math.min(currentPage * PAGE_SIZE, totalCount)}</span> of <span className="font-semibold">{totalCount}</span> results
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => prev - 1)}
+                disabled={!hasPreviousPage}
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Previous page"
+              >
+                <ChevronLeft size={16} className="text-gray-600" />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => {
+                  const pageNum = i + 1;
+                  const isCurrentPage = pageNum === currentPage;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                        isCurrentPage
+                          ? 'text-white'
+                          : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                      style={isCurrentPage ? { background: '#471DDB' } : {}}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={!hasNextPage}
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Next page"
+              >
+                <ChevronRight size={16} className="text-gray-600" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <CreateHospitalModal open={showCreate} onClose={() => setShowCreate(false)} />
