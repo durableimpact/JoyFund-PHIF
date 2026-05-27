@@ -9,10 +9,6 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
-function unwrap(data: any) {
-  return Array.isArray(data) ? data : (data?.results || []);
-}
-
 // ── Accounts ──
 
 export const listAccounts = async (access_token: string) => {
@@ -20,7 +16,7 @@ export const listAccounts = async (access_token: string) => {
     const { data } = await api.get("/api/payments/accounts/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -49,7 +45,7 @@ export const listFeePolicies = async (access_token: string) => {
     const { data } = await api.get("/api/payments/fee-policies/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -96,7 +92,7 @@ export const listGateways = async (access_token: string) => {
     const { data } = await api.get("/api/payments/gateways/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -144,7 +140,7 @@ export const listTransactions = async (access_token: string, params?: Record<str
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -164,7 +160,7 @@ export const listFeeSplits = async (access_token: string) => {
     const { data } = await api.get("/api/payments/fee-splits/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -184,7 +180,7 @@ export const listWebhookEvents = async (access_token: string) => {
     const { data } = await api.get("/api/payments/webhooks/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
