@@ -42,9 +42,33 @@ declare interface HospitalAdmin {
   national_id_number: string;
   front_national_id_image: any;
   back_national_id_image: any;
-  hospital_id?: string | null;
+  hospital?: {
+    id: string;
+    name: string;
+  } | null;
   is_active: boolean;
-  enrolled_by_id: string;
+  enrolled_by: {
+    user_id:string;
+    first_name:string;
+    last_name:string;
+    profile_id:string;
+  };
+}
+
+declare interface HospitalAdminList {
+  id: string;
+  user: User;
+  hospital?: {
+    id: string;
+    name: string;
+  } | null;
+  is_active: boolean;
+  enrolled_by: {
+    user_id:string;
+    first_name:string;
+    last_name:string;
+    profile_id:string;
+  };
 }
 
 declare interface Receptionist {
