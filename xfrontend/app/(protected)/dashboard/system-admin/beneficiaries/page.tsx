@@ -1,6 +1,11 @@
 'use client';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
-  Link
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { listBeneficiaries } from '@/actions/beneficiaries';
+import { statusColor, statusLabel, normalizeBeneficiaryResponse } from '@/lib/utils';
 
 export default function AdminBeneficiaries() {
   const { data: session } = useSession();
@@ -10,17 +15,15 @@ export default function AdminBeneficiaries() {
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['beneficiaries', token, currentPage, search],
+    queryKey: ['beneficiaries', token, currentPage, search, statusFilter],
     queryFn: async () => {
       const params: Record<string, string> = {
         page: currentPage.toString(),
         page_size: '10',
       };
-      if (search) {
-        params.search = search;
-      }
-      const d = await listBeneficiaries(token, params);
-      return d;
+      if (search) params.search = search;
+      if (statusFilter !== 'all') params.status = statusFilter;
+      return await listBeneficiaries(token, params);
     },
     enabled: !!token,
   });
@@ -30,11 +33,6 @@ export default function AdminBeneficiaries() {
   const hasNextPage = !!data?.next;
   const hasPreviousPage = !!data?.previous;
   const totalPages = Math.ceil(totalCount / 10);
-
-  const filtered = bens.filter(b => {
-    const matchStatus = statusFilter === 'all' || b.status === statusFilter;
-    return matchStatus;
-  });
 
   const statuses = ['all', 'awaiting_match', 'voucher_issued', 'care_received', 'pending', 'suspended'];
 
@@ -81,9 +79,9 @@ export default function AdminBeneficiaries() {
                 <tr key={i} className="border-b border-gray-50">
                   {[...Array(6)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
-              )) : filtered.length === 0 ? (
+              )) : bens.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-16 text-gray-400 text-sm">No beneficiaries found</td></tr>
-              ) : filtered.map(b => (
+              ) : bens.map(b => (
                 <tr key={b.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
@@ -116,9 +114,9 @@ export default function AdminBeneficiaries() {
             
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage(prev => prev - 1)}
                 disabled={!hasPreviousPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors animate-pulse-none"
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Previous page"
               >
                 <ChevronLeft size={16} className="text-gray-600" />
@@ -134,7 +132,7 @@ export default function AdminBeneficiaries() {
                       onClick={() => setCurrentPage(pageNum)}
                       className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                         isCurrentPage
-                          ? 'bg-purple-600 text-white'
+                          ? 'text-white'
                           : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
                       }`}
                       style={isCurrentPage ? { background: '#471DDB' } : {}}
@@ -147,7 +145,7 @@ export default function AdminBeneficiaries() {
               </div>
 
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() => setCurrentPage(prev => prev + 1)}
                 disabled={!hasNextPage}
                 className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Next page"
