@@ -12,20 +12,10 @@ import {
   Phone,
   Plus,
   Search
-} from 'lucide-react';
-
-
-
-
-
-
-
-
 
 import { statusColor } from '@/lib/utils';
 import { listHospitals } from '@/actions/hospital';
 import CreateHospitalModal from './_components/CreateHospitalModal';
-
 
 export default function AdminHospitals() {
   const { data: session } = useSession();
@@ -50,7 +40,6 @@ export default function AdminHospitals() {
     : hospitals;
 
   return (<>
-
 
           <div className="flex items-center justify-between mb-6">
         <div>
