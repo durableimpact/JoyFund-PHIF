@@ -9,19 +9,15 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
-function unwrap(data: any) {
-  return Array.isArray(data) ? data : (data?.results || []);
-}
-
 // ── Activity Logs ──
 
 export const listActivityLogs = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/logs/activity/", {
+    const { data } = await api.get<PaginationResponse<ActivityLog>>("/api/logs/activity/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -38,11 +34,11 @@ export const getActivityLog = async (id: string, access_token: string) => {
 
 export const listErrorLogs = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/logs/errors/", {
+    const { data } = await api.get<PaginationResponse<ErrorLog>>("/api/logs/errors/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -59,11 +55,11 @@ export const getErrorLog = async (id: string, access_token: string) => {
 
 export const listRequestLogs = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/logs/requests/", {
+    const { data } = await api.get<PaginationResponse<RequestLog>>("/api/logs/requests/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
