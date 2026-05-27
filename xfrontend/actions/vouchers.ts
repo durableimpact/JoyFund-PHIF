@@ -9,12 +9,13 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
-export const listVouchers = async (token: string) => {
+export const listVouchers = async (token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/vouchers/", {
+    const { data } = await api.get<PaginationResponse<VoucherList>>("/api/vouchers/", {
       headers: { Authorization: `Bearer ${token}` },
+      params,
     });
-    return Array.isArray(data) ? data : data?.results || [];
+    return data;
   } catch (e) { handleError(e); }
 };
 
