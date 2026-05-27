@@ -1,7 +1,7 @@
 'use client';
-import { useSession } from 'next-auth/react';
-import { useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import {
+  
+} from 'lucide-react';
 import { formatXAF } from '@/lib/utils';
 import { listBeneficiaries } from '@/actions/beneficiaries';
 import { listCampaigns } from '@/actions/campaigns';
