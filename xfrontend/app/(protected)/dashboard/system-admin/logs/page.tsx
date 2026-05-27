@@ -1,7 +1,18 @@
 'use client';
 import {
-  
+  Activity,
+  AlertCircle,
+  FileText,
+  Globe,
+  React,
+  RefreshCw
 } from 'lucide-react';
+
+
+
+
+
+
 
 type LogTab = 'activity' | 'requests' | 'errors';
 
