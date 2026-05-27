@@ -1,8 +1,7 @@
 'use client';
-import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Ticket, Copy, Check, Calendar, MapPin, User, Activity, Banknote } from 'lucide-react';
+import {
+  
+} from 'lucide-react';
 import { formatXAF, statusColor, formatDate, formatDateTime } from '@/lib/utils';
 import { getVoucher } from '@/actions/vouchers';
 import { useState } from 'react';
