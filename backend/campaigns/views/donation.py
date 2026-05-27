@@ -213,6 +213,7 @@ class DonationViewSet(
         responses={200: DonationDetailSerializer(many=True)},
         operation_description='Get all donations made by the authenticated donor with pagination and filtering.',
     )
+    @cache_response(timeout=5 * 60)
     def my_donations(self, request, *args, **kwargs):
         """Get all donations made by the authenticated donor"""
         try:
@@ -247,8 +248,9 @@ class DonationViewSet(
             serializer = DonationDetailSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = DonationDetailSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        page = self.paginator.paginate_queryset(queryset, request, view=self)
+        serializer = DonationDetailSerializer(page, many=True)
+        return self.paginator.get_paginated_response(serializer.data)
 
 
 class DonationCreateViewSet(viewsets.GenericViewSet):
