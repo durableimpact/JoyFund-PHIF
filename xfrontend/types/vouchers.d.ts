@@ -23,18 +23,13 @@ declare interface Voucher {
   locked_at?: string | null;
   redeemed_at?: string | null;
   expired_at?: string | null;
-  beneficiary?: {
-    id: string;
-    digital_health_id?: string | null;
-    full_name: string;
-  };
-  health_issue?: {
-    id: string;
-    description: string;
-    category: string;
-    severity: string;
-    status: string;
-  };
+  beneficiary?: Beneficiary | null;
+  health_issue?: HealthIssue | null;
+  beneficiary_name?: string;
+  hospital_name?: string;
+  hospital?: Hospital | null;
+  events?: VoucherEvent[];
+  funding_records?: VoucherFunding[];
 }
 
 declare interface VoucherEvent {
@@ -46,51 +41,45 @@ declare interface VoucherEvent {
   notes?: string;
 }
 
+declare interface VoucherFunding {
+  id: string;
+  campaign_id: string;
+  committed_amount: number;
+  utilized_amount: number;
+  refund_amount: number;
+  status: 'COMMITTED' | 'UTILIZED' | 'CANCELLED';
+  committed_at: string;
+  utilized_at?: string | null;
+  cancelled_at?: string | null;
+}
+
+// ── Create Payloads ──
+
 declare interface VoucherCreatePayload {
-  beneficiary_id: string;
-  health_issue_id?: string;
-  hospital_id?: string;
-  language_preference?: VoucherLanguage;
+  health_issue_id: string;
+  hospital_id: string;
+  campaign_id: string;
+  amount: number;
+}
+
+declare interface CampaignAllocationItem {
+  campaign_id: string;
+  amount?: number;
+  percentage?: number;
 }
 
 declare interface VoucherCreateFromCampaignsPayload {
-  campaign_ids: string[];
+  health_issue_id: string;
+  hospital_id: string;
+  total_amount?: number;
+  campaign_allocations: CampaignAllocationItem[];
 }
 
 declare interface VoucherCheckResponse {
-  exists: boolean;
-  voucher?: Voucher;
-}
-
-declare type VoucherNotificationMoment =
-  | "VOUCHER_ISSUED"
-  | "VOUCHER_APPROVED"
-  | "VOUCHER_REJECTED"
-  | "VOUCHER_REDEEMED"
-  | "VOUCHER_EXPIRED";
-
-declare interface VoucherNotification {
-  id: string;
-  voucher_id: string;
-  campaign_id?: string | null;
-  donor_id?: string | null;
-  moment: VoucherNotificationMoment;
-  message: string;
-  is_read: boolean;
+  voucher_code: string;
+  status: string;
+  expiry_date?: string | null;
+  beneficiary: Record<string, any>;
+  is_valid: boolean;
   created_at: string;
-}
-
-declare interface VoucherApproveResponse {
-  success: boolean;
-  message: string;
-  pin: string;
-}
-
-declare interface VoucherConfirmPinPayload {
-  pin: string;
-}
-
-declare interface VoucherConfirmPinResponse {
-  success: boolean;
-  message: string;
 }
