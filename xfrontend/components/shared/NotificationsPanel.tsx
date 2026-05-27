@@ -21,7 +21,7 @@ export default function NotificationsPanel() {
     enabled: !!session?.user && open,
   });
 
-  const notifications = (notificationsData || []) as any[];
+  const notifications = (notificationsData as any)?.results || (Array.isArray(notificationsData) ? notificationsData : []);
   const unread = notifications.filter(n => !n.is_read && !n.read).length;
 
   // Close on outside click
