@@ -1,11 +1,14 @@
 'use client';
 import {
+  ChevronLeft,
+  ChevronRight,
   Plus,
   Search,
   X
 } from 'lucide-react';
-
-
+import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+import Link from 'next/link';
 
 
 
@@ -17,6 +20,7 @@ import { listHospitals } from '@/actions/hospital';
 import { listCampaigns } from '@/actions/campaigns';
 
 const STATUS_FILTERS = ['all','AVAILABLE','ACTIVE','PENDING_CONFIRMATION','USED','EXPIRED'];
+const PAGE_SIZE = 10;
 
 type CreateMode = 'single' | 'multi';
 
@@ -34,6 +38,7 @@ export default function AdminVouchers() {
   const [filter, setFilter] = useState('all');
   const [showCreate, setShowCreate] = useState(false);
   const [mode, setMode] = useState<CreateMode>('single');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [healthIssueId, setHealthIssueId] = useState('');
   const [hospitalId, setHospitalId] = useState('');
@@ -45,37 +50,49 @@ export default function AdminVouchers() {
   const [totalAmount, setTotalAmount] = useState('');
   const [allocations, setAllocations] = useState<Allocation[]>([{ campaign_id: '', amount: '' }]);
 
-  const { data: vouchers = [], isLoading } = useQuery<Voucher[]>({
-    queryKey: ['vouchers', token],
-    queryFn: () => listVouchers(token),
+  const { data: vouchersData, isLoading } = useQuery({
+    queryKey: ['vouchers', token, currentPage, search, filter],
+    queryFn: async () => {
+      const params: Record<string, string> = {
+        page: currentPage.toString(),
+        page_size: PAGE_SIZE.toString(),
+      };
+      if (search) params.search = search;
+      if (filter !== 'all') params.status = filter;
+      return await listVouchers(token, params);
+    },
     enabled: !!token,
   });
 
-  const { data: healthIssues = [] } = useQuery<HealthIssue[]>({
+  const vouchers: VoucherList[] = vouchersData?.results || [];
+  const totalCount = vouchersData?.count || 0;
+  const hasNextPage = !!vouchersData?.next;
+  const hasPreviousPage = !!vouchersData?.previous;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  const { data: healthIssuesData } = useQuery({
     queryKey: ['healthIssues', token],
-    queryFn: () => listHealthIssues(token),
+    queryFn: async () => await listHealthIssues(token, { page_size: '1000' }),
     enabled: !!token,
   });
 
+  const healthIssues: HealthIssue[] = healthIssuesData?.results || [];
   const validatedHealthIssues = healthIssues.filter((h) => h.status === 'VALIDATED');
 
-  const { data: hospitals = [] } = useQuery<Hospital[]>({
+  const { data: hospitalsData } = useQuery({
     queryKey: ['hospitals', token],
-    queryFn: () => listHospitals(token),
+    queryFn: async () => await listHospitals(token, { page_size: '1000' }),
     enabled: !!token,
   });
 
-  const { data: campaigns = [] } = useQuery<Campaign[]>({
+  const hospitals: Hospital[] = hospitalsData?.results || [];
+
+  const { data: campaignsData } = useQuery({
     queryKey: ['campaigns', token],
-    queryFn: () => listCampaigns(),
+    queryFn: async () => await listCampaigns({ page_size: '1000' }),
   });
 
-  const filtered = vouchers.filter((v) => {
-    const matchStatus = filter === 'all' || v.status === filter;
-    const code = v.voucher_code || '';
-    const bn = v.beneficiary_name || '';
-    return matchStatus && (code.toLowerCase().includes(search.toLowerCase()) || bn.toLowerCase().includes(search.toLowerCase()));
-  });
+  const campaigns: Campaign[] = campaignsData?.results || [];
 
   const createSingleMutation = useMutation({
     mutationFn: () => createVoucher(token, { health_issue_id: healthIssueId, hospital_id: hospitalId, campaign_id: campaignId, amount: Number(amount) }),
@@ -107,7 +124,7 @@ export default function AdminVouchers() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-900">Voucher Management</h1>
-          <p className="text-gray-500 text-sm">{vouchers.length} total vouchers</p>
+          <p className="text-gray-500 text-sm">{totalCount} total vouchers</p>
         </div>
         <button onClick={() => setShowCreate(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
           <Plus size={16} /> Create Voucher
@@ -117,9 +134,9 @@ export default function AdminVouchers() {
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input className="input-field pl-10" placeholder="Search by code or beneficiary..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input-field pl-10" placeholder="Search by code or beneficiary..." value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }} />
         </div>
-        <select className="input-field w-auto" value={filter} onChange={e => setFilter(e.target.value)}>
+        <select className="input-field w-auto" value={filter} onChange={e => { setFilter(e.target.value); setCurrentPage(1); }}>
           {STATUS_FILTERS.map(s => <option key={s} value={s}>{s === 'all' ? 'All Status' : s.replace(/_/g, ' ')}</option>)}
         </select>
       </div>
@@ -139,9 +156,9 @@ export default function AdminVouchers() {
                 <tr key={i} className="border-b border-gray-50">
                   {[...Array(6)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
-              )) : filtered.length === 0 ? (
+              )) : vouchers.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-16 text-gray-400 text-sm">No vouchers found</td></tr>
-              ) : filtered.map((v) => (
+              ) : vouchers.map((v) => (
                 <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4"><Link href={`/dashboard/system-admin/vouchers/${v.id}`} className="font-mono text-sm font-bold text-gray-900 hover:text-blue-600 hover:underline">{v.voucher_code}</Link></td>
                   <td className="p-4 text-gray-700 text-xs">{v.beneficiary_name || '—'}</td>
@@ -154,6 +171,55 @@ export default function AdminVouchers() {
             </tbody>
           </table>
         </div>
+
+        {totalCount > PAGE_SIZE && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div className="text-xs text-gray-600">
+              Showing <span className="font-semibold">{(currentPage - 1) * PAGE_SIZE + 1}</span> to <span className="font-semibold">{Math.min(currentPage * PAGE_SIZE, totalCount)}</span> of <span className="font-semibold">{totalCount}</span> results
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => prev - 1)}
+                disabled={!hasPreviousPage}
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Previous page"
+              >
+                <ChevronLeft size={16} className="text-gray-600" />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => {
+                  const pageNum = i + 1;
+                  const isCurrentPage = pageNum === currentPage;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                        isCurrentPage
+                          ? 'text-white'
+                          : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                      style={isCurrentPage ? { background: '#471DDB' } : {}}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={!hasNextPage}
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Next page"
+              >
+                <ChevronRight size={16} className="text-gray-600" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {showCreate && (
