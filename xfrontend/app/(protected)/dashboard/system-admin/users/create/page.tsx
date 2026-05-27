@@ -1,7 +1,6 @@
 'use client';
-import {
+import { Check, Upload } from 'lucide-react';
   HospitalCombobox
-} from 'lucide-react';
   createHospitalAdminAccount,
   createSocialWorkerAccount,
   createReceptionistAccount,
