@@ -1,52 +1,72 @@
 'use client';
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Globe,
-  React,
   RefreshCw
 } from 'lucide-react';
-
-
-
-
-
-
+import { listActivityLogs, listRequestLogs, listErrorLogs, getLogStats } from '@/actions/logs';
 
 type LogTab = 'activity' | 'requests' | 'errors';
+const PAGE_SIZE = 15;
 
 export default function AdminLogs() {
   const { data: session } = useSession();
   const [tab, setTab] = useState<LogTab>('activity');
+  const [currentPage, setCurrentPage] = useState(1);
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
-  const { data: activityLogs = [], isLoading: loadingActivity } = useQuery<ActivityLog[]>({
-    queryKey: ['logs-activity', token],
-    queryFn: () => listActivityLogs(token),
+  const handleTabChange = (newTab: LogTab) => {
+    setTab(newTab);
+    setCurrentPage(1);
+  };
+
+  const { data: activityData, isLoading: loadingActivity } = useQuery({
+    queryKey: ['logs-activity', token, currentPage],
+    queryFn: async () => {
+      const res = await listActivityLogs(token, { page: currentPage.toString(), page_size: PAGE_SIZE.toString() });
+      return res || { results: [], next: null, previous: null, count: 0 };
+    },
     enabled: !!token && tab === 'activity',
   });
 
-  const { data: requestLogs = [], isLoading: loadingRequests } = useQuery<RequestLog[]>({
-    queryKey: ['logs-requests', token],
-    queryFn: () => listRequestLogs(token),
+  const { data: requestData, isLoading: loadingRequests } = useQuery({
+    queryKey: ['logs-requests', token, currentPage],
+    queryFn: async () => {
+      const res = await listRequestLogs(token, { page: currentPage.toString(), page_size: PAGE_SIZE.toString() });
+      return res || { results: [], next: null, previous: null, count: 0 };
+    },
     enabled: !!token && tab === 'requests',
   });
 
-  const { data: errorLogs = [], isLoading: loadingErrors } = useQuery<ErrorLog[]>({
-    queryKey: ['logs-errors', token],
-    queryFn: () => listErrorLogs(token),
+  const { data: errorData, isLoading: loadingErrors } = useQuery({
+    queryKey: ['logs-errors', token, currentPage],
+    queryFn: async () => {
+      const res = await listErrorLogs(token, { page: currentPage.toString(), page_size: PAGE_SIZE.toString() });
+      return res || { results: [], next: null, previous: null, count: 0 };
+    },
     enabled: !!token && tab === 'errors',
   });
+
+  const activeData = tab === 'activity' ? activityData : tab === 'requests' ? requestData : errorData;
+  const logs = activeData?.results || [];
+  const totalCount = activeData?.count || 0;
+  const hasNextPage = !!activeData?.next;
+  const hasPreviousPage = !!activeData?.previous;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const loading = tab === 'activity' ? loadingActivity : tab === 'requests' ? loadingRequests : loadingErrors;
 
   const { data: stats } = useQuery<LogStats>({
     queryKey: ['logs-stats', token],
     queryFn: () => getLogStats(token),
     enabled: !!token,
   });
-
-  const logs = tab === 'activity' ? activityLogs : tab === 'requests' ? requestLogs : errorLogs;
-  const loading = tab === 'activity' ? loadingActivity : tab === 'requests' ? loadingRequests : loadingErrors;
 
   const TABS: { key: LogTab; label: string; icon: React.ReactNode }[] = [
     { key: 'activity', label: 'Activity', icon: <Activity size={14} /> },
@@ -93,7 +113,7 @@ export default function AdminLogs() {
         {TABS.map(t => (
           <button
             key={t.key}
-            onClick={() => setTab(t.key)}
+            onClick={() => handleTabChange(t.key)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
               tab === t.key ? 'text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
             }`}
@@ -133,7 +153,7 @@ export default function AdminLogs() {
               <tbody>
                 {logs.map((log, i) => (
                   <tr key={(log as any).id || i} className="border-b border-gray-50 hover:bg-gray-50">
-                    {tab === 'activity' && (
+                    {tab === 'activity' && (<>
                       
                         <td className="p-4 text-xs text-gray-700">{(log as ActivityLog).actor_label || '—'}</td>
                         <td className="p-4 text-xs font-mono text-blue-600">{(log as ActivityLog).action || '—'}</td>
@@ -148,8 +168,8 @@ export default function AdminLogs() {
                         <td className="p-4 text-xs text-gray-600 max-w-xs truncate">{(log as ActivityLog).description || (log as ActivityLog).action}</td>
                         <td className="p-4 text-xs text-gray-400">{(log as ActivityLog).created_at ? new Date((log as ActivityLog).created_at).toLocaleString() : '—'}</td>
                       
-                    )}
-                    {tab === 'requests' && (
+                    </>)}
+                    {tab === 'requests' && (<>
                       
                         <td className="p-4">
                           <span className={`badge text-xs font-mono ${
@@ -169,19 +189,68 @@ export default function AdminLogs() {
                         <td className="p-4 text-xs text-gray-500">{(log as RequestLog).ip_address || '—'}</td>
                         <td className="p-4 text-xs text-gray-400">{(log as RequestLog).created_at ? new Date((log as RequestLog).created_at).toLocaleString() : '—'}</td>
                       
-                    )}
-                    {tab === 'errors' && (
+                    </>)}
+                    {tab === 'errors' && (<>
                       
                         <td className="p-4"><span className="badge bg-red-100 text-red-600 text-[10px]">{(log as ErrorLog).error_type}</span></td>
                         <td className="p-4 text-xs text-gray-700 max-w-xs truncate">{(log as ErrorLog).error_message}</td>
                         <td className="p-4 text-xs font-mono text-gray-500 max-w-[150px] truncate">{(log as ErrorLog).path || '—'}</td>
                         <td className="p-4 text-xs text-gray-400">{(log as ErrorLog).created_at ? new Date((log as ErrorLog).created_at).toLocaleString() : '—'}</td>
                       
-                    )}
+                    </>)}
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {totalCount > PAGE_SIZE && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div className="text-xs text-gray-600">
+              Showing <span className="font-semibold">{(currentPage - 1) * PAGE_SIZE + 1}</span> to <span className="font-semibold">{Math.min(currentPage * PAGE_SIZE, totalCount)}</span> of <span className="font-semibold">{totalCount}</span> results
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => prev - 1)}
+                disabled={!hasPreviousPage}
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Previous page"
+              >
+                <ChevronLeft size={16} className="text-gray-600" />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => {
+                  const pageNum = i + 1;
+                  const isCurrentPage = pageNum === currentPage;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                        isCurrentPage
+                          ? 'text-white'
+                          : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                      style={isCurrentPage ? { background: '#471DDB' } : {}}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={!hasNextPage}
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Next page"
+              >
+                <ChevronRight size={16} className="text-gray-600" />
+              </button>
+            </div>
           </div>
         )}
       </div>
