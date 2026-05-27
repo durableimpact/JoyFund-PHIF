@@ -3,11 +3,14 @@ from django.urls import path
 from beneficiaries.views import (
     BeneficiaryListView,
     BeneficiaryDetailView,
+    BeneficiaryVerifyView,
     HealthIssueListCreateView,
     HealthIssueDetailView,
     HealthIssueStatusActionView,
     HealthIssueVerifyView,
     HealthIssueRejectView,
+)
+from beneficiaries.views.document import (
     BeneficiaryDocumentListCreateView,
     BeneficiaryDocumentDetailView,
 )
@@ -20,6 +23,11 @@ urlpatterns = [
         "<uuid:id>/",
         BeneficiaryDetailView.as_view(),
         name="beneficiary-detail-update-delete",
+    ),
+    path(
+        "<uuid:id>/verify/",
+        BeneficiaryVerifyView.as_view(),
+        name="beneficiary-verify",
     ),
     # Health Issues
     path(
@@ -47,14 +55,14 @@ urlpatterns = [
         HealthIssueRejectView.as_view(),
         name="health-issue-reject",
     ),
-    # Documents
+    # Documents (nested under beneficiary)
     path(
-        "documents/",
+        "<uuid:beneficiary_id>/documents/",
         BeneficiaryDocumentListCreateView.as_view(),
         name="document-list-create",
     ),
     path(
-        "documents/<int:id>/",
+        "<uuid:beneficiary_id>/documents/<int:doc_id>/",
         BeneficiaryDocumentDetailView.as_view(),
         name="document-detail",
     ),
