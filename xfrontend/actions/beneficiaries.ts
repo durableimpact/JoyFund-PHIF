@@ -9,17 +9,13 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
-function unwrap(data: any) {
-  return Array.isArray(data) ? data : (data?.results || []);
-}
-
 export const listBeneficiaries = async (token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/beneficiaries/", {
+    const { data } = await api.get<PaginationResponse<Beneficiary>>("/api/beneficiaries/", {
       headers: { Authorization: `Bearer ${token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -65,7 +61,7 @@ export const listBeneficiaryDocuments = async (token: string, params?: Record<st
       headers: { Authorization: `Bearer ${token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -107,11 +103,11 @@ export const deleteBeneficiaryDocument = async (id: string, token: string) => {
 
 export const listHealthIssues = async (token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/beneficiaries/health-issues/", {
+    const { data } = await api.get<PaginationResponse<HealthIssue>>("/api/beneficiaries/health-issues/", {
       headers: { Authorization: `Bearer ${token}` },
       params,
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
