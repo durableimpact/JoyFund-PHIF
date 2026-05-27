@@ -9,16 +9,12 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
-function unwrap(data: any) {
-  return Array.isArray(data) ? data : (data?.results || []);
-}
-
 // ── Campaigns CRUD ──
 
 export const listCampaigns = async (params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/campaigns/", { params });
-    return unwrap(data);
+    const { data } = await api.get<PaginationResponse<Campaign>>("/api/campaigns/", { params });
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -60,10 +56,10 @@ export const deleteCampaign = async (id: string, access_token: string) => {
 
 export const getMyCampaigns = async (access_token: string) => {
   try {
-    const { data } = await api.get("/api/campaigns/my-campaigns/", {
+    const { data } = await api.get<PaginationResponse<Campaign>>("/api/campaigns/my-campaigns/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -72,7 +68,7 @@ export const getAvailableBalances = async (access_token: string) => {
     const { data } = await api.get("/api/campaigns/available-balances/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -94,8 +90,8 @@ export const donateToCampaign = async (campaignId: string, data: DonationCreateP
 
 export const listCampaignDonations = async (campaignId: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get(`/api/campaigns/${campaignId}/donations/`, { params });
-    return unwrap(data);
+    const { data } = await api.get<PaginationResponse<Donation>>(`/api/campaigns/${campaignId}/donations/`, { params });
+    return data;
   } catch (e) { handleError(e); }
 };
 
@@ -109,16 +105,16 @@ export const getCampaignDonation = async (campaignId: string, id: string) => {
 export const listAllDonations = async (params?: Record<string, string>) => {
   try {
     const { data } = await api.get("/api/campaigns/donations/", { params });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
 export const getMyDonations = async (access_token: string) => {
   try {
-    const { data } = await api.get("/api/campaigns/donations/my-donations/", {
+    const { data } = await api.get<PaginationResponse<Donation>>("/api/campaigns/donations/my-donations/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return unwrap(data);
+    return data;
   } catch (e) { handleError(e); }
 };
 
