@@ -9,6 +9,18 @@ declare type VoucherStatus =
 
 declare type VoucherLanguage = "fr" | "en" | "local";
 
+declare interface VoucherList{
+  id:number;
+  voucher_code: string;
+  beneficiary:string; // id of beneficiary
+  beneficiary_name: string;
+  hospital: string; // id of hospital
+  hospital_name: string;
+  status: VoucherStatus;
+  expiry_date: string;
+  created_at: string;
+}
+
 declare interface Voucher {
   id: string;
   voucher_code: string;
