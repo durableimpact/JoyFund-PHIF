@@ -55,9 +55,9 @@ export const deleteBeneficiary = async (id: string, token: string) => {
   } catch (e) { handleError(e); }
 };
 
-export const listBeneficiaryDocuments = async (token: string, params?: Record<string, string>) => {
+export const listBeneficiaryDocuments = async (beneficiary_id:string,token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/beneficiaries/documents/", {
+    const { data } = await api.get(`/api/beneficiaries/${beneficiary_id}/documents/`, {
       headers: { Authorization: `Bearer ${token}` },
       params,
     });
@@ -65,36 +65,45 @@ export const listBeneficiaryDocuments = async (token: string, params?: Record<st
   } catch (e) { handleError(e); }
 };
 
-export const getBeneficiaryDocument = async (id: string, token: string) => {
+export const getBeneficiaryDocument = async (id: string,beneficiary_id:string, token: string) => {
   try {
-    const { data } = await api.get<BeneficiaryDocument>(`/api/beneficiaries/documents/${id}/`, {
+    const { data } = await api.get<BeneficiaryDocument>(`/api/beneficiaries/${beneficiary_id}/documents/${id}/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return data;
   } catch (e) { handleError(e); }
 };
 
-export const createBeneficiaryDocument = async (token: string, formData: FormData) => {
+/**
+ * 
+ * @param token 
+ * @param formData 
+formData should include:
+ - document : file
+ - description : optional
+ * @returns 
+ */
+export const createBeneficiaryDocument = async (token: string,beneficiary_id:string, formData: FormData) => {
   try {
-    const { data } = await api.post<BeneficiaryDocument>("/api/beneficiaries/documents/", formData, {
+    const { data } = await api.post<BeneficiaryDocument>(`/api/beneficiaries/${beneficiary_id}/documents/`, formData, {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
     });
     return data;
   } catch (e) { handleError(e); }
 };
 
-export const updateBeneficiaryDocument = async (id: string, token: string, formData: FormData) => {
+export const updateBeneficiaryDocument = async (id: string,beneficiary_id:string, token: string, formData: FormData) => {
   try {
-    const { data } = await api.patch<BeneficiaryDocument>(`/api/beneficiaries/documents/${id}/`, formData, {
+    const { data } = await api.patch<BeneficiaryDocument>(`/api/beneficiaries/${beneficiary_id}/documents/${id}/`, formData, {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
     });
     return data;
   } catch (e) { handleError(e); }
 };
 
-export const deleteBeneficiaryDocument = async (id: string, token: string) => {
+export const deleteBeneficiaryDocument = async (id: string, beneficiary_id:string, token: string) => {
   try {
-    const { data } = await api.delete(`/api/beneficiaries/documents/${id}/`, {
+    const { data } = await api.delete(`/api/beneficiaries/${beneficiary_id}/documents/${id}/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return data;
