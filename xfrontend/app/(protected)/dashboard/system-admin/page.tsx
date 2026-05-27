@@ -11,15 +11,6 @@ import {
   Ticket,
   TrendingUp,
   Users
-} from 'lucide-react';
-
-
-
-
-
-
-
-
 
 import { formatXAF } from '@/lib/utils';
 import { listBeneficiaries } from '@/actions/beneficiaries';
