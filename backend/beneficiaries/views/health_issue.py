@@ -9,14 +9,11 @@ from rest_framework import status
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.utils import timezone
 
 from beneficiaries.models.health_issue import HealthIssue, HealthIssueStatus, HealthIssueEvent
-from beneficiaries.models.document import BeneficiaryDocument
 from beneficiaries.serializers.health_issue import (
     HealthIssueSerializer,
     HealthIssueDetailSerializer,
-    BeneficiaryDocumentSerializer,
     HealthIssueVerifySerializer,
     HealthIssueRejectSerializer,
 )
@@ -50,7 +47,7 @@ class HealthIssueListCreateView(ListCreateAPIView):
         return [IsAuthenticated()]
 
     @swagger_auto_schema(
-        tags=_TAG, responses={200: HealthIssueDetailSerializer(many=True)},
+        tags=_TAG,
         operation_description="List health issues with optional filtering."
     )
     def get(self, request, *args, **kwargs):
@@ -275,60 +272,3 @@ class HealthIssueStatusActionView(GenericAPIView):
         )
 
         return Response(self.get_serializer(health_issue).data)
-
-
-class BeneficiaryDocumentListCreateView(ListCreateAPIView):
-    """
-    List and upload documents for beneficiaries.
-    - List: accessible by authenticated users.
-    - Upload: only SOCIAL_WORKER can upload new documents.
-    """
-    queryset = BeneficiaryDocument.objects.all()
-    serializer_class = BeneficiaryDocumentSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_permissions(self):
-        if self.request.method == "POST":
-            return [IsAuthenticated(), IsSocialWorker()]
-        return [IsAuthenticated()]
-
-    @swagger_auto_schema(tags=_TAG, operation_description="List beneficiary documents.")
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    @swagger_auto_schema(tags=_TAG, operation_description="Upload a new beneficiary document.")
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
-
-
-class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, update, or delete a specific beneficiary document.
-    - Retrieve: accessible by authenticated users.
-    - Update/Delete: only SYSTEM_ADMIN can modify document records.
-    """
-    queryset = BeneficiaryDocument.objects.all()
-    serializer_class = BeneficiaryDocumentSerializer
-    lookup_field = "id"
-
-    def get_permissions(self):
-        if self.request.method in ["PUT", "PATCH", "DELETE"]:
-            return [IsAuthenticated(), IsSystemAdmin()]
-        return [IsAuthenticated()]
-
-    @swagger_auto_schema(tags=_TAG, operation_description="Retrieve details of a beneficiary document.")
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    @swagger_auto_schema(tags=_TAG, operation_description="Partially update document info (System Admin only).")
-    def patch(self, request, *args, **kwargs):
-        kwargs["partial"] = True
-        return super().patch(request, *args, **kwargs)
-
-    @swagger_auto_schema(tags=_TAG, operation_description="Replace document info entirely (System Admin only).")
-    def put(self, request, *args, **kwargs):
-        return super().put(request, *args, **kwargs)
-
-    @swagger_auto_schema(tags=_TAG, operation_description="Delete a beneficiary document (System Admin only).")
-    def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
