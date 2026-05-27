@@ -4,8 +4,6 @@ import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { formatDate } from '@/lib/utils';
 import {
-  getSystemAdmin,
-import {
   ArrowLeft,
   Briefcase,
   Building2,
