@@ -1,7 +1,11 @@
 'use client';
 import {
-  EditHospitalModal
+  ArrowLeft,
+  CreditCard,
+  Pencil,
+  Users
 } from 'lucide-react';
+  EditHospitalModal
 
 type StaffTab = 'admins' | 'receptionists' | 'all';
 
