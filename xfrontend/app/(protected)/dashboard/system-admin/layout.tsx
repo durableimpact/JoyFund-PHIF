@@ -1,0 +1,29 @@
+"use client";
+
+import React from "react";
+import { LayoutDashboard, Users, Building2, Ticket, BarChart2, FileText } from "lucide-react";
+import DashboardShell, { NavItem } from "../../_components/DashboardShell";
+
+const NAV: NavItem[] = [
+  { label: "Dashboard",     href: "/dashboard/system-admin",           icon: <LayoutDashboard size={16} /> },
+  { label: "Hospitals",     href: "/dashboard/system-admin/hospitals", icon: <Building2 size={16} /> },
+  { label: "Vouchers",      href: "/dashboard/system-admin/vouchers",  icon: <Ticket size={16} /> },
+  { label: "Beneficiaries", href: "/dashboard/system-admin/beneficiaries", icon: <Users size={16} /> },
+  { label: "Analytics",     href: "/dashboard/system-admin/analytics", icon: <BarChart2 size={16} /> },
+  { label: "Disbursements",  href: "/dashboard/system-admin/disbursements", icon: <FileText size={16} /> },
+  { label: "Logs",          href: "/dashboard/system-admin/logs",      icon: <FileText size={16} /> },
+  { label: "Users",         href: "/dashboard/system-admin/users",     icon: <Users size={16} /> },
+];
+
+export default function SystemAdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <DashboardShell
+      navItems={NAV}
+      accentColor="#471DDB"
+      brandLabel="System Admin"
+      brandSub="Full platform oversight"
+    >
+      {children}
+    </DashboardShell>
+  );
+}
