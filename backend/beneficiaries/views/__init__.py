@@ -1,6 +1,7 @@
 from .beneficiary import (
     BeneficiaryListView,
     BeneficiaryDetailView,
+    BeneficiaryVerifyView,
 )
 from .health_issue import (
     HealthIssueListCreateView,
@@ -8,6 +9,8 @@ from .health_issue import (
     HealthIssueStatusActionView,
     HealthIssueVerifyView,
     HealthIssueRejectView,
+)
+from .document import (
     BeneficiaryDocumentListCreateView,
     BeneficiaryDocumentDetailView,
 )
@@ -15,6 +18,7 @@ from .health_issue import (
 __all__ = [
     "BeneficiaryListView",
     "BeneficiaryDetailView",
+    "BeneficiaryVerifyView",
     "HealthIssueListCreateView",
     "HealthIssueDetailView",
     "HealthIssueStatusActionView",
