@@ -11,7 +11,7 @@ declare module "next-auth" {
     userInfo?:
       | DonorInfo
       | SystemAdminInfo
-      | SocialWorkerInfoSerializer
+      | SocialWorkerInfo
       | HospitalAdminInfo
       | ReceptionistInfo
   }
@@ -34,7 +34,7 @@ declare module "next-auth/jwt" {
     userInfo?:
       | DonorInfo
       | SystemAdminInfo
-      | SocialWorkerInfoSerializer
+      | SocialWorkerInfo
       | HospitalAdminInfo
       | ReceptionistInfo
   }
