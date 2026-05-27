@@ -9,6 +9,9 @@ import {
   User
 } from 'lucide-react';
 import { formatXAF, statusColor, formatDate, formatDateTime } from '@/lib/utils';
+import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import { getVoucher } from '@/actions/vouchers';
 import { useState } from 'react';
 
@@ -60,7 +63,7 @@ export default function VoucherDetailPage() {
   const totalCommitted = fundings.reduce((sum, f) => sum + Number(f.committed_amount || 0), 0);
   const totalUtilized = fundings.reduce((sum, f) => sum + Number(f.utilized_amount || 0), 0);
 
-  return (
+  return (<>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
         <ArrowLeft size={16} /> Back to Vouchers
       </button>
@@ -223,8 +226,7 @@ export default function VoucherDetailPage() {
           )}
         </div>
       </div>
-    
-  
+    </>
   );
 }
 
