@@ -33,7 +33,6 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["description", "actor_label", "action"]
     ordering_fields = ["created_at", "level", "action"]
     ordering = ["-created_at"]
-    pagination_class = None  # Will use default pagination from settings
 
     def get_queryset(self):
         """Filter by date range and user_id if provided."""
@@ -98,7 +97,6 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["path", "ip_address"]
     ordering_fields = ["created_at", "response_time_ms", "status_code"]
     ordering = ["-created_at"]
-    pagination_class = None  # Will use default pagination from settings
 
     def get_queryset(self):
         """Filter by date range and user_id if provided."""
@@ -168,7 +166,6 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["error_type", "error_message", "stack_trace"]
     ordering_fields = ["created_at", "error_type"]
     ordering = ["-created_at"]
-    pagination_class = None  # Will use default pagination from settings
 
     def get_queryset(self):
         """Filter by date range."""
