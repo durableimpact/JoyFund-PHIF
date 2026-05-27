@@ -89,12 +89,18 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     def list(self, request, *args, **kwargs):
         user_id = request.user.id
         cache_key = self._get_list_cache_key(user_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        try:
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                return Response(cached_data, status=status.HTTP_200_OK)
+        except Exception:
+            pass
         
         response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        try:
+            cache.set(cache_key, response.data, CACHE_TIMEOUT)
+        except Exception:
+            pass
         return response
     
     @swagger_auto_schema(
@@ -105,12 +111,18 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     def retrieve(self, request, *args, **kwargs):
         notification_id = kwargs.get('pk')
         cache_key = self._get_detail_cache_key(notification_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        try:
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                return Response(cached_data, status=status.HTTP_200_OK)
+        except Exception:
+            pass
         
         response = super().retrieve(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        try:
+            cache.set(cache_key, response.data, CACHE_TIMEOUT)
+        except Exception:
+            pass
         return response
     
     @swagger_auto_schema(
