@@ -5,7 +5,13 @@ import {
   Pencil,
   Users
 } from 'lucide-react';
-  EditHospitalModal
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
+import { getHospital, getHospitalStaff, getHospitalReceptionists } from '@/actions/hospital';
+import { statusColor, formatDate } from '@/lib/utils';
+import EditHospitalModal from '../_components/EditHospitalModal';
 
 type StaffTab = 'admins' | 'receptionists' | 'all';
 
@@ -23,17 +29,20 @@ export default function HospitalDetailPage() {
     enabled: !!token && !!id,
   });
 
-  const { data: staff = [], isLoading: staffLoading } = useQuery<StaffMember[]>({
+  const { data: staffData, isLoading: staffLoading } = useQuery({
     queryKey: ['hospital-staff', id, token],
     queryFn: () => getHospitalStaff(id, token),
     enabled: !!token && !!id,
   });
 
-  const { data: receptionists = [], isLoading: recLoading } = useQuery<Receptionist[]>({
+  const { data: receptionistsData, isLoading: recLoading } = useQuery({
     queryKey: ['hospital-receptionists', id, token],
     queryFn: () => getHospitalReceptionists(id, token),
     enabled: !!token && !!id,
   });
+
+  const staff: StaffMember[] = (staffData as any)?.results || (Array.isArray(staffData) ? staffData : []);
+  const receptionists: Receptionist[] = (receptionistsData as any)?.results || (Array.isArray(receptionistsData) ? receptionistsData : []);
 
   if (isLoading) {
     return (<>
@@ -63,7 +72,7 @@ export default function HospitalDetailPage() {
       ? staff.filter(s => (s as any).role === 'hospital_admin')
       : staff.filter(s => (s as any).role === 'receptionist');
 
-  return (
+  return (<>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
         <ArrowLeft size={16} /> Back to Hospitals
       </button>
@@ -110,26 +119,26 @@ export default function HospitalDetailPage() {
               <CreditCard size={14} /> Payment Details
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              {hospital.momo_number && (
+              {hospital.momo_number && (<>
                 
                   <Detail label="MoMo Number" value={hospital.momo_number} mono />
                   <Detail label="MoMo Name" value={hospital.momo_name || '—'} />
                 
-              )}
-              {hospital.orange_number && (
+              </>)}
+              {hospital.orange_number && (<>
                 
                   <Detail label="Orange Number" value={hospital.orange_number} mono />
                   <Detail label="Orange Name" value={hospital.orange_name || '—'} />
                 
-              )}
-              {hospital.bank_account_number && (
+              </>)}
+              {hospital.bank_account_number && (<>
                 
                   <Detail label="Bank Account #" value={hospital.bank_account_number} mono />
                   <Detail label="Bank Account Name" value={hospital.bank_account_name || '—'} />
                   <Detail label="Bank Name" value={hospital.bank_name || '—'} />
                   <Detail label="Bank Branch" value={hospital.bank_branch || '—'} />
                 
-              )}
+              </>)}
               {!hospital.momo_number && !hospital.orange_number && !hospital.bank_account_number && (
                 <p className="text-xs text-gray-400 col-span-2">No payment details configured</p>
               )}
@@ -219,8 +228,7 @@ export default function HospitalDetailPage() {
           hospital={hospital}
         />
       )}
-    
-  
+    </>
   );
 }
 
