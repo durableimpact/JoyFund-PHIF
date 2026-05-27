@@ -27,7 +27,7 @@ export default function HospitalCombobox({ value, onChange, placeholder = "— S
 
   const { data: hospitals = [], isLoading } = useQuery<Hospital[]>({
     queryKey: ["hospitals", token],
-    queryFn: () => listHospitals(token),
+    queryFn: async () => { const res = await listHospitals(token); return res?.results || res; },
     enabled: !!token,
   });
 
