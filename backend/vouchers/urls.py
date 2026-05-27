@@ -11,7 +11,6 @@ app_name = "vouchers"
 
 urlpatterns = [
     path("", VoucherListView.as_view(), name="voucher-list"),
-    path("<uuid:pk>/", VoucherDetailView.as_view(), name="voucher-detail"),
     path("check/", VoucherCheckView.as_view(), name="voucher-check"),
     path("create/", VoucherCreateView.as_view(), name="voucher-create"),
     path(
@@ -19,4 +18,5 @@ urlpatterns = [
         VoucherCreateMultipleCampaignsView.as_view(),
         name="voucher-create-multiple",
     ),
+    path("<int:pk>/", VoucherDetailView.as_view(), name="voucher-detail"),
 ]
