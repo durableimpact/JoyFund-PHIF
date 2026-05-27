@@ -126,6 +126,10 @@ declare type DisbursementPaymentMethod = "MOMO" | "BANK_TRANSFER" | "CASH" | "OT
 declare interface Disbursement {
   id: string;
   hospital_id: string;
+  hospital_name?: string;
+  payment_method_display?: string;
+  status_display?: string;
+  created_by_name?: string;
   amount: number;
   currency: string;
   payment_method: DisbursementPaymentMethod;
