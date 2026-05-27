@@ -135,7 +135,6 @@ class BeneficiaryListView(ListAPIView):
 
     @swagger_auto_schema(
         tags=_TAG,
-        responses={200: BeneficiaryDetailSerializer(many=True)},
         operation_description="List beneficiaries enrolled by the authenticated SOCIAL_WORKER.",
     )
     def get(self, request, *args, **kwargs):
@@ -217,3 +216,34 @@ class BeneficiaryDetailView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+
+class BeneficiaryVerifyView(APIView):
+    """Verify a beneficiary (System Admin only)."""
+
+    permission_classes = [IsAuthenticated, IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        operation_description="Verify a beneficiary. System Admin endpoint.",
+        responses={
+            200: BeneficiaryDetailSerializer,
+            404: "Beneficiary not found",
+        },
+    )
+    def post(self, request, id):
+        try:
+            beneficiary = Beneficiary.objects.get(id=id)
+        except Beneficiary.DoesNotExist:
+            return Response(
+                {"detail": "Beneficiary not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        beneficiary.is_verified = True
+        beneficiary.save(update_fields=["is_verified", "updated_at"])
+
+        return Response(
+            BeneficiaryDetailSerializer(beneficiary).data,
+            status=status.HTTP_200_OK,
+        )
