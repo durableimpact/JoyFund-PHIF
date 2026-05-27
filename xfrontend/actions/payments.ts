@@ -9,14 +9,18 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
+function unwrap(data: any) {
+  return Array.isArray(data) ? data : (data?.results || []);
+}
+
 // ── Accounts ──
 
 export const listAccounts = async (access_token: string) => {
   try {
-    const { data } = await api.get<Account[]>("/api/payments/accounts/", {
+    const { data } = await api.get("/api/payments/accounts/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -42,10 +46,10 @@ export const getFeeAccount = async (access_token: string) => {
 
 export const listFeePolicies = async (access_token: string) => {
   try {
-    const { data } = await api.get<FeePolicy[]>("/api/payments/fee-policies/", {
+    const { data } = await api.get("/api/payments/fee-policies/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -89,10 +93,10 @@ export const deleteFeePolicy = async (id: number, access_token: string) => {
 
 export const listGateways = async (access_token: string) => {
   try {
-    const { data } = await api.get<PaymentGateway[]>("/api/payments/gateways/", {
+    const { data } = await api.get("/api/payments/gateways/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -136,11 +140,11 @@ export const deleteGateway = async (id: number, access_token: string) => {
 
 export const listTransactions = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<Transaction[]>("/api/payments/transactions/", {
+    const { data } = await api.get("/api/payments/transactions/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -157,10 +161,10 @@ export const getTransaction = async (id: string, access_token: string) => {
 
 export const listFeeSplits = async (access_token: string) => {
   try {
-    const { data } = await api.get<FeeSplit[]>("/api/payments/fee-splits/", {
+    const { data } = await api.get("/api/payments/fee-splits/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -177,10 +181,10 @@ export const getFeeSplit = async (id: number, access_token: string) => {
 
 export const listWebhookEvents = async (access_token: string) => {
   try {
-    const { data } = await api.get<WebhookEvent[]>("/api/payments/webhooks/", {
+    const { data } = await api.get("/api/payments/webhooks/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
