@@ -37,10 +37,43 @@ class HealthIssueDetailSerializer(serializers.ModelSerializer):
 
 
 class BeneficiaryDocumentSerializer(serializers.ModelSerializer):
+    documents = serializers.ListField(
+        child=serializers.FileField(max_length=100000, allow_empty_file=False, use_url=False),
+        write_only=True,
+        required=False,
+    )
+
     class Meta:
         model = BeneficiaryDocument
-        fields = ["id", "document", "description", "uploaded_at"]
+        fields = ["id", "document", "documents", "description", "uploaded_at"]
         read_only_fields = ["uploaded_at"]
+
+    def validate(self, data):
+        if "documents" not in data and "document" not in data:
+            raise serializers.ValidationError("Must provide either 'document' (single file) or 'documents' (list of files).")
+        return data
+
+    def create(self, validated_data):
+        beneficiary = validated_data.pop("beneficiary")
+        description = validated_data.pop("description", "")
+        single_file = validated_data.pop("document", None)
+        multiple_files = validated_data.pop("documents", None)
+
+        files = []
+        if multiple_files:
+            files = multiple_files
+        elif single_file:
+            files = [single_file]
+
+        created = []
+        for f in files:
+            doc = BeneficiaryDocument.objects.create(
+                beneficiary=beneficiary,
+                document=f,
+                description=description,
+            )
+            created.append(doc)
+        return created
 
 
 class HealthIssueVerifySerializer(serializers.Serializer):
