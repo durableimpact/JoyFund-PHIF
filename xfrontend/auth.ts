@@ -195,10 +195,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const now = Date.now()
       const expiresAt = (token.expiresAt as number) || 0
       const timeUntilExpiry = expiresAt - now
-      const threeMinutesInMs = 3 * 60 * 1000
+      const tenMinutesInMs = 10 * 60 * 1000
 
-      // If token is expired or expiring within 3 minutes, refresh it
-      if (timeUntilExpiry < threeMinutesInMs) {
+      // If token is expired or expiring within 10 minutes, refresh it
+      if (timeUntilExpiry < tenMinutesInMs) {
         console.log(
           `[auth] Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, refreshing...`
         )
