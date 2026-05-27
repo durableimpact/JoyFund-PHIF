@@ -9,15 +9,19 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
+function unwrap(data: any) {
+  return Array.isArray(data) ? data : (data?.results || []);
+}
+
 // ── Hospitals CRUD ──
 
 export const listHospitals = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<Hospital[]>("/api/hospitals/", {
+    const { data } = await api.get("/api/hospitals/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -26,7 +30,7 @@ export const getHospital = async (id: string, access_token: string) => {
     const { data } = await api.get<Hospital>(`/api/hospitals/${id}/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -53,7 +57,7 @@ export const deleteHospital = async (id: string, access_token: string) => {
     const { data } = await api.delete(`/api/hospitals/${id}/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -64,7 +68,7 @@ export const getHospitalDashboard = async (hospitalId: string, access_token: str
     const { data } = await api.get<HospitalDashboardResponse>(`/api/hospitals/${hospitalId}/dashboard/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -83,7 +87,7 @@ export const getHospitalStaff = async (id: string, access_token: string) => {
     const { data } = await api.get<StaffMember[]>(`/api/hospitals/${id}/staff/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -92,7 +96,7 @@ export const getHospitalReceptionists = async (id: string, access_token: string)
     const { data } = await api.get<Receptionist[]>(`/api/hospitals/${id}/receptionists/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -110,10 +114,10 @@ export const getHospitalRedeemedVouchersTotal = async (id: string, access_token:
 
 export const listServices = async (hospitalId: string, access_token: string) => {
   try {
-    const { data } = await api.get<Service[]>(`/api/hospitals/${hospitalId}/services/`, {
+    const { data } = await api.get(`/api/hospitals/${hospitalId}/services/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -122,7 +126,7 @@ export const getService = async (hospitalId: string, id: string, access_token: s
     const { data } = await api.get<Service>(`/api/hospitals/${hospitalId}/services/${id}/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -149,7 +153,7 @@ export const deleteService = async (hospitalId: string, id: string, access_token
     const { data } = await api.delete(`/api/hospitals/${hospitalId}/services/${id}/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -169,7 +173,7 @@ export const getMedicalClaim = async (id: string, access_token: string) => {
     const { data } = await api.get<MedicalClaim>(`/api/hospitals/medical-claims/${id}/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -230,7 +234,7 @@ export const markMedicalClaimComplete = async (medicalClaimId: string, access_to
 
 export const listMedicalClaimProofs = async (medicalClaimId: string, access_token: string) => {
   try {
-    const { data } = await api.get<MedicalClaimProof[]>(
+    const { data } = await api.get(
       `/api/hospitals/medical-claims/${medicalClaimId}/proofs/`,
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
@@ -317,10 +321,10 @@ export const flagMedicalClaimProof = async (medicalClaimId: string, id: string, 
 
 export const listVoucherTopUpRequests = async (access_token: string) => {
   try {
-    const { data } = await api.get<VoucherTopUpRequest[]>("/api/hospitals/voucher-top-up-requests/", {
+    const { data } = await api.get("/api/hospitals/voucher-top-up-requests/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -329,7 +333,7 @@ export const getVoucherTopUpRequest = async (id: string, access_token: string) =
     const { data } = await api.get<VoucherTopUpRequest>(`/api/hospitals/voucher-top-up-requests/${id}/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
