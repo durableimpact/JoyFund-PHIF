@@ -1,4 +1,6 @@
 'use client';
+import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import { Download } from 'lucide-react';
 import { formatXAF } from '@/lib/utils';
 import { listBeneficiaries } from '@/actions/beneficiaries';
@@ -10,29 +12,46 @@ export default function AdminAnalytics() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
-  const { data: campaigns = [], isLoading: loading } = useQuery<Campaign[]>({
+  const { data: campaignsData, isLoading: loading } = useQuery({
     queryKey: ['analytics-campaigns', token],
-    queryFn: () => listCampaigns(),
+    queryFn: async () => {
+      const res = await listCampaigns({ page_size: '1000' });
+      return res || { results: [], next: null, previous: null, count: 0 };
+    },
     enabled: !!token,
   });
 
-  const { data: beneficiaries = [] } = useQuery<Beneficiary[]>({
+  const { data: beneficiariesData } = useQuery({
     queryKey: ['analytics-beneficiaries', token],
-    queryFn: () => listBeneficiaries(token),
+    queryFn: async () => {
+      const res = await listBeneficiaries(token, { page_size: '1000' });
+      return res || { results: [], next: null, previous: null, count: 0 };
+    },
     enabled: !!token,
   });
 
-  const { data: vouchers = [] } = useQuery<Voucher[]>({
+  const { data: vouchersData } = useQuery({
     queryKey: ['analytics-vouchers', token],
-    queryFn: () => listVouchers(token),
+    queryFn: async () => {
+      const res = await listVouchers(token, { page_size: '1000' });
+      return res || { results: [], next: null, previous: null, count: 0 };
+    },
     enabled: !!token,
   });
 
-  const { data: hospitals = [] } = useQuery<Hospital[]>({
+  const { data: hospitalsData } = useQuery({
     queryKey: ['analytics-hospitals', token],
-    queryFn: () => listHospitals(token),
+    queryFn: async () => {
+      const res = await listHospitals(token, { page_size: '1000' });
+      return res || { results: [], next: null, previous: null, count: 0 };
+    },
     enabled: !!token,
   });
+
+  const campaigns: Campaign[] = campaignsData?.results || [];
+  const beneficiaries: Beneficiary[] = beneficiariesData?.results || [];
+  const vouchers: Voucher[] = vouchersData?.results || [];
+  const hospitals: Hospital[] = hospitalsData?.results || [];
 
   const totalRaised = campaigns.reduce((s, c) => s + (c.available_balance ?? 0), 0);
   const totalGoal = campaigns.reduce((s, c) => s + (c.goal_amount ?? 0), 0);
