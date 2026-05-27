@@ -56,6 +56,7 @@ from .system_admin import (
     SystemAdminCreateSerializer,
     SystemAdminDetailSerializer,
     SystemAdminUpdateSerializer,
+    MinimalSystemAdminSerializer
 )
 
 __all__ = [
@@ -69,6 +70,7 @@ __all__ = [
     'SystemAdminCreateSerializer',
     'SystemAdminDetailSerializer',
     'SystemAdminUpdateSerializer',
+    'MinimalSystemAdminSerializer',
     'DonorRegisterSerializer',
     'DonorDetailSerializer',
     'DonorUpdateSerializer',

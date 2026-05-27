@@ -46,6 +46,22 @@ class SystemAdminDetailSerializer(serializers.ModelSerializer):
         model = SystemAdmin
         fields = ['id', 'user']
 
+class MinimalSystemAdminSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(source='user.id', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    profile_id = serializers.UUIDField(source='id', read_only=True)
+
+    class Meta:
+        model = SystemAdmin
+        fields = [
+            'id',
+            'user_id',
+            'first_name',
+            'last_name',
+            'profile_id',
+        ]
+
 
 class SystemAdminUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=False)

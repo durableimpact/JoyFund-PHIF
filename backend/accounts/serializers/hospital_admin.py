@@ -3,7 +3,8 @@ from rest_framework import serializers
 
 from accounts.models import HospitalAdmin, Role, SystemAdmin, User
 from .user import UserReadSerializer
-
+from hospitals.serializers.hospital import MinimalHospitalSerializer
+from .system_admin import MinimalSystemAdminSerializer
 
 # ---------------------------------------------------------------------------
 # Helper mixin — national-ID input fields
@@ -78,14 +79,28 @@ class HospitalAdminCreateSerializer(NationalIDInputMixin, serializers.Serializer
         return HospitalAdminDetailSerializer(instance).data
 
 
+class HospitalAdminListSerializer(serializers.ModelSerializer):
+    user = UserReadSerializer(read_only=True)
+    enrolled_by = MinimalSystemAdminSerializer(read_only=True)
+    hospital = MinimalHospitalSerializer(read_only=True)
+
+    class Meta:
+        model = HospitalAdmin
+        fields = [
+            'id', 'user',
+            'is_active',
+            'enrolled_by',
+            'hospital',
+        ]
+
 # ---------------------------------------------------------------------------
 # Detail (read)
 # ---------------------------------------------------------------------------
 
 class HospitalAdminDetailSerializer(serializers.ModelSerializer):
     user = UserReadSerializer(read_only=True)
-    enrolled_by_id = serializers.UUIDField(source='enrolled_by.id', read_only=True)
-    hospital_id = serializers.UUIDField(source='hospital.id', read_only=True, allow_null=True)
+    enrolled_by = MinimalSystemAdminSerializer(read_only=True)
+    hospital = MinimalHospitalSerializer(read_only=True)
 
     class Meta:
         model = HospitalAdmin
@@ -94,8 +109,9 @@ class HospitalAdminDetailSerializer(serializers.ModelSerializer):
             'national_id_number',
             'front_national_id_image',
             'back_national_id_image',
-            'enrolled_by_id',
-            'hospital_id',
+            'is_active',
+            'enrolled_by',
+            'hospital',
         ]
 
 
