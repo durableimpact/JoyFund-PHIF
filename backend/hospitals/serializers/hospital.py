@@ -28,6 +28,11 @@ class HospitalListSerializer(serializers.ModelSerializer):
         ]
 
 
+class MinimalHospitalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hospital
+        fields = ['id', 'name']
+
 class HospitalDetailSerializer(serializers.ModelSerializer):
     admins = serializers.SerializerMethodField()
 

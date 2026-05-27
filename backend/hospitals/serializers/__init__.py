@@ -2,6 +2,7 @@ from .hospital import (
     HospitalCreateUpdateSerializer,
     HospitalDetailSerializer,
     HospitalListSerializer,
+    MinimalHospitalSerializer
 )
 from .service import ServiceCreateUpdateSerializer, ServiceDetailSerializer
 from .staff import StaffSerializer
@@ -35,6 +36,7 @@ __all__ = [
     "HospitalCreateUpdateSerializer",
     "HospitalDetailSerializer",
     "HospitalListSerializer",
+    "MinimalHospitalSerializer",
     "ServiceCreateUpdateSerializer",
     "ServiceDetailSerializer",
     "StaffSerializer",
