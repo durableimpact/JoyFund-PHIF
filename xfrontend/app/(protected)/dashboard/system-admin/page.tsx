@@ -39,22 +39,22 @@ export default function AdminDashboard() {
   const currentUser = (session?.user as any)?.userInfo;
   const { data: beneficiaries = [], isLoading: bLoading } = useQuery<Beneficiary[]>({
     queryKey: ['admin-beneficiaries', token],
-    queryFn: () => listBeneficiaries(token),
+    queryFn: async () => { const res = await listBeneficiaries(token); return res?.results || res; },
     enabled: !!token,
   });
   const { data: campaigns = [], isLoading: cLoading } = useQuery<Campaign[]>({
     queryKey: ['admin-campaigns', token],
-    queryFn: () => listCampaigns(),
+    queryFn: async () => { const res = await listCampaigns(); return res?.results || res; },
     enabled: !!token,
   });
   const { data: hospitals = [], isLoading: hLoading } = useQuery<Hospital[]>({
     queryKey: ['admin-hospitals', token],
-    queryFn: () => listHospitals(token),
+    queryFn: async () => { const res = await listHospitals(token); return res?.results || res; },
     enabled: !!token,
   });
   const { data: vouchers = [], isLoading: vLoading } = useQuery<Voucher[]>({
     queryKey: ['admin-vouchers', token],
-    queryFn: () => listVouchers(token),
+    queryFn: async () => { const res = await listVouchers(token); return res?.results || res; },
     enabled: !!token,
   });
   const loading = bLoading || cLoading || hLoading || vLoading;
