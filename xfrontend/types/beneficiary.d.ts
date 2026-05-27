@@ -19,7 +19,7 @@ declare interface Beneficiary {
   emergency_contact_name: string;
   emergency_contact_phone: string;
   emergency_contact_relationship: string;
-  enrolled_by_id: string;
+  enrolled_by: string;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -27,7 +27,7 @@ declare interface Beneficiary {
 
 declare interface BeneficiaryDocument {
   id?: number;
-  beneficiary_id: string;
+  beneficiary: string;
   document: any;
   description?: string;
   uploaded_at?: string;
@@ -35,7 +35,7 @@ declare interface BeneficiaryDocument {
 
 declare interface HealthIssue {
   id?: number;
-  beneficiary_id: string;
+  beneficiary: string;
   social_worker_id?: string | null;
   validated_by_id?: string | null;
   category: string;
@@ -53,5 +53,5 @@ declare interface HealthIssueEvent {
   changed_by_id?: string | null;
   changed_at?: string;
   notes?: string;
-  health_issue_id: number;
+  health_issue: number;
 }
