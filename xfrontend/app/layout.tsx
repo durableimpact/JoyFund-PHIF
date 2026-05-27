@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "next-auth/react";
 import ReactQueryProvider from "@/provider/react-query-provider";
+import { Toaster } from "@/components/ui/sonner"
 
 const montserrat = localFont({
   src: "../public/font/Montserrat-VariableFont_wght.ttf",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             {children}
           </ReactQueryProvider>
+          <Toaster/>
         </SessionProvider>
       </body>
     </html>
