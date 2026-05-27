@@ -11,7 +11,7 @@ function handleError(e: unknown) {
 
 export const listNotifications = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/notifications/", {
+    const { data } = await api.get<PaginationResponse<Notification>>("/api/notifications/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
