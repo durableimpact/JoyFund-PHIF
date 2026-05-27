@@ -27,6 +27,7 @@ class BeneficiaryDetailSerializer(serializers.ModelSerializer):
             "region",
             "city",
             "address",
+            "is_verified",
             "national_id_number",
             "emergency_contact_name",
             "emergency_contact_phone",
