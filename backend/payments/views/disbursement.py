@@ -12,6 +12,7 @@ from ..serializers.disbursement import (
     DisbursementCreateSerializer,
     DisbursementUpdateSerializer,
     DisbursementDetailSerializer,
+    DisbursementStatisticsSerializer,
 )
 
 
@@ -51,6 +52,8 @@ class DisbursementViewSet(viewsets.ModelViewSet):
             return DisbursementUpdateSerializer
         elif self.action == 'retrieve':
             return DisbursementDetailSerializer
+        elif self.action == 'statistics':
+            return DisbursementStatisticsSerializer
         return DisbursementSerializer
 
     @swagger_auto_schema(
@@ -248,6 +251,7 @@ class DisbursementViewSet(viewsets.ModelViewSet):
         operation_summary='Get Statistics',
         operation_description='Get aggregated disbursement statistics by status and payment method.',
         methods=['get'],
+        responses={200: DisbursementStatisticsSerializer},
     )
     @action(detail=False, methods=['get'])
     def statistics(self, request):

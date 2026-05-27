@@ -2,6 +2,37 @@ from rest_framework import serializers
 from ..models import Disbursement, Transaction
 
 
+class DisbursementStatisticsSerializer(serializers.Serializer):
+    """Serializer for disbursement statistics response."""
+    total_disbursed = serializers.DecimalField(
+        max_digits=15, decimal_places=2,
+        help_text="Total amount of completed disbursements"
+    )
+    total_pending = serializers.DecimalField(
+        max_digits=15, decimal_places=2,
+        help_text="Total amount of pending disbursements"
+    )
+    total_failed = serializers.DecimalField(
+        max_digits=15, decimal_places=2,
+        help_text="Total amount of failed disbursements"
+    )
+    by_status = serializers.DictField(
+        child=serializers.ListField(
+            child=serializers.IntegerField(),
+        ),
+        help_text="Disbursements grouped by status with count and total"
+    )
+    by_payment_method = serializers.DictField(
+        child=serializers.ListField(
+            child=serializers.IntegerField(),
+        ),
+        help_text="Disbursements grouped by payment method with count and total"
+    )
+    total_count = serializers.IntegerField(
+        help_text="Total number of disbursement records"
+    )
+
+
 class DisbursementSerializer(serializers.ModelSerializer):
     """Main serializer for Disbursement model."""
     status_display = serializers.CharField(source='get_status_display', read_only=True)
