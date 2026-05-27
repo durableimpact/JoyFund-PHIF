@@ -67,7 +67,7 @@ export default function DisbursementsPage() {
 
   const { data: disbursements = [], isLoading: loadingList } = useQuery<Disbursement[]>({
     queryKey: ['disbursements', token],
-    queryFn: () => listDisbursements(token),
+    queryFn: async () => { const res = await listDisbursements(token); return res?.results || res; },
     enabled: !!token,
   });
 
@@ -79,7 +79,7 @@ export default function DisbursementsPage() {
 
   const { data: hospitals = [] } = useQuery<Hospital[]>({
     queryKey: ['hospitals', token],
-    queryFn: () => listHospitals(token),
+    queryFn: async () => { const res = await listHospitals(token); return res?.results || res; },
     enabled: !!token && showRecordModal,
   });
 
