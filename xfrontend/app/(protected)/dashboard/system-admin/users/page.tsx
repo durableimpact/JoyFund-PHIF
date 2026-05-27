@@ -37,27 +37,27 @@ export default function UsersPage() {
   // Fetch all role types
   const { data: systemAdmins = [], isLoading: loadingSA } = useQuery<SystemAdmin[]>({
     queryKey: ['systemAdmins', token],
-    queryFn: () => listSystemAdmins(token),
+    queryFn: async () => { const res = await listSystemAdmins(token); return res?.results || res; },
     enabled: !!token,
   });
   const { data: hospitalAdmins = [], isLoading: loadingHA } = useQuery<HospitalAdmin[]>({
     queryKey: ['hospitalAdmins', token],
-    queryFn: () => listHospitalAdmins(token),
+    queryFn: async () => { const res = await listHospitalAdmins(token); return res?.results || res; },
     enabled: !!token,
   });
   const { data: socialWorkers = [], isLoading: loadingSW } = useQuery<SocialWorker[]>({
     queryKey: ['socialWorkers', token],
-    queryFn: () => listSocialWorkers(token),
+    queryFn: async () => { const res = await listSocialWorkers(token); return res?.results || res; },
     enabled: !!token,
   });
   const { data: receptionists = [], isLoading: loadingRec } = useQuery<Receptionist[]>({
     queryKey: ['receptionists', token],
-    queryFn: () => listReceptionists(token),
+    queryFn: async () => { const res = await listReceptionists(token); return res?.results || res; },
     enabled: !!token,
   });
   const { data: donors = [], isLoading: loadingDon } = useQuery<Donor[]>({
     queryKey: ['donors', token],
-    queryFn: () => listDonors(token),
+    queryFn: async () => { const res = await listDonors(token); return res?.results || res; },
     enabled: !!token,
   });
   const isLoading = loadingSA || loadingHA || loadingSW || loadingRec || loadingDon;
