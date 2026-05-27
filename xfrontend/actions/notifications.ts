@@ -9,13 +9,17 @@ function handleError(e: unknown) {
   throw JSON.stringify({ message: "An unexpected error occurred" });
 }
 
+function unwrap(data: any) {
+  return Array.isArray(data) ? data : (data?.results || []);
+}
+
 export const listNotifications = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get<Notification[]>("/api/notifications/", {
+    const { data } = await api.get("/api/notifications/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
-    return data;
+    return unwrap(data);
   } catch (e) { handleError(e); }
 };
 
@@ -30,7 +34,7 @@ export const getNotification = async (id: string, access_token: string) => {
 
 export const getNotificationsByType = async (access_token: string) => {
   try {
-    const { data } = await api.get<NotificationsByType[]>("/api/notifications/by_type/", {
+    const { data } = await api.get("/api/notifications/by_type/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
     return data;
