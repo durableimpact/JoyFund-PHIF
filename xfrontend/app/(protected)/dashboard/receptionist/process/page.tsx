@@ -173,11 +173,15 @@ export default function ProcessVoucher() {
 
   // ── Top-Up Request ──
   const topUpMutation = useMutation({
-    mutationFn: () => createVoucherTopUpRequest(token, {
-      medical_claim: claimId!,
-      requested_amount: Number(topUpAmount),
-      reason: topUpReason,
-    }),
+    mutationFn: () => {
+      const maxTopUp = claimTotal - voucherAmount;
+      const clampedAmount = Math.min(Number(topUpAmount), maxTopUp);
+      return createVoucherTopUpRequest(token, {
+        medical_claim: claimId!,
+        requested_amount: clampedAmount,
+        reason: topUpReason,
+      });
+    },
     onSuccess: () => {
       setShowTopUp(false);
       setTopUpAmount('');
@@ -548,12 +552,13 @@ export default function ProcessVoucher() {
                     You can save and wait, or request a top-up from the hospital admin.
                   </p>
                   {!showTopUp && (
-                    <button onClick={() => setShowTopUp(true)} className="text-xs font-bold text-amber-800 underline">Request Top-Up</button>
+                    <button onClick={() => { setShowTopUp(true); setTopUpAmount(String(claimTotal - voucherAmount)); }} className="text-xs font-bold text-amber-800 underline">Request Top-Up</button>
                   )}
                   {showTopUp && (
                     <div className="space-y-2 mt-2">
+                      <p className="text-xs text-amber-600">Maximum top-up: {formatXAF(claimTotal - voucherAmount)}</p>
                       <div className="grid grid-cols-2 gap-2">
-                        <input className="input-field" type="number" min="0" placeholder="Amount (XAF)" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
+                        <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder="Amount (XAF)" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
                         <input className="input-field" placeholder="Reason" value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />
                       </div>
                       <div className="flex gap-2">
