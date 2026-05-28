@@ -40,6 +40,8 @@ class BeneficiaryFilter(filters.FilterSet):
     income_verified = django_filters.BooleanFilter(
         field_name="income_verified", lookup_expr="exact"
     )
+    hospital = django_filters.UUIDFilter(method="filter_hospital")
+
 
     # Search filters (case-insensitive contains)
     full_name = django_filters.CharFilter(
@@ -99,3 +101,9 @@ class BeneficiaryFilter(filters.FilterSet):
     class Meta:
         model = Beneficiary
         fields = []
+
+    def filter_hospital(self, queryset, name, value):
+        if value:
+            return queryset.filter(health_issues__voucher_set__hospital_id=value).distinct()
+        return queryset
+
