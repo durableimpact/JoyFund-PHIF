@@ -81,12 +81,13 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         hospital_id = self.kwargs.get('hospital_pk')
         cache_key = self._get_list_cache_key(hospital_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            from rest_framework.response import Response
+            return Response(cached_data)
         
         response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, response.data, CACHE_TIMEOUT)
         return response
 
     @swagger_auto_schema(tags=_TAG, request_body=ServiceCreateUpdateSerializer,
@@ -104,12 +105,13 @@ class ServiceViewSet(viewsets.ModelViewSet):
         hospital_id = self.kwargs.get('hospital_pk')
         service_id = kwargs.get('pk')
         cache_key = self._get_detail_cache_key(hospital_id, service_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            from rest_framework.response import Response
+            return Response(cached_data)
         
         response = super().retrieve(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, response.data, CACHE_TIMEOUT)
         return response
 
     @swagger_auto_schema(tags=_TAG, request_body=ServiceCreateUpdateSerializer,
