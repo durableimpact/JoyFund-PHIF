@@ -120,6 +120,7 @@ def invalidate_user_info_cache_on_user_update(sender, instance, created, **kwarg
         ]
         
         for cache_key in cache_keys:
+            cache.delete(f"view_cache:{cache_key}")
             cache.delete(cache_key)
         
         logger.debug(f"Invalidated user info caches for user {user_id}")
@@ -132,6 +133,7 @@ def invalidate_donor_info_cache(sender, instance, **kwargs):
     """Invalidate donor info cache when donor profile is updated"""
     from django.core.cache import cache
     user_id = instance.user.id
+    cache.delete(f'view_cache:donor_info:{user_id}')
     cache.delete(f'donor_info_{user_id}')
     logger.debug(f"Invalidated donor info cache for user {user_id}")
 
@@ -141,6 +143,7 @@ def invalidate_hospital_admin_info_cache(sender, instance, **kwargs):
     """Invalidate hospital admin info cache when hospital admin profile is updated"""
     from django.core.cache import cache
     user_id = instance.user.id
+    cache.delete(f'view_cache:hospital_admin_info:{user_id}')
     cache.delete(f'hospital_admin_info_{user_id}')
     logger.debug(f"Invalidated hospital admin info cache for user {user_id}")
 
@@ -150,6 +153,7 @@ def invalidate_receptionist_info_cache(sender, instance, **kwargs):
     """Invalidate receptionist info cache when receptionist profile is updated"""
     from django.core.cache import cache
     user_id = instance.user.id
+    cache.delete(f'view_cache:receptionist_info:{user_id}')
     cache.delete(f'receptionist_info_{user_id}')
     logger.debug(f"Invalidated receptionist info cache for user {user_id}")
 
@@ -159,6 +163,7 @@ def invalidate_social_worker_info_cache(sender, instance, **kwargs):
     """Invalidate social worker info cache when social worker profile is updated"""
     from django.core.cache import cache
     user_id = instance.user.id
+    cache.delete(f'view_cache:social_worker_info:{user_id}')
     cache.delete(f'social_worker_info_{user_id}')
     logger.debug(f"Invalidated social worker info cache for user {user_id}")
 
@@ -168,5 +173,6 @@ def invalidate_system_admin_info_cache(sender, instance, **kwargs):
     """Invalidate system admin info cache when system admin profile is updated"""
     from django.core.cache import cache
     user_id = instance.user.id
+    cache.delete(f'view_cache:system_admin_info:{user_id}')
     cache.delete(f'system_admin_info_{user_id}')
     logger.debug(f"Invalidated system admin info cache for user {user_id}")
