@@ -145,12 +145,25 @@ class VoucherListView(ListAPIView):
 
         if user.role == Role.RECEPTIONIST:
             # Receptionists only see vouchers for their hospital
-            queryset = queryset.filter(hospital=user.hospital)
+            if hasattr(user, 'receptionist') and user.receptionist.hospital:
+                queryset = queryset.filter(hospital=user.receptionist.hospital)
+            else:
+                queryset = queryset.none()
+        elif user.role == Role.HOSPITAL_ADMIN:
+            # Hospital Admins only see vouchers for their hospital
+            if hasattr(user, 'hospitaladmin') and user.hospitaladmin.hospital:
+                queryset = queryset.filter(hospital=user.hospitaladmin.hospital)
+            else:
+                queryset = queryset.none()
 
         # Filtering
         status_filter = self.request.query_params.get("status")
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+
+        hospital_filter = self.request.query_params.get("hospital")
+        if hospital_filter:
+            queryset = queryset.filter(hospital=hospital_filter)
 
         return queryset.order_by("-created_at")
 
