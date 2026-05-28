@@ -3,20 +3,17 @@
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { setCachedToken } from "@/actions/api";
+import { refreshToken as apiRefreshToken } from "@/actions/auth";
 
 /**
  * Wraps protected routes and proactively refreshes the access token
  * before it expires so the user never experiences a mid-operation logout.
- *
- * Strategy:
- * 1. On mount / when session changes → cache the access token for actions
- * 2. Every 5 minutes → call update() which triggers NextAuth's JWT callback
- *    The JWT callback in auth.ts checks expiry and refreshes via Django when needed
  */
 
 export default function TokenRefreshProvider({ children }: { children: React.ReactNode }) {
   const { data: session, update } = useSession();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isRefreshingRef = useRef(false);
 
   // Keep cached token in sync with session
   useEffect(() => {
@@ -25,23 +22,46 @@ export default function TokenRefreshProvider({ children }: { children: React.Rea
     }
   }, [session?.accessToken]);
 
-  // Proactive refresh every 5 minutes
+  // Proactive refresh check every 1 minute
   useEffect(() => {
     intervalRef.current = setInterval(async () => {
-      try {
-        // update() hits the NextAuth session endpoint, which runs the JWT
-        // callback. The JWT callback checks expiry and calls Django /auth/token/
-        // with the refresh_token to get a new access_token.
-        await update();
-      } catch {
-        // silent — if the refresh fails the interceptor will catch the 401
+      if (!session?.refreshToken || !session?.expiresAt || isRefreshingRef.current) {
+        return;
       }
-    }, 5 * 60 * 1000);
+
+      const now = Date.now();
+      const timeUntilExpiry = session.expiresAt - now;
+      const tenMinutesInMs = 10 * 60 * 1000;
+
+      // If token is expiring within 10 minutes, proactively refresh it
+      if (timeUntilExpiry < tenMinutesInMs) {
+        console.log(`[TokenRefreshProvider] Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, refreshing...`);
+        isRefreshingRef.current = true;
+        try {
+          const refreshed = await apiRefreshToken(session.refreshToken);
+          if (refreshed && refreshed.access_token) {
+            console.log("[TokenRefreshProvider] Refresh successful, updating session...");
+            await update({
+              accessToken: refreshed.access_token,
+              refreshToken: refreshed.refresh_token,
+              expiresAt: Date.now() + refreshed.expires_in * 1000,
+            });
+            console.log("[TokenRefreshProvider] Session updated successfully");
+          } else {
+            console.warn("[TokenRefreshProvider] Refresh returned empty token");
+          }
+        } catch (error) {
+          console.error("[TokenRefreshProvider] Failed to proactively refresh token:", error);
+        } finally {
+          isRefreshingRef.current = false;
+        }
+      }
+    }, 60 * 1000); // Check every minute
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [update]);
+  }, [session, update]);
 
   return <>{children}</>;
 }
