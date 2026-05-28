@@ -22,9 +22,9 @@ class ReceptionistCreateSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=15)
     
 
-    national_id_number = serializers.CharField(max_length=500)
-    front_national_id_image = serializers.ImageField()
-    back_national_id_image = serializers.ImageField()
+    national_id_number = serializers.CharField(max_length=500, required=False, allow_blank=True, default='')
+    front_national_id_image = serializers.ImageField(required=False)
+    back_national_id_image = serializers.ImageField(required=False)
 
     # `hospital` field is injected in __init__ to avoid a circular import at
     # module load time (hospitals app imports nothing from accounts, but DRF
