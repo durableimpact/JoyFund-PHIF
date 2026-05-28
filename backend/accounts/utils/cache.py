@@ -4,7 +4,7 @@ from django.core.cache import cache
 from rest_framework.response import Response
 
 
-def cache_response(timeout=5 * 60, key_func=None):
+def cache_response(timeout=5 * 60, key_func=None, key_prefix=None):
     """
     Decorator to cache view responses based on request parameters.
     
@@ -19,17 +19,18 @@ def cache_response(timeout=5 * 60, key_func=None):
         timeout: Cache timeout in seconds (default: 5 minutes)
         key_func: Optional callable to generate custom cache key.
                  Signature: key_func(request, *args, **kwargs) -> str
+        key_prefix: Optional human-readable prefix for the cache key.
+                   When provided, the key becomes 'view_cache:{prefix}:{hash}'.
+                   This allows @invalidate_cache to delete all keys with that prefix
+                   using Redis pattern matching.
     
     Example:
         @cache_response(timeout=10 * 60)
         def get(self, request, *args, **kwargs):
             return super().get(request, *args, **kwargs)
     
-    With custom key function:
-        def custom_key(request, *args, **kwargs):
-            return f"donor_{kwargs.get('id')}"
-        
-        @cache_response(timeout=5 * 60, key_func=custom_key)
+    With key_prefix (recommended for list views):
+        @cache_response(timeout=5 * 60, key_prefix='donor_list')
         def get(self, request, *args, **kwargs):
             return super().get(request, *args, **kwargs)
     """
@@ -40,12 +41,15 @@ def cache_response(timeout=5 * 60, key_func=None):
             if key_func:
                 cache_key = key_func(request, *args, **kwargs)
             else:
-                cache_key = _generate_cache_key(request, *args, **kwargs)
+                hash_key = _generate_cache_key(request, *args, **kwargs)
+                if key_prefix:
+                    cache_key = f"view_cache:{key_prefix}:{hash_key}"
+                else:
+                    cache_key = hash_key
             
             # Try to get from cache
             cached_data = cache.get(cache_key)
             if cached_data is not None:
-                # Reconstruct Response from cached data (handles both dict and list responses)
                 return Response(cached_data['data'], status=cached_data['status'])
             
             # Call the actual view
@@ -54,15 +58,12 @@ def cache_response(timeout=5 * 60, key_func=None):
             # Cache the response data only if it's successful
             if isinstance(response, Response) and response.status_code == 200:
                 try:
-                    # Cache data can be a dict, list, or any JSON-serializable object
                     cache_data = {
                         'data': response.data,
                         'status': response.status_code,
                     }
                     cache.set(cache_key, cache_data, timeout)
-                except Exception as e:
-                    # If caching fails, still return the response
-                    # Log warning but don't fail the view
+                except Exception:
                     pass
             
             return response
@@ -71,16 +72,18 @@ def cache_response(timeout=5 * 60, key_func=None):
     return decorator
 
 
-def invalidate_cache(*cache_keys):
+def invalidate_cache(*prefixes):
     """
-    Decorator to invalidate cache keys after a view execution.
-    Useful for POST, PATCH, DELETE operations that modify data.
+    Decorator to invalidate cached responses by key prefix after a view execution.
+    Uses Redis pattern matching (delete_pattern) to remove all cache entries
+    whose keys start with 'view_cache:{prefix}:*'.
     
     Args:
-        *cache_keys: Variable number of cache keys to invalidate
+        *prefixes: Variable number of cache key prefixes to invalidate.
+                   These must match the key_prefix passed to @cache_response.
     
     Example:
-        @invalidate_cache('donor_list', 'donor_detail_*')
+        @invalidate_cache('donor_list')
         def post(self, request, *args, **kwargs):
             return super().post(request, *args, **kwargs)
     """
@@ -89,16 +92,13 @@ def invalidate_cache(*cache_keys):
         def wrapper(self, request, *args, **kwargs):
             response = func(self, request, *args, **kwargs)
             
-            # Invalidate specified keys
-            for key in cache_keys:
-                if '*' in key:
-                    # Wildcard invalidation (requires Redis backend)
-                    try:
-                        cache.delete_pattern(key)
-                    except AttributeError:
-                        pass
-                else:
-                    cache.delete(key)
+            for prefix in prefixes:
+                pattern = f"view_cache:{prefix}:*"
+                try:
+                    cache.delete_pattern(pattern)
+                except AttributeError:
+                    # Fallback: delete the exact prefix key (no wildcard match)
+                    cache.delete(f"view_cache:{prefix}")
             
             return response
         
