@@ -206,7 +206,7 @@ export default function HospitalPatientDetailPage() {
             <Calendar size={14} /> Enrollment Info
           </h2>
           <div className="space-y-3">
-            <Detail label="Status" value={beneficiary.is_active ? 'Active' : 'Inactive'} />
+            {/* <Detail label="Status" value={beneficiary.is_active ? 'Active' : 'Inactive'} /> */}
             <Detail label="Created" value={beneficiary.created_at ? formatDateTime(beneficiary.created_at) : '—'} />
             <Detail label="Updated" value={beneficiary.updated_at ? formatDateTime(beneficiary.updated_at) : '—'} />
           </div>
