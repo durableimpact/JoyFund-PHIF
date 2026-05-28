@@ -2,6 +2,7 @@
 
 import React from "react";
 import { LayoutDashboard, ClipboardCheck, FileText, Users, Ticket, Repeat, HeartPulse } from "lucide-react";
+import { useSession } from "next-auth/react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 
 const NAV: NavItem[] = [
@@ -15,12 +16,17 @@ const NAV: NavItem[] = [
 ];
 
 export default function HospitalAdminLayout({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
+  const userInfo = (session?.user as any)?.userInfo;
+  const hospitalName = userInfo?.hospital?.name;
+
   return (
     <DashboardShell
       navItems={NAV}
       accentColor="#1D75DB"
       brandLabel="Hospital Admin"
       brandSub="Hospital management"
+      hospitalName={hospitalName}
     >
       {children}
     </DashboardShell>
