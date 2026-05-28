@@ -109,7 +109,7 @@ export default function HospitalStaff() {
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {(s.name || s.first_name || '?').charAt(0)}
                       </div>
                       <span className="font-semibold text-gray-900">{s.name || `${s.first_name || ''} ${s.last_name || ''}`}</span>
