@@ -7,7 +7,6 @@ import {
   Activity,
   AlertTriangle,
   ArrowLeft,
-  CheckCircle,
   ClipboardCheck,
   Copy,
   Check,
@@ -72,11 +71,12 @@ export default function ReceptionistVoucherDetailPage() {
   const [error, setError] = useState('');
 
   // ── Fetch voucher ──
-  const { data: voucher, isLoading: vLoading } = useQuery<Voucher>({
+  const { data: voucherData, isLoading: vLoading } = useQuery({
     queryKey: ['rec-voucher', id, token],
     queryFn: () => getVoucher(id, token),
     enabled: !!token && !!id,
   });
+  const voucher = voucherData as Voucher | undefined;
 
   // ── Fetch associated medical claim ──
   const { data: claimsData, isLoading: cLoading } = useQuery({
@@ -85,15 +85,16 @@ export default function ReceptionistVoucherDetailPage() {
     enabled: !!token && !!id,
   });
 
-  const claim: MedicalClaim | undefined = claimsData?.results?.[0];
+  const claim = (claimsData as any)?.results?.[0] as MedicalClaim | undefined;
   const claimId = claim?.id;
 
   // ── Fetch full claim details when we have an ID ──
-  const { data: claimDetail } = useQuery<MedicalClaim>({
+  const { data: claimDetailData } = useQuery({
     queryKey: ['rec-voucher-claim', claimId, token],
     queryFn: () => getMedicalClaim(claimId!, token),
     enabled: !!token && !!claimId,
   });
+  const claimDetail = claimDetailData as MedicalClaim | undefined;
 
   const activeClaim = claimDetail || claim;
 
@@ -159,11 +160,15 @@ export default function ReceptionistVoucherDetailPage() {
   });
 
   const topUpMutation = useMutation({
-    mutationFn: () => createVoucherTopUpRequest(token, {
-      medical_claim: claimId!,
-      requested_amount: Number(topUpAmount),
-      reason: topUpReason,
-    }),
+    mutationFn: () => {
+      const maxTopUp = claimTotal - voucherAmount;
+      const clampedAmount = Math.min(Number(topUpAmount), maxTopUp);
+      return createVoucherTopUpRequest(token, {
+        medical_claim: claimId!,
+        requested_amount: clampedAmount,
+        reason: topUpReason,
+      });
+    },
     onSuccess: () => {
       setShowTopUp(false);
       setTopUpAmount('');
@@ -499,11 +504,12 @@ export default function ReceptionistVoucherDetailPage() {
                         Claim total ({formatXAF(claimTotal)}) exceeds voucher budget ({formatXAF(voucherAmount)}).
                       </p>
                       {!showTopUp ? (
-                        <button onClick={() => setShowTopUp(true)} className="text-xs font-bold text-amber-800 underline">Request Top-Up</button>
+                        <button onClick={() => { setShowTopUp(true); setTopUpAmount(String(claimTotal - voucherAmount)); }} className="text-xs font-bold text-amber-800 underline">Request Top-Up</button>
                       ) : (
                         <div className="space-y-2">
+                          <p className="text-xs text-amber-600">Maximum top-up: {formatXAF(claimTotal - voucherAmount)}</p>
                           <div className="grid grid-cols-2 gap-2">
-                            <input className="input-field" type="number" min="0" placeholder="Amount" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
+                            <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder="Amount" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
                             <input className="input-field" placeholder="Reason" value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />
                           </div>
                           <div className="flex gap-2">
