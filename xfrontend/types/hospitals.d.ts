@@ -137,20 +137,32 @@ declare type DocumentType = "BILL" | "PRESCRIPTION" | "LAB_RESULT" | "DISCHARGE"
 
 declare interface MedicalClaim {
   id: string;
-  voucher_id: string;
-  hospital_id: string;
+  voucher: string;
+  hospital: string;
   service_description: string;
   total_cost: number;
   claim_status: ClaimStatus;
   submitted_at: string;
-  submitted_by_id: string;
+  submitted_by: string;
   reviewed_at?: string | null;
-  reviewed_by_id?: string | null;
+  reviewed_by?: string | null;
   service_completed_at?: string | null;
   rejection_reason?: string | null;
   claim_items: ClaimItem[];
   proofs: MedicalClaimProof[];
   events?: MedicalClaimEvent[];
+}
+
+declare interface MedicalClaimList {
+  id: string;
+  voucher: string;
+  hospital: string;
+  hospital_name: string;
+  total_cost: string;
+  claim_status: ClaimStatus;
+  submitted_at: string;
+  submitted_by: string;
+  service_completed_at: string | null;
 }
 
 declare interface MedicalClaimEvent {
