@@ -180,7 +180,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // Handle client-side session update
+      if (trigger === "update" && session) {
+        console.log("[auth] Handling session update from client", session)
+        if (session.accessToken) token.accessToken = session.accessToken
+        if (session.refreshToken) token.refreshToken = session.refreshToken
+        if (session.expiresAt) token.expiresAt = session.expiresAt
+        if (session.role) token.role = session.role
+        if (session.userInfo) token.userInfo = session.userInfo
+        return token
+      }
+
       // Initial login
       if (user) {
         token.accessToken = (user as any).accessToken
