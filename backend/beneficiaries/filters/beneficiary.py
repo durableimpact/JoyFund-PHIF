@@ -104,6 +104,7 @@ class BeneficiaryFilter(filters.FilterSet):
 
     def filter_hospital(self, queryset, name, value):
         if value:
-            return queryset.filter(health_issues__voucher_set__hospital_id=value).distinct()
+            return queryset.filter(health_issues__voucher__hospital_id=value).distinct()
         return queryset
+
 
