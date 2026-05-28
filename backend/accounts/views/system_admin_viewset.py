@@ -13,7 +13,7 @@ from accounts.serializers import (
     SystemAdminUpdateSerializer,
     SystemAdminDashboardSerializer,
 )
-from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache, make_cache_key
+from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache
 from accounts.filters import SystemAdminFilter
 
 _TAG = ['System Admins']
@@ -64,7 +64,7 @@ class SystemAdminViewSet(
         responses={201: SystemAdminDetailSerializer},
         operation_description="Create a new System Admin account. Only accessible by existing SYSTEM_ADMIN.",
     )
-    @invalidate_cache(make_cache_key('system_admin_list'))
+    @invalidate_cache('system_admin_list')
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -79,7 +79,7 @@ class SystemAdminViewSet(
         responses={200: SystemAdminDetailSerializer(many=True)},
         operation_description="List System Admin profiles with filtering and search support. Only SYSTEM_ADMIN can list.",
     )
-    @cache_response(timeout=5 * 60)
+    @cache_response(timeout=5 * 60, key_prefix='system_admin_list')
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -88,7 +88,7 @@ class SystemAdminViewSet(
         responses={200: SystemAdminDetailSerializer},
         operation_description="Retrieve a System Admin profile. Accessible by the admin or another SYSTEM_ADMIN.",
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='system_admin_detail')
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -98,7 +98,7 @@ class SystemAdminViewSet(
         responses={200: SystemAdminDetailSerializer},
         operation_description="Partially update a System Admin profile. Accessible by the admin or another SYSTEM_ADMIN.",
     )
-    @invalidate_cache(make_cache_key('system_admin_list'))
+    @invalidate_cache('system_admin_list')
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
@@ -108,7 +108,7 @@ class SystemAdminViewSet(
         responses={200: SystemAdminDetailSerializer},
         operation_description="Fully update a System Admin profile. Accessible by the admin or another SYSTEM_ADMIN.",
     )
-    @invalidate_cache(make_cache_key('system_admin_list'))
+    @invalidate_cache('system_admin_list')
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
