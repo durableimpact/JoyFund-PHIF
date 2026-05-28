@@ -20,6 +20,7 @@ interface DashboardShellProps {
   brandLabel: string;        // e.g. 'System Admin'
   brandSub?: string;         // e.g. 'Full platform oversight'
   headerExtra?: React.ReactNode;
+  hospitalName?: string;     // e.g. 'Central Hospital Yaoundé'
 }
 
 export default function DashboardShell({
@@ -29,6 +30,7 @@ export default function DashboardShell({
   brandLabel,
   brandSub,
   headerExtra,
+  hospitalName,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
@@ -61,6 +63,12 @@ export default function DashboardShell({
             {brandSub && <p className="text-white/60 text-xs">{brandSub}</p>}
           </div>
         </Link>
+        {hospitalName && (
+          <div className="mt-3 px-1 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <p className="text-white/50 text-[10px] uppercase tracking-wider">Hospital</p>
+            <p className="text-white text-xs font-semibold truncate">{hospitalName}</p>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -158,6 +166,12 @@ export default function DashboardShell({
           </button>
 
           <div className="flex-1" />
+
+          {hospitalName && (
+            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg hidden sm:block">
+              {hospitalName}
+            </span>
+          )}
 
           {headerExtra}
 
