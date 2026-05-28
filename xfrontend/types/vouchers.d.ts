@@ -88,10 +88,12 @@ declare interface VoucherCreateFromCampaignsPayload {
 }
 
 declare interface VoucherCheckResponse {
+  id: string;
   voucher_code: string;
   status: string;
   expiry_date?: string | null;
-  beneficiary: Record<string, any>;
+  amount: number;
+  beneficiary: Beneficiary;
   is_valid: boolean;
   created_at: string;
 }
