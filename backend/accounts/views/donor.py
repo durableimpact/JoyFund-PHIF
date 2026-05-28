@@ -13,7 +13,7 @@ from accounts.serializers import (
     DonorRegisterSerializer,
     DonorUpdateSerializer,
 )
-from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache, make_cache_key
+from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache
 from accounts.filters import DonorFilter
 
 _TAG = ['Donors']
@@ -33,7 +33,7 @@ class DonorRegisterView(APIView):
         responses={201: DonorDetailSerializer},
         operation_description="Register a new Donor account. Open to everyone.",
     )
-    @invalidate_cache(make_cache_key('donor_list'))
+    @invalidate_cache('donor_list')
     def post(self, request):
         serializer = DonorRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -69,7 +69,7 @@ class DonorListView(ListAPIView):
         responses={200: DonorDetailSerializer(many=True)},
         operation_description="List Donor profiles with filtering, search, and ordering support. Accessible only by SYSTEM_ADMIN.",
     )
-    @cache_response(timeout=5 * 60)
+    @cache_response(timeout=5 * 60, key_prefix='donor_list')
     def get(self, request, *args, **kwargs):
         """Cache includes query parameters, so different filters generate different cache keys."""
         return super().get(request, *args, **kwargs)
@@ -91,7 +91,7 @@ class DonorDetailView(RetrieveAPIView):
         responses={200: DonorDetailSerializer},
         operation_description="Retrieve a Donor profile. Accessible by the donor or a SYSTEM_ADMIN.",
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='donor_detail')
     def get(self, request, *args, **kwargs):
         """Cache key includes the donor ID, so each donor profile is cached separately."""
         return super().get(request, *args, **kwargs)
@@ -115,7 +115,7 @@ class DonorUpdateView(UpdateAPIView):
         responses={200: DonorDetailSerializer},
         operation_description="Partially update a Donor profile. Only accessible by the donor or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache(make_cache_key('donor_list'))
+    @invalidate_cache('donor_list')
     def patch(self, request, *args, **kwargs):
         """Invalidates the donor list cache when a donor is updated."""
         response = super().patch(request, *args, **kwargs)
@@ -128,3 +128,4 @@ class DonorUpdateView(UpdateAPIView):
             pass
         
         return response
+
