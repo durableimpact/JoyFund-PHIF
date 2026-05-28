@@ -259,3 +259,18 @@ declare interface VoucherTopUpCreatePayload {
 declare interface VoucherTopUpActionPayload {
   review_notes?: string;
 }
+
+// ── Voucher Hospital Actions ──
+
+declare interface VoucherApproveResponse {
+  id: string;
+  status: string;
+  message?: string;
+}
+
+declare interface VoucherConfirmPinResponse {
+  id: string;
+  status: string;
+  confirmed: boolean;
+  message?: string;
+}
