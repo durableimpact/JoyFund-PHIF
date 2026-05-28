@@ -204,8 +204,8 @@ export default function ReceptionistVoucherDetailPage() {
   };
 
   const pendingTotal = pendingItems.reduce((s, i) => s + i.amount, 0);
-  const claimTotal = activeClaim?.claim_items?.reduce((s: number, i: any) => s + i.amount, 0) || 0;
-  const voucherAmount = voucher?.funding_records?.reduce((s, f) => s + f.committed_amount, 0) || 0;
+  const claimTotal = Math.round(activeClaim?.claim_items?.reduce((s: number, i: any) => s + i.amount, 0) || 0);
+  const voucherAmount = Math.round(voucher?.funding_records?.reduce((s: number, f: any) => s + f.committed_amount, 0) || 0);
   const overBudget = (activeClaim ? claimTotal : pendingTotal) > voucherAmount && voucherAmount > 0;
   const hasItems = activeClaim ? (activeClaim.claim_items?.length || 0) > 0 : pendingItems.length > 0;
   const hasProofs = (activeClaim?.proofs?.length || 0) > 0;

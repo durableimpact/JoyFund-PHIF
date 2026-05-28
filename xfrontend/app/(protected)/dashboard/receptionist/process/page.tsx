@@ -210,8 +210,8 @@ export default function ProcessVoucher() {
   };
 
   const pendingTotal = pendingItems.reduce((s, i) => s + i.amount, 0);
-  const claimTotal = claimData?.claim_items?.reduce((s: number, i: any) => s + i.amount, 0) || 0;
-  const voucherAmount = voucherData?.amount || 0;
+  const claimTotal = Math.round(claimData?.claim_items?.reduce((s: number, i: any) => s + i.amount, 0) || 0);
+  const voucherAmount = Math.round(voucherData?.amount || 0);
   const activeTotal = step === 'manage' ? claimTotal : pendingTotal;
   const overBudget = activeTotal > voucherAmount && voucherAmount > 0;
   const hasItems = step === 'manage'
