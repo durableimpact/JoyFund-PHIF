@@ -3,6 +3,7 @@ from .service import ServiceViewSet
 from .medical_claim import (
     MedicalClaimCreateView,
     MedicalClaimDetailView,
+    MedicalClaimListView,
     MedicalClaimProofListCreateView,
     MedicalClaimProofDetailView,
     MedicalClaimProofVerifyView,
@@ -32,6 +33,7 @@ __all__ = [
     "ServiceViewSet",
     "MedicalClaimCreateView",
     "MedicalClaimDetailView",
+    "MedicalClaimListView",
     "MedicalClaimProofListCreateView",
     "MedicalClaimProofDetailView",
     "MedicalClaimProofVerifyView",
