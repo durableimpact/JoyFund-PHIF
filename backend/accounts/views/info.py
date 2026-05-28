@@ -12,7 +12,7 @@ from accounts.serializers import (
     SocialWorkerInfoSerializer,
     SystemAdminInfoSerializer,
 )
-from accounts.utils import IsSystemAdmin, cache_response, make_cache_key
+from accounts.utils import IsSystemAdmin, cache_response
 
 
 _TAG = ['User Info']
@@ -44,7 +44,7 @@ class DonorInfoView(RetrieveAPIView):
             403: 'Forbidden - Only DONOR can access this endpoint',
         },
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='donor_info')
     def get(self, request, *args, **kwargs):
         """Cache key includes the authenticated user's ID."""
         return super().get(request, *args, **kwargs)
@@ -76,7 +76,7 @@ class HospitalAdminInfoView(RetrieveAPIView):
             403: 'Forbidden - Only HOSPITAL_ADMIN can access this endpoint',
         },
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='hospital_admin_info')
     def get(self, request, *args, **kwargs):
         """Cache key includes the authenticated user's ID."""
         return super().get(request, *args, **kwargs)
@@ -108,7 +108,7 @@ class ReceptionistInfoView(RetrieveAPIView):
             403: 'Forbidden - Only RECEPTIONIST can access this endpoint',
         },
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='receptionist_info')
     def get(self, request, *args, **kwargs):
         """Cache key includes the authenticated user's ID."""
         return super().get(request, *args, **kwargs)
@@ -140,7 +140,7 @@ class SocialWorkerInfoView(RetrieveAPIView):
             403: 'Forbidden - Only SOCIAL_WORKER can access this endpoint',
         },
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='social_worker_info')
     def get(self, request, *args, **kwargs):
         """Cache key includes the authenticated user's ID."""
         return super().get(request, *args, **kwargs)
@@ -167,7 +167,7 @@ class SystemAdminInfoView(RetrieveAPIView):
             403: 'Forbidden - Only SYSTEM_ADMIN can access this endpoint',
         },
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='system_admin_info')
     def get(self, request, *args, **kwargs):
         """Cache key includes the authenticated user's ID."""
         return super().get(request, *args, **kwargs)
