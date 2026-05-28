@@ -330,6 +330,25 @@ export const updateMedicalClaim = async (
   }
 };
 
+export const addClaimItems = async (
+  medicalClaimId: string,
+  access_token: string,
+  data: MedicalClaimAddItemsPayload,
+) => {
+  try {
+    const { data: claim } = await api.post<MedicalClaim>(
+      `/api/hospitals/medical-claims/${medicalClaimId}/add-items/`,
+      data,
+      {
+        headers: { Authorization: `Bearer ${access_token}` },
+      },
+    );
+    return claim;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
 export const approveMedicalClaim = async (
   medicalClaimId: string,
   access_token: string,
