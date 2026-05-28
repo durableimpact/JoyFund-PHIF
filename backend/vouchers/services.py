@@ -113,11 +113,14 @@ def check_in_voucher(voucher: Voucher,check_by:User) -> bool:
 
     VoucherEvent.objects.create(
         voucher=voucher,
-        event_type=Voucher.Status.ACTIVE,
+        status=Voucher.Status.ACTIVE,
         changed_by=check_by,
         notes="Voucher checked in at hospital reception.",
     )
 
+    if voucher.health_issue and voucher.health_issue.status != HealthIssueStatus.IN_TREATMENT:
+        voucher.health_issue.status = HealthIssueStatus.IN_TREATMENT
+        voucher.health_issue.save(update_fields=["status"])
 
     _log_activity(
         action="voucher.check_in.success",
