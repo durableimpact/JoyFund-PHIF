@@ -10,8 +10,11 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
+
+from hospitals.filters import MedicalClaimFilter
 
 from utils.serializers import ErrorResponseSerializer
 from hospitals.models import (
@@ -23,6 +26,7 @@ from hospitals.models import (
 from hospitals.serializers.medical_claim import (
     MedicalClaimCreateSerializer,
     MedicalClaimDetailSerializer,
+    MedicalClaimListSerializer,
     MedicalClaimAddItemsSerializer,
     MedicalClaimProofSerializer,
     MedicalClaimProofCreateSerializer,
@@ -177,6 +181,23 @@ class MedicalClaimDetailView(RetrieveUpdateAPIView):
     def patch(self, request, *args, **kwargs):
         kwargs["partial"] = True
         return self.put(request, *args, **kwargs)
+
+
+class MedicalClaimListView(ListAPIView):
+    """List all medical claims with filtering."""
+
+    permission_classes = [IsSystemOrHospitalAdminOrReceptionist]
+    queryset = MedicalClaim.objects.select_related("hospital").all()
+    serializer_class = MedicalClaimListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MedicalClaimFilter
+
+    @swagger_auto_schema(
+        tags=["Medical Claims"],
+        operation_description="List all medical claims with optional filters (claim_status, hospital, total_cost range, submitted_at range, service_completed).",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class MedicalClaimProofListCreateView(ListCreateAPIView):
