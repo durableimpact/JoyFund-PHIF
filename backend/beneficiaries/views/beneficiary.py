@@ -57,6 +57,21 @@ class IsSocialWorkerOrSystemAdmin(BasePermission):
             and request.user.role in [Role.SOCIAL_WORKER, Role.SYSTEM_ADMIN]
         )
 
+class CanViewBeneficiaries(BasePermission):
+    message = "Only Social Workers, System Admins, Hospital Admins, or Receptionists can perform this action."
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in [
+                Role.SOCIAL_WORKER,
+                Role.SYSTEM_ADMIN,
+                Role.HOSPITAL_ADMIN,
+                Role.RECEPTIONIST,
+            ]
+        )
+
 class IsBeneficiaryEnrolledByRequester(BasePermission):
     message = "You can only manage beneficiaries enrolled by your account."
 
@@ -64,10 +79,14 @@ class IsBeneficiaryEnrolledByRequester(BasePermission):
         # System Admin can see and manage everything
         if request.user.role == Role.SYSTEM_ADMIN:
             return True
+        # Hospital Admin and Receptionist can view any beneficiary details (read-only)
+        if request.user.role in [Role.HOSPITAL_ADMIN, Role.RECEPTIONIST] and request.method == "GET":
+            return True
         try:
             return obj.enrolled_by_id == request.user.socialworker.id
         except Exception:
             return False
+
 
 
 class BeneficiaryCreateView(APIView):
@@ -110,7 +129,7 @@ class BeneficiaryListView(ListAPIView):
     Supports filtering, searching, and ordering.
     """
     serializer_class = BeneficiaryDetailSerializer
-    permission_classes = [IsAuthenticated, IsSocialWorkerOrSystemAdmin]
+    permission_classes = [IsAuthenticated, CanViewBeneficiaries]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = BeneficiaryFilter
     search_fields = [
@@ -127,11 +146,16 @@ class BeneficiaryListView(ListAPIView):
         if getattr(self, "swagger_fake_view", False):
             return Beneficiary.objects.none()
 
+        user = self.request.user
+        if user.role in [Role.SYSTEM_ADMIN, Role.HOSPITAL_ADMIN, Role.RECEPTIONIST]:
+            return Beneficiary.objects.all().order_by("-created_at")
+
         return (
             Beneficiary.objects.select_related("enrolled_by__user")
-            .filter(enrolled_by__user=self.request.user)
+            .filter(enrolled_by__user=user)
             .order_by("-created_at")
         )
+
 
     @swagger_auto_schema(
         tags=_TAG,
