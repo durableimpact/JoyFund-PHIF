@@ -6,6 +6,7 @@ from hospitals.views import (
     ServiceViewSet,
     MedicalClaimCreateView,
     MedicalClaimDetailView,
+    MedicalClaimListView,
     MedicalClaimProofListCreateView,
     MedicalClaimProofDetailView,
     MedicalClaimProofVerifyView,
@@ -44,32 +45,37 @@ urlpatterns = (
             name="medical-claim-create",
         ),
         path(
-            "medical-claims/<uuid:pk>/",
+            "medical-claims/list/",
+            MedicalClaimListView.as_view(),
+            name="medical-claim-list",
+        ),
+        path(
+            "medical-claims/<int:pk>/",
             MedicalClaimDetailView.as_view(),
             name="medical-claim-detail",
         ),
         path(
-            "medical-claims/<uuid:medical_claim_id>/proofs/",
+            "medical-claims/<int:medical_claim_id>/proofs/",
             MedicalClaimProofListCreateView.as_view(),
             name="medical-claim-proofs",
         ),
         path(
-            "medical-claims/<uuid:medical_claim_id>/proofs/<uuid:pk>/",
+            "medical-claims/<int:medical_claim_id>/proofs/<int:pk>/",
             MedicalClaimProofDetailView.as_view(),
             name="medical-claim-proof-detail",
         ),
         path(
-            "medical-claims/<uuid:medical_claim_id>/proofs/<uuid:pk>/verify/",
+            "medical-claims/<int:medical_claim_id>/proofs/<int:pk>/verify/",
             MedicalClaimProofVerifyView.as_view(),
             name="medical-claim-proof-verify",
         ),
         path(
-            "medical-claims/<uuid:medical_claim_id>/proofs/<uuid:pk>/reject/",
+            "medical-claims/<int:medical_claim_id>/proofs/<int:pk>/reject/",
             MedicalClaimProofRejectView.as_view(),
             name="medical-claim-proof-reject",
         ),
         path(
-            "medical-claims/<uuid:medical_claim_id>/proofs/<uuid:pk>/flag/",
+            "medical-claims/<int:medical_claim_id>/proofs/<int:pk>/flag/",
             MedicalClaimProofFlagView.as_view(),
             name="medical-claim-proof-flag",
         ),
@@ -113,23 +119,23 @@ urlpatterns = (
         ),
         # Claim approval/rejection workflow
         path(
-            "medical-claims/<uuid:medical_claim_id>/approve/",
+            "medical-claims/<int:medical_claim_id>/approve/",
             MedicalClaimApproveView.as_view(),
             name="medical-claim-approve",
         ),
         path(
-            "medical-claims/<uuid:medical_claim_id>/reject/",
+            "medical-claims/<int:medical_claim_id>/reject/",
             MedicalClaimRejectView.as_view(),
             name="medical-claim-reject",
         ),
         # Claim completion workflow
         path(
-            "medical-claims/<uuid:medical_claim_id>/mark-complete/",
+            "medical-claims/<int:medical_claim_id>/mark-complete/",
             MedicalClaimMarkCompleteView.as_view(),
             name="medical-claim-mark-complete",
         ),
         path(
-            "medical-claims/<uuid:medical_claim_id>/final-verify/",
+            "medical-claims/<int:medical_claim_id>/final-verify/",
             MedicalClaimFinalVerifyView.as_view(),
             name="medical-claim-final-verify",
         ),
