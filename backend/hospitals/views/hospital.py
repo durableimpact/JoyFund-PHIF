@@ -6,7 +6,7 @@ from drf_yasg import openapi
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import HospitalAdmin, Receptionist, Role
@@ -314,3 +314,71 @@ class HospitalViewSet(viewsets.ModelViewSet):
 
         serializer = StaffSerializer(staff_list, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[AllowAny],
+        url_path="dashboard",
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={
+            200: openapi.Response(
+                description="Dashboard statistics for the hospital",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "total_services": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "total_vouchers_redeemed": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "total_claims_processed": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "pending_claims": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "monthly_redeemed": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    },
+                ),
+            )
+        },
+        operation_description="Get dashboard statistics for a specific hospital.",
+    )
+    def dashboard(self, request, pk=None):
+        """Get dashboard statistics for a hospital"""
+        try:
+            hospital = self.get_object()
+        except Hospital.DoesNotExist:
+            return Response(
+                {"detail": "Hospital not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from django.utils import timezone
+        from hospitals.models import Services, MedicalClaim
+        
+        now = timezone.now()
+        
+        total_services = hospital.services.count()
+        total_vouchers_redeemed = Voucher.objects.filter(
+            hospital=hospital, status=Voucher.Status.USED
+        ).count()
+        total_claims_processed = MedicalClaim.objects.filter(
+            hospital=hospital, claim_status__in=["APPROVED", "REJECTED"]
+        ).count()
+        pending_claims = MedicalClaim.objects.filter(
+            hospital=hospital, claim_status="PENDING"
+        ).count()
+        monthly_redeemed = Voucher.objects.filter(
+            hospital=hospital,
+            status=Voucher.Status.USED,
+            redeemed_at__year=now.year,
+            redeemed_at__month=now.month,
+        ).count()
+
+        return Response(
+            {
+                "total_services": total_services,
+                "total_vouchers_redeemed": total_vouchers_redeemed,
+                "total_claims_processed": total_claims_processed,
+                "pending_claims": pending_claims,
+                "monthly_redeemed": monthly_redeemed,
+            },
+            status=status.HTTP_200_OK,
+        )
