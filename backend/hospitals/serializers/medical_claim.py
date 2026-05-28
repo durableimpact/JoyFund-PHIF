@@ -83,6 +83,26 @@ class MedicalClaimDetailSerializer(serializers.ModelSerializer):
         ]
 
 
+class MedicalClaimListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for listing medical claims in a table."""
+
+    hospital_name = serializers.CharField(source="hospital.name", read_only=True)
+
+    class Meta:
+        model = MedicalClaim
+        fields = [
+            "id",
+            "voucher",
+            "hospital",
+            "hospital_name",
+            "total_cost",
+            "claim_status",
+            "submitted_at",
+            "submitted_by",
+            "service_completed_at",
+        ]
+
+
 class MedicalClaimCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating a medical claim with initial items."""
 
