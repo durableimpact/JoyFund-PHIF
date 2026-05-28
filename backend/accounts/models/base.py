@@ -49,9 +49,9 @@ class BaseProfile(models.Model):
 class NationalIDMixin(models.Model):
     """National-ID fields shared by staff profiles."""
 
-    national_id_number = models.CharField(max_length=500)
-    front_national_id_image = models.ImageField(upload_to=_national_id_upload('front'))
-    back_national_id_image = models.ImageField(upload_to=_national_id_upload('back'))
+    national_id_number = models.CharField(max_length=500, blank=True, default='')
+    front_national_id_image = models.ImageField(upload_to=_national_id_upload('front'), null=True, blank=True)
+    back_national_id_image = models.ImageField(upload_to=_national_id_upload('back'), null=True, blank=True)
 
     class Meta:
         abstract = True
