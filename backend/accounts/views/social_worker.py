@@ -14,7 +14,7 @@ from accounts.serializers import (
     SocialWorkerUpdateSerializer,
     SocialWorkerDashboardSerializer,
 )
-from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache, make_cache_key
+from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache
 from accounts.filters import SocialWorkerFilter
 from beneficiaries.models import Beneficiary, HealthIssue
 from vouchers.models.Voucher import Voucher
@@ -68,7 +68,7 @@ class SocialWorkerViewSet(
         responses={201: SocialWorkerDetailSerializer},
         operation_description="Create a new Social Worker account. Only accessible by SYSTEM_ADMIN.",
     )
-    @invalidate_cache(make_cache_key('social_worker_list'))
+    @invalidate_cache('social_worker_list')
     def create(self, request, *args, **kwargs):
         try:
             enrolled_by = request.user.systemadmin
@@ -110,7 +110,7 @@ class SocialWorkerViewSet(
         responses={200: SocialWorkerDetailSerializer},
         operation_description="Retrieve a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
-    @cache_response(timeout=10 * 60)
+    @cache_response(timeout=10 * 60, key_prefix='social_worker_detail')
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -120,7 +120,7 @@ class SocialWorkerViewSet(
         responses={200: SocialWorkerDetailSerializer},
         operation_description="Partially update a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache(make_cache_key('social_worker_list'))
+    @invalidate_cache('social_worker_list')
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
@@ -130,7 +130,7 @@ class SocialWorkerViewSet(
         responses={200: SocialWorkerDetailSerializer},
         operation_description="Fully update a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache(make_cache_key('social_worker_list'))
+    @invalidate_cache('social_worker_list')
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
