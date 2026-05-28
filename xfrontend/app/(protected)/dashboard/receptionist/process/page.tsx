@@ -23,7 +23,12 @@ import {
   markMedicalClaimComplete,
   createVoucherTopUpRequest,
 } from '@/actions/hospital';
-import { formatXAF, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+
+function money(amount: number): string {
+  if (isNaN(amount)) return '0 XAF';
+  return `${Math.round(amount).toLocaleString()} XAF`;
+}
 
 interface PendingItem {
   tempId: number;
@@ -285,7 +290,7 @@ export default function ProcessVoucher() {
               </div>
               <div>
                 <dt className="text-[10px] text-gray-400 uppercase">Allocated Amount</dt>
-                <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{formatXAF(voucherData.amount)}</dd>
+                <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherData.amount)}</dd>
               </div>
               {voucherData.expiry_date && (
                 <div>
@@ -320,7 +325,7 @@ export default function ProcessVoucher() {
                   <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Create Medical Claim</h3>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-gray-400">Budget:</span>
-                    <span className="font-bold" style={{ color: '#1D75DB' }}>{formatXAF(voucherAmount)}</span>
+                    <span className="font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</span>
                   </div>
                 </div>
 
@@ -340,7 +345,7 @@ export default function ProcessVoucher() {
                     <select className="input-field" value={selectedServiceId} onChange={(e) => handleServiceSelect(e.target.value)}>
                       <option value="">— Choose a service —</option>
                       {services.filter((s: any) => s.is_available).map((s: any) => (
-                        <option key={s.id} value={s.id}>{s.name} — {formatXAF(s.price)}</option>
+                        <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                       ))}
                     </select>
                   </div>
@@ -383,7 +388,7 @@ export default function ProcessVoucher() {
                           <tr key={item.tempId} className="border-b border-gray-50">
                             <td className="p-3 text-xs text-gray-400">{idx + 1}</td>
                             <td className="p-3 font-medium text-gray-800">{item.name}</td>
-                            <td className="p-3 text-right font-semibold text-gray-900">{formatXAF(item.amount)}</td>
+                            <td className="p-3 text-right font-semibold text-gray-900">{money(item.amount)}</td>
                             <td className="p-3 text-right">
                               <button onClick={() => removePendingItem(item.tempId)} className="text-gray-400 hover:text-red-500">
                                 <Trash2 size={14} />
@@ -393,7 +398,7 @@ export default function ProcessVoucher() {
                         ))}
                         <tr className="bg-gray-50">
                           <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
-                          <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{formatXAF(pendingTotal)}</td>
+                          <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{money(pendingTotal)}</td>
                           <td></td>
                         </tr>
                       </tbody>
@@ -410,7 +415,7 @@ export default function ProcessVoucher() {
               {overBudget && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs text-amber-700">
                   <AlertTriangle size={14} />
-                  Total ({formatXAF(pendingTotal)}) exceeds voucher budget ({formatXAF(voucherAmount)}). You can still create the claim and request a top-up later.
+                  Total ({money(pendingTotal)}) exceeds voucher budget ({money(voucherAmount)}). You can still create the claim and request a top-up later.
                 </div>
               )}
 
@@ -449,19 +454,19 @@ export default function ProcessVoucher() {
             <div className="grid grid-cols-3 gap-4 pt-3 border-t border-gray-100">
               <div>
                 <dt className="text-[10px] text-gray-400 uppercase">Voucher Budget</dt>
-                <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{formatXAF(voucherAmount)}</dd>
+                <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</dd>
               </div>
               <div>
                 <dt className="text-[10px] text-gray-400 uppercase">Claim Total</dt>
                 <dd className={`text-sm font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>
-                  {formatXAF(claimTotal)}
+                  {money(claimTotal)}
                   {overBudget && <span className="text-xs ml-1">(over budget)</span>}
                 </dd>
               </div>
               <div>
                 <dt className="text-[10px] text-gray-400 uppercase">Remaining</dt>
                 <dd className={`text-sm font-bold ${overBudget ? 'text-red-600' : 'text-green-600'}`}>
-                  {formatXAF(voucherAmount - claimTotal)}
+                  {money(voucherAmount - claimTotal)}
                 </dd>
               </div>
             </div>
@@ -488,12 +493,12 @@ export default function ProcessVoucher() {
                       <tr key={item.id} className="border-b border-gray-50">
                         <td className="p-3 text-xs text-gray-400">{idx + 1}</td>
                         <td className="p-3 font-medium text-gray-800">{item.name}</td>
-                        <td className="p-3 text-right font-semibold text-gray-900">{formatXAF(item.amount)}</td>
+                        <td className="p-3 text-right font-semibold text-gray-900">{money(item.amount)}</td>
                       </tr>
                     ))}
                     <tr className="bg-gray-50">
                       <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
-                      <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{formatXAF(claimTotal)}</td>
+                      <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{money(claimTotal)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -513,7 +518,7 @@ export default function ProcessVoucher() {
                   }}>
                     <option value="">— Custom entry —</option>
                     {services.filter((s: any) => s.is_available).map((s: any) => (
-                      <option key={s.id} value={s.id}>{s.name} — {formatXAF(s.price)}</option>
+                      <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                     ))}
                   </select>
                 </div>
@@ -548,7 +553,7 @@ export default function ProcessVoucher() {
                 <div className="flex-1">
                   <h4 className="font-bold text-amber-800 text-sm mb-1">Over Budget</h4>
                   <p className="text-xs text-amber-700 mb-3">
-                    Claim total ({formatXAF(claimTotal)}) exceeds voucher budget ({formatXAF(voucherAmount)}).
+                    Claim total ({money(claimTotal)}) exceeds voucher budget ({money(voucherAmount)}).
                     You can save and wait, or request a top-up from the hospital admin.
                   </p>
                   {!showTopUp && (
@@ -556,7 +561,7 @@ export default function ProcessVoucher() {
                   )}
                   {showTopUp && (
                     <div className="space-y-2 mt-2">
-                      <p className="text-xs text-amber-600">Maximum top-up: {formatXAF(claimTotal - voucherAmount)}</p>
+                      <p className="text-xs text-amber-600">Maximum top-up: {money(claimTotal - voucherAmount)}</p>
                       <div className="grid grid-cols-2 gap-2">
                         <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder="Amount (XAF)" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
                         <input className="input-field" placeholder="Reason" value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />

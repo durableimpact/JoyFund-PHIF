@@ -31,7 +31,12 @@ import {
   markMedicalClaimComplete,
   createVoucherTopUpRequest,
 } from '@/actions/hospital';
-import { formatXAF, formatDate, formatDateTime, statusColor } from '@/lib/utils';
+import { formatDate, formatDateTime, statusColor } from '@/lib/utils';
+
+function money(amount: number): string {
+  if (isNaN(amount)) return '0 XAF';
+  return `${Math.round(amount).toLocaleString()} XAF`;
+}
 
 interface PendingItem {
   tempId: number;
@@ -259,7 +264,7 @@ export default function ReceptionistVoucherDetailPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <dt className="text-[10px] text-gray-400 uppercase">Budget</dt>
-                <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{formatXAF(voucherAmount)}</dd>
+                <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</dd>
               </div>
               <div>
                 <dt className="text-[10px] text-gray-400 uppercase">Language</dt>
@@ -319,7 +324,7 @@ export default function ReceptionistVoucherDetailPage() {
                   <select className="input-field" value={selectedServiceId} onChange={(e) => handleServiceSelect(e.target.value)}>
                     <option value="">— Choose a service —</option>
                     {services.filter((s: any) => s.is_available).map((s: any) => (
-                      <option key={s.id} value={s.id}>{s.name} — {formatXAF(s.price)}</option>
+                      <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                     ))}
                   </select>
                 </div>
@@ -358,7 +363,7 @@ export default function ReceptionistVoucherDetailPage() {
                           <tr key={item.tempId} className="border-b border-gray-50">
                             <td className="p-3 text-xs text-gray-400">{idx + 1}</td>
                             <td className="p-3 font-medium text-gray-800">{item.name}</td>
-                            <td className="p-3 text-right font-semibold text-gray-900">{formatXAF(item.amount)}</td>
+                            <td className="p-3 text-right font-semibold text-gray-900">{money(item.amount)}</td>
                             <td className="p-3 text-right">
                               <button onClick={() => removePendingItem(item.tempId)} className="text-gray-400 hover:text-red-500">
                                 <Trash2 size={14} />
@@ -368,7 +373,7 @@ export default function ReceptionistVoucherDetailPage() {
                         ))}
                         <tr className="bg-gray-50">
                           <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
-                          <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{formatXAF(pendingTotal)}</td>
+                          <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{money(pendingTotal)}</td>
                           <td></td>
                         </tr>
                       </tbody>
@@ -410,18 +415,18 @@ export default function ReceptionistVoucherDetailPage() {
                 <div className="grid grid-cols-3 gap-4 pt-3 border-t border-gray-100">
                   <div>
                     <dt className="text-[10px] text-gray-400 uppercase">Budget</dt>
-                    <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{formatXAF(voucherAmount)}</dd>
+                    <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</dd>
                   </div>
                   <div>
                     <dt className="text-[10px] text-gray-400 uppercase">Claim Total</dt>
                     <dd className={`text-sm font-bold ${claimTotal > voucherAmount && voucherAmount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                      {formatXAF(claimTotal)}
+                      {money(claimTotal)}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-[10px] text-gray-400 uppercase">Remaining</dt>
                     <dd className={`text-sm font-bold ${claimTotal > voucherAmount && voucherAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {formatXAF(voucherAmount - claimTotal)}
+                      {money(voucherAmount - claimTotal)}
                     </dd>
                   </div>
                 </div>
@@ -447,12 +452,12 @@ export default function ReceptionistVoucherDetailPage() {
                         <tr key={item.id} className="border-b border-gray-50">
                           <td className="p-3 text-xs text-gray-400">{idx + 1}</td>
                           <td className="p-3 font-medium text-gray-800">{item.name}</td>
-                          <td className="p-3 text-right font-semibold text-gray-900">{formatXAF(item.amount)}</td>
+                          <td className="p-3 text-right font-semibold text-gray-900">{money(item.amount)}</td>
                         </tr>
                       ))}
                       <tr className="bg-gray-50">
                         <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
-                        <td className={`p-3 text-right font-bold ${claimTotal > voucherAmount && voucherAmount > 0 ? 'text-red-600' : 'text-gray-900'}`}>{formatXAF(claimTotal)}</td>
+                        <td className={`p-3 text-right font-bold ${claimTotal > voucherAmount && voucherAmount > 0 ? 'text-red-600' : 'text-gray-900'}`}>{money(claimTotal)}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -469,7 +474,7 @@ export default function ReceptionistVoucherDetailPage() {
                     }}>
                       <option value="">— Hospital service or custom —</option>
                       {services.filter((s: any) => s.is_available).map((s: any) => (
-                        <option key={s.id} value={s.id}>{s.name} — {formatXAF(s.price)}</option>
+                        <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                       ))}
                     </select>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -501,13 +506,13 @@ export default function ReceptionistVoucherDetailPage() {
                     <div className="flex-1">
                       <h4 className="font-bold text-amber-800 text-sm mb-1">Over Budget</h4>
                       <p className="text-xs text-amber-700 mb-3">
-                        Claim total ({formatXAF(claimTotal)}) exceeds voucher budget ({formatXAF(voucherAmount)}).
+                        Claim total ({money(claimTotal)}) exceeds voucher budget ({money(voucherAmount)}).
                       </p>
                       {!showTopUp ? (
                         <button onClick={() => { setShowTopUp(true); setTopUpAmount(String(claimTotal - voucherAmount)); }} className="text-xs font-bold text-amber-800 underline">Request Top-Up</button>
                       ) : (
                         <div className="space-y-2">
-                          <p className="text-xs text-amber-600">Maximum top-up: {formatXAF(claimTotal - voucherAmount)}</p>
+                          <p className="text-xs text-amber-600">Maximum top-up: {money(claimTotal - voucherAmount)}</p>
                           <div className="grid grid-cols-2 gap-2">
                             <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder="Amount" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
                             <input className="input-field" placeholder="Reason" value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />
