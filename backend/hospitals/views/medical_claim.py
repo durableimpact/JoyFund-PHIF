@@ -14,6 +14,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
 
+from core.cache import cache_response, invalidate_group
+
 from hospitals.filters import MedicalClaimFilter
 
 from utils.serializers import ErrorResponseSerializer
@@ -49,6 +51,9 @@ from hospitals.services.voucher_topup import (
 )
 from vouchers.services import settle_voucher_with_campaign_updates
 from accounts.models import Role
+
+CLAIMS_CACHE_GROUP = 'medical_claims'
+CLAIMS_CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
 class IsReceptionist(IsAuthenticated):
@@ -118,6 +123,7 @@ class MedicalClaimCreateView(CreateAPIView):
             notes="Medical claim created with initial items.",
             changed_by=request.user,
         )
+        invalidate_group(CLAIMS_CACHE_GROUP)
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_201_CREATED,
@@ -141,6 +147,7 @@ class MedicalClaimDetailView(RetrieveUpdateAPIView):
         operation_description="Retrieve a medical claim with all items and proofs.",
         responses={200: MedicalClaimDetailSerializer, 404: ErrorResponseSerializer},
     )
+    @cache_response(group=CLAIMS_CACHE_GROUP, timeout=CLAIMS_CACHE_TIMEOUT)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -163,6 +170,7 @@ class MedicalClaimDetailView(RetrieveUpdateAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         medical_claim = serializer.save()
+        invalidate_group(CLAIMS_CACHE_GROUP)
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_200_OK,
@@ -196,6 +204,7 @@ class MedicalClaimListView(ListAPIView):
         tags=["Medical Claims"],
         operation_description="List all medical claims with optional filters (claim_status, hospital, total_cost range, submitted_at range, service_completed).",
     )
+    @cache_response(group=CLAIMS_CACHE_GROUP, timeout=CLAIMS_CACHE_TIMEOUT)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -509,6 +518,7 @@ class MedicalClaimMarkCompleteView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        invalidate_group(CLAIMS_CACHE_GROUP)
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_200_OK,
@@ -577,6 +587,7 @@ class MedicalClaimApproveView(APIView):
             changed_by=request.user.system_admin,
         )
 
+        invalidate_group(CLAIMS_CACHE_GROUP)
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_200_OK,
@@ -641,6 +652,7 @@ class MedicalClaimRejectView(APIView):
             notes=f"MedicalClaim status changed from PENDING to REJECTED. Reason: {medical_claim.rejection_reason}",
             changed_by=request.user.system_admin,
         )
+        invalidate_group(CLAIMS_CACHE_GROUP)
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_200_OK,
@@ -755,6 +767,7 @@ Optional approval_notes for audit trail.
         # Send notifications to campaign creators (async)
         send_campaign_contributor_notifications(str(voucher.id))
 
+        invalidate_group(CLAIMS_CACHE_GROUP)
         return Response(
             MedicalClaimDetailSerializer(medical_claim).data,
             status=status.HTTP_200_OK,
@@ -808,6 +821,8 @@ class VoucherApproveView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        invalidate_group(CLAIMS_CACHE_GROUP)
+        invalidate_group('vouchers')
         return Response(
             {"detail": message},
             status=status.HTTP_200_OK,
@@ -859,6 +874,8 @@ class VoucherConfirmPinView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        invalidate_group(CLAIMS_CACHE_GROUP)
+        invalidate_group('vouchers')
         return Response(
             {"detail": message},
             status=status.HTTP_200_OK,
