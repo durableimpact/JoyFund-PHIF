@@ -3,6 +3,7 @@ from vouchers.models.Voucher import Voucher
 from beneficiaries.serializers.beneficiary import BeneficiaryDetailSerializer
 from beneficiaries.serializers.health_issue import HealthIssueSerializer
 from hospitals.serializers.hospital import HospitalListSerializer
+from hospitals.serializers.medical_claim import MedicalClaimDetailSerializer
 from .voucher_funding import VoucherFundingSerializer
 from .voucher_base import VoucherEventSerializer, VoucherMinimalSerializer
 
@@ -53,6 +54,7 @@ class VoucherDetailSerializer(serializers.ModelSerializer):
     hospital = HospitalListSerializer(read_only=True)
     events = VoucherEventSerializer(many=True, read_only=True)
     funding_records = VoucherFundingSerializer(many=True, read_only=True)
+    medical_claim = MedicalClaimDetailSerializer(read_only=True)
 
     class Meta:
         model = Voucher
