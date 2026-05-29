@@ -238,14 +238,7 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-            <div>
-              <p className="font-semibold mb-3 text-sm">Portals</p>
-              <div className="flex flex-col gap-2 text-white/60 text-sm">
-                {[['Donor Portal', '/dashboard'], ['Social Worker', '/social-worker/dashboard'], ['Hospital', '/hospital/receptionist'], ['Admin', '/admin/dashboard']].map(([l, h]) => (
-                  <Link key={h} href={h} className="hover:text-white">{l}</Link>
-                ))}
-              </div>
-            </div>
+            
           </div>
           <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between gap-3 text-white/40 text-xs">
             <p>© 2026 JoyFund — Solidarity Health Bridge. All rights reserved.</p>
