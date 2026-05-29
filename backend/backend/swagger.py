@@ -10,6 +10,7 @@ class AppTagAutoSchema(SwaggerAutoSchema):
         'campaigns': 'Campaigns',
         'disbursements': 'Disbursements',
         'hospitals': 'Hospitals',
+        'logs': 'Logging',
         'notifications': 'Notifications',
         'payments': 'Payments',
         'vouchers': 'Vouchers',
