@@ -61,7 +61,7 @@ export default function HospitalAdminPatients() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Beneficiary', 'Health ID', 'Location', 'Category', 'Health Issues', 'Enrolled', 'Status'].map(h => (
+                {['Beneficiary', 'Health ID', 'Location', 'Category', 'Health Issues', 'Enrolled'].map(h => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -99,11 +99,7 @@ export default function HospitalAdminPatients() {
                       ) : <span className="text-xs text-gray-400">None</span>}
                     </td>
                     <td className="p-4 text-gray-400 text-xs">{b.created_at ? formatDate(b.created_at) : '—'}</td>
-                    <td className="p-4">
-                      <span className={`badge text-[10px] ${b.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                        {b.is_verified ? 'Verified' : 'Pending'}
-                      </span>
-                    </td>
+                   
                   </tr>
                 );
               })}
