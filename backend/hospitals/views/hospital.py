@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from core.mixins import CacheInvalidationMixin
 from django.db.models import Sum, Count
 from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
@@ -37,12 +39,19 @@ class IsSystemOrHospitalAdmin(BasePermission):
         )
 
 
-class HospitalViewSet(viewsets.ModelViewSet):
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='destroy', decorator=swagger_auto_schema(tags=_TAG))
+class HospitalViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     """
     ViewSet for managing hospitals.
     - System Admin: full CRUD
     - Hospital Admin: retrieve, update, partial_update (own hospital)
     """
+    cache_group = 'hospitals'
     permission_classes = [IsAuthenticated, IsSystemOrHospitalAdmin]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = {
@@ -81,14 +90,7 @@ class HospitalViewSet(viewsets.ModelViewSet):
             return HospitalListSerializer
         return HospitalDetailSerializer
 
-    @swagger_auto_schema(
-        tags=_TAG,
-        responses={200: HospitalListSerializer(many=True)},
-        operation_description="List hospitals.",
-    )
-    @cache_response(timeout=CACHE_TIMEOUT)
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -96,7 +98,6 @@ class HospitalViewSet(viewsets.ModelViewSet):
         responses={201: HospitalDetailSerializer},
         operation_description="Create a hospital.",
     )
-    @invalidate_cache("view_cache:*")
     def create(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
@@ -122,43 +123,7 @@ class HospitalViewSet(viewsets.ModelViewSet):
             #     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             # )
 
-    @swagger_auto_schema(
-        tags=_TAG,
-        responses={200: HospitalDetailSerializer},
-        operation_description="Retrieve a hospital.",
-    )
-    @cache_response(timeout=CACHE_TIMEOUT)
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        tags=_TAG,
-        request_body=HospitalCreateUpdateSerializer,
-        responses={200: HospitalDetailSerializer},
-        operation_description="Replace a hospital.",
-    )
-    @invalidate_cache("view_cache:*")
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        request_body=HospitalCreateUpdateSerializer,
-        responses={200: HospitalDetailSerializer},
-        operation_description="Update a hospital.",
-    )
-    @invalidate_cache("view_cache:*")
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        responses={204: "No Content"},
-        operation_description="Delete a hospital.",
-    )
-    @invalidate_cache("view_cache:*")
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
 
     @action(
         detail=True,
