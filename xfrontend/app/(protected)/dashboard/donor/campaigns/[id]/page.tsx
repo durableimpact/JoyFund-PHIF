@@ -229,7 +229,7 @@ export default function CampaignDetailPage() {
                 <button
                   onClick={() =>
                     navigator.clipboard.writeText(
-                      `https://joyfund.cm/campaign/${campaign.id}`
+                      `https://joy-fund.com/campaign/${campaign.id}`
                     )
                   }
                   className="btn-primary w-full text-sm flex items-center justify-center gap-2"
