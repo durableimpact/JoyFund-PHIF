@@ -1,3 +1,4 @@
+from django.utils.decorators import method_decorator
 from django.db.models import Q, Sum, F, DecimalField, Value, ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.core.cache import cache
@@ -56,7 +57,16 @@ class IsSystemAdmin(BasePermission):
         )
 
 
-class CampaignViewSet(viewsets.ModelViewSet):
+from core.mixins import CacheInvalidationMixin
+
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='destroy', decorator=swagger_auto_schema(tags=_TAG))
+class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
+    cache_group = "campaigns"
     """
     ViewSet for managing campaigns.
     - Public: list, retrieve (only active/public)
@@ -119,22 +129,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         tags=_TAG,
-        responses={200: CampaignDetailSerializer(many=True)},
-        operation_description="Public list of campaigns with filters. Donors also see their private campaigns.",
-    )
-    def list(self, request, *args, **kwargs):
-        cache_key = 'campaign_list'
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data, status=status.HTTP_200_OK)
-
-        response = super().list(request, *args, **kwargs)
-        if response.status_code == 200:
-            cache.set(cache_key, response.data, CACHE_TIMEOUT)
-        return response
-
-    @swagger_auto_schema(
-        tags=_TAG,
         request_body=CampaignCreateUpdateSerializer,
         responses={201: CampaignDetailSerializer},
         operation_description="Create a campaign for the authenticated donor.",
@@ -150,65 +144,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         campaign = serializer.save(donor=donor)
-        cache.delete('campaign_list')
+        self._invalidate_cache()
         return Response(
             CampaignDetailSerializer(campaign).data, status=status.HTTP_201_CREATED
         )
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        responses={200: CampaignDetailSerializer},
-        operation_description="Retrieve a campaign visible to the requester. Public for everyone; donors can also retrieve their own private campaigns.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        campaign_id = kwargs.get("pk")
-        cache_key = f"campaign_detail_{campaign_id}"
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data, status=status.HTTP_200_OK)
-
-        response = super().retrieve(request, *args, **kwargs)
-        if response.status_code == 200:
-            cache.set(cache_key, response.data, CACHE_TIMEOUT)
-        return response
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        request_body=CampaignCreateUpdateSerializer,
-        responses={200: CampaignDetailSerializer},
-        operation_description="Replace a donor-owned campaign.",
-    )
-    def update(self, request, *args, **kwargs):
-        campaign_id = kwargs.get("pk")
-        response = super().update(request, *args, **kwargs)
-        cache.delete(f"campaign_detail_{campaign_id}")
-        cache.delete('campaign_list')
-        return response
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        request_body=CampaignCreateUpdateSerializer,
-        responses={200: CampaignDetailSerializer},
-        operation_description="Partially update a donor-owned campaign.",
-    )
-    def partial_update(self, request, *args, **kwargs):
-        campaign_id = kwargs.get("pk")
-        response = super().partial_update(request, *args, **kwargs)
-        cache.delete(f"campaign_detail_{campaign_id}")
-        cache.delete('campaign_list')
-        return response
-
-    @swagger_auto_schema(
-        tags=_TAG,
-        responses={204: "No Content"},
-        operation_description="Delete a donor-owned campaign.",
-    )
-    def destroy(self, request, *args, **kwargs):
-        campaign_id = kwargs.get("pk")
-        response = super().destroy(request, *args, **kwargs)
-        cache.delete('campaign_list')
-        cache.delete(f"campaign_detail_{campaign_id}")
-        return response
 
     @action(
         detail=False,
