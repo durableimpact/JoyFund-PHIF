@@ -28,5 +28,12 @@
         },
         "timeout": true,
         "true": true
-    }
+    },
+    "python-envs.pythonProjects": [
+        {
+            "path": "payments/filters",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ]
 }

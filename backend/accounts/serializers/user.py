@@ -234,3 +234,48 @@ class SystemAdminInfoSerializer(serializers.ModelSerializer):
 
 # Legacy - keep for backward compatibility if needed
 UserInfoSerializer = DonorInfoSerializer
+
+class UnifiedUserSerializer(serializers.ModelSerializer):
+    """Unified user serializer - returns base user fields + specific profile depending on role."""
+    profile = serializers.SerializerMethodField(read_only=True)
+    hospital = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "profile_picture",
+            "phone_number",
+            "role",
+            "is_verified",
+            "created_at",
+            "updated_at",
+            "profile",
+            "hospital",
+        ]
+        read_only_fields = fields
+
+    def get_profile(self, obj):
+        if obj.role == 'DONOR' and hasattr(obj, 'donor'):
+            return DonorProfileSerializer(obj.donor).data
+        elif obj.role == 'HOSPITAL_ADMIN' and hasattr(obj, 'hospitaladmin'):
+            return HospitalAdminProfileSerializer(obj.hospitaladmin).data
+        elif obj.role == 'RECEPTIONIST' and hasattr(obj, 'receptionist'):
+            return ReceptionistProfileSerializer(obj.receptionist).data
+        elif obj.role == 'SOCIAL_WORKER' and hasattr(obj, 'socialworker'):
+            return SocialWorkerProfileSerializer(obj.socialworker).data
+        elif obj.role == 'SYSTEM_ADMIN' and hasattr(obj, 'systemadmin'):
+            return SystemAdminProfileSerializer(obj.systemadmin).data
+        return None
+
+    def get_hospital(self, obj):
+        from hospitals.serializers import MinimalHospitalSerializer
+
+        if obj.role == 'HOSPITAL_ADMIN' and hasattr(obj, 'hospitaladmin') and getattr(obj.hospitaladmin, 'hospital', None):
+            return MinimalHospitalSerializer(obj.hospitaladmin.hospital).data
+        elif obj.role == 'RECEPTIONIST' and hasattr(obj, 'receptionist') and getattr(obj.receptionist, 'hospital', None):
+            return MinimalHospitalSerializer(obj.receptionist.hospital).data
+        return None
