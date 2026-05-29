@@ -67,7 +67,7 @@ declare interface HospitalAdminInfo {
   created_at?: string;
   updated_at?: string;
   profile?: HospitalAdminProfile | null;
-  hospital?: string | null;
+  hospital?: Hospital | null;
 }
 
 declare interface HospitalAdminProfile extends CommonInfo {
