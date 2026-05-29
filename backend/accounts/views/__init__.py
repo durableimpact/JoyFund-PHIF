@@ -14,6 +14,7 @@ from .info import (
     SocialWorkerInfoView,
     SystemAdminInfoView,
 )
+from .unified_user import UnifiedUserViewSet
 from .admin_dashboard import (
     AdminOverviewView,
     AdminFinancialView,
@@ -52,4 +53,5 @@ __all__ = [
     'AdminBeneficiaryVoucherView',
     'AdminOrganizationView',
     'AdminTrendsReportView',
+    'UnifiedUserViewSet',
 ]
