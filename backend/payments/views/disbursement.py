@@ -1,3 +1,4 @@
+from core.mixins import CacheInvalidationMixin
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
@@ -5,7 +6,7 @@ from rest_framework.response import Response
 from django.utils import timezone
 from django.db import transaction
 
-from accounts.utils.permissions import IsSystemAdmin
+from accounts.utils.permissions import IsSystemAdmin,IsSystemAdminOrHospitalAdmin
 from ..models import Disbursement, Transaction
 from ..serializers.disbursement import (
     DisbursementSerializer,
@@ -16,7 +17,7 @@ from ..serializers.disbursement import (
 )
 
 
-class DisbursementViewSet(viewsets.ModelViewSet):
+class DisbursementViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     """
     API endpoint for recording and managing disbursements to hospitals.
     
@@ -34,13 +35,14 @@ class DisbursementViewSet(viewsets.ModelViewSet):
     - Link disbursements to external system references
     - Mark as failed (for corrections if needed)
     """
+    cache_group = 'disbursements'
     queryset = Disbursement.objects.select_related(
         'hospital', 'transaction', 'created_by'
     ).order_by('-created_at')
     serializer_class = DisbursementSerializer
-    permission_classes = [IsSystemAdmin]
-    filterset_fields = ['status', 'payment_method', 'hospital']
-    search_fields = ['external_reference', 'gateway_transaction_id', 'hospital__name']
+    permission_classes = [IsSystemAdminOrHospitalAdmin]
+    filterset_fields = ['status', 'payment_method', 'hospital', 'voucher']
+    search_fields = ['external_reference', 'gateway_transaction_id', 'hospital__name', 'voucher__voucher_code']
     ordering_fields = ['amount', 'status', 'created_at', 'disbursed_at']
     ordering = ['-created_at']
 
