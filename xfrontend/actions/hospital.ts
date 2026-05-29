@@ -175,7 +175,7 @@ export const listServices = async (
   access_token: string,
 ) => {
   try {
-    const { data } = await api.get(`/api/hospitals/${hospitalId}/services/`, {
+    const { data } = await api.get<PaginationResponse<Service>>(`/api/hospitals/${hospitalId}/services/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
     return data;
@@ -563,10 +563,11 @@ export const flagMedicalClaimProof = async (
 
 // ── Voucher Top-Up Requests ──
 
-export const listVoucherTopUpRequests = async (access_token: string) => {
+export const listVoucherTopUpRequests = async (access_token: string,params?:Partial<{page:number,hospital:string,status:"PENDING"|"APPROVED"|"REJECTED"}>) => {
   try {
-    const { data } = await api.get("/api/hospitals/voucher-top-up-requests/", {
+    const { data } = await api.get<PaginationResponse<VoucherTopUpRequest>>("/api/hospitals/voucher-top-up-requests/", {
       headers: { Authorization: `Bearer ${access_token}` },
+      params
     });
     return data;
   } catch (e) {
