@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from core.mixins import CacheInvalidationMixin
 """
 DRF Views for log endpoints.
 """
@@ -17,13 +19,17 @@ from .models import ActivityLog, RequestLog, ErrorLog
 from .serializers import ActivityLogSerializer, RequestLogSerializer, ErrorLogSerializer
 
 
-class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=["Logging"]))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=["Logging"]))
+class ActivityLogViewSet(CacheInvalidationMixin, viewsets.ReadOnlyModelViewSet):
+
     """
     ViewSet for querying ActivityLog entries.
     Only accessible to admin users.
     
     Activity logs record system-level events and user actions for audit purposes.
     """
+    cache_group = 'activity_logs'
 
     queryset = ActivityLog.objects.all()
     serializer_class = ActivityLogSerializer
@@ -66,28 +72,20 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @swagger_auto_schema(
-        tags=["Logging - Activity"],
-        operation_description="List activity log entries with date range and user filtering."
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=["Logging - Activity"],
-        operation_description="Retrieve a specific activity log entry."
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
 
-class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
+
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=["Logging"]))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=["Logging"]))
+class RequestLogViewSet(CacheInvalidationMixin, viewsets.ReadOnlyModelViewSet):
+
     """
     ViewSet for querying RequestLog entries.
     Only accessible to admin users.
     
     Request logs track incoming HTTP requests, response times, and status codes.
     """
+    cache_group = 'request_logs'
 
     queryset = RequestLog.objects.all()
     serializer_class = RequestLogSerializer
@@ -135,28 +133,20 @@ class RequestLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @swagger_auto_schema(
-        tags=["Logging - Request"],
-        operation_description="List request log entries with date range and path filtering."
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=["Logging - Request"],
-        operation_description="Retrieve a specific request log entry."
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
 
-class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
+
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=["Logging"]))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=["Logging"]))
+class ErrorLogViewSet(CacheInvalidationMixin, viewsets.ReadOnlyModelViewSet):
+
     """
     ViewSet for querying ErrorLog entries.
     Only accessible to admin users.
     
     Error logs capture unhandled exceptions and system errors with stack traces.
     """
+    cache_group = 'error_logs'
 
     queryset = ErrorLog.objects.all()
     serializer_class = ErrorLogSerializer
@@ -194,19 +184,7 @@ class ErrorLogViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-    @swagger_auto_schema(
-        tags=["Logging - Error"],
-        operation_description="List error log entries with date range filtering."
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        tags=["Logging - Error"],
-        operation_description="Retrieve a specific error log entry."
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
 
 class LogStatsView(viewsets.ViewSet):
@@ -219,7 +197,7 @@ class LogStatsView(viewsets.ViewSet):
 
     @action(detail=False, methods=["get"])
     @swagger_auto_schema(
-        tags=["Logging - Statistics"],
+        tags=["Logging"],
         operation_description="Get aggregated statistics for the last 30 days including request counts, error rates, and active users."
     )
     def stats(self, request):
