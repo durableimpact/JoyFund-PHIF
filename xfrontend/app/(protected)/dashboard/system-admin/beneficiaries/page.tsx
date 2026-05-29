@@ -5,36 +5,32 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { listBeneficiaries } from '@/actions/beneficiaries';
-import { statusColor, statusLabel, normalizeBeneficiaryResponse } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 
 export default function AdminBeneficiaries() {
   const { data: session } = useSession();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['beneficiaries', token, currentPage, search, statusFilter],
+    queryKey: ['beneficiaries', token, currentPage, search],
     queryFn: async () => {
       const params: Record<string, string> = {
         page: currentPage.toString(),
         page_size: '10',
       };
       if (search) params.search = search;
-      if (statusFilter !== 'all') params.status = statusFilter;
       return await listBeneficiaries(token, params);
     },
     enabled: !!token,
   });
 
-  const bens = (data?.results || []).map(normalizeBeneficiaryResponse);
+  const bens: Beneficiary[] = data?.results || [];
   const totalCount = data?.count || 0;
   const hasNextPage = !!data?.next;
   const hasPreviousPage = !!data?.previous;
   const totalPages = Math.ceil(totalCount / 10);
-
-  const statuses = ['all', 'awaiting_match', 'voucher_issued', 'care_received', 'pending', 'suspended'];
 
   return (<>
 
@@ -48,20 +44,11 @@ export default function AdminBeneficiaries() {
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input 
             className="input-field pl-10" 
-            placeholder="Search by name, health ID, community..." 
+            placeholder="Search by name, health ID, city..." 
             value={search} 
             onChange={e => { setSearch(e.target.value); setCurrentPage(1); }} 
           />
         </div>
-        <select 
-          className="input-field w-auto" 
-          value={statusFilter} 
-          onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-        >
-          {statuses.map(s => (
-            <option key={s} value={s}>{s === 'all' ? 'All Status' : statusLabel(s)}</option>
-          ))}
-        </select>
       </div>
 
       <div className="card overflow-hidden">
@@ -69,7 +56,7 @@ export default function AdminBeneficiaries() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Beneficiary', 'Health ID', 'Community', 'Age / Week', 'Enrolled', 'Status'].map(h => (
+                {['Beneficiary', 'Health ID', 'Location', 'Phone', 'Category', 'Enrolled', 'Verified'].map(h => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -77,28 +64,31 @@ export default function AdminBeneficiaries() {
             <tbody>
               {loading ? [...Array(6)].map((_, i) => (
                 <tr key={i} className="border-b border-gray-50">
-                  {[...Array(6)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
+                  {[...Array(7)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
               )) : bens.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-16 text-gray-400 text-sm">No beneficiaries found</td></tr>
+                <tr><td colSpan={7} className="text-center py-16 text-gray-400 text-sm">No beneficiaries found</td></tr>
               ) : bens.map(b => (
                 <tr key={b.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                        {(b.fullName || '?').charAt(0)}
+                        {(b.full_name || '?').charAt(0)}
                       </div>
-                      <Link href={`/social-worker/beneficiary/${b.id}`} className="font-semibold text-gray-900 hover:text-blue-600">
-                        {b.fullName}
+                      <Link href={`/dashboard/system-admin/beneficiaries/${b.id}`} className="font-semibold text-gray-900 hover:text-blue-600">
+                        {b.full_name}
                       </Link>
                     </div>
                   </td>
-                  <td className="p-4 font-mono text-xs text-gray-600">{b.healthId || '—'}</td>
-                  <td className="p-4 text-gray-600 text-xs">{b.community || '—'}</td>
-                  <td className="p-4 text-gray-600 text-xs">Age {b.age} · Wk {b.gestationalWeek}</td>
-                  <td className="p-4 text-gray-400 text-xs">{b.enrolledAt || '—'}</td>
+                  <td className="p-4 font-mono text-xs text-gray-600">{b.digital_health_id || '—'}</td>
+                  <td className="p-4 text-gray-600 text-xs">{b.city || '—'}{b.region && b.region !== b.city ? `, ${b.region}` : ''}</td>
+                  <td className="p-4 text-gray-600 text-xs">{b.phone || '—'}</td>
+                  <td className="p-4 text-gray-600 text-xs">{b.category || '—'}</td>
+                  <td className="p-4 text-gray-400 text-xs">{b.created_at ? formatDate(b.created_at) : '—'}</td>
                   <td className="p-4">
-                    <span className={`badge ${statusColor(b.status)}`}>{statusLabel(b.status)}</span>
+                    <span className={`badge text-[10px] ${b.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {b.is_verified ? 'Verified' : 'Pending'}
+                    </span>
                   </td>
                 </tr>
               ))}
