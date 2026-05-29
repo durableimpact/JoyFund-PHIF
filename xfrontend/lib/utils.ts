@@ -56,12 +56,3 @@ export function formatDateTime(dateString: string | null): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-export function normalizeBeneficiaryResponse(b: any): any {
-  return {
-    ...b,
-    fullName: b.full_name || b.fullName,
-    healthId: b.health_id || b.healthId,
-    gestationalWeek: b.gestational_week || b.gestationalWeek,
-    enrolledAt: formatDate(b.enrolled_at || b.enrolledAt),
-  };
-}
