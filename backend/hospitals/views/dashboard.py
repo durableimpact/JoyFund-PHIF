@@ -48,7 +48,7 @@ class HospitalDashboardView(APIView):
         hospital = get_object_or_404(Hospital, id=hospital_id)
 
         if request.user.role == Role.HOSPITAL_ADMIN:
-            if not hasattr(request.user, 'hospital_admin') or request.user.hospital_admin.hospital_id != hospital.id:
+            if not hasattr(request.user, 'hospitaladmin') or request.user.hospitaladmin.hospital_id != hospital.id:
                 return Response({"error": "You can only view your own hospital's dashboard"}, status=403)
 
         processed_vouchers = Voucher.objects.filter(
@@ -112,7 +112,7 @@ class HospitalRedeemedDailyView(APIView):
         hospital = get_object_or_404(Hospital, id=hospital_id)
 
         if request.user.role == Role.HOSPITAL_ADMIN:
-            if not hasattr(request.user, 'hospital_admin') or request.user.hospital_admin.hospital_id != hospital.id:
+            if not hasattr(request.user, 'hospitaladmin') or request.user.hospitaladmin.hospital_id != hospital.id:
                 return Response({"error": "You can only view your own hospital's dashboard"}, status=403)
 
         queryset = Voucher.objects.filter(
