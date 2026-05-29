@@ -52,7 +52,7 @@ export default function HospitalServices() {
     enabled: !!token && !!hospitalId,
   });
 
-  const services: Service[] = Array.isArray(servicesData) ? servicesData : [];
+  const services: Service[] = Array.isArray(servicesData) ? servicesData : servicesData?.results ?? [];
 
   const filtered = services.filter(
     s => s.name.toLowerCase().includes(search.toLowerCase()) ||
