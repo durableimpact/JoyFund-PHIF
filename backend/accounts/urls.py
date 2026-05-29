@@ -21,6 +21,7 @@ from accounts.views import (
     PasswordResetRequestView,
     PasswordResetConfirmView,
     PasswordChangeView,
+    UnifiedUserViewSet,
 )
 
 app_name = 'accounts'
