@@ -1,3 +1,4 @@
+from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -13,7 +14,9 @@ from accounts.serializers import (
     HospitalAdminUpdateSerializer,
     HospitalAdminDashboardSerializer,
 )
-from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache
+from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin
+from core.cache import cache_response
+from core.mixins import CacheInvalidationMixin
 from accounts.filters import HospitalAdminFilter
 from vouchers.models.Voucher import Voucher
 from hospitals.models import MedicalClaim
@@ -21,7 +24,14 @@ from hospitals.models import MedicalClaim
 _TAG = ['Hospital Admins']
 
 
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
+
 class HospitalAdminViewSet(
+    CacheInvalidationMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -37,6 +47,7 @@ class HospitalAdminViewSet(
     - GET    /api/accounts/hospital-admins/{id}/     - Get hospital admin details
     - PATCH  /api/accounts/hospital-admins/{id}/     - Update hospital admin (owner or SYSTEM_ADMIN)
     """
+    cache_group = "hospital_admins"
     
     queryset = HospitalAdmin.objects.select_related('user', 'enrolled_by__user', 'hospital').all().order_by('-user__created_at')
     lookup_field = 'id'
@@ -68,7 +79,6 @@ class HospitalAdminViewSet(
         responses={201: HospitalAdminDetailSerializer},
         operation_description="Create a new Hospital Admin account. Only SYSTEM_ADMIN can create. The `enrolled_by` field is automatically set to the requesting system admin.",
     )
-    @invalidate_cache('hospital_admin_list')
     def create(self, request, *args, **kwargs):
         """Create a new hospital admin."""
         try:
@@ -95,7 +105,7 @@ class HospitalAdminViewSet(
         responses={200: HospitalAdminDetailSerializer(many=True)},
         operation_description="List Hospital Admin profiles with filtering and search support. Only SYSTEM_ADMIN can list.",
     )
-    @cache_response(timeout=5 * 60, key_prefix='hospital_admin_list')
+    @cache_response(group="hospital_admins", timeout=5 * 60)
     def list(self, request, *args, **kwargs):
         """List all hospital admins with caching."""
         return super().list(request, *args, **kwargs)
@@ -105,7 +115,7 @@ class HospitalAdminViewSet(
         responses={200: HospitalAdminDetailSerializer},
         operation_description="Retrieve a Hospital Admin profile. Accessible by the hospital admin or a SYSTEM_ADMIN.",
     )
-    @cache_response(timeout=10 * 60, key_prefix='hospital_admin_detail')
+    @cache_response(group="hospital_admins", timeout=10 * 60)
     def retrieve(self, request, *args, **kwargs):
         """Retrieve a specific hospital admin."""
         return super().retrieve(request, *args, **kwargs)
@@ -116,7 +126,6 @@ class HospitalAdminViewSet(
         responses={200: HospitalAdminDetailSerializer},
         operation_description="Partially update a Hospital Admin profile. Accessible by the hospital admin or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache('hospital_admin_list')
     def partial_update(self, request, *args, **kwargs):
         """Partially update a hospital admin."""
         return super().partial_update(request, *args, **kwargs)
@@ -127,7 +136,6 @@ class HospitalAdminViewSet(
         responses={200: HospitalAdminDetailSerializer},
         operation_description="Fully update a Hospital Admin profile. Accessible by the hospital admin or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache('hospital_admin_list')
     def update(self, request, *args, **kwargs):
         """Fully update a hospital admin."""
         return super().update(request, *args, **kwargs)
