@@ -1,7 +1,15 @@
 from django.urls import path, include
-from .views import PlatformStatsView
+from .views import PlatformStatsView, health_check
+
+from accounts.views import UnifiedUserViewSet
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r"users", UnifiedUserViewSet, basename="user")
 
 urlpatterns = [
+    # Health check
+    path("health/", health_check, name="health-check"),
     # Platform statistics
     path("platform-stats/", PlatformStatsView.as_view(), name="platform-stats"),
     
@@ -14,4 +22,4 @@ urlpatterns = [
     path("vouchers/", include("vouchers.urls")),
     path("notifications/", include("notifications.urls")),
     path("logs/", include("logs.urls")),
-]
+] + router.urls
