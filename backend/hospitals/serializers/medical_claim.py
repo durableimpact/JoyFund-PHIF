@@ -13,6 +13,12 @@ class MedicalClaimProofEventSerializer(serializers.ModelSerializer):
         model = MedicalClaimProofEvent
         exclude = ["medical_claim_proof"]
 
+class ProfileMinimalSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    full_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+
+
 class ClaimItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClaimItem
@@ -53,6 +59,8 @@ class MedicalClaimDetailSerializer(serializers.ModelSerializer):
 
     claim_items = ClaimItemSerializer(many=True, read_only=True)
     proofs = MedicalClaimProofSerializer(many=True, read_only=True)
+    submitted_by = ProfileMinimalSerializer(read_only=True)
+    reviewed_by = ProfileMinimalSerializer(read_only=True)
 
     class Meta:
         model = MedicalClaim
