@@ -3,7 +3,7 @@ from .campaign import (
     CampaignDetailSerializer,
     CampaignBalanceSerializer,
 )
-from .donation import DonationCreateSerializer, DonationDetailSerializer
+from .donation import DonationCreateSerializer, DonationDetailSerializer, DonationListSerializer
 
 __all__ = [
     "CampaignCreateUpdateSerializer",
@@ -11,4 +11,5 @@ __all__ = [
     "CampaignBalanceSerializer",
     "DonationCreateSerializer",
     "DonationDetailSerializer",
+    "DonationListSerializer",
 ]
