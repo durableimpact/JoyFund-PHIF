@@ -73,6 +73,14 @@ class Disbursement(models.Model):
         unique=True,
         help_text="Reference from external payment system (e.g., Campay transaction ID)."
     )
+    voucher = models.ForeignKey(
+        'vouchers.Voucher',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='disbursements',
+        help_text="Voucher reference for traceability of the payment."
+    )
     gateway_transaction_id = models.CharField(
         max_length=100,
         blank=True,
