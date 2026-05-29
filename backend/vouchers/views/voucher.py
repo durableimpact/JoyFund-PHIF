@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from core.cache import cache_response, invalidate_group
 from vouchers.models.Voucher import Voucher
 from vouchers.serializers.voucher import (
     VoucherCheckSerializer,
@@ -18,6 +19,9 @@ from vouchers.serializers.voucher_create import (
 )
 from accounts.models import Role
 from vouchers.services import check_in_voucher
+
+VOUCHERS_CACHE_GROUP = 'vouchers'
+VOUCHERS_CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
 class IsReceptionist(IsAuthenticated):
@@ -108,6 +112,10 @@ class VoucherCreateView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        invalidate_group(VOUCHERS_CACHE_GROUP)
+
 
 class VoucherCreateMultipleCampaignsView(CreateAPIView):
     """
@@ -128,6 +136,10 @@ class VoucherCreateMultipleCampaignsView(CreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        invalidate_group(VOUCHERS_CACHE_GROUP)
 
 
 class VoucherListView(ListAPIView):
@@ -165,6 +177,10 @@ class VoucherListView(ListAPIView):
         if hospital_filter:
             queryset = queryset.filter(hospital=hospital_filter)
 
+        beneficiary_filter = self.request.query_params.get("beneficiary")
+        if beneficiary_filter:
+            queryset = queryset.filter(beneficiary=beneficiary_filter)
+
         return queryset.order_by("-created_at")
 
     @swagger_auto_schema(
@@ -175,10 +191,23 @@ class VoucherListView(ListAPIView):
                 openapi.IN_QUERY,
                 description="Filter by status (AVAILABLE, ACTIVE, USED, etc.)",
                 type=openapi.TYPE_STRING,
-            )
+            ),
+            openapi.Parameter(
+                "hospital",
+                openapi.IN_QUERY,
+                description="Filter by hospital UUID",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "beneficiary",
+                openapi.IN_QUERY,
+                description="Filter by beneficiary UUID",
+                type=openapi.TYPE_STRING,
+            ),
         ],
         operation_description="List vouchers. System Admins see all, Receptionists see their hospital's vouchers.",
     )
+    @cache_response(group=VOUCHERS_CACHE_GROUP, timeout=VOUCHERS_CACHE_TIMEOUT)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -196,5 +225,6 @@ class VoucherDetailView(RetrieveAPIView):
         tags=["Vouchers"],
         operation_description="Get full details of a specific voucher.",
     )
+    @cache_response(group=VOUCHERS_CACHE_GROUP, timeout=VOUCHERS_CACHE_TIMEOUT)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
