@@ -8,6 +8,7 @@ from django.db.models import Sum, Count
 
 from campaigns.models import Campaign, Donation
 from beneficiaries.models import Beneficiary, HealthIssue
+from core.cache import cache_response
 from .serializers import PlatformStatsSerializer
 
 
@@ -36,6 +37,7 @@ class PlatformStatsView(APIView):
             )
         }
     )
+    @cache_response(group="platform_stats", timeout=10 * 60)
     def get(self, request):
         """
         Get platform statistics.
@@ -77,3 +79,22 @@ class PlatformStatsView(APIView):
                 {'error': f'Failed to retrieve platform statistics: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+from django.db import connection
+from rest_framework.decorators import api_view, permission_classes
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    # Check DB connection
+    try:
+        connection.ensure_connection()
+        db_ok = True
+    except Exception:
+        db_ok = False
+
+    status_code = 200 if db_ok else 503
+    return Response({
+        "status": "ok" if db_ok else "degraded",
+        "db": db_ok,
+    }, status=status_code)
