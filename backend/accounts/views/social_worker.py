@@ -1,3 +1,4 @@
+from django.utils.decorators import method_decorator
 import logging
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
@@ -14,7 +15,9 @@ from accounts.serializers import (
     SocialWorkerUpdateSerializer,
     SocialWorkerDashboardSerializer,
 )
-from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache
+from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin
+from core.cache import cache_response
+from core.mixins import CacheInvalidationMixin
 from accounts.filters import SocialWorkerFilter
 from beneficiaries.models import Beneficiary, HealthIssue
 from vouchers.models.Voucher import Voucher
@@ -23,7 +26,14 @@ logger = logging.getLogger(__name__)
 
 _TAG = ['Social Workers']
 
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
+
 class SocialWorkerViewSet(
+    CacheInvalidationMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -39,6 +49,7 @@ class SocialWorkerViewSet(
     - GET    /api/accounts/social-workers/{id}/     - Get social worker details
     - PATCH  /api/accounts/social-workers/{id}/     - Update social worker
     """
+    cache_group = "social_workers"
 
     queryset = SocialWorker.objects.select_related('user', 'enrolled_by__user').all().order_by('-user__created_at')
     lookup_field = 'id'
@@ -68,7 +79,6 @@ class SocialWorkerViewSet(
         responses={201: SocialWorkerDetailSerializer},
         operation_description="Create a new Social Worker account. Only accessible by SYSTEM_ADMIN.",
     )
-    @invalidate_cache('social_worker_list')
     def create(self, request, *args, **kwargs):
         try:
             enrolled_by = request.user.systemadmin
@@ -102,6 +112,7 @@ class SocialWorkerViewSet(
         responses={200: SocialWorkerDetailSerializer(many=True)},
         operation_description="List Social Worker profiles with filtering and search support. Accessible only by SYSTEM_ADMIN.",
     )
+    @cache_response(group="social_workers", timeout=5 * 60)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -110,7 +121,7 @@ class SocialWorkerViewSet(
         responses={200: SocialWorkerDetailSerializer},
         operation_description="Retrieve a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
-    @cache_response(timeout=10 * 60, key_prefix='social_worker_detail')
+    @cache_response(group="social_workers", timeout=10 * 60)
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -120,7 +131,6 @@ class SocialWorkerViewSet(
         responses={200: SocialWorkerDetailSerializer},
         operation_description="Partially update a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache('social_worker_list')
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
@@ -130,7 +140,6 @@ class SocialWorkerViewSet(
         responses={200: SocialWorkerDetailSerializer},
         operation_description="Fully update a Social Worker profile. Accessible by the social worker or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache('social_worker_list')
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
