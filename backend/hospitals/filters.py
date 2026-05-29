@@ -1,6 +1,6 @@
 import django_filters
 
-from hospitals.models import MedicalClaim, ClaimStatus
+from hospitals.models import MedicalClaim, ClaimStatus, VoucherTopUpRequest, VoucherTopUpRequestStatus
 from hospitals.models.hospital import Hospital
 
 
@@ -26,3 +26,15 @@ class MedicalClaimFilter(django_filters.FilterSet):
     class Meta:
         model = MedicalClaim
         fields = ["claim_status", "hospital"]
+
+
+class VoucherTopUpRequestFilter(django_filters.FilterSet):
+    hospital = django_filters.ModelChoiceFilter(
+        queryset=Hospital.objects.all(),
+        field_name="medical_claim__hospital",
+    )
+    status = django_filters.ChoiceFilter(choices=VoucherTopUpRequestStatus)
+
+    class Meta:
+        model = VoucherTopUpRequest
+        fields = ["hospital", "status"]
