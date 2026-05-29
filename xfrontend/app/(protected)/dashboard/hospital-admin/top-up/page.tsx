@@ -12,32 +12,34 @@ const PAGE_SIZE = 10;
 export default function HospitalAdminTopUpRequests() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
+  const currentUser = (session?.user as any)?.userInfo;
+  const hospitalId = currentUser?.hospital?.id;
 
   const [filter, setFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<VoucherTopUpRequest | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['ha-topup', token],
+    queryKey: ['ha-topup', token, hospitalId, filter, currentPage],
     queryFn: async () => {
-      const res = await listVoucherTopUpRequests(token);
-      return res?.results || res || [];
+      const params: Record<string, string | number> = { page: currentPage };
+      if (filter !== 'all') params.status = filter;
+      if (hospitalId) params.hospital = hospitalId;
+      return listVoucherTopUpRequests(token, params);
     },
     enabled: !!token,
   });
 
-  const allRequests: any[] = Array.isArray(data) ? data : [];
-  const filtered = allRequests.filter(r => filter === 'all' || r.status === filter);
-  const totalCount = filtered.length;
+  const requests: VoucherTopUpRequest[] = data?.results ?? [];
+  const totalCount = data?.count ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const handleViewDetail = async (id: string) => {
     setDetailLoading(true);
     try {
       const detail = await getVoucherTopUpRequest(id, token);
-      setSelectedRequest(detail);
+      setSelectedRequest(detail!);
     } catch {
       setSelectedRequest(null);
     } finally {
@@ -73,9 +75,9 @@ export default function HospitalAdminTopUpRequests() {
                 <tr key={i} className="border-b border-gray-50">
                   {[...Array(6)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
-              )) : paginated.length === 0 ? (
+              )) : requests.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-16 text-gray-400 text-sm">No top-up requests found</td></tr>
-              ) : paginated.map((r: any) => (
+              ) : requests.map((r) => (
                 <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4 font-mono text-xs text-gray-700">#{r.id?.toString().slice(-8)}</td>
                   <td className="p-4 font-bold text-gray-900">{formatXAF(Number(r.requested_amount || r.amount || 0))}</td>
