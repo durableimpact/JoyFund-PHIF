@@ -65,8 +65,11 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "puml_generator",
     "django_smart_ratelimit",
+    "axes",
+
     # Local apps
     "logs",  # Logging system - must be before other apps to ensure proper app initialization
+    "core",
     "accounts",
     "campaigns",
     "vouchers",
@@ -87,6 +90,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -197,6 +202,7 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "/login/"
 
 AUTHENTICATION_BACKENDS = (
+    'axes.backends.AxesStandaloneBackend',
     "social_core.backends.google.GoogleOAuth2",
     "drf_social_oauth2.backends.DjangoOAuth2",
     "django.contrib.auth.backends.ModelBackend",
@@ -358,21 +364,34 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ─────────────────────────────────────────────────────────────────────────────
 # Caching (Redis)
 # ─────────────────────────────────────────────────────────────────────────────
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env("CACHE_LOCATION", default="redis://localhost:6379/2"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "SOCKET_CONNECT_TIMEOUT": 5,
-            "SOCKET_TIMEOUT": 5,
-            "SOCKET_KEEPALIVE": True,
-            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-        },
-        "KEY_PREFIX": "joyfund",
-        "TIMEOUT": 300,  # 5 minutes default
+TESTING = env.bool("TESTING", default=False)
+
+if TESTING:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "TIMEOUT": 0,
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": env("CACHE_LOCATION", default="redis://localhost:6379/2"),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+                "SOCKET_KEEPALIVE": True,
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+            },
+            "KEY_PREFIX": "joyfund",
+            "TIMEOUT": 60 * 15,  # 15 minutes default
+        }
+    }
+
+CACHE_MIDDLEWARE_SECONDS = 60 * 15
+CACHE_MIDDLEWARE_KEY_PREFIX = "joyfund"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Celery (RabbitMQ Broker)
@@ -565,20 +584,20 @@ FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 
 # Sentry
 
-# sentry_sdk.init(
-#     dsn="https://aa10d259382d4d60082a61f49d8f7cc7@o4507198990647296.ingest.us.sentry.io/4511172985028608",
-#     # Add data like request headers and IP for users,
-#     # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-#     send_default_pii=True,
-#     # Enable sending logs to Sentry
-#     enable_logs=True,
-#     # Set traces_sample_rate to 1.0 to capture 100%
-#     # of transactions for tracing.
-#     traces_sample_rate=1.0,
-#     # Set profile_session_sample_rate to 1.0 to profile 100%
-#     # of profile sessions.
-#     profile_session_sample_rate=1.0,
-#     # Set profile_lifecycle to "trace" to automatically
-#     # run the profiler on when there is an active transaction
-#     profile_lifecycle="trace",
-# )
+sentry_sdk.init(
+    dsn="https://aa10d259382d4d60082a61f49d8f7cc7@o4507198990647296.ingest.us.sentry.io/4511172985028608",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+    # Enable sending logs to Sentry
+    enable_logs=True,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profile_session_sample_rate to 1.0 to profile 100%
+    # of profile sessions.
+    profile_session_sample_rate=1.0,
+    # Set profile_lifecycle to "trace" to automatically
+    # run the profiler on when there is an active transaction
+    profile_lifecycle="trace",
+)
