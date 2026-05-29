@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from core.mixins import CacheInvalidationMixin
 from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
@@ -14,6 +16,8 @@ _TAG = ['Notifications']
 CACHE_TIMEOUT = 5 * 60  # 5 minutes
 
 
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
 class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     ViewSet for managing notifications (read-only creation).
@@ -26,6 +30,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     
     Notifications are created by the system only.
     """
+    cache_group = 'notifications'
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = {
@@ -38,29 +43,9 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     ordering = ['-created_at']
     
     @staticmethod
-    def _get_list_cache_key(user_id):
-        """Get cache key for user's notification list"""
-        return f'notification_list_{user_id}'
-    
-    @staticmethod
-    def _get_detail_cache_key(notification_id):
-        """Get cache key for notification detail"""
-        return f'notification_detail_{notification_id}'
-    
-    @staticmethod
     def _get_unread_count_cache_key(user_id):
         """Get cache key for unread notification count"""
         return f'notification_unread_count_{user_id}'
-    
-    @staticmethod
-    def _invalidate_list_cache(user_id):
-        """Invalidate user's notification list cache"""
-        cache.delete(NotificationViewSet._get_list_cache_key(user_id))
-    
-    @staticmethod
-    def _invalidate_detail_cache(notification_id):
-        """Invalidate notification detail cache"""
-        cache.delete(NotificationViewSet._get_detail_cache_key(notification_id))
     
     @staticmethod
     def _invalidate_unread_count_cache(user_id):
@@ -83,50 +68,6 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     
     @swagger_auto_schema(
         tags=_TAG,
-        operation_description='List all notifications for the current user.',
-        responses={200: NotificationListSerializer(many=True)}
-    )
-    def list(self, request, *args, **kwargs):
-        user_id = request.user.id
-        cache_key = self._get_list_cache_key(user_id)
-        try:
-            cached_data = cache.get(cache_key)
-            if cached_data is not None:
-                return Response(cached_data, status=status.HTTP_200_OK)
-        except Exception:
-            pass
-        
-        response = super().list(request, *args, **kwargs)
-        try:
-            cache.set(cache_key, response.data, CACHE_TIMEOUT)
-        except Exception:
-            pass
-        return response
-    
-    @swagger_auto_schema(
-        tags=_TAG,
-        operation_description='Retrieve a specific notification.',
-        responses={200: NotificationSerializer}
-    )
-    def retrieve(self, request, *args, **kwargs):
-        notification_id = kwargs.get('pk')
-        cache_key = self._get_detail_cache_key(notification_id)
-        try:
-            cached_data = cache.get(cache_key)
-            if cached_data is not None:
-                return Response(cached_data, status=status.HTTP_200_OK)
-        except Exception:
-            pass
-        
-        response = super().retrieve(request, *args, **kwargs)
-        try:
-            cache.set(cache_key, response.data, CACHE_TIMEOUT)
-        except Exception:
-            pass
-        return response
-    
-    @swagger_auto_schema(
-        tags=_TAG,
         operation_description='Mark a notification as read.',
         responses={200: NotificationSerializer}
     )
@@ -138,8 +79,8 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.save()
         
         # Invalidate caches
-        self._invalidate_list_cache(request.user.id)
-        self._invalidate_detail_cache(notification.id)
+        self._invalidate_cache()
+        
         self._invalidate_unread_count_cache(request.user.id)
         
         serializer = self.get_serializer(notification)
@@ -158,8 +99,8 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.save()
         
         # Invalidate caches
-        self._invalidate_list_cache(request.user.id)
-        self._invalidate_detail_cache(notification.id)
+        self._invalidate_cache()
+        
         self._invalidate_unread_count_cache(request.user.id)
         
         serializer = self.get_serializer(notification)
@@ -176,7 +117,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         count = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         
         # Invalidate all caches
-        self._invalidate_list_cache(request.user.id)
+        self._invalidate_cache()
         self._invalidate_unread_count_cache(request.user.id)
         
         return Response({'message': f'{count} notifications marked as read'}, status=status.HTTP_200_OK)
@@ -239,8 +180,8 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.delete()
         
         # Invalidate caches
-        self._invalidate_list_cache(user_id)
-        self._invalidate_detail_cache(notification_id)
+        self._invalidate_cache()
+        
         self._invalidate_unread_count_cache(user_id)
         
         return Response(status=status.HTTP_204_NO_CONTENT)
