@@ -58,6 +58,24 @@ class DonationDetailSerializer(serializers.ModelSerializer):
         ]
 
 
+class DonationListSerializer(serializers.ModelSerializer):
+    campaign_title = serializers.CharField(source='campaign.title', read_only=True)
+
+    class Meta:
+        model = Donation
+        fields = [
+            'id',
+            'campaign_id',
+            'campaign_title',
+            'donor_name',
+            'amount',
+            'status',
+            'message',
+            'is_anonymous',
+            'created_at',
+        ]
+
+
 class DonationCreateSerializer(serializers.ModelSerializer):
 
     payment_method = serializers.CharField()
