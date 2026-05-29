@@ -36,9 +36,66 @@ services_router = routers.NestedSimpleRouter(router, r"", lookup="hospital")
 services_router.register(r"services", ServiceViewSet, basename="hospital-services")
 
 urlpatterns = (
-    router.urls
-    + services_router.urls
-    + [
+    [
+        # Voucher top-up workflow
+        path(
+            "voucher-top-up-requests/",
+            VoucherTopUpRequestListView.as_view(),
+            name="voucher-top-up-list",
+        ),
+        path(
+            "voucher-top-up-requests/create/",
+            VoucherTopUpRequestCreateView.as_view(),
+            name="voucher-top-up-create",
+        ),
+        path(
+            "voucher-top-up-requests/<uuid:top_up_request_id>/",
+            VoucherTopUpRequestDetailView.as_view(),
+            name="voucher-top-up-detail",
+        ),
+        path(
+            "voucher-top-up-requests/<uuid:top_up_request_id>/approve/",
+            VoucherTopUpRequestApproveView.as_view(),
+            name="voucher-top-up-approve",
+        ),
+        path(
+            "voucher-top-up-requests/<uuid:top_up_request_id>/reject/",
+            VoucherTopUpRequestRejectView.as_view(),
+            name="voucher-top-up-reject",
+        ),
+        # Claim approval/rejection workflow
+        path(
+            "medical-claims/<int:medical_claim_id>/approve/",
+            MedicalClaimApproveView.as_view(),
+            name="medical-claim-approve",
+        ),
+        path(
+            "medical-claims/<int:medical_claim_id>/reject/",
+            MedicalClaimRejectView.as_view(),
+            name="medical-claim-reject",
+        ),
+        # Claim completion workflow
+        path(
+            "medical-claims/<int:medical_claim_id>/mark-complete/",
+            MedicalClaimMarkCompleteView.as_view(),
+            name="medical-claim-mark-complete",
+        ),
+        path(
+            "medical-claims/<int:medical_claim_id>/final-verify/",
+            MedicalClaimFinalVerifyView.as_view(),
+            name="medical-claim-final-verify",
+        ),
+        # Hospital dashboards
+        path(
+            "<uuid:hospital_id>/dashboard/",
+            HospitalDashboardView.as_view(),
+            name="hospital-dashboard",
+        ),
+        path(
+            "<uuid:hospital_id>/dashboard/redeemed-daily/",
+            HospitalRedeemedDailyView.as_view(),
+            name="hospital-redeemed-daily",
+        ),
         path(
             "medical-claims/",
             MedicalClaimCreateView.as_view(),
@@ -79,32 +136,6 @@ urlpatterns = (
             MedicalClaimProofFlagView.as_view(),
             name="medical-claim-proof-flag",
         ),
-        # Voucher top-up workflow
-        path(
-            "voucher-top-up-requests/",
-            VoucherTopUpRequestListView.as_view(),
-            name="voucher-top-up-list",
-        ),
-        path(
-            "voucher-top-up-requests/create/",
-            VoucherTopUpRequestCreateView.as_view(),
-            name="voucher-top-up-create",
-        ),
-        path(
-            "voucher-top-up-requests/<uuid:top_up_request_id>/",
-            VoucherTopUpRequestDetailView.as_view(),
-            name="voucher-top-up-detail",
-        ),
-        path(
-            "voucher-top-up-requests/<uuid:top_up_request_id>/approve/",
-            VoucherTopUpRequestApproveView.as_view(),
-            name="voucher-top-up-approve",
-        ),
-        path(
-            "voucher-top-up-requests/<uuid:top_up_request_id>/reject/",
-            VoucherTopUpRequestRejectView.as_view(),
-            name="voucher-top-up-reject",
-        ),
         # Voucher approval workflow
         path(
             "vouchers/<uuid:voucher_id>/approve/",
@@ -117,38 +148,7 @@ urlpatterns = (
             VoucherConfirmPinView.as_view(),
             name="voucher-confirm-pin",
         ),
-        # Claim approval/rejection workflow
-        path(
-            "medical-claims/<int:medical_claim_id>/approve/",
-            MedicalClaimApproveView.as_view(),
-            name="medical-claim-approve",
-        ),
-        path(
-            "medical-claims/<int:medical_claim_id>/reject/",
-            MedicalClaimRejectView.as_view(),
-            name="medical-claim-reject",
-        ),
-        # Claim completion workflow
-        path(
-            "medical-claims/<int:medical_claim_id>/mark-complete/",
-            MedicalClaimMarkCompleteView.as_view(),
-            name="medical-claim-mark-complete",
-        ),
-        path(
-            "medical-claims/<int:medical_claim_id>/final-verify/",
-            MedicalClaimFinalVerifyView.as_view(),
-            name="medical-claim-final-verify",
-        ),
-        # Hospital dashboards
-        path(
-            "<uuid:hospital_id>/dashboard/",
-            HospitalDashboardView.as_view(),
-            name="hospital-dashboard",
-        ),
-        path(
-            "<uuid:hospital_id>/dashboard/redeemed-daily/",
-            HospitalRedeemedDailyView.as_view(),
-            name="hospital-redeemed-daily",
-        ),
     ]
+    + router.urls
+    + services_router.urls
 )
