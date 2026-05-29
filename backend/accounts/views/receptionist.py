@@ -1,3 +1,4 @@
+from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -13,7 +14,9 @@ from accounts.serializers import (
     ReceptionistUpdateSerializer,
     ReceptionistDashboardSerializer,
 )
-from accounts.utils import IsHospitalAdmin, IsOwnerOrHospitalAdmin, cache_response, invalidate_cache
+from accounts.utils import IsHospitalAdmin, IsOwnerOrHospitalAdmin
+from core.cache import cache_response
+from core.mixins import CacheInvalidationMixin
 from accounts.filters import ReceptionistFilter
 from hospitals.models import MedicalClaim, MedicalClaimProof
 from vouchers.models.Voucher import Voucher
@@ -32,7 +35,14 @@ class IsHospitalAdminOrSystemAdmin(BasePermission):
         )
 
 
+@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
+@method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
+
 class ReceptionistViewSet(
+    CacheInvalidationMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -42,6 +52,7 @@ class ReceptionistViewSet(
     """
     ViewSet for Receptionist management.
     """
+    cache_group = "receptionists"
     lookup_field = 'id'
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ReceptionistFilter
@@ -80,7 +91,6 @@ class ReceptionistViewSet(
         responses={201: ReceptionistDetailSerializer},
         operation_description="Create a new Receptionist account. Only accessible by HOSPITAL_ADMIN.",
     )
-    @invalidate_cache('receptionist_list')
     def create(self, request, *args, **kwargs):
         try:
             enrolled_by = request.user.hospitaladmin
@@ -106,7 +116,7 @@ class ReceptionistViewSet(
         responses={200: ReceptionistDetailSerializer(many=True)},
         operation_description='List Receptionist profiles with filtering and search support. SYSTEM_ADMIN sees all; HOSPITAL_ADMIN sees only their enrolled receptionists.',
     )
-    @cache_response(timeout=5 * 60, key_prefix='receptionist_list')
+    @cache_response(group="receptionists", timeout=5 * 60)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -115,7 +125,7 @@ class ReceptionistViewSet(
         responses={200: ReceptionistDetailSerializer},
         operation_description="Retrieve a Receptionist profile. Accessible by the receptionist, their hospital admin, or a SYSTEM_ADMIN.",
     )
-    @cache_response(timeout=10 * 60, key_prefix='receptionist_detail')
+    @cache_response(group="receptionists", timeout=10 * 60)
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -125,7 +135,6 @@ class ReceptionistViewSet(
         responses={200: ReceptionistDetailSerializer},
         operation_description="Partially update a Receptionist profile. Accessible by the receptionist, their hospital admin, or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache('receptionist_list')
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
@@ -135,7 +144,6 @@ class ReceptionistViewSet(
         responses={200: ReceptionistDetailSerializer},
         operation_description="Fully update a Receptionist profile. Accessible by the receptionist, their hospital admin, or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache('receptionist_list')
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
