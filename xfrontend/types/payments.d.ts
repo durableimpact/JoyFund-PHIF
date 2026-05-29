@@ -65,7 +65,11 @@ declare interface PaymentGatewayUpdatePayload {
 
 // ── Transactions ──
 
-declare type TransactionType = "DONATION" | "PLATFORM_FEE" | "DISBURSEMENT" | "REFUND";
+declare type TransactionType =
+  | "DONATION"
+  | "PLATFORM_FEE"
+  | "DISBURSEMENT"
+  | "REFUND";
 declare type TransactionStatus = "SUCCESSFUL" | "FAILED" | "PENDING";
 declare type TransactionDirection = "IN" | "OUT";
 
@@ -120,8 +124,16 @@ declare interface WebhookEvent {
 
 // ── Disbursements ──
 
-declare type DisbursementStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
-declare type DisbursementPaymentMethod = "MOMO" | "BANK_TRANSFER" | "CASH" | "OTHER";
+declare type DisbursementStatus =
+  | "PENDING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
+declare type DisbursementPaymentMethod =
+  | "MOMO"
+  | "BANK_TRANSFER"
+  | "CASH"
+  | "OTHER";
 
 declare interface Disbursement {
   id: string;
@@ -188,4 +200,89 @@ declare interface DisbursementStatistics {
     total: number;
     count: number;
   }[];
+}
+
+declare interface ProfileMinimal {
+  id: string; // UUID
+  full_name: string;
+  email: string;
+}
+
+declare interface ClaimItem {
+  id: number;
+  name: string;
+  amount: string; // Decimal string
+}
+
+declare interface MedicalClaimProof {
+  id: number;
+  file: string; // URL string
+  document_type: string; // e.g., 'BILL', 'PRESCRIPTION', 'LAB_RESULT', etc.
+  verification_status: string; // e.g., 'PENDING', 'VERIFIED', 'REJECTED', 'FLAGGED'
+  uploaded_at: string; // ISO 8601 Date string
+}
+declare interface MedicalClaimDetail {
+  id: number;
+  voucher: number; // Voucher ID
+  hospital: string; // Hospital UUID
+  service_description: string;
+  total_cost: string; // Decimal string
+  claim_status: string; // e.g., 'PENDING', 'APPROVED', 'REJECTED'
+  submitted_at: string; // ISO 8601 Date string
+  submitted_by: ProfileMinimal | null;
+  reviewed_at: string | null; // ISO 8601 Date string
+  reviewed_by: ProfileMinimal | null;
+  service_completed_at: string | null; // ISO 8601 Date string
+  rejection_reason: string | null;
+  claim_items: ClaimItem[];
+  proofs: MedicalClaimProof[];
+}
+declare interface HealthIssue {
+  id: number;
+  beneficiary: string; // Beneficiary UUID
+  social_worker: string | null; // Social Worker UUID
+  validated_by: string | null; // System Admin UUID
+  category: string; // e.g., 'MATERNAL', 'ELDERLY', 'EMERGENCY', 'CHRONIC', 'OTHER'
+  severity: string; // e.g., 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'
+  status: string; // e.g., 'REPORTED', 'VALIDATED', 'WAITING', 'ASSIGNED', etc.
+  description: string;
+  rejection_reason: string | null;
+  created_at: string; // YYYY-MM-DD Date string
+  updated_at: string; // YYYY-MM-DD Date string
+}
+
+declare interface DisbursementVoucher {
+  voucher_code: string;
+  status: string; // e.g., 'AVAILABLE', 'ACTIVE', 'PENDING_CONFIRMATION', 'USED', 'EXPIRED'
+  health_issue: HealthIssue | null;
+  medical_claim: MedicalClaimDetail | null;
+}
+
+declare interface DisbursementDetail {
+  id: string; // UUID
+  hospital: string; // Hospital UUID
+  hospital_name: string;
+  hospital_email: string;
+  hospital_phone: string;
+  amount: string; // Decimal string
+  currency: string;
+  payment_method: string; // e.g., 'MOMO', 'BANK_TRANSFER', 'CASH', 'OTHER'
+  payment_method_display: string;
+  recipient_phone: string | null;
+  recipient_account: string | null;
+  status: string; // e.g., 'PENDING', 'COMPLETED', 'FAILED', 'CANCELLED'
+  status_display: string;
+  external_reference: string | null;
+  voucher: DisbursementVoucher | null;
+  voucher_code: string | null;
+  gateway_transaction_id: string | null;
+  transaction_details: any | null; // Keep dynamic based on Transaction model
+  notes: string | null;
+  error_message: string | null;
+  metadata: Record<string, any> | null;
+  created_at: string; // ISO 8601 Date string
+  updated_at: string; // ISO 8601 Date string
+  disbursed_at: string | null; // ISO 8601 Date string
+  created_by: string | null; // UUID
+  created_by_name: string | null;
 }
