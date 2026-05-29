@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -15,7 +18,11 @@ from accounts.models import Role
 from accounts.utils.cache import cache_response, invalidate_cache
 from campaigns.filters import DonationFilter
 from campaigns.models import Campaign, Donation, Payment
-from campaigns.serializers import DonationCreateSerializer, DonationDetailSerializer
+from campaigns.serializers import (
+    DonationCreateSerializer,
+    DonationDetailSerializer,
+    DonationListSerializer,
+)
 from logs.services import LogService
 from utils.campay import CamPayManager
 
@@ -134,17 +141,14 @@ class DonationViewSet(
     viewsets.GenericViewSet,
 ):
     """
-    ViewSet for accessing all donations in the system (not campaign-specific).
-    - GET /api/donations/ - List all donations with filters
-    - GET /api/donations/<id>/ - Retrieve a specific donation
-    - GET /api/donations/my-donations/ - Get authenticated user's donations
-    
-    Supports filtering, searching, and ordering:
-    - ?status=confirmed
-    - ?is_anonymous=false
-    - ?donor_name=John
-    - ?min_amount=100&max_amount=5000
-    - ?created_after=2026-01-01&created_before=2026-12-31
+    System-wide donations endpoint — designed for the landing page.
+
+    - GET /api/campaigns/donations/           — List all donations (lightweight)
+    - GET /api/campaigns/donations/{id}/      — Retrieve a single donation (full detail)
+    - GET /api/campaigns/donations/recent/    — Donations from the last 30 minutes
+    - GET /api/campaigns/donations/my-donations/ — Authenticated donor's own donations
+
+    Filtering / search / ordering are supported on the list endpoint.
     """
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -153,55 +157,93 @@ class DonationViewSet(
     ordering_fields = ['amount', 'created_at', 'campaign__title']
     ordering = ['-created_at']
 
-    serializer_class = DonationDetailSerializer
+    serializer_class = DonationListSerializer
 
-    @staticmethod
-    def _get_list_cache_key():
-        """Get cache key for all donations list"""
-        return 'donation_list_all'
+    RECENT_CACHE_TIMEOUT = 60  # 1 minute — polled frequently from the landing page
 
-    @staticmethod
-    def _get_detail_cache_key(donation_id):
-        """Get cache key for donation detail"""
-        return f'donation_detail_{donation_id}'
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return DonationDetailSerializer
+        return DonationListSerializer
 
     def get_queryset(self):
-        # Handle schema generation for Swagger
         if getattr(self, 'swagger_fake_view', False):
             return Donation.objects.none()
-        
-        # Return all donations (accessible to everyone)
+
         return Donation.objects.select_related(
-            'campaign__donor__user',
+            'campaign',
             'donor__user',
-            'payment'
         ).order_by('-created_at')
 
+    # ------------------------------------------------------------------
+    # list
+    # ------------------------------------------------------------------
     @swagger_auto_schema(
         tags=_TAG,
-        responses={200: DonationDetailSerializer(many=True)},
-        operation_description='List all donations in the system with filtering, searching, and ordering support.',
+        operation_description='List all donations in the system (lightweight, for the landing page).',
     )
     def list(self, request, *args, **kwargs):
         cache_key = self._get_list_cache_key()
         cached_data = cache.get(cache_key)
         if cached_data is not None:
             return Response(cached_data, status=status.HTTP_200_OK)
-        
+
         response = super().list(request, *args, **kwargs)
         if response.status_code == 200:
             cache.set(cache_key, response.data, CACHE_TIMEOUT)
         return response
 
+    # ------------------------------------------------------------------
+    # retrieve (full detail — payment + events)
+    # ------------------------------------------------------------------
     @swagger_auto_schema(
         tags=_TAG,
-        responses={200: DonationDetailSerializer},
-        operation_description='Retrieve a specific donation from the system.',
+        operation_description='Retrieve a single donation with full detail (payment, events).',
     )
-    @cache_response(timeout=CACHE_TIMEOUT)
+    @cache_response(timeout=CACHE_TIMEOUT, key_prefix="donation")
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    # ------------------------------------------------------------------
+    # recent — GET /api/campaigns/donations/recent/?minutes=30
+    # ------------------------------------------------------------------
+    @action(detail=False, methods=['get'], url_path='recent')
+    @swagger_auto_schema(
+        tags=_TAG,
+        operation_description='Returns donations created within the last N minutes (default 30). '
+                              'Use ?minutes=N to customise.',
+    )
+    def recent(self, request, *args, **kwargs):
+        try:
+            minutes = int(request.query_params.get('minutes', 30))
+        except (ValueError, TypeError):
+            minutes = 30
+
+        cutoff = timezone.now() - timedelta(minutes=minutes)
+
+        cache_key = f'donation_recent_{minutes}'
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
+
+        queryset = self.get_queryset().filter(created_at__gte=cutoff)
+        queryset = self.filter_queryset(queryset)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = DonationListSerializer(page, many=True)
+            paginated = self.get_paginated_response(serializer.data)
+            cache.set(cache_key, paginated.data, self.RECENT_CACHE_TIMEOUT)
+            return paginated
+
+        serializer = DonationListSerializer(queryset, many=True)
+        data = serializer.data
+        cache.set(cache_key, data, self.RECENT_CACHE_TIMEOUT)
+        return Response(data, status=status.HTTP_200_OK)
+
+    # ------------------------------------------------------------------
+    # my-donations — GET /api/campaigns/donations/my-donations/
+    # ------------------------------------------------------------------
     @action(
         detail=False,
         methods=['get'],
@@ -210,10 +252,9 @@ class DonationViewSet(
     )
     @swagger_auto_schema(
         tags=_TAG,
-        responses={200: DonationDetailSerializer(many=True)},
-        operation_description='Get all donations made by the authenticated donor with pagination and filtering.',
+        operation_description='Get all donations made by the authenticated donor.',
     )
-    @cache_response(timeout=5 * 60)
+    @cache_response(timeout=5 * 60, key_prefix="donation")
     def my_donations(self, request, *args, **kwargs):
         """Get all donations made by the authenticated donor"""
         try:
@@ -228,29 +269,31 @@ class DonationViewSet(
             request,
             'donation.view_my_donations',
             user=request.user,
-            description=f'Donor viewed their donation history',
+            description='Donor viewed their donation history',
             metadata={'donor_id': str(donor.id)},
         )
 
-        # Filter donations by this donor, apply filters from query params
         donations = Donation.objects.select_related(
-            'campaign__donor__user',
+            'campaign',
             'donor__user',
-            'payment'
         ).filter(donor=donor).order_by('-created_at')
 
-        # Apply filtering, searching, and ordering via filter backends
         queryset = self.filter_queryset(donations)
 
-        # Apply pagination
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = DonationDetailSerializer(page, many=True)
+            serializer = DonationListSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        page = self.paginator.paginate_queryset(queryset, request, view=self)
-        serializer = DonationDetailSerializer(page, many=True)
-        return self.paginator.get_paginated_response(serializer.data)
+        serializer = DonationListSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # ------------------------------------------------------------------
+    # helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _get_list_cache_key():
+        return 'donation_list_all'
 
 
 class DonationCreateViewSet(viewsets.GenericViewSet):
@@ -397,6 +440,9 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                 NestedDonationViewSet._invalidate_campaign_donations_list(campaign_id)
                 # Invalidate top-level donations list (system-wide donations view)
                 cache.delete("donation_list_all")
+                # Invalidate recent donations caches (keyed by minutes param)
+                cache.delete("donation_recent_30")
+                cache.delete("donation_recent_60")
                 # Invalidate campaign detail cache (since donated amount increased)
                 cache.delete(f"campaign_detail_{campaign_id}")
                 # Invalidate campaigns list cache
