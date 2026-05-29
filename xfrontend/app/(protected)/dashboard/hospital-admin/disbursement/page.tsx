@@ -2,26 +2,28 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatXAF, formatDate, statusColor } from '@/lib/utils';
-import { getDisbursementsByHospital } from '@/actions/disbursement';
+import { listDisbursements } from '@/actions/disbursement';
+import Link from 'next/link';
 
 const STATUS_FILTERS = ['all', 'PENDING', 'COMPLETED', 'FAILED', 'CANCELLED'];
 const PAGE_SIZE = 10;
 
 export default function HospitalAdminDisbursements() {
   const { data: session } = useSession();
+  const userInfo = (session?.user?.userInfo as HospitalAdminInfo);
+  const hospital_id = userInfo?.hospital?.id;
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState<DisbursementStatus | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedDisbursement, setSelectedDisbursement] = useState<Disbursement | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['ha-disbursements', token],
-    queryFn: () => getDisbursementsByHospital(token),
-    enabled: !!token,
+    queryFn: () => listDisbursements(token, { hospital: hospital_id!, status: filter === 'all' ? null : filter }),
+    enabled: !!token && !!hospital_id,
   });
 
   const allDisbursements: Disbursement[] = Array.isArray(data) ? data : (data as any)?.results || [];
@@ -85,9 +87,9 @@ export default function HospitalAdminDisbursements() {
                   <td className="p-4 text-gray-400 text-xs">{d.created_at ? formatDate(d.created_at) : '—'}</td>
                   <td className="p-4 text-gray-400 text-xs font-mono">{d.external_reference || d.gateway_transaction_id || '—'}</td>
                   <td className="p-4">
-                    <button onClick={() => setSelectedDisbursement(d)} className="text-xs font-semibold" style={{ color: '#1D75DB' }}>
+                    <Link href={`/dashboard/hospital-admin/disbursement/${d.id}`} className="text-xs font-semibold" style={{ color: '#1D75DB' }}>
                       View
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -117,42 +119,6 @@ export default function HospitalAdminDisbursements() {
           </div>
         )}
       </div>
-
-      {selectedDisbursement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-black text-gray-900">Disbursement Detail</h2>
-              <button onClick={() => setSelectedDisbursement(null)}><X size={20} className="text-gray-400" /></button>
-            </div>
-            <div className="space-y-3 text-sm">
-              {[
-                ['Amount', formatXAF(selectedDisbursement.amount)],
-                ['Payment Method', paymentMethodLabels[selectedDisbursement.payment_method] || selectedDisbursement.payment_method],
-                ['Status', selectedDisbursement.status],
-                ['Recipient Phone', selectedDisbursement.recipient_phone || '—'],
-                ['Recipient Account', selectedDisbursement.recipient_account || '—'],
-                ['External Reference', selectedDisbursement.external_reference || '—'],
-                ['Gateway Transaction', selectedDisbursement.gateway_transaction_id || '—'],
-                ['Notes', selectedDisbursement.notes || '—'],
-                ['Created At', selectedDisbursement.created_at ? formatDate(selectedDisbursement.created_at) : '—'],
-                ['Disbursed At', selectedDisbursement.disbursed_at ? formatDate(selectedDisbursement.disbursed_at) : '—'],
-              ].map(([k, v]) => (
-                <div key={k} className="flex justify-between border-b border-gray-50 pb-2">
-                  <span className="text-gray-500">{k}</span>
-                  <span className="font-semibold text-gray-900 text-right max-w-[60%] truncate">{v}</span>
-                </div>
-              ))}
-              {selectedDisbursement.error_message && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700 mt-2">
-                  <span className="font-semibold">Error: </span>{selectedDisbursement.error_message}
-                </div>
-              )}
-            </div>
-            <button className="btn-outline w-full mt-5" onClick={() => setSelectedDisbursement(null)}>Close</button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
