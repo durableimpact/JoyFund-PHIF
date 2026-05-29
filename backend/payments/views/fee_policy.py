@@ -1,3 +1,4 @@
+from core.mixins import CacheInvalidationMixin
 from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
@@ -36,7 +37,8 @@ _tag = ['Payments — Fee Policies']
 @method_decorator(name='destroy', decorator=swagger_auto_schema(
     tags=_tag, operation_summary="Delete Fee Policy",
 ))
-class FeePolicyViewSet(viewsets.ModelViewSet):
+class FeePolicyViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
+
     """
     Full CRUD for Fee Policies.
     Accessible by System Admins only.
@@ -45,6 +47,7 @@ class FeePolicyViewSet(viewsets.ModelViewSet):
     platform fee account and the escrow account. The two percentages
     must always sum to 100.
     """
+    cache_group = 'fee_policies'
     queryset = FeePolicy.objects.order_by('-created_at')
     serializer_class = FeePolicySerializer
     permission_classes = [IsSystemAdmin]
@@ -53,59 +56,9 @@ class FeePolicyViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'platform_fee_percentage', 'escrow_fee_percentage', 'created_at']
     ordering = ['-created_at']
 
-    @staticmethod
-    def _get_list_cache_key():
-        return 'fee_policy_list'
-
-    @staticmethod
-    def _get_detail_cache_key(policy_id):
-        return f'fee_policy_detail_{policy_id}'
-
-    @staticmethod
-    def _invalidate_list_cache():
-        cache.delete(FeePolicyViewSet._get_list_cache_key())
-
-    @staticmethod
-    def _invalidate_detail_cache(policy_id):
-        cache.delete(FeePolicyViewSet._get_detail_cache_key(policy_id))
-
-    def list(self, request, *args, **kwargs):
-        cache_key = self._get_list_cache_key()
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-        
-        response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
-
-    def retrieve(self, request, *args, **kwargs):
-        policy_id = kwargs.get('pk')
-        cache_key = self._get_detail_cache_key(policy_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
-        
-        response = super().retrieve(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
-        return response
-
-    def perform_create(self, serializer):
-        super().perform_create(serializer)
-        self._invalidate_list_cache()
-
-    def perform_update(self, serializer):
-        super().perform_update(serializer)
-        policy_id = self.kwargs.get('pk')
-        self._invalidate_detail_cache(policy_id)
-        self._invalidate_list_cache()
-
-    def perform_destroy(self, instance):
-        super().perform_destroy(instance)
-        self._invalidate_detail_cache(instance.id)
-        self._invalidate_list_cache()
+    def _build_response(self, serializer):
         data = serializer.data
-        deactivated = serializer.validated_data.pop('_deactivates', None)
+        deactivated = getattr(serializer, 'validated_data', {}).get('_deactivates', None)
         if deactivated:
             data = dict(data)
             data['warning'] = f"Fee policy '{deactivated}' has been deactivated."
