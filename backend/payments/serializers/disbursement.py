@@ -1,6 +1,23 @@
 from rest_framework import serializers
 from ..models import Disbursement, Transaction
+from vouchers.models import Voucher
+from beneficiaries.serializers.health_issue import HealthIssueSerializer
+from hospitals.serializers.medical_claim import MedicalClaimDetailSerializer
 
+
+class DisbursementVoucherSerializer(serializers.ModelSerializer):
+    """Secure voucher serializer for disbursement details that excludes PII and internal data."""
+    health_issue = HealthIssueSerializer(read_only=True)
+    medical_claim = MedicalClaimDetailSerializer(read_only=True)
+
+    class Meta:
+        model = Voucher
+        fields = [
+            'voucher_code',
+            'status',
+            'health_issue',
+            'medical_claim',
+        ]
 
 class DisbursementStatisticsSerializer(serializers.Serializer):
     """Serializer for disbursement statistics response."""
@@ -49,6 +66,7 @@ class DisbursementSerializer(serializers.ModelSerializer):
     transaction_id = serializers.UUIDField(
         source='transaction.id', read_only=True, allow_null=True
     )
+    voucher_code = serializers.CharField(source='voucher.voucher_code', read_only=True)
 
     class Meta:
         model = Disbursement
@@ -66,6 +84,8 @@ class DisbursementSerializer(serializers.ModelSerializer):
             'status',
             'status_display',
             'external_reference',
+            'voucher',
+            'voucher_code',
             'gateway_transaction_id',
             'transaction_id',
             'notes',
@@ -82,6 +102,7 @@ class DisbursementSerializer(serializers.ModelSerializer):
             'hospital_name',
             'hospital_momo',
             'transaction_id',
+            'voucher_code',
             'created_by_name',
             'created_at',
             'updated_at',
@@ -100,6 +121,7 @@ class DisbursementCreateSerializer(serializers.ModelSerializer):
             'recipient_phone',
             'recipient_account',
             'external_reference',
+            'voucher',
             'gateway_transaction_id',
             'notes',
             'metadata',
@@ -117,6 +139,7 @@ class DisbursementUpdateSerializer(serializers.ModelSerializer):
             'recipient_phone',
             'recipient_account',
             'external_reference',
+            'voucher',
             'gateway_transaction_id',
             'notes',
             'error_message',
@@ -138,6 +161,8 @@ class DisbursementDetailSerializer(serializers.ModelSerializer):
         source='created_by.get_full_name', read_only=True
     )
     transaction_details = serializers.SerializerMethodField()
+    voucher_code = serializers.CharField(source='voucher.voucher_code', read_only=True)
+    voucher = DisbursementVoucherSerializer(read_only=True)
 
     class Meta:
         model = Disbursement
@@ -156,6 +181,8 @@ class DisbursementDetailSerializer(serializers.ModelSerializer):
             'status',
             'status_display',
             'external_reference',
+            'voucher',
+            'voucher_code',
             'gateway_transaction_id',
             'transaction_details',
             'notes',
