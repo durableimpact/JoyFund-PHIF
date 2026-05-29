@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.serializers import ErrorResponseSerializer
@@ -21,6 +22,7 @@ from hospitals.services.voucher_topup import (
     approve_top_up_request_and_allocate_funds,
     reject_top_up_request,
 )
+from hospitals.filters import VoucherTopUpRequestFilter
 from .medical_claim import IsReceptionist, IsSystemAdmin
 
 
@@ -179,7 +181,11 @@ class VoucherTopUpRequestListView(ListAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = VoucherTopUpRequestSerializer
-    queryset = VoucherTopUpRequest.objects.prefetch_related("events").order_by("-created_at")
+    queryset = VoucherTopUpRequest.objects.select_related(
+        "medical_claim__hospital", "created_by", "reviewed_by"
+    ).prefetch_related("events").order_by("-created_at")
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = VoucherTopUpRequestFilter
 
     @swagger_auto_schema(
         tags=["Voucher Top-Up"],
