@@ -11,7 +11,7 @@ function handleError(e: unknown) {
 
 // ── Disbursements CRUD ──
 
-export const listDisbursements = async (access_token: string, params?: Record<string, string>) => {
+export const listDisbursements = async (access_token: string, params?: Partial<{ hospital: string, payment_method: DisbursementPaymentMethod | null, status: DisbursementStatus | null }>) => {
   try {
     const { data } = await api.get<PaginationResponse<Disbursement>>("/api/payments/disbursements/", {
       headers: { Authorization: `Bearer ${access_token}` },
@@ -23,7 +23,7 @@ export const listDisbursements = async (access_token: string, params?: Record<st
 
 export const getDisbursement = async (id: string, access_token: string) => {
   try {
-    const { data } = await api.get<Disbursement>(`/api/payments/disbursements/${id}/`, {
+    const { data } = await api.get<DisbursementDetail>(`/api/payments/disbursements/${id}/`, {
       headers: { Authorization: `Bearer ${access_token}` },
     });
     return data;
@@ -73,16 +73,6 @@ export const markDisbursementFailed = async (id: string, access_token: string) =
     const { data } = await api.post<Disbursement>(
       `/api/payments/disbursements/${id}/mark_failed/`,
       {},
-      { headers: { Authorization: `Bearer ${access_token}` } }
-    );
-    return data;
-  } catch (e) { handleError(e); }
-};
-
-export const getDisbursementsByHospital = async (access_token: string) => {
-  try {
-    const { data } = await api.get(
-      "/api/payments/disbursements/by_hospital/",
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
     return data;
