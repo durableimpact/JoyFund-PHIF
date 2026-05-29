@@ -89,3 +89,20 @@ class IsOwnerOrHospitalAdmin(BasePermission):
         if request.user.role == Role.HOSPITAL_ADMIN:
             return True
         return obj.user == request.user
+
+class IsSystemAdminOrHospitalAdmin(BasePermission):
+    """
+    Object-level permission.
+    Allows access to the system admin, hospital admin, or the hospital admin who enrolled them.
+    """
+
+    message = "You do not have permission to access this resource."
+
+    def has_object_permission(self, request, view, obj):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.user.role == Role.SYSTEM_ADMIN:
+            return True
+        if request.user.role == Role.HOSPITAL_ADMIN:
+            return True
+        return obj.user == request.user
