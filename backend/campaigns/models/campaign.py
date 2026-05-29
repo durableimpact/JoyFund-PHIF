@@ -109,13 +109,16 @@ class Campaign(models.Model):
 
     @property
     def progress_percentage(self):
-        if self.goal_amount > 0:
-            return (self.current_amount / self.goal_amount) * 100
+        if self.goal_amount and self.goal_amount > 0:
+            current = self.current_amount or 0
+            return (current / self.goal_amount) * 100
         return 0
     
     @property
     def goal_reached(self):
         """Check if campaign has reached its goal amount."""
+        if not self.goal_amount:
+            return False
         return self.total_net_raised >= self.goal_amount
     
     def generate_impact_certificate(self, force=False):
