@@ -402,7 +402,7 @@ function CreateCampaignContent() {
                   className="btn-primary w-full flex items-center justify-center gap-2"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `https://joyfund.cm/campaign/${publishedCampaign.id}`
+                      `https://joy-fund.com/campaign/${publishedCampaign.id}`
                     );
                     alert('Link copied!');
                   }}
