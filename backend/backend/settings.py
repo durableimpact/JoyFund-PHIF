@@ -546,6 +546,13 @@ CAMPAY_PERMANENT_TOKEN = env("CAMPAY_PERMANENT_TOKEN", default="")
 CAMPAY_WEBHOOK_SECRET = env("CAMPAY_WEBHOOK_SECRET", default="")
 CAMPAY_ENVIRONMENT = env("CAMPAY_ENVIRONMENT", default="DEV")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Twilio SMS Configuration
+# ─────────────────────────────────────────────────────────────────────────────
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
+TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER", default="")
+
 # Ensure the logs directory exists before Django configures file-based logging.
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
