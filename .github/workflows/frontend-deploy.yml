@@ -24,8 +24,9 @@ jobs:
             # Navigate to the project root
             cd /root/projects/JoyFund/frontend
             
-            # Pull the latest changes
-            git pull origin main
+            # Forced sync with main branch
+            git fetch origin main
+            git reset --hard origin/main
             
             # Deploy frontend using docker-compose
             cd frontend
