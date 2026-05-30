@@ -10,11 +10,14 @@ import {
   Check,
   Shield,
   User,
-  X
+  X,
+} from 'lucide-react';
+import {
   getHospitalAdmin,
   getSocialWorker,
   getReceptionist,
   getDonor,
+  getSystemAdmin,
 } from '@/actions/accounts';
 
 const ROLE_LABELS: Record<string, string> = {
@@ -80,7 +83,8 @@ export default function UserDetailPage() {
   const u = user.user || user;
 
   return (
-          <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
+    <>
+      <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
         <ArrowLeft size={16} /> Back to Users
       </button>
 
@@ -221,7 +225,7 @@ export default function UserDetailPage() {
           </div>
         </div>
       </div>
-  
+    </>
   );
 }
 
