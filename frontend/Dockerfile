@@ -35,29 +35,23 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-# ENV NEXT_TELEMETRY_DISABLED 1
 
-# Create system users
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs --ingroup nodejs
 
-COPY --from=builder /app/public ./public
-
-# Create cache folder for prerender and set proper permissions
-RUN mkdir .next && chown nextjs:nodejs .next
-
-# Copy Next.js standalone output (with output file tracing)
-COPY --from=builder --chown=nextjs:nodejs /app/public /app/.next/standalone/
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static /app/.next/standalone/.next/
+# Copy standalone output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-# COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy static files ← THIS IS THE FIX
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy public folder
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]
-
