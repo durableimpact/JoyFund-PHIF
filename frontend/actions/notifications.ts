@@ -3,7 +3,7 @@
 import api from "./api";
 import { AxiosError } from "axios";
 
-function handleError(e: unknown) {
+function handleError(e: unknown): never {
   const err = e as AxiosError;
   if (err.response?.data) throw JSON.stringify(err.response.data);
   throw JSON.stringify({ message: "An unexpected error occurred" });
