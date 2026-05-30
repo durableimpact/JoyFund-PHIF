@@ -10,7 +10,7 @@ function getAuthHeader(access_token?: string) {
   return { Authorization: `Bearer ${access_token}` };
 }
 
-function handleError(error: unknown) {
+function handleError(error: unknown): never {
   const axiosError = error as AxiosError;
   if (axiosError.response?.data) throw JSON.stringify(axiosError.response.data);
   throw JSON.stringify({ message: "An unexpected error occurred" });
