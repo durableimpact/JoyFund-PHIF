@@ -134,7 +134,12 @@ class MedicalClaimDetailView(RetrieveUpdateAPIView):
     """View and add items to a medical claim."""
 
     permission_classes = [IsSystemOrHospitalAdminOrReceptionist]
-    queryset = MedicalClaim.objects.prefetch_related("claim_items", "proofs")
+    queryset = MedicalClaim.objects.select_related(
+        "hospital", 
+        "voucher", 
+        "submitted_by__user", 
+        "reviewed_by__user"
+    ).prefetch_related("claim_items", "proofs")
     lookup_field = "pk"
 
     def get_serializer_class(self):
