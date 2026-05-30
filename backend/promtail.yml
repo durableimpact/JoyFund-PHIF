@@ -1,0 +1,48 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://joyfund_loki:3100/loki/api/v1/push
+
+scrape_configs:
+
+  # ── Collect logs from ALL containers automatically ──
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        target_label: container
+      - source_labels: ["__meta_docker_container_log_stream"]
+        target_label: stream
+
+  # ── Django workers specifically ─────────────────────
+  - job_name: joyfund_django
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        filters:
+          - name: name
+            values: ["joyfund_web_1", "joyfund_web_2"]
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        target_label: container
+      - target_label: app
+        replacement: joyfund_django
+
+  # ── Celery workers specifically ─────────────────────
+  - job_name: joyfund_celery
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        filters:
+          - name: name
+            values: ["joyfund_celery_1", "joyfund_celery_2", "joyfund_celery_beat"]
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        target_label: container
+      - target_label: app
+        replacement: joyfund_celery
