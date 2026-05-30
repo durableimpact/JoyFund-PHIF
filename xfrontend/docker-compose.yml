@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: joyfund_frontend
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    expose:
+      - "3000"
+    networks:
+      - joyfund_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  joyfund_network:
+    external: true
