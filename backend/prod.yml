@@ -1,259 +1,346 @@
 services:
-  db:
-    image: postgis/postgis:17-3.5-alpine
-    restart: unless-stopped
-    env_file:
-    - ./envs/prod/.env
-    environment:
-      POSTGRES_INITDB_ARGS: -c shared_buffers=256MB -c effective_cache_size=1GB -c
-        max_connections=500 -c work_mem=50MB
-    volumes:
-    - pgdata:/var/lib/postgresql/data
-    networks:
-    - backend
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - pg_isready -U joyfund -d joyfund
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '1.0'
-          memory: 1G
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+
+  # ─── RabbitMQ (Message Broker) ─────────────────────
   rabbitmq:
     image: rabbitmq:3.10-management-alpine
+    container_name: joyfund_rabbitmq
     restart: unless-stopped
     env_file:
-    - ./envs/prod/.env
+      - ./envs/prod/.env
     networks:
-    - backend
+      - backend
     healthcheck:
-      test:
-      - CMD
-      - rabbitmq-diagnostics
-      - ping
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
     logging:
       driver: json-file
       options:
         max-size: 15m
-        max-file: '5'
+        max-file: "5"
+
+  # ─── Redis (Cache + Celery Broker) ─────────────────
   redis:
     image: redis:7.4
+    container_name: joyfund_redis
     restart: unless-stopped
-    command: redis-server --maxmemory 1gb --maxmemory-policy allkeys-lru --appendonly
-      yes --appendfsync everysec
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
     networks:
-    - backend
+      - backend
     healthcheck:
-      test:
-      - CMD
-      - redis-cli
-      - ping
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
     volumes:
-    - redis_data:/data
+      - redis_data:/data
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1.5G
+          cpus: "0.5"
+          memory: 512M
         reservations:
-          cpus: '0.5'
-          memory: 1G
+          cpus: "0.25"
+          memory: 256M
     logging:
       driver: json-file
       options:
         max-size: 10m
-        max-file: '3'
-  nginx:
-    image: nginx:alpine
-    restart: unless-stopped
-    ports:
-    - 80:80
-    - 443:443
-    volumes:
-    - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    - static_volume:/app/static:ro
-    - media_volume:/app/media:ro
-    depends_on:
-    - web-worker-1
-    - web-worker-2
-    - web-worker-3
-    - web-worker-4
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 256M
-        reservations:
-          cpus: '0.5'
-          memory: 128M
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+        max-file: "3"
+
+  # ─── Django Web Workers ─────────────────────────────
   web-worker-1:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: joyfund_web_1
     restart: unless-stopped
     env_file:
-    - ./envs/prod/.env
+      - ./envs/prod/.env
+    environment:
+      RUN_MIGRATIONS: "true"
     volumes:
-    - .:/app
-    - media_volume:/app/media
-    - static_volume:/app/static
+      - static_volume:/app/static
     depends_on:
-      db:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
         condition: service_healthy
     expose:
-    - '8000'
+      - "8000"
     networks:
-    - frontend
-    - backend
-    command: gunicorn --config gunicorn_config.py --bind 0.0.0.0:8000 --workers 8
-      --worker-class sync --max-requests 1000 --max-requests-jitter 100 --timeout
-      30 --access-logfile - --error-logfile - backend.wsgi:application
+      - joyfund_network     # NPM proxies traffic here
+      - backend             # reaches Redis and RabbitMQ
+    command: >
+      gunicorn
+      --bind 0.0.0.0:8000
+      --workers 4
+      --worker-class uvicorn.workers.UvicornWorker
+      --max-requests 1000
+      --max-requests-jitter 100
+      --timeout 120
+      --access-logfile -
+      --error-logfile -
+      backend.asgi:application
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-        max-file: '5'
-  web-worker-2:
-    extends: web-worker-1
-    expose:
-    - '8000'
-    networks:
-    - frontend
-    - backend
-  web-worker-3:
-    extends: web-worker-1
-    expose:
-    - '8000'
-    networks:
-    - frontend
-    - backend
-  web-worker-4:
-    extends: web-worker-1
-    expose:
-    - '8000'
-    networks:
-    - frontend
-    - backend
-  celery-worker-1:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file:
-    - ./envs/prod/.env
-    volumes:
-    - .:/app
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: celery -A backend worker -n worker1@%h --loglevel=info --concurrency=4
-      --max-tasks-per-child=1000 --time-limit=3600 --soft-time-limit=3300
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-        max-file: '5'
-    networks:
-    - backend
-  celery-worker-2:
-    extends: celery-worker-1
-    command: celery -A backend worker -n worker2@%h --loglevel=info --concurrency=4
-      --max-tasks-per-child=1000 --time-limit=3600 --soft-time-limit=3300
-    networks:
-    - backend
-  celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file:
-    - ./envs/prod/.env
-    volumes:
-    - .:/app
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: celery -A backend beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
+          cpus: "1.0"
           memory: 256M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 128M
     logging:
       driver: json-file
       options:
         max-size: 10m
-        max-file: '3'
+        max-file: "5"
+
+  web-worker-2:
+    extends: web-worker-1
+    container_name: joyfund_web_2
+    environment:
+      RUN_MIGRATIONS: "false"
     networks:
-    - backend
+      - joyfund_network
+      - backend
+
+  # ─── Celery Workers (Async Tasks) ──────────────────
+  celery-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joyfund_celery_1
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    volumes:
+      - static_volume:/app/static
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      celery -A joyfund worker
+      -n worker1@%h
+      --loglevel=info
+      --concurrency=4
+      --max-tasks-per-child=1000
+      --time-limit=3600
+      --soft-time-limit=3300
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  celery-worker-2:
+    extends: celery-worker-1
+    container_name: joyfund_celery_2
+    command: >
+      celery -A joyfund worker
+      -n worker2@%h
+      --loglevel=info
+      --concurrency=4
+      --max-tasks-per-child=1000
+      --time-limit=3600
+      --soft-time-limit=3300
+    networks:
+      - backend
+
+  # ─── Celery Beat (Scheduled Tasks) ─────────────────
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joyfund_celery_beat
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      celery -A joyfund beat
+      --loglevel=info
+      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          cpus: "0.25"
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Prometheus (Metrics Collection) ───────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: joyfund_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    expose:
+      - "9090"
+    networks:
+      - joyfund_network     # NPM proxies prometheus.joyfund.cm here
+      - backend             # scrapes Django workers metrics
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.enable-lifecycle
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Grafana (Metrics + Logs Dashboard) ────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: joyfund_grafana
+    restart: unless-stopped
+    expose:
+      - "3001"
+    environment:
+      GF_SERVER_HTTP_PORT: "3001"
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki                # ← wait for Loki before starting
+    networks:
+      - joyfund_network     # NPM proxies grafana.joyfund.cm here
+      - backend             # reaches Prometheus and Loki
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Loki (Log Storage) ────────────────────────────
+  loki:
+    image: grafana/loki:latest
+    container_name: joyfund_loki
+    restart: unless-stopped
+    expose:
+      - "3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - joyfund_network     # Grafana reaches Loki here
+      - backend             # Promtail ships logs here
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Promtail (Log Collector) ───────────────────────
+  promtail:
+    image: grafana/promtail:latest
+    container_name: joyfund_promtail
+    restart: unless-stopped
+    volumes:
+      - ./promtail.yml:/etc/promtail/config.yml:ro    # your config file
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro  # all container logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker metadata
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki                # ← wait for Loki before shipping logs
+    networks:
+      - backend             # ships logs to Loki
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
 volumes:
-  pgdata: null
-  redis_data: null
-  media_volume: null
-  static_volume: null
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  static_volume:
+    name: joyfund_static_volume    # ← same name
+    external: true                 # ← already exists, just reference it
+
 networks:
-  frontend: null
+  joyfund_network:
+    external: true        # shared with NPM and frontend
   backend:
-    internal: true
+    internal: true        # Redis, RabbitMQ, Loki never exposed to internet
