@@ -2,7 +2,7 @@ services:
 
   # ─── RabbitMQ (Message Broker) ─────────────────────
   rabbitmq:
-    image: rabbitmq:3.10-management-alpine
+    image: rabbitmq:3.13-management-alpine 
     container_name: joyfund_rabbitmq
     restart: unless-stopped
     env_file:
