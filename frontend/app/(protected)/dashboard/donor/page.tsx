@@ -78,7 +78,7 @@ export default function DonorDashboardPage() {
 
   // Fetch donations with React Query
   const { data: donationsResponse, isLoading: donationsLoading } = useQuery({
-    queryKey: ['my-donations', session?.user?.userInfo.id],
+    queryKey: ['my-donations', session?.user?.userInfo?.id],
     queryFn: async () => {
       const token = (session as any)?.accessToken || session?.user?.accessToken;
       if (!token) throw new Error('No access token');
@@ -87,7 +87,7 @@ export default function DonorDashboardPage() {
     enabled: !!session?.user,
   });
 
-  const campaigns = campaignsResponse || [];
+  const campaigns = campaignsResponse?.results || [];
   const donations = donationsResponse?.results || [];
   const loading = campaignsLoading || donationsLoading || dashboardLoading;
 
