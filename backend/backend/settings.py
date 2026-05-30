@@ -123,7 +123,7 @@ ASGI_APPLICATION = "backend.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-has_db_url = env.db_url("DATABASE_URL", default=None)
+has_db_url = env("DATABASE_URL", default=None)
 if has_db_url:
     # Parse the DATABASE_URL and set the DATABASES setting accordingly
     tmpPostgres = urlparse(has_db_url)
