@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JoyFund Frontend
+
+Frontend for [JoyFund](https://joy-fund.com) — a transparent crowdfunding platform that turns celebrations into maternal healthcare for vulnerable women across Cameroon.
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router) + React 19
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4 + shadcn/ui
+- **Auth:** NextAuth v5 (JWT strategy) backed by a Django API
+- **State/Data:** React Query, Zustand
+- **Forms:** react-hook-form + Zod v4
+- **Maps:** Leaflet + react-leaflet
+- **Charts:** Recharts
+- **Payments:** MTN MoMo, Orange Money
+
+## User Roles
+
+| Role | Description |
+|---|---|
+| `DONOR` | Creates campaigns, makes donations |
+| `SOCIAL_WORKER` | Enrolls beneficiaries, manages health issues |
+| `HOSPITAL_ADMIN` | Manages hospital and staff |
+| `RECEPTIONIST` | Processes vouchers at hospital |
+| `SYSTEM_ADMIN` | Platform administration |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 22+
+- A running [JoyFund Django backend](https://joy-fund.com)
+
+### Environment Variables
+
+Create a `.env` file:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXTAUTH_SECRET=<random-secret>
+NEXT_PUBLIC_DJANGO_API_URL=http://localhost:8000
+NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID=<client-id>
+NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET=<client-secret>
+AUTH_SECRET=<same-as-nextauth-secret>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+### Production Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Docker
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker compose up --build
+```
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+app/
+  (auth)/          # Login, register, forgot/reset password, email verify
+  (marketing)/     # Public pages: home, about, explore, campaigns
+  (protected)/     # Dashboards per role: donor, social-worker, hospital-admin, receptionist, system-admin
+  api/auth/        # NextAuth catch-all route
+components/
+  dashboard/       # Dashboard-specific components
+  global/          # Cross-app components
+  shared/          # Shared logic components
+  ui/              # shadcn/ui primitives
+actions/           # Server actions (API calls to Django backend)
+types/             # Global TypeScript declarations
+lib/               # Auth helpers, utilities
+hooks/             # Custom React hooks
+provider/          # React Query and token-refresh providers
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+Private — not for public distribution.
