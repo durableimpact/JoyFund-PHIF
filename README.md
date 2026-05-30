@@ -161,6 +161,7 @@ This is a one-time step. The network persists across all compose stacks.
 
 ```bash
 docker network create joyfund_network
+docker volume create joyfund_static_volume
 ```
 
 ### 2. Deploy Nginx Proxy Manager + Netdata
