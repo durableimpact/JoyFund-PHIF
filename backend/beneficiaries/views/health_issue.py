@@ -31,7 +31,9 @@ class HealthIssueListCreateView(ListCreateAPIView):
     - List: accessible by authenticated users.
     - Create: only SOCIAL_WORKER can report new health issues.
     """
-    queryset = HealthIssue.objects.all()
+    queryset = HealthIssue.objects.select_related(
+        "social_worker__user", "validated_by__user", "beneficiary"
+    ).prefetch_related("events")
     serializer_class = HealthIssueSerializer
     filterset_class = HealthIssueFilter
     permission_classes = [IsAuthenticated]
@@ -78,7 +80,9 @@ class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
     - Retrieve: accessible by authenticated users.
     - Update/Delete: only SYSTEM_ADMIN can modify health issue records.
     """
-    queryset = HealthIssue.objects.all()
+    queryset = HealthIssue.objects.select_related(
+        "social_worker__user", "validated_by__user", "beneficiary"
+    ).prefetch_related("events")
     serializer_class = HealthIssueSerializer
     lookup_field = "id"
 
@@ -224,7 +228,9 @@ class HealthIssueStatusActionView(GenericAPIView):
     Action view to validate or reject a health issue.
     Deprecated in favor of explicit Verify and Reject views but kept for backward compatibility.
     """
-    queryset = HealthIssue.objects.all()
+    queryset = HealthIssue.objects.select_related(
+        "social_worker__user", "validated_by__user", "beneficiary"
+    ).prefetch_related("events")
     serializer_class = HealthIssueDetailSerializer
     permission_classes = [IsAuthenticated, IsSystemAdmin]
     lookup_field = "id"
