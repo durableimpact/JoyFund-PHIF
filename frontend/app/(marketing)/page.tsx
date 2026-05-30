@@ -45,7 +45,7 @@ export default function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  const activeCampaigns = (campaignsResponse?.results || []).filter(c => c.status === 'active').slice(0, 3);
+  const activeCampaigns = (campaignsResponse?.results || []).filter(c => c.status === 'ACTIVE').slice(0, 3);
 
   return (
     <div className="min-h-screen">
