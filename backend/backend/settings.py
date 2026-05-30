@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import environ
 import sentry_sdk
+from urllib.parse import urlparse,parse_qsl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -66,6 +67,7 @@ INSTALLED_APPS = [
     "puml_generator",
     "django_smart_ratelimit",
     "axes",
+    "django_prometheus",
 
     # Local apps
     "logs",  # Logging system - must be before other apps to ensure proper app initialization
@@ -80,6 +82,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Logging middleware - must be after SessionMiddleware to have access to session
@@ -88,10 +91,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    'axes.middleware.AxesMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
-    'axes.middleware.AxesMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -120,24 +123,40 @@ ASGI_APPLICATION = "backend.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": env("DB_ENGINE", default="django.contrib.gis.db.backends.postgis"),
-        "NAME": env("DB_NAME", default="joyfund"),
-        "USER": env("DB_USER", default="joyfund"),
-        "PASSWORD": env("DB_PASSWORD", default="joyfund"),
-        "HOST": env("DB_HOST", default="localhost"),
-        "PORT": env("DB_PORT", default="5432"),
-        # Connection pooling for production
-        "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
-        "OPTIONS": {
-            "connect_timeout": 10,
-            "options": "-c statement_timeout=30000 -c idle_in_transaction_session_timeout=60000",
-        },
-        "ATOMIC_REQUESTS": False,  # Avoid long-running transactions
+has_db_url = env.db_url("DATABASE_URL", default=None)
+if has_db_url:
+    # Parse the DATABASE_URL and set the DATABASES setting accordingly
+    tmpPostgres = urlparse(has_db_url)
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': 5432,
+        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
     }
 }
-print("Envs : ", env("DB_USER", default="joyfund"), env("DB_PASSWORD", default="joyfund"), env("DB_HOST", default="localhost"), env("DB_PORT", default="5432"))
+else:
+
+    DATABASES = {
+        "default": {
+            "ENGINE": env("DB_ENGINE", default="django.contrib.gis.db.backends.postgis"),
+            "NAME": env("DB_NAME", default="joyfund"),
+            "USER": env("DB_USER", default="joyfund"),
+            "PASSWORD": env("DB_PASSWORD", default="joyfund"),
+            "HOST": env("DB_HOST", default="localhost"),
+            "PORT": env("DB_PORT", default="5432"),
+            # Connection pooling for production
+            "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
+            "OPTIONS": {
+                "connect_timeout": 10,
+                "options": "-c statement_timeout=30000 -c idle_in_transaction_session_timeout=60000",
+            },
+            "ATOMIC_REQUESTS": False,  # Avoid long-running transactions
+        }
+    }
 # SpatiaLite path — only used when DB_ENGINE is set to the spatialite backend
 # (local development without Docker)
 SPATIALITE_LIBRARY_PATH = env(
@@ -190,11 +209,46 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+USER_S3 = env("USE_S3", default=False)
+if USER_S3:
+    AWS_ACCESS_KEY_ID = env('B2_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = env('B2_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = env('B2_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = env('B2_S3_REGION_NAME')
+    AWS_S3_ENDPOINT = f's3.{AWS_S3_REGION_NAME}.backblazeb2.com'
+    AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_ENDPOINT}'
+
+    AWS_S3_FILE_OVERWRITE      = False   # don't overwrite files with same name
+    AWS_DEFAULT_ACL            = "public-read"  # files are publicly accessible
+    AWS_QUERYSTRING_AUTH       = False   # clean public URLs without signatures
+
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+    # ── Media files — served via Backblaze B2 ─────────────────────────────────────
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
+
+else:
+
+
+    MEDIA_URL = "media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "static"
-
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
 
 AUTH_USER_MODEL = "accounts.User"
 
