@@ -46,6 +46,22 @@ class DisbursementViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     ordering_fields = ['amount', 'status', 'created_at', 'disbursed_at']
     ordering = ['-created_at']
 
+    def get_queryset(self):
+        """Optimize queryset based on action."""
+        queryset = super().get_queryset()
+        if self.action == 'retrieve':
+            queryset = queryset.select_related(
+                'voucher__health_issue',
+                'voucher__medical_claim',
+                'voucher__medical_claim__hospital',
+                'voucher__medical_claim__submitted_by__user',
+                'voucher__medical_claim__reviewed_by__user'
+            ).prefetch_related(
+                'voucher__medical_claim__claim_items',
+                'voucher__medical_claim__proofs'
+            )
+        return queryset
+
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
         if self.action == 'create':
