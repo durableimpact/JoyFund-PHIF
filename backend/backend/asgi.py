@@ -21,7 +21,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django_asgi_app = get_asgi_application()
 
 # Import routing after Django setup to avoid import issues
-from .routing import websocket_urlpatterns
+from backend.routing import websocket_urlpatterns
 
 # Configure ASGI application to handle both HTTP and WebSocket protocols
 application = ProtocolTypeRouter({
