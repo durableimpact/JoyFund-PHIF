@@ -56,7 +56,7 @@ export default function HospitalAdminDisbursements() {
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input className="input-field pl-10" placeholder="Search by hospital name..." value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }} />
         </div>
-        <select className="input-field w-auto" value={filter} onChange={e => { setFilter(e.target.value); setCurrentPage(1); }}>
+        <select className="input-field w-auto" value={filter} onChange={e => { setFilter(e.target.value as any); setCurrentPage(1); }}>
           {STATUS_FILTERS.map(s => <option key={s} value={s}>{s === 'all' ? 'All Status' : s}</option>)}
         </select>
       </div>
