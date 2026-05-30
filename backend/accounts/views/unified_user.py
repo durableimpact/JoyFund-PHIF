@@ -15,7 +15,13 @@ class UnifiedUserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Unified endpoint to retrieve all users in the system and their specific details.
     """
-    queryset = User.objects.all().order_by('-created_at')
+    queryset = User.objects.select_related(
+        'donor',
+        'hospitaladmin__hospital',
+        'receptionist__hospital',
+        'socialworker',
+        'systemadmin'
+    ).all().order_by('-created_at')
     serializer_class = UnifiedUserSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
