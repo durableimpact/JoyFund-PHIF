@@ -14,14 +14,14 @@ import os
 from pathlib import Path
 import environ
 import sentry_sdk
-from urllib.parse import urlparse,parse_qsl
+from urllib.parse import urlparse, parse_qsl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
 # Take environment variables from .env file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     "django_smart_ratelimit",
     "axes",
     "django_prometheus",
-
     # Local apps
     "logs",  # Logging system - must be before other apps to ensure proper app initialization
     "core",
@@ -82,7 +81,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Logging middleware - must be after SessionMiddleware to have access to session
@@ -91,10 +90,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    'axes.middleware.AxesMiddleware',
+    "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'django_prometheus.middleware.PrometheusAfterMiddleware',
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -128,14 +127,15 @@ if has_db_url:
     # Parse the DATABASE_URL and set the DATABASES setting accordingly
     tmpPostgres = urlparse(has_db_url)
     DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': tmpPostgres.path.replace('/', ''),
-        'USER': tmpPostgres.username,
-        'PASSWORD': tmpPostgres.password,
-        'HOST': tmpPostgres.hostname,
-        'PORT': 5432,
-        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+        "default": {
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "NAME": tmpPostgres.path.replace("/", ""),
+            "USER": tmpPostgres.username,
+            "PASSWORD": tmpPostgres.password,
+            "HOST": tmpPostgres.hostname,
+            "PORT": 5432,
+            "OPTIONS": dict(parse_qsl(tmpPostgres.query)),
+        }
     }
 
     # DATABASES = {
@@ -144,12 +144,13 @@ if has_db_url:
     #         engine='django.contrib.gis.db.backends.postgis'
     #     )
     # }
-}
 else:
 
     DATABASES = {
         "default": {
-            "ENGINE": env("DB_ENGINE", default="django.contrib.gis.db.backends.postgis"),
+            "ENGINE": env(
+                "DB_ENGINE", default="django.contrib.gis.db.backends.postgis"
+            ),
             "NAME": env("DB_NAME", default="joyfund"),
             "USER": env("DB_USER", default="joyfund"),
             "PASSWORD": env("DB_PASSWORD", default="joyfund"),
@@ -218,19 +219,19 @@ USE_TZ = True
 
 USER_S3 = env("USE_S3", default=False)
 if USER_S3:
-    AWS_ACCESS_KEY_ID = env('B2_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = env('B2_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = env('B2_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = env('B2_S3_REGION_NAME')
-    AWS_S3_ENDPOINT = f's3.{AWS_S3_REGION_NAME}.backblazeb2.com'
-    AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_ENDPOINT}'
+    AWS_ACCESS_KEY_ID = env("B2_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("B2_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = env("B2_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = env("B2_S3_REGION_NAME")
+    AWS_S3_ENDPOINT = f"s3.{AWS_S3_REGION_NAME}.backblazeb2.com"
+    AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_ENDPOINT}"
 
-    AWS_S3_FILE_OVERWRITE      = False   # don't overwrite files with same name
-    AWS_DEFAULT_ACL            = "public-read"  # files are publicly accessible
-    AWS_QUERYSTRING_AUTH       = False   # clean public URLs without signatures
+    AWS_S3_FILE_OVERWRITE = False  # don't overwrite files with same name
+    AWS_DEFAULT_ACL = "public-read"  # files are publicly accessible
+    AWS_QUERYSTRING_AUTH = False  # clean public URLs without signatures
 
     AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
+        "CacheControl": "max-age=86400",
     }
 
     STORAGES = {
@@ -241,15 +242,14 @@ if USER_S3:
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
-    
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
     # ── Media files — served via Backblaze B2 ─────────────────────────────────────
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
 
 else:
-
 
     MEDIA_URL = "media/"
     MEDIA_ROOT = BASE_DIR / "media"
@@ -263,7 +263,7 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "/login/"
 
 AUTHENTICATION_BACKENDS = (
-    'axes.backends.AxesStandaloneBackend',
+    "axes.backends.AxesStandaloneBackend",
     "social_core.backends.google.GoogleOAuth2",
     "drf_social_oauth2.backends.DjangoOAuth2",
     "django.contrib.auth.backends.ModelBackend",
@@ -299,9 +299,7 @@ REST_FRAMEWORK = {
 }
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", default="")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env(
-    "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", default=""
-)
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", default="")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ["openid", "email", "profile"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = env.list(
     "SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS", default=[]
@@ -375,13 +373,17 @@ SWAGGER_SETTINGS = {
 # ─────────────────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
-    default=[
-        "http://localhost:3000",      # Next.js dev server
-        "http://localhost:3001",      # Alternative Next.js port
-        "http://localhost:8000",      # Django dev server
-        "http://127.0.0.1:3000",      # Next.js dev server (127.0.0.1)
-        "http://127.0.0.1:8000",      # Django dev server (127.0.0.1)
-    ] if DEBUG else []  # Empty in production - use ALLOWED_HOSTS env var
+    default=(
+        [
+            "http://localhost:3000",  # Next.js dev server
+            "http://localhost:3001",  # Alternative Next.js port
+            "http://localhost:8000",  # Django dev server
+            "http://127.0.0.1:3000",  # Next.js dev server (127.0.0.1)
+            "http://127.0.0.1:8000",  # Django dev server (127.0.0.1)
+        ]
+        if DEBUG
+        else []
+    ),  # Empty in production - use ALLOWED_HOSTS env var
 )
 
 # Allow credentials (cookies, authorization headers) in CORS requests
@@ -462,9 +464,7 @@ CACHE_MIDDLEWARE_KEY_PREFIX = "joyfund"
 CELERY_BROKER_URL = env(
     "CELERY_BROKER_URL", default="amqp://joyfund:joyfund@localhost:5672//"
 )
-CELERY_RESULT_BACKEND = env(
-    "CELERY_RESULT_BACKEND", default="redis://localhost:6379/1"
-)
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/1")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -564,6 +564,7 @@ TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER", default="")
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def _ensure_log_file(filename):
     path = LOG_DIR / filename
     try:
@@ -573,6 +574,7 @@ def _ensure_log_file(filename):
     except OSError:
         return None
     return None
+
 
 DJANGO_LOG_FILE = _ensure_log_file("django.log")
 CELERY_LOG_FILE = _ensure_log_file("celery.log")
