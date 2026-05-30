@@ -1,13 +1,122 @@
 services:
-  app:
-    image: 'jc21/nginx-proxy-manager:latest'
+
+  # ─── Nginx Proxy Manager ───────────────────────────
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: joyfund_npm
     restart: unless-stopped
-    environment:
-      TZ: "Australia/Brisbane"
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    environment:
+      TZ: 'Africa/Douala'
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
+      - static_volume:/app/static:ro    # ← read static files
+    networks:
+      - joyfund_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Netdata (Server Monitoring) ───────────────────
+  netdata:
+    image: netdata/netdata:latest
+    container_name: joyfund_netdata
+    restart: unless-stopped
+    expose:
+      - "19999"
+    environment:
+      - NETDATA_CLAIM_TOKEN=${NETDATA_CLAIM_TOKEN}   # optional, leave empty if not using Netdata Cloud
+      - NETDATA_CLAIM_URL=https://app.netdata.cloud
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdata_config:/etc/netdata
+      - netdata_lib:/var/lib/netdata
+      - netdata_cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro         # reads users from host
+      - /etc/group:/host/etc/group:ro           # reads groups from host
+      - /etc/localtime:/etc/localtime:ro        # syncs timezone with host
+      - /proc:/host/proc:ro                     # reads CPU, RAM from host
+      - /sys:/host/sys:ro                       # reads disk, network from host
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # reads all Docker container stats
+    networks:
+      - joyfund_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # netdata:
+  #   image: netdata/netdata:latest
+  #   container_name: joyfund_netdata
+  #   restart: unless-stopped
+  #   expose:
+  #     - "19999"
+  #   cap_add:
+  #     - SYS_PTRACE
+  #     - SYS_ADMIN
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   volumes:
+  #     - netdata_config:/etc/netdata
+  #     - netdata_lib:/var/lib/netdata
+  #     - netdata_cache:/var/cache/netdata
+  #     - /etc/passwd:/host/etc/passwd:ro
+  #     - /etc/group:/host/etc/group:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - joyfund_network
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "0.5"
+  #         memory: 256M
+  #       reservations:
+  #         cpus: "0.25"
+  #         memory: 128M
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 10m
+  #       max-file: "3"
+
+volumes:
+  netdata_config:
+  netdata_lib:
+  netdata_cache:
+  static_volume:
+    name: joyfund_static_volume
+    external: true
+
+networks:
+  joyfund_network:
+    external: true
