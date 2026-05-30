@@ -9,11 +9,17 @@ services:
       - ./envs/prod/.env
     networks:
       - backend
+    # healthcheck:
+    #   test: ["CMD", "rabbitmq-diagnostics", "ping"]
+    #   interval: 10s
+    #   timeout: 15s
+    #   retries: 5
+    #   start_period: 60s
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "rabbitmqctl await_startup 2>/dev/null && echo OK || exit 1"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
       start_period: 60s
     deploy:
       resources:
