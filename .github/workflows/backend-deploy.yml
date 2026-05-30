@@ -1,0 +1,35 @@
+name: Backend Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH (sshpass)
+        env:
+          SSHPASS: ${{ secrets.PASSWORD }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'ENDSSH'
+            # Navigate to the project root
+            cd /root/projects/JoyFund/backend
+            
+            # Pull the latest changes
+            git pull origin main
+            
+            # Deploy backend using docker-compose
+            cd backend
+            docker compose up --build -d
+            
+            # Optional: Clean up unused images to save space
+            docker image prune -f
+          ENDSSH

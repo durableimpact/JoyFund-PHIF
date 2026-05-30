@@ -1,0 +1,35 @@
+name: Frontend Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+
+jobs:
+  deploy:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH (sshpass)
+        env:
+          SSHPASS: ${{ secrets.PASSWORD }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'ENDSSH'
+            # Navigate to the project root
+            cd /root/projects/JoyFund/frontend
+            
+            # Pull the latest changes
+            git pull origin main
+            
+            # Deploy frontend using docker-compose
+            cd frontend
+            docker compose up --build -d
+            
+            # Optional: Clean up unused images to save space
+            docker image prune -f
+          ENDSSH
