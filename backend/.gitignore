@@ -1,8 +1,8 @@
 env/
 __pycache__/
 .env
+!.env.example
 .venv/
-.env.example
 .env.prod
 .env.dev
 
