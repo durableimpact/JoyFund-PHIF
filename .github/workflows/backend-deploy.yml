@@ -28,7 +28,7 @@ jobs:
             
             # Deploy backend using docker-compose
             cd backend
-            docker compose up --build -d
+            docker compose -f prod.yml --env-file ./envs/prod/.env up --build -d
             
             # Optional: Clean up unused images to save space
             docker image prune -f
