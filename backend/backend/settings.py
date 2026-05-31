@@ -124,17 +124,18 @@ ASGI_APPLICATION = "backend.asgi.application"
 
 has_db_url = os.getenv("DATABASE_URL", None)
 if has_db_url:
-    # Parse the DATABASE_URL and set the DATABASES setting accordingly
     tmpPostgres = urlparse(has_db_url)
     DATABASES = {
-        "default": {
-            "ENGINE": "django.contrib.gis.db.backends.postgis",
-            "NAME": tmpPostgres.path.replace("/", ""),
-            "USER": tmpPostgres.username,
-            "PASSWORD": tmpPostgres.password,
-            "HOST": tmpPostgres.hostname,
-            "PORT": 5432,
-            "OPTIONS": dict(parse_qsl(tmpPostgres.query)),
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': tmpPostgres.path.lstrip('/'),  # ← lstrip safer than replace
+            'USER': tmpPostgres.username,
+            'PASSWORD': tmpPostgres.password,
+            'HOST': tmpPostgres.hostname,
+            'PORT': tmpPostgres.port or 5432,
+            'OPTIONS': {
+                'sslmode': 'require',  # ← hardcode instead of parsing query
+            },
         }
     }
 
