@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* ── How It Works ── */}
-      <section id="how-it-works" className="py-20 px-4">
+      <section id="make-an-impact" className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           {/* <div className="text-center mb-14">
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--primary)' }}>How It Works</p>
