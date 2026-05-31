@@ -351,4 +351,5 @@ networks:
   joyfund_network:
     external: true        # shared with NPM and frontend
   backend:
-    internal: true        # Redis, RabbitMQ, Loki never exposed to internet
+    external: true        # Redis, RabbitMQ, Loki never exposed to internet
+    name: backend_backend
