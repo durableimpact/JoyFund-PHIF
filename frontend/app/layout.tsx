@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     "JoyFund is a transparent crowdfunding platform that turns celebrations into maternal healthcare for vulnerable women across Cameroon.",
   metadataBase: new URL("https://joy-fund.com"),
   verification: {
-    google: "3Td7-qGUvMTtrrQ-0rVom8KwPSNikh9eLKgGzZMpCdk",
+    google: "OyspcSNhwrr5zCVrvp1J0iPhdZEvX2iAAl3nuEkiUZo",
   },
   openGraph: {
     type: "website",
