@@ -1,3 +1,5 @@
+name: joyfund
+
 services:
 
   # ─── RabbitMQ (Message Broker) ─────────────────────
