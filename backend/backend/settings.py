@@ -391,6 +391,14 @@ CORS_ALLOWED_ORIGINS = env.list(
     ),  # Empty in production - use ALLOWED_HOSTS env var
 )
 
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=[
+        "http://localhost:3000",
+        "http://localhost:8000",
+    ]
+)
+
 # Allow credentials (cookies, authorization headers) in CORS requests
 CORS_ALLOW_CREDENTIALS = True
 
