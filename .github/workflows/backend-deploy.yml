@@ -29,7 +29,6 @@ jobs:
             git reset --hard origin/main
             
             # Deploy backend using docker-compose
-            cd backend
             docker compose -f prod.yml --env-file ./envs/prod/.env up --build -d
             
             # Optional: Clean up unused images to save space
