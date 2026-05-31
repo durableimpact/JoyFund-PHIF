@@ -234,7 +234,7 @@ export default function HomePage() {
                 </div>
                 <span className="font-black text-lg">JoyFund</span>
               </div>
-              <p className="text-white/60 text-sm leading-relaxed max-w-xs">Your Joy, Their Care — a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.</p>
+              <p className="text-white/60 text-sm leading-relaxed max-w-xs">Your Joy Saves Lives - a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.</p>
             </div>
             <div>
               <p className="font-semibold mb-3 text-sm">Platform</p>

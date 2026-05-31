@@ -4,7 +4,7 @@ import Toast from '@/components/shared/Toast';
 import ClientHydrator from '@/components/ClientHydrator';
 
 export const metadata: Metadata = {
-  title: 'JoyFund — Your Joy, Their Care',
+  title: 'JoyFund — Your Joy Saves Lives',
   description: 'Turning celebrations into maternal healthcare for vulnerable women in Cameroon.',
 };
 

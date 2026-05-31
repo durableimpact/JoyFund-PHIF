@@ -11,7 +11,7 @@ export default function AboutPage() {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-black text-[#1A1A2E] mb-4">About JoyFund</h1>
             <p className="text-xl text-gray-500 leading-relaxed">
-              <span className="font-semibold" style={{ color: 'var(--primary)' }}>Your Joy, Their Care</span> — a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.
+              <span className="font-semibold" style={{ color: 'var(--primary)' }}>Your Joy Saves Lives</span> — a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.
             </p>
           </div>
 
