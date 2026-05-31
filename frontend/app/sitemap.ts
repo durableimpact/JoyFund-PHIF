@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Cache results for 1 hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://joyfund.cm'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://joy-fund.com'
   const apiUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://localhost:8000'
 
   // Standard static pages
@@ -26,7 +26,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch up to 1000 campaigns for dynamic routes
   let campaignsSitemap: MetadataRoute.Sitemap = []
   try {
-    // We use a shorter timeout for the fetch to prevent hanging the request
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
 
@@ -49,8 +48,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
     }
   } catch (error) {
-    // During build time, this will likely fail because the API is unreachable.
-    // We catch it here so the build can complete with just the static routes.
     console.log('Sitemap: API unreachable during generation, using static routes only.')
   }
   
