@@ -225,7 +225,13 @@ export default function HomePage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" style={{ background: 'var(--primary)' }}>J</div>
+                <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
+                <img
+                  src="/assets/joyfund-logo-half-removebg-preview.png"
+                  alt="JoyFund logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
                 <span className="font-black text-lg">JoyFund</span>
               </div>
               <p className="text-white/60 text-sm leading-relaxed max-w-xs">Your Joy, Their Care — a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.</p>

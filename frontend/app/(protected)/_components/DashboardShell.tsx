@@ -52,11 +52,12 @@ export default function DashboardShell({
       {/* Brand */}
       <div className="px-5 py-5 border-b border-white/10">
         <Link href="/" className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-sm"
-            style={{ background: 'rgba(255,255,255,0.25)' }}
-          >
-            J
+          <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
+            <img
+              src="/assets/joyfund-logo-half-removebg-preview.png"
+              alt="JoyFund logo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <p className="font-black text-white text-sm leading-tight">JoyFund</p>

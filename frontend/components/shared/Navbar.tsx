@@ -58,9 +58,13 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
           href="/"
           className={`flex items-center gap-2 font-black text-xl tracking-tight ${useDark ? 'text-white' : 'text-[#1A1A2E]'}`}
         >
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-sm" style={{ background: 'var(--primary)' }}>
-              J
-            </div>
+          <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
+            <img
+              src="/assets/joyfund-logo-half-removebg-preview.png"
+              alt="JoyFund logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
           JoyFund
         </Link>
 
