@@ -52,95 +52,95 @@ export default function HomePage() {
       <Navbar transparent />
 
       {/* ── Hero ── */}
-      {/* ── Hero ── */}
-<section className="relative min-h-screen flex flex-col overflow-hidden">
-  {/* Background photo */}
-  <div
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-    style={{
-      backgroundImage:
-        "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1600&auto=format&fit=crop')",
-    }}
-  />
-
-  {/* Soft gradient overlay: dark at top, fades to page bg at bottom */}
-  <div
-    className="absolute inset-0"
-    style={{
-      background:
-        'linear-gradient(to bottom, rgba(10,20,60,0.58) 0%, rgba(15,30,90,0.38) 38%, rgba(249,250,251,0.90) 80%, #F9FAFB 100%)',
-    }}
-  />
-
-  {/* Navbar sits on top of everything */}
-  <Navbar transparent />
-
-  {/* Hero content */}
-  <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-24">
-
-    {/* Live toast pill */}
-        {/* <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-xs mb-8"></div> */}
-            <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
-    <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
-      {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-      <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
-      <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
-    </div>
-
-    {/* Headline */}
-    <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md" style={{ letterSpacing: '-1px' }}>
-      Turn your{' '}
-      <span style={{ color: '#7de8c0' }}>celebration</span>
-      {' '}into<br />someone&apos;s safe delivery
-    </h1>
-
-    {/* Subtext */}
-    <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
-      JoyFund digitalises Cameroon&apos;s Njangi solidarity - redirecting birthday gifts and wedding contributions into a transparent People&apos;s Health Insurance Fund for vulnerable pregnant women.
-    </p>
-
-    {/* CTAs */}
-    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
-      <Link
-        href="/create"
-        className="btn-secondary text-base px-8 py-4 inline-flex items-center gap-2"
-      >
-        Start a JoyFund <Sparkles size={18} className="fill-current" />
-      </Link>
-      <Link
-        href="#how-it-works"
-        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-white border-2 border-white/40 hover:bg-white/10 transition-all"
-      >
-        How it works
-      </Link>
-    </div>
-
-    {/* Stats */}
-    <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-      {[
-        { v: stats?.lives_supported, l: 'Lives Supported', icon: Heart, color: 'text-rose-400' },
-        { v: stats?.active_campaigns, l: 'Active Campaigns', icon: Sparkles, color: 'text-amber-400' },
-        { v: stats?.total_raised, l: 'XAF Raised', icon: DollarSign, color: 'text-emerald-400' },
-      ].map((s) => (
+      <section className="relative min-h-screen flex flex-col overflow-hidden">
+        {/* Background photo */}
+        {/* "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1600&auto=format&fit=crop')", */}
         <div
-          key={s.l}
-          className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20"
-        >
-          <s.icon size={24} className={`mb-1 ${s.color}`} />
-          <div className="text-lg font-black">{s.v}</div>
-          <div className="text-xs opacity-70">{s.l}</div>
-        </div>
-      ))}
-    </div>
-  </div>
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage:
+              // "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1600&auto=format&fit=crop')",
+            "url('/assets/images/joyfund-hero-image.jpeg')",
+          }}
+        />
 
-  {/* Smooth wave into next section */}
-  <div className="absolute bottom-0 left-0 right-0">
-    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 40C360 80 1080 0 1440 40V80H0V40Z" fill="#F9FAFB" />
-    </svg>
-  </div>
-</section>
+        {/* Soft gradient overlay: dark at top, fades to page bg at bottom */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(10,20,60,0.58) 0%, rgba(15,30,90,0.38) 38%, rgba(249,250,251,0.90) 80%, #F9FAFB 100%)',
+          }}
+        />
+
+        {/* Navbar sits on top of everything */}
+        <Navbar transparent />
+
+        {/* Hero content */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-24">
+
+          {/* Live toast pill */}
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
+            {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+              <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
+              <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
+          </div>
+
+          {/* Headline */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md" style={{ letterSpacing: '-1px' }}>
+            Turn your{' '}
+            <span style={{ color: '#7de8c0' }}>celebration</span>
+            {' '}into<br />someone&apos;s safe delivery
+          </h1>
+
+          {/* Subtext */}
+          <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
+            JoyFund digitalises Cameroon&apos;s Njangi solidarity - redirecting birthday gifts and wedding contributions into a transparent People&apos;s Health Insurance Fund for vulnerable pregnant women.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
+            <Link
+              href="/create"
+              className="btn-secondary text-base px-8 py-4 inline-flex items-center gap-2"
+            >
+              Start a JoyFund <Sparkles size={18} className="fill-current" />
+            </Link>
+            <Link
+              href="#how-it-works"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-white border-2 border-white/40 hover:bg-white/10 transition-all"
+            >
+              How it works
+            </Link>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
+            {[
+              { v: stats?.lives_supported, l: 'Lives Supported', icon: Heart, color: 'text-rose-400' },
+              { v: stats?.active_campaigns, l: 'Active Campaigns', icon: Sparkles, color: 'text-amber-400' },
+              { v: stats?.total_raised, l: 'XAF Raised', icon: DollarSign, color: 'text-emerald-400' },
+            ].map((s) => (
+              <div
+                key={s.l}
+                className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20"
+              >
+                <s.icon size={24} className={`mb-1 ${s.color}`} />
+                <div className="text-lg font-black">{s.v}</div>
+                <div className="text-xs opacity-70">{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Smooth wave into next section */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 40C360 80 1080 0 1440 40V80H0V40Z" fill="#F9FAFB" />
+          </svg>
+        </div>
+      </section>
 
       {/* ── How It Works ── */}
       <section id="how-it-works" className="py-20 px-4">
@@ -150,7 +150,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-black text-[#1A1A2E]">Celebrate → Pool → Care</h2>
             <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">Three simple steps transform your personal milestone into life-saving maternal healthcare.</p>
           </div>
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl">
             <video
               src="/assets/videos/about-joyfund-intro-vid.mp4"
               className="w-full h-full min-h-[320px]"
@@ -226,12 +226,12 @@ export default function HomePage() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
-                <img
-                  src="/assets/joyfund-logo-half-removebg-preview.png"
-                  alt="JoyFund logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
+                  <img
+                    src="/assets/joyfund-logo-half-removebg-preview.png"
+                    alt="JoyFund logo"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
                 <span className="font-black text-lg">JoyFund</span>
               </div>
               <p className="text-white/60 text-sm leading-relaxed max-w-xs">Your Joy, Their Care — a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.</p>
@@ -244,7 +244,7 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-            
+
           </div>
           <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between gap-3 text-white/40 text-xs">
             <p>© 2026 JoyFund - Solidarity Health Bridge. All rights reserved.</p>
