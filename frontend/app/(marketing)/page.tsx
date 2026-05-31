@@ -102,7 +102,7 @@ export default function HomePage() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
             <Link
-              href="/create"
+              href="/dashboard/donor/campaigns/create"
               className="btn-secondary text-base px-8 py-4 inline-flex items-center gap-2"
             >
               Start a JoyFund <Sparkles size={18} className="fill-current" />
@@ -145,11 +145,11 @@ export default function HomePage() {
       {/* ── How It Works ── */}
       <section id="how-it-works" className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          {/* <div className="text-center mb-14">
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--primary)' }}>How It Works</p>
             <h2 className="text-3xl font-black text-[#1A1A2E]">Celebrate → Pool → Care</h2>
             <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">Three simple steps transform your personal milestone into life-saving maternal healthcare.</p>
-          </div>
+          </div> */}
           <div className="relative rounded-3xl overflow-hidden shadow-2xl">
             <video
               src="/assets/videos/about-joyfund-intro-vid.mp4"
@@ -213,7 +213,7 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-black text-white mb-4">Your celebration could save a life</h2>
           <p className="text-white/80 mb-8">It takes 2 minutes to create a JoyFund. Your network does the rest.</p>
-          <Link href="/create" className="inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-full hover:opacity-90 transition-all" style={{ color: 'var(--secondary)' }}>
+          <Link href="/dashboard/donor/campaigns/create" className="inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-full hover:opacity-90 transition-all" style={{ color: 'var(--secondary)' }}>
             Start Your JoyFund <Heart size={18} className="fill-current" />
           </Link>
         </div>

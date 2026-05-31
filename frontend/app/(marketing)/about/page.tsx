@@ -67,7 +67,7 @@ export default function AboutPage() {
 
           {/* CTA */}
           <div className="text-center">
-            <Link href="/create" className="btn-primary mr-3">Start a JoyFund</Link>
+            <Link href="/dashboard/donor/campaigns/create" className="btn-primary mr-3">Start a JoyFund</Link>
             <Link href="/explore" className="btn-outline">Explore Campaigns</Link>
           </div>
         </div>

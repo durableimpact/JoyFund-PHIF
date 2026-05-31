@@ -121,7 +121,7 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                 Sign In
               </Link>
               <Link
-                href="/create"
+                href="/dashboard/donor/campaigns/create"
                 className="bg-[#1D38DB] hover:bg-[#1530c4] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
               >
                 Start a JoyFund
