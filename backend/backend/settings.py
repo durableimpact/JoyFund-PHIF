@@ -83,6 +83,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Logging middleware - must be after SessionMiddleware to have access to session
     "logs.middleware.LoggingMiddleware",
@@ -244,7 +245,6 @@ if USER_S3:
         },
     }
 
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
     # ── Media files — served via Backblaze B2 ─────────────────────────────────────
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
@@ -255,6 +255,7 @@ else:
     MEDIA_URL = "media/"
     MEDIA_ROOT = BASE_DIR / "media"
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "static"
 
