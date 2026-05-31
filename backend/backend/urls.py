@@ -49,6 +49,8 @@ urlpatterns = [
     path("login/", login_view, name="login"),
     path("accounts/logout/", logout_view, name="logout"),
     path("admin/", admin.site.urls),
+    # Prometheus Metrics
+    path("", include("django_prometheus.urls")),
     # WebSocket AsyncAPI Documentation (Chanx)
     path("asyncapi/", include(chanx_urls.urlpatterns)),
     # API endpoints
