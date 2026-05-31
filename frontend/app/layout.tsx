@@ -39,7 +39,7 @@ const jsonLd = {
 
 export const metadata: Metadata = {
   title: {
-    default: "JoyFund — Solidarity Health Insurance for Cameroon",
+    default: "JoyFund - Solidarity Health Insurance for Cameroon",
     template: "%s | JoyFund",
   },
   description:
@@ -52,14 +52,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "JoyFund",
-    title: "JoyFund — Solidarity Health Insurance for Cameroon",
+    title: "JoyFund - Solidarity Health Insurance for Cameroon",
     description:
       "Turn celebrations into maternal healthcare. Donate via MTN MoMo or Orange Money.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "JoyFund" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JoyFund — Solidarity Health Insurance for Cameroon",
+    title: "JoyFund - Solidarity Health Insurance for Cameroon",
     description:
       "Turn celebrations into maternal healthcare. Donate via MTN MoMo or Orange Money.",
     images: ["/og-image.png"],

@@ -118,18 +118,18 @@ export default function HomePage() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
             {[
-              { v: stats?.lives_supported, l: 'Lives Supported', icon: Heart, color: 'text-rose-400' },
-              { v: stats?.active_campaigns, l: 'Active Campaigns', icon: Sparkles, color: 'text-amber-400' },
-              { v: stats?.total_raised, l: 'XAF Raised', icon: DollarSign, color: 'text-emerald-400' },
+              { v: stats?.lives_supported, l: 'Lives Supported', icon: Heart, color: 'text-rose-300' },
+              { v: stats?.active_campaigns, l: 'Active Campaigns', icon: Sparkles, color: 'text-amber-300' },
+              { v: stats?.total_raised, l: 'XAF Raised', icon: DollarSign, color: 'text-emerald-300' },
             ].map((s) => (
               <div
-                key={s.l}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20"
-              >
-                <s.icon size={24} className={`mb-1 ${s.color}`} />
-                <div className="text-lg font-black">{s.v}</div>
-                <div className="text-xs opacity-70">{s.l}</div>
-              </div>
+                  key={s.l}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20 flex flex-col items-center text-center"
+                >
+                  <s.icon size={28} className={`${s.color} mb-2`} />
+                  <div className="text-lg font-black">{s.v}</div>
+                  <div className="text-xs opacity-70">{s.l}</div>
+                </div>
             ))}
           </div>
         </div>
