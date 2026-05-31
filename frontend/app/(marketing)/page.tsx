@@ -1,5 +1,4 @@
 'use client';
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Heart, ArrowRight, Star, ChevronRight, Cake, Gift, Hospital, Sparkles, DollarSign, type LucideIcon } from 'lucide-react';
@@ -151,18 +150,16 @@ export default function HomePage() {
             <h2 className="text-3xl font-black text-[#1A1A2E]">Celebrate → Pool → Care</h2>
             <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">Three simple steps transform your personal milestone into life-saving maternal healthcare.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {steps.map((s, i) => (
-              <div key={s.step} className="relative">
-                <div className="card p-8 h-full hover:shadow-lg transition-shadow">
-                  <s.icon size={36} className="text-[#1A1A2E] mb-4" />
-                  <div className="text-xs font-black uppercase tracking-widest mb-2" style={{ color: 'var(--primary)' }}>{s.step}</div>
-                  <h3 className="text-xl font-bold text-[#1A1A2E] mb-3">{s.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
-                </div>
-                {i < 2 && <div className="hidden md:flex absolute top-1/2 -right-3 z-10"><ArrowRight size={20} className="text-gray-300" /></div>}
-              </div>
-            ))}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            <video
+              src="/assets/videos/about-joyfund-intro-vid.mp4"
+              className="w-full h-full min-h-[320px]"
+              controls
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
           </div>
         </div>
       </section>
