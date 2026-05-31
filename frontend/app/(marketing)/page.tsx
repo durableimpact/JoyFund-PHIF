@@ -2,16 +2,17 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { Heart, ArrowRight, Star, ChevronRight } from 'lucide-react';
+import { Heart, ArrowRight, Star, ChevronRight, Cake, Gift, Hospital, Sparkles, DollarSign, type LucideIcon } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { listCampaigns, getPlatformStats } from '@/actions/campaigns';
 
 
-const steps = [
-  { icon: '🎂', step: '01', title: 'Celebrate', desc: 'Create a JoyFund campaign for your birthday, wedding, promotion, or graduation instead of asking for traditional gifts.' },
-  { icon: '💝', step: '02', title: 'Pool', desc: 'Friends and family donate via MTN MoMo or Orange Money. 95% goes directly to the healthcare fund.' },
-  { icon: '🏥', step: '03', title: 'Care', desc: 'A verified vulnerable pregnant woman receives a care voucher, redeemable at partner hospitals across Cameroon.' },
+type StepItem = { icon: LucideIcon; step: string; title: string; desc: string };
+const steps: StepItem[] = [
+  { icon: Cake, step: '01', title: 'Celebrate', desc: 'Create a JoyFund campaign for your birthday, wedding, promotion, or graduation instead of asking for traditional gifts.' },
+  { icon: Gift, step: '02', title: 'Pool', desc: 'Friends and family donate via MTN MoMo or Orange Money. 95% goes directly to the healthcare fund.' },
+  { icon: Hospital, step: '03', title: 'Care', desc: 'A verified vulnerable pregnant woman receives a care voucher, redeemable at partner hospitals across Cameroon.' },
 ];
 
 const testimonials = [
@@ -21,11 +22,11 @@ const testimonials = [
 ];
 
 export default function HomePage() {
-  const [feedIdx, setFeedIdx] = useState(0);
-  const activityFeed = [
-    { id: 1, type: 'donation', message: '20 XAF contributed to Solange & Eric\'s Wedding JoyFund', timeAgo: '3 hours ago' },
-    { id: 2, type: 'voucher', message: 'Voucher JF3R8T generated for BEN-0071', timeAgo: '4 hours ago' },
-  ];
+  // const [feedIdx, setFeedIdx] = useState(0);
+  // const activityFeed = [
+  //   { id: 1, type: 'donation', message: '20 XAF contributed to Solange & Eric\'s Wedding JoyFund', timeAgo: '3 hours ago' },
+  //   { id: 2, type: 'voucher', message: 'Voucher JF3R8T generated for BEN-0071', timeAgo: '4 hours ago' },
+  // ];
 
   // Fetch campaigns with React Query
   const { data: campaignsResponse, isLoading: campaignsLoading } = useQuery({
@@ -40,10 +41,10 @@ export default function HomePage() {
     initialData: { lives_supported: 0, active_campaigns: 0, total_raised: '0' },
   });
 
-  useEffect(() => {
-    const t = setInterval(() => setFeedIdx(i => (i + 1) % activityFeed.length), 3000);
-    return () => clearInterval(t);
-  }, []);
+  // useEffect(() => {
+  //   const t = setInterval(() => setFeedIdx(i => (i + 1) % activityFeed.length), 3000);
+  //   return () => clearInterval(t);
+  // }, []);
 
   const activeCampaigns = (campaignsResponse?.results || []).filter(c => c.status === 'ACTIVE').slice(0, 3);
 
@@ -79,10 +80,12 @@ export default function HomePage() {
   <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-24">
 
     {/* Live toast pill */}
-    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-xs mb-8">
-      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+        {/* <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-xs mb-8"></div> */}
+            <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
+    <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
+      {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
       <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
-      <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span>
+      <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
     </div>
 
     {/* Headline */}
@@ -94,16 +97,16 @@ export default function HomePage() {
 
     {/* Subtext */}
     <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
-      JoyFund digitalises Cameroon&apos;s Njangi solidarity — redirecting birthday gifts and wedding contributions into a transparent People&apos;s Health Insurance Fund for vulnerable pregnant women.
+      JoyFund digitalises Cameroon&apos;s Njangi solidarity - redirecting birthday gifts and wedding contributions into a transparent People&apos;s Health Insurance Fund for vulnerable pregnant women.
     </p>
 
     {/* CTAs */}
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
       <Link
         href="/create"
-        className="btn-secondary text-base px-8 py-4"
+        className="btn-secondary text-base px-8 py-4 inline-flex items-center gap-2"
       >
-        Start a JoyFund 🎉
+        Start a JoyFund <Sparkles size={18} className="fill-current" />
       </Link>
       <Link
         href="#how-it-works"
@@ -116,15 +119,15 @@ export default function HomePage() {
     {/* Stats */}
     <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
       {[
-        { v: stats?.lives_supported, l: 'Lives Supported', i: '❤️' },
-        { v: stats?.active_campaigns,      l: 'Active Campaigns', i: '🎉' },
-        { v: stats?.total_raised,                            l: 'XAF Raised',       i: '💰' },
-      ].map(s => (
+        { v: stats?.lives_supported, l: 'Lives Supported', icon: Heart, color: 'text-rose-400' },
+        { v: stats?.active_campaigns, l: 'Active Campaigns', icon: Sparkles, color: 'text-amber-400' },
+        { v: stats?.total_raised, l: 'XAF Raised', icon: DollarSign, color: 'text-emerald-400' },
+      ].map((s) => (
         <div
           key={s.l}
           className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20"
         >
-          <div className="text-xl mb-1">{s.i}</div>
+          <s.icon size={24} className={`mb-1 ${s.color}`} />
           <div className="text-lg font-black">{s.v}</div>
           <div className="text-xs opacity-70">{s.l}</div>
         </div>
@@ -152,7 +155,7 @@ export default function HomePage() {
             {steps.map((s, i) => (
               <div key={s.step} className="relative">
                 <div className="card p-8 h-full hover:shadow-lg transition-shadow">
-                  <div className="text-4xl mb-4">{s.icon}</div>
+                  <s.icon size={36} className="text-[#1A1A2E] mb-4" />
                   <div className="text-xs font-black uppercase tracking-widest mb-2" style={{ color: 'var(--primary)' }}>{s.step}</div>
                   <h3 className="text-xl font-bold text-[#1A1A2E] mb-3">{s.title}</h3>
                   <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
@@ -241,7 +244,7 @@ export default function HomePage() {
             
           </div>
           <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between gap-3 text-white/40 text-xs">
-            <p>© 2026 JoyFund — Solidarity Health Bridge. All rights reserved.</p>
+            <p>© 2026 JoyFund - Solidarity Health Bridge. All rights reserved.</p>
             <p>Built for Cameroon, with love 🇨🇲</p>
           </div>
         </div>
