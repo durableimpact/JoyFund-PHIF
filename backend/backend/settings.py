@@ -286,7 +286,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ),
     # Pagination required for all list endpoints
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.StandardResultsSetPagination",
     "PAGE_SIZE": env.int("REST_PAGE_SIZE", default=20),
     # Rate limiting to prevent abuse
     "DEFAULT_THROTTLE_CLASSES": [
