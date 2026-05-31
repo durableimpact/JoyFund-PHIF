@@ -91,8 +91,8 @@ services:
     expose:
       - "8000"
     networks:
-      - joyfund_network     # NPM proxies traffic here
-      - backend             # reaches Redis and RabbitMQ
+      - joyfund_network
+      - backend
     command: >
       gunicorn
       --bind 0.0.0.0:8000
@@ -107,11 +107,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: 256M
+          cpus: "2.0"
+          memory: 1024M
         reservations:
-          cpus: "0.25"
-          memory: 128M
+          cpus: "0.5"
+          memory: 256M
     logging:
       driver: json-file
       options:
@@ -157,10 +157,10 @@ services:
       resources:
         limits:
           cpus: "1.0"
-          memory: 256M
+          memory: 750M
         reservations:
           cpus: "0.25"
-          memory: 128M
+          memory: 256M
     logging:
       driver: json-file
       options:
@@ -205,10 +205,10 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: 128M
+          memory: 512M
         reservations:
           cpus: "0.25"
-          memory: 64M
+          memory: 256M
     logging:
       driver: json-file
       options:
