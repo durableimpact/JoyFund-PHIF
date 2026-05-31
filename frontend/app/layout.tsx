@@ -45,6 +45,9 @@ export const metadata: Metadata = {
   description:
     "JoyFund is a transparent crowdfunding platform that turns celebrations into maternal healthcare for vulnerable women across Cameroon.",
   metadataBase: new URL("https://joy-fund.com"),
+  verification: {
+    google: "3Td7-qGUvMTtrrQ-0rVom8KwPSNikh9eLKgGzZMpCdk",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -76,12 +79,34 @@ export default function RootLayout({
       className={cn("h-full", montserrat.variable)}
     >
       <head>
+        <meta name="google-site-verification" content="3Td7-qGUvMTtrrQ-0rVom8KwPSNikh9eLKgGzZMpCdk" />
+        {/* Google Tag Manager */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-PDSWHHB9');`,
+          }}
+        />
+        {/* End Google Tag Manager */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body suppressHydrationWarning suppressContentEditableWarning className={cn("min-h-full flex flex-col antialiased font-sans", geistMono.variable)}>
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-PDSWHHB9"
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
+        {/* End Google Tag Manager (noscript) */}
         <SessionProvider>
           <ReactQueryProvider>
             {children}
