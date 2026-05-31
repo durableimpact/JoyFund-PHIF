@@ -37,8 +37,11 @@ SECRET_KEY = env(
 DEBUG = env.bool("DEBUG", default=True)
 
 # Accept all hosts in development
-ALLOWED_HOSTS = ["*"] if DEBUG else env.list("ALLOWED_HOSTS", default=["localhost"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"]) if not DEBUG else ["*"]
 
+# Then add this to allow any host when * is in the list
+if "*" in ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
