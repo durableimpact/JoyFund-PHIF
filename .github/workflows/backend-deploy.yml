@@ -31,7 +31,6 @@ jobs:
             # RabbitMQ, Redis, Prometheus etc. are untouched
             docker compose -f prod.yml --env-file ./envs/prod/.env up \
               --build \
-              --no-deps \
               --force-recreate \
               -d \
               web-worker-1 web-worker-2 \
