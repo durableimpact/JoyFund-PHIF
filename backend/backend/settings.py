@@ -37,7 +37,9 @@ SECRET_KEY = env(
 DEBUG = env.bool("DEBUG", default=True)
 
 # Accept all hosts in development
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"] if DEBUG else ["localhost"])
+# ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"] if DEBUG else ["localhost"])
+_allowed_hosts = env.list("ALLOWED_HOSTS", default=["*"])
+ALLOWED_HOSTS = ["*"] if "*" in _allowed_hosts else _allowed_hosts
 
 # Application definition
 
@@ -128,13 +130,20 @@ if has_db_url:
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': tmpPostgres.path.lstrip('/'),  # ← lstrip safer than replace
+            'NAME': tmpPostgres.path.lstrip('/'),
             'USER': tmpPostgres.username,
             'PASSWORD': tmpPostgres.password,
             'HOST': tmpPostgres.hostname,
             'PORT': tmpPostgres.port or 5432,
+            'CONN_MAX_AGE': 0,          # ← critical for Neon pooler
+            'CONN_HEALTH_CHECKS': False, # ← disable health checks on pooler
             'OPTIONS': {
-                'sslmode': 'require',  # ← hardcode instead of parsing query
+                'sslmode': 'require',
+                'connect_timeout': 30,   # ← give Neon time to wake up
+                'keepalives': 1,
+                'keepalives_idle': 30,
+                'keepalives_interval': 5,
+                'keepalives_count': 5,
             },
         }
     }
