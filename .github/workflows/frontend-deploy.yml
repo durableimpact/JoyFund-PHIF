@@ -29,8 +29,8 @@ jobs:
             git reset --hard origin/main
             
             # Deploy frontend using docker-compose
-            cd frontend
-            docker compose up --build -d
+            
+            docker compose --env-file .env up -d --build
             
             # Optional: Clean up unused images to save space
             docker image prune -f
