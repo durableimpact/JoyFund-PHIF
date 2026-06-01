@@ -142,20 +142,6 @@ function LoginPageContent() {
         <p className="text-center text-xs text-gray-400 mt-6">
           JoyFund v1.0 · Solidarity Health Bridge · Cameroon 🇨🇲
         </p>
-
-        {/* Dev credentials card */}
-        <div className="mt-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-xs text-gray-500 space-y-1">
-          <p className="font-semibold text-gray-700 mb-2">Dev test accounts (after seed_data):</p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-            <p><span className="font-semibold text-gray-600">Admin:</span></p>
-            <p className="font-mono">admin@joyfund.com / Joyfund237</p>
-            <p><span className="font-semibold text-gray-600">Donor:</span></p>
-            <p className="font-mono">donor@joyfund.com / password</p>
-            <p><span className="font-semibold text-gray-600">Social Worker:</span></p>
-            <p className="font-mono">social_worker@joyfund.com / password</p>
-          </div>
-          <p className="text-gray-400 mt-2">Hospital staff → <a href="/hospital/login" className="text-blue-500 hover:underline">Hospital Portal</a></p>
-        </div>
       </div>
     </div>
   );
