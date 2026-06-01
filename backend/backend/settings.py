@@ -127,6 +127,13 @@ ASGI_APPLICATION = "backend.asgi.application"
 has_db_url = os.getenv("DATABASE_URL", None)
 if has_db_url:
     tmpPostgres = urlparse(has_db_url)
+    # Determine SSL mode: use 'require' for cloud databases (Neon), 'disable' for Docker
+    _is_cloud_db = tmpPostgres.hostname and not any(
+        tmpPostgres.hostname.startswith(x) 
+        for x in ('postgres', 'localhost', '127.0.0.1', '172.')
+    )
+    _sslmode = 'require' if _is_cloud_db else 'disable'
+    
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -138,7 +145,7 @@ if has_db_url:
             'CONN_MAX_AGE': 0,          # ← critical for Neon pooler
             'CONN_HEALTH_CHECKS': False, # ← disable health checks on pooler
             'OPTIONS': {
-                'sslmode': 'require',
+                'sslmode': _sslmode,
                 'connect_timeout': 30,   # ← give Neon time to wake up
                 'keepalives': 1,
                 'keepalives_idle': 30,
@@ -330,6 +337,8 @@ SOCIAL_AUTH_PIPELINE = (
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
+    # Axes brute-force protection
+    "axes.backends.AxesStandaloneBackend",
     # Google OAuth2
     "social_core.backends.google.GoogleOAuth2",
     # Django
