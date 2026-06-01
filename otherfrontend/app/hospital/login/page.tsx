@@ -130,12 +130,6 @@ export default function HospitalLoginPage() {
           </p>
         </form>
 
-        {/* Seed credentials hint for dev */}
-        <div className="mt-6 card p-4 text-xs text-gray-500 space-y-1">
-          <p className="font-semibold text-gray-700 mb-2">Dev credentials (after seed):</p>
-          <p>Hospital Admin: <span className="font-mono">hospital_admin@joyfund.com</span> / <span className="font-mono">password</span></p>
-          <p>Receptionist: <span className="font-mono">receptionist@joyfund.com</span> / <span className="font-mono">password</span></p>
-        </div>
       </div>
     </div>
   );
