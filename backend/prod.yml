@@ -2,6 +2,109 @@ name: joyfund
 
 services:
 
+  # ──── Postgres (Database) ──────────────────────────
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: joyfund_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Database Backup ────────────────────────────────
+  db-backup:
+    image: python:3.13-alpine
+    container_name: joyfund_backup
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    environment:
+      DB_HOST: joyfund_postgres
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - backup_data:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    entrypoint: >
+      sh -c "
+        apk add --no-cache postgresql-client &&
+        pip install boto3==1.25.5 --quiet &&
+        echo '0 2 * * * sh /backup.sh >> /var/log/backup.log 2>&1' | crontab - &&
+        echo '⏰ Backup scheduler started - runs daily at 2:00 AM UTC' &&
+        crond -f -d 8
+      "
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: joyfund_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    expose:
+      - "80"
+    networks:
+      - joyfund_network
+      - backend
+    depends_on:
+      - postgres
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
   # ─── RabbitMQ (Message Broker) ─────────────────────
   rabbitmq:
     image: rabbitmq:3.13-management-alpine 
@@ -89,6 +192,8 @@ services:
       rabbitmq:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      postgres:           # ← add this
         condition: service_healthy
     expose:
       - "8000"
@@ -345,6 +450,9 @@ volumes:
   prometheus_data:
   grafana_data:
   loki_data:
+  backup_data:
+  postgres_data:
+  pgadmin_data:
   static_volume:
     name: joyfund_static_volume    # ← same name
     external: true                 # ← already exists, just reference it
