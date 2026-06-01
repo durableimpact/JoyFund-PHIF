@@ -21,16 +21,23 @@ jobs:
           SSHPASS: ${{ secrets.PASSWORD }}
         run: |
           sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'ENDSSH'
-            # Navigate to the project root
             cd /root/projects/JoyFund/backend
-            
-            # Forced sync with main branch
+
+            # Sync with main branch
             git fetch origin main
             git reset --hard origin/main
-            
-            # Deploy backend using docker-compose
-            docker compose -f prod.yml --env-file ./envs/prod/.env up --build -d
-            
-            # Optional: Clean up unused images to save space
+
+            # Only rebuild and recreate Django + Celery containers
+            # RabbitMQ, Redis, Prometheus etc. are untouched
+            docker compose -f prod.yml --env-file ./envs/prod/.env up \
+              --build \
+              --no-deps \
+              --force-recreate \
+              -d \
+              web-worker-1 web-worker-2 \
+              celery-worker-1 celery-worker-2 \
+              celery-beat
+
+            # Clean up old images
             docker image prune -f
           ENDSSH
