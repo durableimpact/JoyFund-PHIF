@@ -454,5 +454,4 @@ networks:
   joyfund_network:
     external: true        # shared with NPM and frontend
   backend:
-    external: true        # Redis, RabbitMQ, Loki never exposed to internet
-    name: backend_backend
+    driver: bridge
