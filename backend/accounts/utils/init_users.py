@@ -47,7 +47,7 @@ def ensure_seed_users() -> None:
         },
     )
     if created:
-        sys_admin_user.set_password('Joyfund237')
+        sys_admin_user.set_password('JoyThreatAdmin')
         sys_admin_user.save()
         SystemAdmin.objects.get_or_create(user=sys_admin_user)
         print(f'Created System Admin: {sys_admin_user.email}')
@@ -66,7 +66,7 @@ def ensure_seed_users() -> None:
         },
     )
     if created:
-        hosp_admin_user.set_password('password')
+        hosp_admin_user.set_password('JoyHospAdmin')
         hosp_admin_user.save()
     HospitalAdmin.objects.get_or_create(
         user=hosp_admin_user,
@@ -95,7 +95,7 @@ def ensure_seed_users() -> None:
         },
     )
     if created:
-        receptionist_user.set_password('password')
+        receptionist_user.set_password('JoyReceptionist')
         receptionist_user.save()
     Receptionist.objects.get_or_create(
         user=receptionist_user,
