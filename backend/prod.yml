@@ -251,7 +251,7 @@ services:
       redis:
         condition: service_healthy
     command: >
-      celery -A joyfund worker
+      celery -A backend worker
       -n worker1@%h
       --loglevel=info
       --concurrency=4
@@ -278,7 +278,7 @@ services:
     extends: celery-worker-1
     container_name: joyfund_celery_2
     command: >
-      celery -A joyfund worker
+      celery -A backend worker
       -n worker2@%h
       --loglevel=info
       --concurrency=4
@@ -303,7 +303,7 @@ services:
       redis:
         condition: service_healthy
     command: >
-      celery -A joyfund beat
+      celery -A backend beat
       --loglevel=info
       --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
