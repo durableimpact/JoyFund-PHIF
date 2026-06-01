@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "JoyFund Production",
+      "Group": "Servers",
+      "Host": "joyfund_postgres",
+      "Port": 5432,
+      "MaintenanceDB": "joyfund",
+      "Username": "joyfund",
+      "SSLMode": "prefer"
+    }
+  }
+}
