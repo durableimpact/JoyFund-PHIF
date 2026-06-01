@@ -1,9 +1,4 @@
 #!/bin/sh
-# ──────────────────────────────────────────────────────────────────────────────
-# Docker entrypoint
-# Waits for Neon DB to be reachable, then conditionally runs migrations.
-# Migrations only run when RUN_MIGRATIONS=true (web-worker-1 only).
-# ──────────────────────────────────────────────────────────────────────────────
 set -e
 
 echo "⏳  Waiting for database..."
@@ -11,40 +6,37 @@ python << 'EOF'
 import os, sys, time
 import psycopg2
 
-# ── Parse DATABASE_URL (Neon format) ──────────────────────────────────────────
-# postgresql://user:password@host:port/dbname?sslmode=require
 database_url = os.environ.get("DATABASE_URL")
-
 if not database_url:
     print("❌  DATABASE_URL is not set. Exiting.")
     sys.exit(1)
 
-retries = 30
+# Add connect_timeout to the URL if not present
+if "connect_timeout" not in database_url:
+    separator = "&" if "?" in database_url else "?"
+    database_url = f"{database_url}{separator}connect_timeout=10"
+
+retries = 15
 while retries:
     try:
         conn = psycopg2.connect(database_url)
         conn.close()
         print("✅  Database is ready.")
         break
-    except psycopg2.OperationalError as e:
+    except Exception as e:
         retries -= 1
-        print(f"   Not ready yet, retrying... ({retries} attempts left) — {e}")
+        print(f"   Not ready yet ({retries} left): {type(e).__name__}: {e}")
         time.sleep(2)
 else:
-    print("❌  Could not connect to the database after 30 attempts. Exiting.")
+    print("❌  Could not connect after 15 attempts. Exiting.")
     sys.exit(1)
 EOF
 
-# ── Migrations + collectstatic (web-worker-1 only) ────────────────────────────
-# Set RUN_MIGRATIONS=true in docker-compose only for web-worker-1.
-# All other containers (web-worker-2, celery workers, beat) skip this block.
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "🔄  Applying database migrations..."
     python manage.py migrate --noinput
-
     echo "📦  Collecting static files..."
     python manage.py collectstatic --noinput --clear
-
     echo "✔   Migrations and static files done."
 else
     echo "⏭   Skipping migrations (RUN_MIGRATIONS not set)."
