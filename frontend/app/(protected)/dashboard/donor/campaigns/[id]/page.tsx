@@ -187,7 +187,7 @@ export default function CampaignDetailPage() {
                     <Gift size={18} className="text-[#1DB1DB]" />
                     <h2 className="font-bold text-[#1A1A2E]">Donations ({donations.length})</h2>
                   </div>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                  <div className="space-y-2">
                     {donations.map((donation) => (
                       <div key={donation.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex-1">
