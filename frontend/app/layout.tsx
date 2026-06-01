@@ -67,9 +67,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   icons: {
     icon: [
-      { url: "/assets/favicon_io/favicon.ico" },
-      { url: "/assets/favicon_io/joyfund-favicon-16x16.png", type: "image/png", sizes: "16x16" },
       { url: "/assets/favicon_io/joyfund-android-chrome-192x192.png", type: "image/png", sizes: "192x192" },
+      { url: "/assets/favicon_io/joyfund-favicon-16x16.png", type: "image/png", sizes: "16x16" },
     ],
     apple: "/assets/favicon_io/joyfund-apple-touch-icon.png",
     shortcut: "/assets/favicon_io/joyfund-android-chrome-192x192.png",
@@ -91,7 +90,8 @@ export default function RootLayout({
         <meta name="google-site-verification" content="3Td7-qGUvMTtrrQ-0rVom8KwPSNikh9eLKgGzZMpCdk" />
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon_io/joyfund-apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
-        <link rel="icon" href="/assets/favicon_io/favicon.ico" />
+        <link rel="shortcut icon" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
+        <link rel="icon" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
         
         {/* Google tag (gtag.js) - GA4 */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYBNHE5J4B"></script>
