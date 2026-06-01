@@ -1,0 +1,11 @@
+FROM python:3.13-alpine
+
+RUN apk add --no-cache postgresql-client
+RUN pip install --no-cache-dir boto3==1.25.5
+
+RUN mkdir -p /backups
+
+COPY backup.sh /backup.sh
+RUN chmod +x /backup.sh
+
+ENTRYPOINT ["sh", "-c", "echo '0 2 * * * sh /backup.sh >> /var/log/backup.log 2>&1' | crontab - && echo '⏰ Backup scheduler started - runs daily at 2:00 AM UTC' && crond -f -d 8"]

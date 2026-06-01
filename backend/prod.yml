@@ -37,7 +37,9 @@ services:
 
   # ─── Database Backup ────────────────────────────────
   db-backup:
-    image: python:3.13-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
     container_name: joyfund_backup
     restart: unless-stopped
     env_file:
@@ -45,21 +47,12 @@ services:
     environment:
       DB_HOST: joyfund_postgres
     volumes:
-      - ./backup.sh:/backup.sh:ro
       - backup_data:/backups
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - backend
-    entrypoint: >
-      sh -c "
-        apk add --no-cache postgresql-client &&
-        pip install boto3==1.25.5 --quiet &&
-        echo '0 2 * * * sh /backup.sh >> /var/log/backup.log 2>&1' | crontab - &&
-        echo '⏰ Backup scheduler started - runs daily at 2:00 AM UTC' &&
-        crond -f -d 8
-      "
     deploy:
       resources:
         limits:
