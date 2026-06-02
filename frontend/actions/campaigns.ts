@@ -11,7 +11,25 @@ function handleError(e: unknown): never {
 
 // ── Campaigns CRUD ──
 
-export const listCampaigns = async (params?: Record<string, string>) => {
+type CampaignFilter = {
+  status:string;
+  event_type:CampaignEventType;
+  is_public:boolean;
+  is_active:boolean;
+  donor_id:string;
+  min_goal_amount:string;
+  max_goal_amount:string;
+  created_after:string;
+  created_before:string;
+  end_after:string;
+  end_before:string;
+  search:string;
+  ordering:string;
+  page:number;
+  page_size:number;
+}
+
+export const listCampaigns = async (params?: Partial<CampaignFilter>) => {
   try {
     const { data } = await api.get<PaginationResponse<Campaign>>("/api/campaigns/", { params });
     return data;
