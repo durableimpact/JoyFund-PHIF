@@ -306,8 +306,8 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": env("THROTTLE_ANON", default="100/hour"),
-        "user": env("THROTTLE_USER", default="1000/hour"),
+        "anon": env("THROTTLE_ANON", default="1000/hour"),
+        "user": env("THROTTLE_USER", default="10000/hour"),
     },
     # Custom exception handler with logging
     "EXCEPTION_HANDLER": "logs.exceptions.custom_exception_handler",
