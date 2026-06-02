@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Footer from "@/components/shared/Footer";
 
 export const metadata: Metadata = {
   title: "JoyFund — Solidarity Health Insurance for Cameroon",
@@ -18,5 +19,12 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
 }
