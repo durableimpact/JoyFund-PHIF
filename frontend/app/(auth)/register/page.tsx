@@ -1,10 +1,10 @@
 'use client';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 import {createDonorAccount} from "@/actions/accounts"
-import { Eye, EyeOff, Heart, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -83,8 +83,14 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
 
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4" style={{ background: 'var(--primary)' }}>
-            <Heart size={28} />
+          <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white mx-auto mb-4 flex items-center justify-center">
+            <Image
+              src="/assets/favicon_io/joyfund-android-chrome-192x192.png"
+              alt="JoyFund logo"
+              width={56}
+              height={56}
+              className="object-cover"
+            />
           </div>
           <h1 className="text-2xl font-black text-[#1A1A2E]">Create your JoyFund account</h1>
           <p className="text-gray-500 text-sm mt-2">Start creating campaigns for people you love</p>
