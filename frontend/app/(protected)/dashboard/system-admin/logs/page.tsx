@@ -11,6 +11,15 @@ import {
   Globe,
   RefreshCw
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { listActivityLogs, listRequestLogs, listErrorLogs, getLogStats } from '@/actions/logs';
 
 type LogTab = 'activity' | 'requests' | 'errors';
@@ -20,6 +29,7 @@ export default function AdminLogs() {
   const { data: session } = useSession();
   const [tab, setTab] = useState<LogTab>('activity');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedLog, setSelectedLog] = useState<any | null>(null);
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
   const handleTabChange = (newTab: LogTab) => {
@@ -62,6 +72,22 @@ export default function AdminLogs() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const loading = tab === 'activity' ? loadingActivity : tab === 'requests' ? loadingRequests : loadingErrors;
 
+  const getVisiblePages = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+
+    if (currentPage >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+
   const { data: stats } = useQuery<LogStats>({
     queryKey: ['logs-stats', token],
     queryFn: () => getLogStats(token),
@@ -76,6 +102,29 @@ export default function AdminLogs() {
 
   const refetch = () => {
     window.location.reload();
+  };
+
+  const formatFieldLabel = (key: string) =>
+    key
+      .replace(/_/g, ' ')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/\b\w/g, c => c.toUpperCase());
+
+  const formatFieldValue = (value: unknown) => {
+    if (value === null || value === undefined || value === '') {
+      return '—';
+    }
+    if (typeof value === 'boolean') {
+      return value ? 'True' : 'False';
+    }
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return String(value);
+      }
+    }
+    return String(value);
   };
 
   return (<>
@@ -136,103 +185,139 @@ export default function AdminLogs() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100">
+            <Table className="text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-gray-100">
                   {tab === 'activity' && ['User', 'Action', 'Level', 'Description', 'Time'].map(h => (
-                    <th key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                    <TableHead key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      {h}
+                    </TableHead>
                   ))}
                   {tab === 'requests' && ['Method', 'Path', 'Status', 'Duration', 'IP', 'Time'].map(h => (
-                    <th key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                    <TableHead key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      {h}
+                    </TableHead>
                   ))}
                   {tab === 'errors' && ['Type', 'Message', 'Path', 'Time'].map(h => (
-                    <th key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                    <TableHead key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      {h}
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {logs.map((log, i) => (
-                  <tr key={(log as any).id || i} className="border-b border-gray-50 hover:bg-gray-50">
+                  <TableRow
+                    key={(log as any).id || i}
+                    className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => setSelectedLog(log)}
+                  >
                     {tab === 'activity' && (<>
-                      
-                        <td className="p-4 text-xs text-gray-700">{(log as ActivityLog).actor_label || '—'}</td>
-                        <td className="p-4 text-xs font-mono text-blue-600">{(log as ActivityLog).action || '—'}</td>
-                        <td className="p-4">
+                        <TableCell className="p-4 text-xs text-gray-700">{(log as ActivityLog).actor_label || '—'}</TableCell>
+                        <TableCell className="p-4 text-xs font-mono text-blue-600">{(log as ActivityLog).action || '—'}</TableCell>
+                        <TableCell className="p-4">
                           <span className={`badge text-[10px] ${
                             (log as ActivityLog).level === 'ERROR' ? 'bg-red-100 text-red-600' :
                             (log as ActivityLog).level === 'WARNING' ? 'bg-amber-100 text-amber-600' :
                             (log as ActivityLog).level === 'CRITICAL' ? 'bg-red-200 text-red-700' :
                             'bg-gray-100 text-gray-600'
                           }`}>{(log as ActivityLog).level}</span>
-                        </td>
-                        <td className="p-4 text-xs text-gray-600 max-w-xs truncate">{(log as ActivityLog).description || (log as ActivityLog).action}</td>
-                        <td className="p-4 text-xs text-gray-400">{(log as ActivityLog).created_at ? new Date((log as ActivityLog).created_at).toLocaleString() : '—'}</td>
-                      
+                        </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-600 max-w-xs truncate">
+                          {(log as ActivityLog).description || (log as ActivityLog).action}
+                        </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-400">
+                          {(log as ActivityLog).created_at ? new Date((log as ActivityLog).created_at).toLocaleString() : '—'}
+                        </TableCell>
                     </>)}
                     {tab === 'requests' && (<>
-                      
-                        <td className="p-4">
+                        <TableCell className="p-4">
                           <span className={`badge text-xs font-mono ${
                             (log as RequestLog).method === 'GET' ? 'bg-blue-100 text-blue-700' :
                             (log as RequestLog).method === 'POST' ? 'bg-green-100 text-green-700' :
                             (log as RequestLog).method === 'DELETE' ? 'bg-red-100 text-red-700' :
                             'bg-amber-100 text-amber-700'
-                          }`}>{(log as RequestLog).method}</span>
-                        </td>
-                        <td className="p-4 text-xs font-mono text-gray-700 max-w-xs truncate">{(log as RequestLog).path}</td>
-                        <td className="p-4">
+                          }`}>
+                            {(log as RequestLog).method}
+                          </span>
+                        </TableCell>
+                        <TableCell className="p-4 text-xs font-mono text-gray-700 max-w-xs truncate">
+                          {(log as RequestLog).path}
+                        </TableCell>
+                        <TableCell className="p-4">
                           <span className={`badge text-xs ${(log as RequestLog).status_code >= 400 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'}`}>
                             {(log as RequestLog).status_code}
                           </span>
-                        </td>
-                        <td className="p-4 text-xs text-gray-500">{(log as RequestLog).response_time_ms}ms</td>
-                        <td className="p-4 text-xs text-gray-500">{(log as RequestLog).ip_address || '—'}</td>
-                        <td className="p-4 text-xs text-gray-400">{(log as RequestLog).created_at ? new Date((log as RequestLog).created_at).toLocaleString() : '—'}</td>
-                      
+                        </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-500">
+                          {(log as RequestLog).response_time_ms}ms
+                        </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-500">
+                          {(log as RequestLog).ip_address || '—'}
+                        </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-400">
+                          {(log as RequestLog).created_at ? new Date((log as RequestLog).created_at).toLocaleString() : '—'}
+                        </TableCell>
                     </>)}
                     {tab === 'errors' && (<>
-                      
-                        <td className="p-4"><span className="badge bg-red-100 text-red-600 text-[10px]">{(log as ErrorLog).error_type}</span></td>
-                        <td className="p-4 text-xs text-gray-700 max-w-xs truncate">{(log as ErrorLog).error_message}</td>
-                        <td className="p-4 text-xs font-mono text-gray-500 max-w-[150px] truncate">{(log as ErrorLog).path || '—'}</td>
-                        <td className="p-4 text-xs text-gray-400">{(log as ErrorLog).created_at ? new Date((log as ErrorLog).created_at).toLocaleString() : '—'}</td>
-                      
+                        <TableCell className="p-4">
+                          <span className="badge bg-red-100 text-red-600 text-[10px]">
+                            {(log as ErrorLog).error_type}
+                          </span>
+                        </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-700 max-w-xs truncate">
+                          {(log as ErrorLog).error_message}
+                        </TableCell>
+                        <TableCell className="p-4 text-xs font-mono text-gray-500 max-w-[150px] truncate">
+                          {(log as ErrorLog).path || '—'}
+                        </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-400">
+                          {(log as ErrorLog).created_at ? new Date((log as ErrorLog).created_at).toLocaleString() : '—'}
+                        </TableCell>
                     </>)}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
 
         {totalCount > PAGE_SIZE && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+          <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50 lg:flex-row lg:items-center lg:justify-between">
             <div className="text-xs text-gray-600">
               Showing <span className="font-semibold">{(currentPage - 1) * PAGE_SIZE + 1}</span> to <span className="font-semibold">{Math.min(currentPage * PAGE_SIZE, totalCount)}</span> of <span className="font-semibold">{totalCount}</span> results
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-start lg:justify-end gap-2 flex-wrap max-w-full">
               <button
                 onClick={() => setCurrentPage(prev => prev - 1)}
                 disabled={!hasPreviousPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Previous page"
               >
                 <ChevronLeft size={16} className="text-gray-600" />
               </button>
 
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => {
-                  const pageNum = i + 1;
+              <div className="flex items-center gap-1 flex-wrap">
+                {getVisiblePages().map((item, index) => {
+                  if (item === '...') {
+                    return (
+                      <span key={`ellipsis-${index}`} className="px-1 text-sm text-gray-400 select-none">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  const pageNum = item as number;
                   const isCurrentPage = pageNum === currentPage;
                   return (
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      className={`h-8 min-w-8 px-2 rounded-md text-sm font-medium transition-colors ${
                         isCurrentPage
-                          ? 'text-white'
-                          : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                          ? 'text-white shadow-sm'
+                          : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100'
                       }`}
                       style={isCurrentPage ? { background: '#471DDB' } : {}}
                     >
@@ -245,7 +330,7 @@ export default function AdminLogs() {
               <button
                 onClick={() => setCurrentPage(prev => prev + 1)}
                 disabled={!hasNextPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Next page"
               >
                 <ChevronRight size={16} className="text-gray-600" />
@@ -254,7 +339,52 @@ export default function AdminLogs() {
           </div>
         )}
       </div>
-  
+
+      <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-hidden p-0 gap-0 flex flex-col">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
+            <DialogTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              Log Details
+              <Badge variant="outline" className="font-medium">
+                {tab}
+              </Badge>
+            </DialogTitle>
+            <DialogDescription>
+              Complete log information for audit and troubleshooting.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 min-h-0 px-6 py-4 overflow-y-auto">
+            {selectedLog && (
+              <div className="space-y-4">
+                {Object.entries(selectedLog as Record<string, unknown>).map(([key, value]) => {
+                  const formatted = formatFieldValue(value);
+                  const isJsonLike =
+                    typeof value === 'object' && value !== null;
+
+                  return (
+                    <div key={key} className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2 sm:gap-4 border-b border-gray-50 pb-3">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        {formatFieldLabel(key)}
+                      </div>
+                      {isJsonLike ? (
+                        <pre className="text-xs text-gray-700 bg-gray-50 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-words">
+                          {formatted}
+                        </pre>
+                      ) : (
+                        <div className="text-sm text-gray-800 break-words">
+                          {formatted}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
 </>
 )
 ;
