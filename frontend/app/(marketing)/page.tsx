@@ -51,17 +51,17 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <Helmet>
-        <title>JoyFund - Turn Celebrations into Maternal Healthcare</title>
-        <meta name="description" content="JoyFund is a transparent crowdfunding platform that turns birthdays, weddings, and celebrations into maternal healthcare for vulnerable women across Cameroon." />
+        <title>JoyFund: Maternal Health Crowdfunding in Cameroon</title>
+        <meta name="description" content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare." />
         <link rel="canonical" href="https://joy-fund.com" />
-        <meta property="og:title" content="JoyFund - Turn Celebrations into Maternal Healthcare" />
-        <meta property="og:description" content="A transparent crowdfunding platform turning celebrations into maternal healthcare for vulnerable women in Cameroon." />
+        <meta property="og:title" content="JoyFund: Maternal Health Crowdfunding in Cameroon" />
+        <meta property="og:description" content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare." />
         <meta property="og:url" content="https://joy-fund.com" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://joy-fund.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="JoyFund - Turn Celebrations into Maternal Healthcare" />
-        <meta name="twitter:description" content="A transparent crowdfunding platform turning celebrations into maternal healthcare for vulnerable women in Cameroon." />
+        <meta name="twitter:title" content="JoyFund: Maternal Health Crowdfunding in Cameroon" />
+        <meta name="twitter:description" content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare." />
         <meta name="twitter:image" content="https://joy-fund.com/og-image.png" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -116,9 +116,8 @@ export default function HomePage() {
 
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md" style={{ letterSpacing: '-1px' }}>
-            Turn your{' '}
-            <span style={{ color: '#7de8c0' }}>celebration</span>
-            {' '}into<br />someone&apos;s safe delivery
+            Turn your celebration into a safe delivery:<br />
+            <span style={{ color: '#7de8c0' }} className="text-3xl sm:text-4xl md:text-5xl block mt-2">Maternal Health Crowdfunding in Cameroon</span>
           </h1>
 
           {/* Subtext */}
