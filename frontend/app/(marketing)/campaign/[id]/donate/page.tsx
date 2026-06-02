@@ -175,7 +175,7 @@ function DonatePage() {
       )}
       <Navbar />
       <div className="pt-24 pb-16 px-4">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-xl mx-auto">
           <button onClick={() => router.back()} className="flex items-center gap-1 text-gray-500 text-sm mb-6 hover:text-gray-700">
             <ArrowLeft size={16} /> Back
           </button>
