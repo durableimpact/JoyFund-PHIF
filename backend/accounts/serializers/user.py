@@ -24,6 +24,20 @@ class UserReadSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class UserMinimalSerializer(serializers.ModelSerializer):
+    """Minimal user representation for nested objects."""
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "profile_picture",
+        ]
+        read_only_fields = fields
+
+
 class DonorProfileSerializer(serializers.Serializer):
     """Profile structure for DONOR role."""
 
