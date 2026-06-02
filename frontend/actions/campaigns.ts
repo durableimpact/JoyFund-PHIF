@@ -74,7 +74,7 @@ export const getAvailableBalances = async (access_token: string) => {
 
 export const getCampaignLeaderboard = async () => {
   try {
-    const { data } = await api.get<CampaignLeaderboardEntry[]>("/api/campaigns/leaderboard/");
+    const { data } = await api.get<PaginationResponse<CampaignLeaderboardEntry>>("/api/campaigns/leaderboard/");
     return data;
   } catch (e) { handleError(e); }
 };
