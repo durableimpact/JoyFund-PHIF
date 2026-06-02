@@ -42,20 +42,20 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <Helmet>
-        <title>Explore JoyFund Campaigns</title>
-        <meta name="description" content="Discover active JoyFund campaigns and donate to support maternal healthcare for vulnerable women in Cameroon." />
+        <title>Donate to Maternal Health Campaigns | JoyFund</title>
+        <meta name="description" content="Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money." />
         <link rel="canonical" href="https://joy-fund.com/explore" />
-        <meta property="og:title" content="Explore JoyFund Campaigns" />
-        <meta property="og:description" content="Discover and support campaigns providing maternal healthcare for vulnerable women across Cameroon." />
+        <meta property="og:title" content="Donate to Maternal Health Campaigns | JoyFund" />
+        <meta property="og:description" content="Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money." />
         <meta property="og:url" content="https://joy-fund.com/explore" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://joy-fund.com/og-image.png" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Explore JoyFund Campaigns",
+          name: "Donate to Maternal Health Campaigns",
           url: "https://joy-fund.com/explore",
-          description: "Discover active campaigns providing maternal healthcare for vulnerable women in Cameroon."
+          description: "Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money."
         })}</script>
       </Helmet>
       <Navbar />
