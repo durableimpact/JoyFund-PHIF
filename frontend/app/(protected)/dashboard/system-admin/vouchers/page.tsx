@@ -14,7 +14,7 @@ import Link from 'next/link';
 
 import { formatXAF, statusColor, formatDate } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { listVouchers, createVoucher, createVouchersFromCampaigns } from '@/actions/vouchers';
+import { listVouchers, createVouchersFromCampaigns } from '@/actions/vouchers';
 import { listHealthIssues } from '@/actions/beneficiaries';
 import { listHospitals } from '@/actions/hospital';
 import { listCampaigns } from '@/actions/campaigns';
@@ -22,11 +22,12 @@ import { listCampaigns } from '@/actions/campaigns';
 const STATUS_FILTERS = ['all','AVAILABLE','ACTIVE','PENDING_CONFIRMATION','USED','EXPIRED'];
 const PAGE_SIZE = 10;
 
-type CreateMode = 'single' | 'multi';
+type AllocationMode = 'amount' | 'percentage';
 
-interface Allocation {
+interface SelectedAllocation {
   campaign_id: string;
-  amount: string;
+  mode: AllocationMode;
+  value: string;
 }
 
 export default function AdminVouchers() {
@@ -37,18 +38,15 @@ export default function AdminVouchers() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [showCreate, setShowCreate] = useState(false);
-  const [mode, setMode] = useState<CreateMode>('single');
   const [currentPage, setCurrentPage] = useState(1);
+  const [createStep, setCreateStep] = useState(1);
 
   const [healthIssueId, setHealthIssueId] = useState('');
   const [hospitalId, setHospitalId] = useState('');
-  const [campaignId, setCampaignId] = useState('');
-  const [amount, setAmount] = useState('');
-
-  const [multiHealthIssueId, setMultiHealthIssueId] = useState('');
-  const [multiHospitalId, setMultiHospitalId] = useState('');
-  const [totalAmount, setTotalAmount] = useState('');
-  const [allocations, setAllocations] = useState<Allocation[]>([{ campaign_id: '', amount: '' }]);
+  const [requestedAmount, setRequestedAmount] = useState('');
+  const [fundingSearchAmount, setFundingSearchAmount] = useState('');
+  const [selectedAllocations, setSelectedAllocations] = useState<SelectedAllocation[]>([]);
+  const [createError, setCreateError] = useState('');
 
   const { data: vouchersData, isLoading } = useQuery({
     queryKey: ['vouchers', token, currentPage, search, filter],
@@ -89,35 +87,114 @@ export default function AdminVouchers() {
 
   const { data: campaignsData } = useQuery({
     queryKey: ['campaigns', token],
-    queryFn: async () => await listCampaigns({ page_size: '1000' }),
+    queryFn: async () => await listCampaigns({ page_size: 1000 }),
   });
 
   const campaigns: Campaign[] = campaignsData?.results || [];
 
-  const createSingleMutation = useMutation({
-    mutationFn: () => createVoucher(token, { health_issue_id: healthIssueId, hospital_id: hospitalId, campaign_id: campaignId, amount: Number(amount) }),
+  const createVoucherMutation = useMutation({
+    mutationFn: () => {
+      const total = Number(requestedAmount);
+      const valid = selectedAllocations.filter((a) => a.campaign_id && Number(a.value) > 0);
+      return createVouchersFromCampaigns(token, {
+        health_issue_id: healthIssueId,
+        hospital_id: hospitalId,
+        total_amount: total,
+        campaign_allocations: valid.map((a) =>
+          a.mode === 'percentage'
+            ? { campaign_id: a.campaign_id, percentage: Number(a.value) }
+            : { campaign_id: a.campaign_id, amount: Number(a.value) }
+        ),
+      });
+    },
     onSuccess: () => {
-      setShowCreate(false); setHealthIssueId(''); setHospitalId(''); setCampaignId(''); setAmount('');
+      setShowCreate(false);
+      setCreateStep(1);
+      setHealthIssueId('');
+      setHospitalId('');
+      setRequestedAmount('');
+      setFundingSearchAmount('');
+      setSelectedAllocations([]);
+      setCreateError('');
       queryClient.invalidateQueries({ queryKey: ['vouchers'] });
     },
   });
 
-  const createMultiMutation = useMutation({
-    mutationFn: () => {
-      const valid = allocations.filter((a) => a.campaign_id && Number(a.amount) > 0);
-      return createVouchersFromCampaigns(token, {
-        health_issue_id: multiHealthIssueId,
-        hospital_id: multiHospitalId,
-        total_amount: Number(totalAmount),
-        campaign_allocations: valid.map((a) => ({ campaign_id: a.campaign_id, amount: Number(a.amount) })),
-      });
-    },
-    onSuccess: () => {
-      setShowCreate(false); setMultiHealthIssueId(''); setMultiHospitalId(''); setTotalAmount('');
-      setAllocations([{ campaign_id: '', amount: '' }]);
-      queryClient.invalidateQueries({ queryKey: ['vouchers'] });
-    },
-  });
+  const numericRequestedAmount = Number(requestedAmount) || 0;
+  const numericSearchAmount = Number(fundingSearchAmount || requestedAmount) || 0;
+  const eligibleCampaigns = campaigns.filter(
+    (c) => c.is_active && c.available_balance >= numericSearchAmount
+  );
+
+  const getCampaign = (id: string) => campaigns.find((c) => c.id === id);
+  const selectedCampaignIds = new Set(selectedAllocations.map((a) => a.campaign_id));
+
+  const totalAllocatedAmount = selectedAllocations.reduce((sum, allocation) => {
+    const value = Number(allocation.value) || 0;
+    if (allocation.mode === 'percentage') {
+      return sum + ((numericRequestedAmount * value) / 100);
+    }
+    return sum + value;
+  }, 0);
+
+  const totalPercentage = selectedAllocations.reduce((sum, allocation) => {
+    if (allocation.mode !== 'percentage') return sum;
+    return sum + (Number(allocation.value) || 0);
+  }, 0);
+
+  const canMoveToFundingStep =
+    !!healthIssueId && !!hospitalId && numericRequestedAmount > 0;
+
+  const toggleCampaignSelection = (campaignIdToToggle: string) => {
+    setSelectedAllocations((prev) => {
+      const exists = prev.some((a) => a.campaign_id === campaignIdToToggle);
+      if (exists) {
+        return prev.filter((a) => a.campaign_id !== campaignIdToToggle);
+      }
+      return [...prev, { campaign_id: campaignIdToToggle, mode: 'amount', value: '' }];
+    });
+  };
+
+  const updateAllocation = (campaignIdToUpdate: string, patch: Partial<SelectedAllocation>) => {
+    setSelectedAllocations((prev) =>
+      prev.map((a) => (a.campaign_id === campaignIdToUpdate ? { ...a, ...patch } : a))
+    );
+  };
+
+  const handleOpenCreate = () => {
+    setShowCreate(true);
+    setCreateStep(1);
+    setCreateError('');
+  };
+
+  const handleCreateVoucher = () => {
+    setCreateError('');
+    if (selectedAllocations.length === 0) {
+      setCreateError('Select at least one campaign allocation.');
+      return;
+    }
+
+    const hasInvalid = selectedAllocations.some((a) => Number(a.value) <= 0);
+    if (hasInvalid) {
+      setCreateError('Every selected campaign must have a valid amount or percentage.');
+      return;
+    }
+
+    const usesPercentage = selectedAllocations.some((a) => a.mode === 'percentage');
+    const usesAmount = selectedAllocations.some((a) => a.mode === 'amount');
+
+    if (usesPercentage && totalPercentage > 100) {
+      setCreateError('Total percentage allocation cannot exceed 100%.');
+      return;
+    }
+
+    if (usesAmount && totalAllocatedAmount < numericRequestedAmount) {
+      setCreateError('Total allocation must be at least the requested voucher amount.');
+      return;
+    }
+
+    createVoucherMutation.mutate();
+  };
 
   return (
     <>
@@ -126,7 +203,7 @@ export default function AdminVouchers() {
           <h1 className="text-2xl font-black text-gray-900">Voucher Management</h1>
           <p className="text-gray-500 text-sm">{totalCount} total vouchers</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
+        <button onClick={handleOpenCreate} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
           <Plus size={16} /> Create Voucher
         </button>
       </div>
@@ -224,27 +301,42 @@ export default function AdminVouchers() {
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 my-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 my-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-gray-900">Create Voucher</h2>
               <button onClick={() => setShowCreate(false)}><X size={20} className="text-gray-400" /></button>
             </div>
 
-            <div className="flex gap-2 mb-5">
-              <button onClick={() => setMode('single')} className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${mode === 'single' ? 'text-white' : 'border-gray-200 text-gray-600'}`} style={mode === 'single' ? { background: '#471DDB', borderColor: '#471DDB' } : {}}>Single Campaign</button>
-              <button onClick={() => setMode('multi')} className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${mode === 'multi' ? 'text-white' : 'border-gray-200 text-gray-600'}`} style={mode === 'multi' ? { background: '#471DDB', borderColor: '#471DDB' } : {}}>Multiple Campaigns</button>
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {[
+                { id: 1, label: 'Voucher Details' },
+                { id: 2, label: 'Find Campaigns' },
+                { id: 3, label: 'Allocate & Create' },
+              ].map((step) => (
+                <div
+                  key={step.id}
+                  className={`rounded-xl border px-3 py-2 text-center text-xs font-semibold ${
+                    createStep >= step.id
+                      ? 'text-white border-transparent'
+                      : 'text-gray-500 border-gray-200 bg-gray-50'
+                  }`}
+                  style={createStep >= step.id ? { background: '#471DDB' } : {}}
+                >
+                  Step {step.id}: {step.label}
+                </div>
+              ))}
             </div>
 
             {validatedHealthIssues.length === 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-xs text-amber-700">No VALIDATED health issues found. Health issues must be verified before creating a voucher.</div>
             )}
 
-            {mode === 'single' && (
+            {createStep === 1 && (
               <div className="space-y-3">
                 <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Health Issue (VALIDATED) *</label>
                   <select className="input-field" value={healthIssueId} onChange={e => setHealthIssueId(e.target.value)}>
                     <option value="">— Select health issue —</option>
-                    {validatedHealthIssues.map((h) => <option key={h.id} value={h.id}>{h.description} · {h.beneficiary_id?.slice(-6)}</option>)}
+                    {validatedHealthIssues.map((h) => <option key={h.id} value={h.id}>{h.description}</option>)}
                   </select>
                 </div>
                 <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Hospital *</label>
@@ -253,61 +345,136 @@ export default function AdminVouchers() {
                     {hospitals.map((h) => <option key={h.id} value={h.id}>{h.name} · {h.city}</option>)}
                   </select>
                 </div>
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Funding Campaign *</label>
-                  <select className="input-field" value={campaignId} onChange={e => setCampaignId(e.target.value)}>
-                    <option value="">— Select campaign —</option>
-                    {campaigns.map((c) => <option key={c.id} value={c.id}>{c.title} · Balance: {formatXAF(c.available_balance)}</option>)}
-                  </select>
-                </div>
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Amount (XAF) *</label>
-                  <input className="input-field" type="number" min={1} placeholder="e.g. 60000" value={amount} onChange={e => setAmount(e.target.value)} />
+                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Voucher Amount (XAF) *</label>
+                  <input className="input-field" type="number" min={1} placeholder="e.g. 60000" value={requestedAmount} onChange={e => setRequestedAmount(e.target.value)} />
                 </div>
                 <div className="flex gap-3 mt-2">
                   <button className="btn-outline flex-1" onClick={() => setShowCreate(false)}>Cancel</button>
-                  <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }} onClick={() => createSingleMutation.mutate()} disabled={createSingleMutation.isPending}>
-                    {createSingleMutation.isPending ? 'Creating…' : 'Create Voucher'}
+                  <button
+                    className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
+                    style={{ background: '#471DDB' }}
+                    disabled={!canMoveToFundingStep}
+                    onClick={() => {
+                      setFundingSearchAmount(requestedAmount);
+                      setCreateStep(2);
+                    }}
+                  >
+                    Continue
                   </button>
                 </div>
               </div>
             )}
 
-            {mode === 'multi' && (
+            {createStep === 2 && (
               <div className="space-y-3">
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Health Issue (VALIDATED) *</label>
-                  <select className="input-field" value={multiHealthIssueId} onChange={e => setMultiHealthIssueId(e.target.value)}>
-                    <option value="">— Select health issue —</option>
-                    {validatedHealthIssues.map((h) => <option key={h.id} value={h.id}>{h.description} · {h.beneficiary_id?.slice(-6)}</option>)}
-                  </select>
+                <div className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-800">
+                  Target voucher amount: <span className="font-bold">{formatXAF(numericRequestedAmount)}</span>
                 </div>
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Hospital *</label>
-                  <select className="input-field" value={multiHospitalId} onChange={e => setMultiHospitalId(e.target.value)}>
-                    <option value="">— Select hospital —</option>
-                    {hospitals.map((h) => <option key={h.id} value={h.id}>{h.name} · {h.city}</option>)}
-                  </select>
+                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Search campaigns by available balance (XAF)</label>
+                  <input
+                    className="input-field"
+                    type="number"
+                    min={1}
+                    placeholder="Try a lower amount if no campaign appears"
+                    value={fundingSearchAmount}
+                    onChange={(e) => setFundingSearchAmount(e.target.value)}
+                  />
                 </div>
-                <div><label className="text-xs font-semibold text-gray-500 mb-1 block">Total Amount (XAF) *</label>
-                  <input className="input-field" type="number" min={1} placeholder="e.g. 120000" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-semibold text-gray-500">Campaign Allocations *</label>
-                    <button onClick={() => setAllocations(prev => [...prev, { campaign_id: '', amount: '' }])} className="text-xs font-semibold" style={{ color: '#471DDB' }}>+ Add Campaign</button>
-                  </div>
-                  {allocations.map((a, i) => (
-                    <div key={i} className="flex gap-2 mb-2">
-                      <select className="input-field flex-1 text-sm" value={a.campaign_id} onChange={e => setAllocations(prev => prev.map((x, idx) => idx === i ? { ...x, campaign_id: e.target.value } : x))}>
-                        <option value="">— Campaign —</option>
-                        {campaigns.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-                      </select>
-                      <input className="input-field w-28 text-sm shrink-0" type="number" placeholder="XAF" value={a.amount} onChange={e => setAllocations(prev => prev.map((x, idx) => idx === i ? { ...x, amount: e.target.value } : x))} />
-                      {allocations.length > 1 && <button onClick={() => setAllocations(prev => prev.filter((_, idx) => idx !== i))} className="text-gray-400 hover:text-red-500"><X size={14} /></button>}
+                <div className="max-h-64 overflow-y-auto border border-gray-100 rounded-xl p-2 space-y-2">
+                  {eligibleCampaigns.length === 0 ? (
+                    <div className="text-xs text-gray-500 p-3">
+                      No campaigns match this amount. Reduce search amount to discover more campaigns.
                     </div>
+                  ) : eligibleCampaigns.map((campaign) => (
+                    <button
+                      key={campaign.id}
+                      type="button"
+                      className={`w-full text-left border rounded-xl px-3 py-2 transition ${
+                        selectedCampaignIds.has(campaign.id)
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:bg-gray-50'
+                      }`}
+                      onClick={() => toggleCampaignSelection(campaign.id)}
+                    >
+                      <div className="text-sm font-semibold text-gray-900">{campaign.title}</div>
+                      <div className="text-xs text-gray-500">Available balance: {formatXAF(campaign.available_balance)}</div>
+                    </button>
                   ))}
                 </div>
                 <div className="flex gap-3 mt-2">
-                  <button className="btn-outline flex-1" onClick={() => setShowCreate(false)}>Cancel</button>
-                  <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }} onClick={() => createMultiMutation.mutate()} disabled={createMultiMutation.isPending}>
-                    {createMultiMutation.isPending ? 'Creating…' : 'Create Voucher'}
+                  <button className="btn-outline flex-1" onClick={() => setCreateStep(1)}>Back</button>
+                  <button
+                    className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
+                    style={{ background: '#471DDB' }}
+                    disabled={selectedAllocations.length === 0}
+                    onClick={() => setCreateStep(3)}
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {createStep === 3 && (
+              <div className="space-y-3">
+                <div className="rounded-xl bg-gray-50 p-3 text-xs text-gray-700">
+                  Allocate funds from selected campaigns. You can use fixed amount or percentage per campaign.
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {selectedAllocations.map((allocation) => {
+                    const campaign = getCampaign(allocation.campaign_id);
+                    return (
+                      <div key={allocation.campaign_id} className="border border-gray-200 rounded-xl p-3">
+                        <div className="text-sm font-semibold text-gray-900">{campaign?.title}</div>
+                        <div className="text-xs text-gray-500 mb-2">Available: {formatXAF(campaign?.available_balance || 0)}</div>
+                        <div className="flex gap-2">
+                          <select
+                            className="input-field w-40"
+                            value={allocation.mode}
+                            onChange={(e) => updateAllocation(allocation.campaign_id, {
+                              mode: e.target.value as AllocationMode,
+                              value: '',
+                            })}
+                          >
+                            <option value="amount">Amount (XAF)</option>
+                            <option value="percentage">Percentage (%)</option>
+                          </select>
+                          <input
+                            className="input-field flex-1"
+                            type="number"
+                            min={1}
+                            max={allocation.mode === 'percentage' ? 100 : undefined}
+                            placeholder={allocation.mode === 'percentage' ? 'e.g. 35' : 'e.g. 20000'}
+                            value={allocation.value}
+                            onChange={(e) => updateAllocation(allocation.campaign_id, { value: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="rounded-xl border border-gray-200 p-3 text-xs space-y-1">
+                  <div>Requested amount: <span className="font-bold">{formatXAF(numericRequestedAmount)}</span></div>
+                  <div>Total allocated: <span className="font-bold">{formatXAF(Math.floor(totalAllocatedAmount))}</span></div>
+                  <div>Total percentage: <span className="font-bold">{totalPercentage.toFixed(2)}%</span></div>
+                </div>
+
+                {createError && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700">
+                    {createError}
+                  </div>
+                )}
+
+                <div className="flex gap-3 mt-2">
+                  <button className="btn-outline flex-1" onClick={() => setCreateStep(2)}>Back</button>
+                  <button
+                    className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
+                    style={{ background: '#471DDB' }}
+                    onClick={handleCreateVoucher}
+                    disabled={createVoucherMutation.isPending}
+                  >
+                    {createVoucherMutation.isPending ? 'Creating…' : 'Create Voucher'}
                   </button>
                 </div>
               </div>
