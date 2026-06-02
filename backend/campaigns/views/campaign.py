@@ -22,7 +22,7 @@ from campaigns.serializers import (
 )
 
 _TAG = ["Campaigns"]
-CACHE_TIMEOUT = 3 * 24 * 60 * 60  # 3 days
+CACHE_TIMEOUT = 3 ##* 24 * 60 * 60  # 3 days
 
 
 class IsDonor(BasePermission):
