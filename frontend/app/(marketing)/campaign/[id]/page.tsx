@@ -11,6 +11,7 @@ import {
   Calendar, CreditCard, ChevronRight, HandHeart, Globe
 } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
+import { Helmet } from 'react-helmet-async';
 import { getCampaign, listCampaignDonations } from '@/actions/campaigns';
 import { formatXAF, cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -517,8 +518,42 @@ export default function CampaignPage() {
   const organizerName = campaign.organizer_name || campaign.donor_name || 'Campaign Organizer';
   const organizerInitial = organizerName.charAt(0).toUpperCase();
 
+  const campaignTitle = campaign.title || 'Campaign';
+  const campaignDesc = campaign.description?.slice(0, 160) || `Support "${campaignTitle}" on JoyFund — help provide maternal healthcare for vulnerable women in Cameroon.`;
+
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>{`${campaignTitle} | JoyFund`}</title>
+        <meta name="description" content={campaignDesc} />
+        <link rel="canonical" href={`https://joy-fund.com/campaign/${id}`} />
+        <meta property="og:title" content={`${campaignTitle} | JoyFund`} />
+        <meta property="og:description" content={campaignDesc} />
+        <meta property="og:url" content={`https://joy-fund.com/campaign/${id}`} />
+        <meta property="og:type" content="website" />
+        {campaign.cover_image && <meta property="og:image" content={campaign.cover_image} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${campaignTitle} | JoyFund`} />
+        <meta name="twitter:description" content={campaignDesc} />
+        {campaign.cover_image && <meta name="twitter:image" content={campaign.cover_image} />}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FundAction",
+          name: campaignTitle,
+          description: campaign.description || undefined,
+          url: `https://joy-fund.com/campaign/${id}`,
+          image: campaign.cover_image || undefined,
+          organizer: organizerName ? { "@type": "Person", name: organizerName } : undefined,
+          location: campaign.location ? { "@type": "Place", name: campaign.location } : undefined,
+          offers: {
+            "@type": "Offer",
+            price: goalXAF,
+            priceCurrency: "XAF",
+            availability: "https://schema.org/InStock",
+            url: `https://joy-fund.com/campaign/${id}/donate/`
+          }
+        })}</script>
+      </Helmet>
       <Navbar />
 
       {/* ── Hero Section ── */}
