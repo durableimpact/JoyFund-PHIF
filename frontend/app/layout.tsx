@@ -21,30 +21,42 @@ const geistMono = Geist_Mono({
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "JoyFund",
-  description:
-    "A transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.",
-  url: "https://joy-fund.com",
-  logo: "https://joy-fund.com/logo.png",
-  sameAs: [
-    "https://twitter.com/joyfund",
-    "https://facebook.com/joyfund",
-  ],
-  contactPoint: {
-    "@type": "ContactPoint",
-    contactType: "customer service",
-    email: "support@joyfund.cm",
-  },
+  "@graph": [
+    {
+      "@type": "NonprofitOrganization",
+      "@id": "https://joy-fund.com/#organization",
+      "name": "JoyFund",
+      "description": "A digital Njangi and transparent crowdfunding platform funding maternal healthcare and safe deliveries for vulnerable women across Cameroon.",
+      "url": "https://joy-fund.com",
+      "logo": "https://joy-fund.com/logo.png",
+      "foundingLocation": {
+        "@type": "Place",
+        "name": "Cameroon"
+      },
+      "sameAs": [
+        "https://twitter.com/joyfund",
+        "https://facebook.com/joyfund"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://joy-fund.com/#website",
+      "url": "https://joy-fund.com",
+      "name": "JoyFund",
+      "publisher": {
+        "@id": "https://joy-fund.com/#organization"
+      }
+    }
+  ]
 };
 
 export const metadata: Metadata = {
   title: {
-    default: "JoyFund - Solidarity Health Insurance for Cameroon",
+    default: "JoyFund: Maternal Health Crowdfunding in Cameroon",
     template: "%s | JoyFund",
   },
   description:
-    "JoyFund is a transparent crowdfunding platform that turns celebrations into maternal healthcare for vulnerable women across Cameroon.",
+    "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
   metadataBase: new URL("https://joy-fund.com"),
   verification: {
     google: "OyspcSNhwrr5zCVrvp1J0iPhdZEvX2iAAl3nuEkiUZo",
@@ -53,16 +65,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "JoyFund",
-    title: "JoyFund - Solidarity Health Insurance for Cameroon",
+    title: "JoyFund: Maternal Health Crowdfunding in Cameroon",
     description:
-      "Turn celebrations into maternal healthcare. Donate via MTN MoMo or Orange Money.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "JoyFund" }],
+      "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "JoyFund - Solidarity Health Insurance for Cameroon" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JoyFund - Solidarity Health Insurance for Cameroon",
+    title: "JoyFund: Maternal Health Crowdfunding in Cameroon",
     description:
-      "Turn celebrations into maternal healthcare. Donate via MTN MoMo or Orange Money.",
+      "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
     images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
