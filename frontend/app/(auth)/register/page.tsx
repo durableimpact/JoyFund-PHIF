@@ -63,12 +63,12 @@ export default function RegisterPage() {
     } catch (err) {
       const errorData = typeof err === 'string' ? JSON.parse(err) : err;
       console.error('[register error]', errorData);
-      
+
       const errorMessage = 
         errorData?.email?.[0] ||
         errorData?.message ||
         'Registration failed. Please try again.';
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -79,8 +79,8 @@ export default function RegisterPage() {
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16" style={{ background: 'var(--background)' }}>
-      <div className="w-full max-w-md">
+    <div className="py-12 flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
+      <div className="w-full max-w-xl">
 
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4" style={{ background: 'var(--primary)' }}>
@@ -157,10 +157,6 @@ export default function RegisterPage() {
             <Link href="/login" className="text-[#1DB1DB] font-semibold hover:underline">Sign in</Link>
           </p>
         </form>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          JoyFund v1.0 · Solidarity Health Bridge · Cameroon 🇨🇲
-        </p>
       </div>
     </div>
   );
