@@ -220,7 +220,7 @@ class VoucherDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Voucher.objects.select_related(
         "beneficiary", "hospital", "health_issue", "medical_claim"
-    ).prefetch_related("events", "transactions")
+    ).prefetch_related("events", "funding_records")
     serializer_class = VoucherDetailSerializer
 
     @swagger_auto_schema(
