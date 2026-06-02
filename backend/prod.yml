@@ -47,7 +47,7 @@ services:
     environment:
       DB_HOST: joyfund_postgres
     volumes:
-      - backup_data:/backups
+      - ./backup_data:/backups
     depends_on:
       postgres:
         condition: service_healthy
@@ -443,7 +443,6 @@ volumes:
   prometheus_data:
   grafana_data:
   loki_data:
-  backup_data:
   postgres_data:
   pgadmin_data:
   static_volume:
