@@ -17,8 +17,9 @@ class CampaignTransactionSerializer(serializers.ModelSerializer):
 
 class CampaignDetailSerializer(serializers.ModelSerializer):
     from vouchers.serializers.voucher_funding import VoucherFundingDetailSerializer
+    from accounts.serializers.donor import DonorMinimalSerializer
 
-    donor_id = serializers.UUIDField(source="donor.id", read_only=True)
+    donor = DonorMinimalSerializer(read_only=True)
     total_net_raised = serializers.SerializerMethodField()
     progress_percentage = serializers.SerializerMethodField()
     events = CampaignEventSerializer(many=True, read_only=True)
@@ -29,7 +30,7 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
         model = Campaign
         fields = [
             "id",
-            "donor_id",
+            "donor",
             "title",
             "slug",
             "description",
