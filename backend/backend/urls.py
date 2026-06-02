@@ -31,11 +31,15 @@ schema_view = get_schema_view(
         title="JoyFund PHIF API",
         default_version="v1",
         description="JoyFund People Health Insurance Fund - REST API documentation",
-        contact=openapi.Contact(email="admin@joyfund.org"),
+        contact=openapi.Contact(email="ivan.tomdieu@gmail.com"),
         license=openapi.License(name="Proprietary"),
     ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
+    public=settings.DEBUG,
+    permission_classes=(
+        permissions.AllowAny,
+    ) if settings.DEBUG else (
+        permissions.IsAuthenticated,
+    ),
 )
 
 # Standard Django Error Handlers to prevent Celery startup errors

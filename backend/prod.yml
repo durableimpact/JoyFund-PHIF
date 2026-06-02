@@ -37,7 +37,9 @@ services:
 
   # ─── Database Backup ────────────────────────────────
   db-backup:
-    image: python:3.13-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
     container_name: joyfund_backup
     restart: unless-stopped
     env_file:
@@ -45,21 +47,12 @@ services:
     environment:
       DB_HOST: joyfund_postgres
     volumes:
-      - ./backup.sh:/backup.sh:ro
       - backup_data:/backups
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - backend
-    entrypoint: >
-      sh -c "
-        apk add --no-cache postgresql-client &&
-        pip install boto3==1.25.5 --quiet &&
-        echo '0 2 * * * sh /backup.sh >> /var/log/backup.log 2>&1' | crontab - &&
-        echo '⏰ Backup scheduler started - runs daily at 2:00 AM UTC' &&
-        crond -f -d 8
-      "
     deploy:
       resources:
         limits:
@@ -96,10 +89,10 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: 256M
+          memory: 512M
         reservations:
           cpus: "0.25"
-          memory: 128M
+          memory: 256M
     logging:
       driver: json-file
       options:
@@ -251,7 +244,7 @@ services:
       redis:
         condition: service_healthy
     command: >
-      celery -A joyfund worker
+      celery -A backend worker
       -n worker1@%h
       --loglevel=info
       --concurrency=4
@@ -278,7 +271,7 @@ services:
     extends: celery-worker-1
     container_name: joyfund_celery_2
     command: >
-      celery -A joyfund worker
+      celery -A backend worker
       -n worker2@%h
       --loglevel=info
       --concurrency=4
@@ -303,7 +296,7 @@ services:
       redis:
         condition: service_healthy
     command: >
-      celery -A joyfund beat
+      celery -A backend beat
       --loglevel=info
       --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
@@ -461,5 +454,4 @@ networks:
   joyfund_network:
     external: true        # shared with NPM and frontend
   backend:
-    external: true        # Redis, RabbitMQ, Loki never exposed to internet
-    name: backend_backend
+    driver: bridge

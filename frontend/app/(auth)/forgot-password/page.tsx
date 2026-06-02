@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { requestPasswordReset } from '@/actions/accounts';
 import { Heart, Loader2, ArrowLeft, Mail } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type Step = 'form' | 'sent';
 
@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 py-16"
+      className="py-12 flex items-center justify-center px-4"
       style={{ background: 'var(--background)' }}
     >
       <div className="w-full max-w-md">
@@ -147,10 +147,6 @@ export default function ForgotPasswordPage() {
             </div>
           )}
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          JoyFund v1.0 · Solidarity Health Bridge · Cameroon 🇨🇲
-        </p>
       </div>
     </div>
   );

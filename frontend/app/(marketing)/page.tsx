@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Heart, ArrowRight, Star, ChevronRight, Cake, Gift, Hospital, Sparkles, DollarSign, type LucideIcon } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
+import { Helmet } from 'react-helmet-async';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { listCampaigns, getPlatformStats } from '@/actions/campaigns';
 
@@ -49,6 +50,32 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>JoyFund - Turn Celebrations into Maternal Healthcare</title>
+        <meta name="description" content="JoyFund is a transparent crowdfunding platform that turns birthdays, weddings, and celebrations into maternal healthcare for vulnerable women across Cameroon." />
+        <link rel="canonical" href="https://joy-fund.com" />
+        <meta property="og:title" content="JoyFund - Turn Celebrations into Maternal Healthcare" />
+        <meta property="og:description" content="A transparent crowdfunding platform turning celebrations into maternal healthcare for vulnerable women in Cameroon." />
+        <meta property="og:url" content="https://joy-fund.com" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://joy-fund.com/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="JoyFund - Turn Celebrations into Maternal Healthcare" />
+        <meta name="twitter:description" content="A transparent crowdfunding platform turning celebrations into maternal healthcare for vulnerable women in Cameroon." />
+        <meta name="twitter:image" content="https://joy-fund.com/og-image.png" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "JoyFund",
+          url: "https://joy-fund.com",
+          description: "Transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://joy-fund.com/explore?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        })}</script>
+      </Helmet>
       <Navbar transparent />
 
       {/* ── Hero ── */}
@@ -218,40 +245,6 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* ── Footer ── */}
-      <footer className="bg-[#1A1A2E] text-white py-12 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
-                  <img
-                    src="/assets/joyfund-logo-half-removebg-preview.png"
-                    alt="JoyFund logo"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <span className="font-black text-lg">JoyFund</span>
-              </div>
-              <p className="text-white/60 text-sm leading-relaxed max-w-xs">Your Joy Saves Lives - a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.</p>
-            </div>
-            <div>
-              <p className="font-semibold mb-3 text-sm">Platform</p>
-              <div className="flex flex-col gap-2 text-white/60 text-sm">
-                {[['Explore Campaigns', '/explore'], ['About JoyFund', '/about'], ['Leaderboard', '/leaderboard'], ['Sign In', '/login']].map(([l, h]) => (
-                  <Link key={h} href={h} className="hover:text-white">{l}</Link>
-                ))}
-              </div>
-            </div>
-
-          </div>
-          <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between gap-3 text-white/40 text-xs">
-            <p>© 2026 JoyFund - Solidarity Health Bridge. All rights reserved.</p>
-            <p>Built for Cameroon, with love 🇨🇲</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

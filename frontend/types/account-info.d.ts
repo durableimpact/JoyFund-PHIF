@@ -92,3 +92,56 @@ declare interface ReceptionistInfo {
 declare interface ReceptionistProfile extends CommonInfo {
   id: string;
 }
+
+declare interface MinimalHospital {
+  id: string;
+  name: string;
+}
+
+declare interface DonorProfile {
+  id: string;
+}
+
+
+declare interface SystemAdminProfile {
+  id: string;
+}
+
+declare interface UnifiedUserBase {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  profile_picture: string | null;
+  phone_number: string;
+  is_verified: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+declare type UnifiedUser =
+  | (UnifiedUserBase & {
+      role: 'DONOR';
+      profile: DonorProfile | null;
+      hospital: null;
+    })
+  | (UnifiedUserBase & {
+      role: 'HOSPITAL_ADMIN';
+      profile: HospitalAdminProfile | null;
+      hospital: MinimalHospital | null;
+    })
+  | (UnifiedUserBase & {
+      role: 'RECEPTIONIST';
+      profile: ReceptionistProfile | null;
+      hospital: MinimalHospital | null;
+    })
+  | (UnifiedUserBase & {
+      role: 'SOCIAL_WORKER';
+      profile: SocialWorkerProfile | null;
+      hospital: null;
+    })
+  | (UnifiedUserBase & {
+      role: 'SYSTEM_ADMIN';
+      profile: SystemAdminProfile | null;
+      hospital: null;
+    });

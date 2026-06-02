@@ -73,8 +73,8 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16" style={{ background: 'var(--background)' }}>
-      <div className="w-full max-w-md">
+    <div className="py-12 flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
+      <div className="w-full max-w-xl">
 
         {/* Logo */}
         <div className="text-center mb-8">
@@ -156,10 +156,6 @@ function LoginPageContent() {
             </Link>
           </p>
         </form>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          JoyFund v1.0 · Solidarity Health Bridge · Cameroon 🇨🇲
-        </p>
       </div>
     </div>
   );

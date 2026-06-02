@@ -136,8 +136,8 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16" style={{ background: 'var(--background)' }}>
-      <div className="w-full max-w-md">
+    <div className="py-12 flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
+      <div className="w-full max-w-xl">
 
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4" style={{ background: 'var(--primary)' }}>

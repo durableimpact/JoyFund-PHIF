@@ -14,6 +14,7 @@ LABEL description="Django backend with GeoDjango support"
 # libffi-dev                       → cryptography / jwcrypto
 # jpeg-dev / zlib-dev              → Pillow
 # gettext                          → Django i18n (.mo files)
+# gobject-introspection-dev / pango-dev / cairo-dev → weasyprint (PDF generation)
 RUN apk add --no-cache \
         gdal-dev \
         geos-dev \
@@ -26,7 +27,10 @@ RUN apk add --no-cache \
         libffi-dev \
         jpeg-dev \
         zlib-dev \
-        gettext
+        gettext \
+        gobject-introspection-dev \
+        pango-dev \
+        cairo-dev
 
 # ── GeoDjango geo library paths on Alpine ─────────────────────────────────────
 # Django auto-discovers these via the env vars when they are set.

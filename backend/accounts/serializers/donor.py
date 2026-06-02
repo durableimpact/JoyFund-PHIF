@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from accounts.models import Donor, Role, User
-from .user import UserReadSerializer
+from .user import UserReadSerializer, UserMinimalSerializer
 
 
 # ---------------------------------------------------------------------------
@@ -52,6 +52,14 @@ class DonorRegisterSerializer(serializers.Serializer):
 
 class DonorDetailSerializer(serializers.ModelSerializer):
     user = UserReadSerializer(read_only=True)
+
+    class Meta:
+        model = Donor
+        fields = ['id', 'user']
+
+
+class DonorMinimalSerializer(serializers.ModelSerializer):
+    user = UserMinimalSerializer(read_only=True)
 
     class Meta:
         model = Donor

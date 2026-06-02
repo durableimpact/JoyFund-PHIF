@@ -1,4 +1,3 @@
-from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -34,12 +33,6 @@ class IsHospitalAdminOrSystemAdmin(BasePermission):
             and request.user.role in {Role.HOSPITAL_ADMIN, Role.SYSTEM_ADMIN}
         )
 
-
-@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
 
 class ReceptionistViewSet(
     CacheInvalidationMixin,

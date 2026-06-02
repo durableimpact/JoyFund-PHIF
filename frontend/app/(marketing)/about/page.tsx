@@ -1,9 +1,33 @@
+'use client';
 import Navbar from '@/components/shared/Navbar';
+import { Helmet } from 'react-helmet-async';
 import Link from 'next/link';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <Helmet>
+        <title>About JoyFund - Our Mission for Maternal Healthcare</title>
+        <meta name="description" content="Learn about JoyFund's mission to provide maternal healthcare for vulnerable women in Cameroon through community-powered crowdfunding." />
+        <link rel="canonical" href="https://joy-fund.com/about" />
+        <meta property="og:title" content="About JoyFund - Our Mission" />
+        <meta property="og:description" content="JoyFund digitises Cameroon's Njangi solidarity culture, redirecting celebrations into maternal healthcare for vulnerable pregnant women." />
+        <meta property="og:url" content="https://joy-fund.com/about" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://joy-fund.com/og-image.png" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          name: "About JoyFund",
+          url: "https://joy-fund.com/about",
+          description: "JoyFund digitises Cameroon's Njangi solidarity culture, redirecting celebrations into maternal healthcare.",
+          mainEntity: {
+            "@type": "Organization",
+            name: "JoyFund",
+            url: "https://joy-fund.com"
+          }
+        })}</script>
+      </Helmet>
       <Navbar />
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-3xl mx-auto">

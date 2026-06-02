@@ -1,43 +1,34 @@
-name: Backend Deployment
+  name: Backend Deployment
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-deploy.yml'
+  on:
+    push:
+      branches:
+        - main
+      paths:
+        - 'backend/**'
+        - '.github/workflows/backend-deploy.yml'
 
-jobs:
-  deploy:
-    name: Deploy Backend
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  jobs:
+    deploy:
+      name: Deploy Backend
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-      - name: Deploy to VPS via SSH (sshpass)
-        env:
-          SSHPASS: ${{ secrets.PASSWORD }}
-        run: |
-          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'ENDSSH'
-            cd /root/projects/JoyFund/backend
+        - name: Deploy to VPS via SSH (sshpass)
+          env:
+            SSHPASS: ${{ secrets.PASSWORD }}
+          run: |
+            sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'ENDSSH'
+              cd /root/projects/JoyFund/backend
 
-            # Sync with main branch
-            git fetch origin main
-            git reset --hard origin/main
+              git fetch origin main
+              git reset --hard origin/main
 
-            # Only rebuild and recreate Django + Celery containers
-            # RabbitMQ, Redis, Prometheus etc. are untouched
-            docker compose -f prod.yml --env-file ./envs/prod/.env up \
-              --build \
-              --no-deps \
-              --force-recreate \
-              -d \
-              web-worker-1 web-worker-2 \
-              celery-worker-1 celery-worker-2 \
-              celery-beat
+              docker compose -f prod.yml --env-file ./envs/prod/.env up \
+                --build \
+                -d
 
-            # Clean up old images
-            docker image prune -f
-          ENDSSH
+              docker image prune -f
+            ENDSSH
