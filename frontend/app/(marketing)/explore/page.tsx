@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
+import { Helmet } from 'react-helmet-async';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { listCampaigns } from '@/actions/campaigns';
 
@@ -31,6 +32,23 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <Helmet>
+        <title>Explore JoyFund Campaigns</title>
+        <meta name="description" content="Discover active JoyFund campaigns and donate to support maternal healthcare for vulnerable women in Cameroon." />
+        <link rel="canonical" href="https://joy-fund.com/explore" />
+        <meta property="og:title" content="Explore JoyFund Campaigns" />
+        <meta property="og:description" content="Discover and support campaigns providing maternal healthcare for vulnerable women across Cameroon." />
+        <meta property="og:url" content="https://joy-fund.com/explore" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://joy-fund.com/og-image.png" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Explore JoyFund Campaigns",
+          url: "https://joy-fund.com/explore",
+          description: "Discover active campaigns providing maternal healthcare for vulnerable women in Cameroon."
+        })}</script>
+      </Helmet>
       <Navbar />
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
