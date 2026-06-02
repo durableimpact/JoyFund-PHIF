@@ -20,7 +20,7 @@ export const listCampaigns = async (params?: Record<string, string>) => {
 
 export const getCampaign = async (id: string) => {
   try {
-    const { data } = await api.get<Campaign>(`/api/campaigns/${id}/`);
+    const { data } = await api.get<CampaignDetail>(`/api/campaigns/${id}/`);
     return data;
   } catch (e) { handleError(e); }
 };
