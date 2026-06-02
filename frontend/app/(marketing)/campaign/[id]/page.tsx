@@ -149,13 +149,13 @@ function DonorListDialog({
                   <p className="text-xs text-gray-400 mt-0.5">
                     {donation.created_at
                       ? new Date(donation.created_at).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          },
-                        )
+                        "en-US",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        },
+                      )
                       : "Just now"}
                   </p>
                   {donation.message && (
@@ -263,9 +263,9 @@ function DonorList({
                   <p className="text-[11px] text-gray-400 mt-0.5">
                     {donation.created_at
                       ? new Date(donation.created_at).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric" },
-                        )
+                        "en-US",
+                        { month: "short", day: "numeric" },
+                      )
                       : "Just now"}
                   </p>
                   {donation.message && (
@@ -549,7 +549,7 @@ export default function CampaignPage() {
       typeof window !== "undefined"
         ? `${window.location.origin}/campaign/${campaign?.id}`
         : "";
-    navigator.clipboard.writeText(url).catch(() => {});
+    navigator.clipboard.writeText(url).catch(() => { });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -839,7 +839,7 @@ export default function CampaignPage() {
                                   "USED"
                                   ? "bg-green-100 text-green-700"
                                   : (funding.status ||
-                                        funding.voucher?.status) === "EXPIRED"
+                                    funding.voucher?.status) === "EXPIRED"
                                     ? "bg-red-100 text-red-700"
                                     : "bg-blue-100 text-blue-700",
                               )}
@@ -961,13 +961,18 @@ export default function CampaignPage() {
               {/* Organizer */}
               <div className="border-t border-gray-100 px-6 py-4">
                 <div className="flex items-center gap-3">
-                  {/* <div className="w-10 h-10 bg-[#1DB1DB] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    {organizerInitial}
-                  </div> */}
-                  <Avatar className="w-10 h-10 bg-[#1DB1DB]">
-                    <AvatarImage src={campaign.donor.user.profile_picture} />
-                    <AvatarFallback>{organizerInitial}</AvatarFallback>
-                  </Avatar>
+
+                  {campaign.donor ? (
+                    <Avatar className="w-10 h-10 bg-[#1DB1DB]">
+                      <AvatarImage src={campaign.donor?.user?.profile_picture} />
+                      <AvatarFallback>{organizerInitial}</AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <div className="w-10 h-10 bg-[#1DB1DB] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+                      {organizerInitial}
+                    </div>
+                  )}
+
                   <div className="min-w-0">
                     <p className="text-xs text-gray-400 font-medium">
                       Organized by
