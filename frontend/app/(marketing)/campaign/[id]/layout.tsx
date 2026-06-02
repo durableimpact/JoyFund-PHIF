@@ -70,7 +70,7 @@ export default async function CampaignLayout({
   const jsonLd = campaign
     ? {
         "@context": "https://schema.org",
-        "@type": "FundAction",
+        "@type": "DonateAction",
         name: campaign.title,
         description: campaign.description || undefined,
         url: `${BASE_URL}/campaign/${id}`,
