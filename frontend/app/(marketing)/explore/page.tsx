@@ -7,7 +7,15 @@ import { Helmet } from 'react-helmet-async';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { listCampaigns } from '@/actions/campaigns';
 
-const EVENT_TYPES = ['All', 'birthday', 'wedding', 'graduation', 'promotion', 'other'];
+// Display labels for event types
+const EVENT_TYPE_LABELS = [
+  { value: 'All', label: 'All Types' },
+  { value: 'BIRTHDAY', label: 'Birthday' },
+  { value: 'WEDDING', label: 'Wedding' },
+  { value: 'GRADUATION', label: 'Graduation' },
+  { value: 'PROMOTION', label: 'Promotion' },
+  { value: 'MEMORIAL', label: 'Memorial' },
+];
 
 export default function ExplorePage() {
   const [search, setSearch] = useState('');
@@ -16,8 +24,11 @@ export default function ExplorePage() {
 
   // Fetch campaigns with React Query
   const { data: campaignsResponse, isLoading } = useQuery({
-    queryKey: ['campaigns'],
-    queryFn: async () => await listCampaigns(),
+    queryKey: ['campaigns', filter, statusFilter],
+    queryFn: async () => await listCampaigns({
+      event_type: filter === 'All' ? undefined : filter as any,
+      status: statusFilter === 'all' ? undefined : statusFilter,
+    }),
   });
 
   // Extract campaigns from paginated response
@@ -25,9 +36,7 @@ export default function ExplorePage() {
 
   const filtered = campaignList.filter(c => {
     const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
-    const matchType = filter === 'All' || c.event_type === filter;
-    const matchStatus = statusFilter === 'all' || c.status === statusFilter;
-    return matchSearch && matchType && matchStatus;
+    return matchSearch;
   });
 
   return (
@@ -82,14 +91,14 @@ export default function ExplorePage() {
 
           {/* Type pills */}
           <div className="flex gap-2 overflow-x-auto pb-2 mb-8">
-            {EVENT_TYPES.map(t => (
+            {EVENT_TYPE_LABELS.map(({ value, label }) => (
               <button
-                key={t}
-                onClick={() => setFilter(t)}
-                className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${filter === t ? 'text-white shadow-sm' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'}`}
-                style={filter === t ? { background: 'var(--primary)' } : {}}
+                key={value}
+                onClick={() => setFilter(value)}
+                className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${filter === value ? 'text-white shadow-sm' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'}`}
+                style={filter === value ? { background: 'var(--primary)' } : {}}
               >
-                {t === 'All' ? 'All Types' : t.charAt(0).toUpperCase() + t.slice(1)}
+                {label}
               </button>
             ))}
           </div>
