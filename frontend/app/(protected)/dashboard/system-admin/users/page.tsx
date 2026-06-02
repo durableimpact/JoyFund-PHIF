@@ -126,7 +126,7 @@ export default function UsersPage() {
                   <tr key={u.id || i} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="p-4">
                       <div className="font-semibold text-gray-900 text-sm">
-                        <Link href={`/dashboard/system-admin/users/${u.id}?role=${u.role}`} className="hover:text-blue-600 hover:underline">
+                        <Link href={`/dashboard/system-admin/users/${u.profile?.id}?role=${u.role}`} className="hover:text-blue-600 hover:underline">
                           {u.first_name || ''} {u.last_name || ''}
                         </Link>
                       </div>
