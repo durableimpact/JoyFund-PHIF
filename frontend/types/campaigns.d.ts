@@ -39,6 +39,38 @@ declare interface Campaign {
   voucher_fundings?: VoucherFundingDetail[];
 }
 
+declare interface CampaignDetail {
+  id: string;
+  donor: {
+    id: string;
+    user:{
+      id: string;
+      first_name: string;
+      last_name: string;
+      profile_picture:string | null;
+    }
+  };
+  title: string;
+  slug: string;
+  description: string;
+  cover_image?: string | null;
+  event_type: CampaignEventType;
+  goal_amount: number;
+  available_balance: number;
+  total_net_raised: number;
+  start_date: string;
+  end_date: string;
+  is_public: boolean;
+  status: CampaignStatus;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  progress_percentage: number;
+  events?: CampaignEvent[];
+  transactions?: CampaignTransaction[];
+  voucher_fundings?: VoucherFundingDetail[];
+}
+
 declare interface CampaignBalance {
   id: string;
   title: string;
