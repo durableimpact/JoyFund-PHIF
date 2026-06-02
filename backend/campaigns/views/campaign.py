@@ -1,4 +1,3 @@
-from django.utils.decorators import method_decorator
 from django.db.models import Q, Sum, F, DecimalField, Value, ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.core.cache import cache
@@ -59,12 +58,6 @@ class IsSystemAdmin(BasePermission):
 
 from core.mixins import CacheInvalidationMixin
 
-@method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='destroy', decorator=swagger_auto_schema(tags=_TAG))
 class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     cache_group = "campaigns"
     """
@@ -96,6 +89,26 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
         if self.action in ["create", "update", "partial_update"]:
             return CampaignCreateUpdateSerializer
         return CampaignDetailSerializer
+
+    @swagger_auto_schema(tags=_TAG)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=_TAG)
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=_TAG)
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=_TAG)
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=_TAG)
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
     def get_queryset(self):
         # Handle schema generation for Swagger
