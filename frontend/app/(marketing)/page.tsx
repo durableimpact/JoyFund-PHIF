@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Heart, ArrowRight, Star, ChevronRight, Cake, Gift, Hospital, Sparkles, DollarSign, type LucideIcon } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
+import { Helmet } from 'react-helmet-async';
 import CampaignCard from '@/components/shared/CampaignCard';
 import { listCampaigns, getPlatformStats } from '@/actions/campaigns';
 
@@ -49,6 +50,32 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>JoyFund - Turn Celebrations into Maternal Healthcare</title>
+        <meta name="description" content="JoyFund is a transparent crowdfunding platform that turns birthdays, weddings, and celebrations into maternal healthcare for vulnerable women across Cameroon." />
+        <link rel="canonical" href="https://joy-fund.com" />
+        <meta property="og:title" content="JoyFund - Turn Celebrations into Maternal Healthcare" />
+        <meta property="og:description" content="A transparent crowdfunding platform turning celebrations into maternal healthcare for vulnerable women in Cameroon." />
+        <meta property="og:url" content="https://joy-fund.com" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://joy-fund.com/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="JoyFund - Turn Celebrations into Maternal Healthcare" />
+        <meta name="twitter:description" content="A transparent crowdfunding platform turning celebrations into maternal healthcare for vulnerable women in Cameroon." />
+        <meta name="twitter:image" content="https://joy-fund.com/og-image.png" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "JoyFund",
+          url: "https://joy-fund.com",
+          description: "Transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://joy-fund.com/explore?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        })}</script>
+      </Helmet>
       <Navbar transparent />
 
       {/* ── Hero ── */}
