@@ -4,6 +4,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ArrowLeft, Heart, Phone, Loader2 } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
+import { Helmet } from 'react-helmet-async';
 import { Confetti } from '@/components/ui/confetti';
 import { formatXAF } from '@/lib/utils';
 import { getCampaign, donateToCampaign } from '@/actions/campaigns';
@@ -56,6 +57,10 @@ function DonatePage() {
   const [error, setError] = useState('');
 
   const finalAmount = useCustom ? Number(customAmount) : amount;
+  const paymentAggregatorFee = Math.round(finalAmount * 0.03);
+  const operationsFee = Math.round(finalAmount * 0.05);
+  const totalFees = paymentAggregatorFee + operationsFee;
+  const netContribution = Math.max(finalAmount - totalFees, 0);
 
   // Use mutation for donation
   const donateMutation = useMutation({
@@ -112,6 +117,9 @@ function DonatePage() {
     donateMutation.mutate(payload);
   };
 
+  const campaignTitle = campaign?.title || 'Campaign';
+  const campaignDesc = campaign?.description?.slice(0, 160) || 'Support this campaign and help provide maternal healthcare for vulnerable women in Cameroon.';
+
   if (isLoading) return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <Navbar />
@@ -134,6 +142,30 @@ function DonatePage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <Helmet>
+        <title>{`Donate to ${campaignTitle} | JoyFund`}</title>
+        <meta name="description" content={campaignDesc} />
+        <link rel="canonical" href={`https://joy-fund.com/campaign/${id}/donate`} />
+        <meta property="og:title" content={`Donate to ${campaignTitle}`} />
+        <meta property="og:description" content={campaignDesc} />
+        <meta property="og:url" content={`https://joy-fund.com/campaign/${id}/donate`} />
+        <meta property="og:type" content="website" />
+        {campaign?.cover_image && <meta property="og:image" content={campaign.cover_image} />}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "DonateAction",
+          name: `Donate to ${campaignTitle}`,
+          description: campaignDesc,
+          url: `https://joy-fund.com/campaign/${id}/donate`,
+          action: {
+            "@type": "DonateAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `https://joy-fund.com/campaign/${id}/donate`
+            }
+          }
+        })}</script>
+      </Helmet>
       {paymentStatus === 'success' && (
         <Confetti
           ref={confettiRef}
@@ -151,7 +183,7 @@ function DonatePage() {
           {/* Campaign summary */}
           {campaign && (
             <div className="card p-4 flex items-center gap-3 mb-5" style={{ borderLeft: `4px solid ${color}` }}>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0" style={{ background: color }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0" style={{ background: color }}>
                 <Heart size={16} />
               </div>
               <div className="flex-1 min-w-0">
@@ -250,6 +282,42 @@ function DonatePage() {
                   = {Math.round(finalAmount / 60000 * 10) / 10} safe {Math.round(finalAmount / 60000) === 1 ? 'delivery' : 'deliveries'} funded
                 </p>
               )}
+
+              {finalAmount > 0 && (
+                <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Donation breakdown</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-600">Payment aggregator fee (3%)</span>
+                        <span className="font-semibold text-slate-900">{formatXAF(paymentAggregatorFee)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-600">Operation management (5%)</span>
+                        <span className="font-semibold text-slate-900">{formatXAF(operationsFee)}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+                        <span className="font-semibold text-slate-700">Total fees</span>
+                        <span className="font-bold text-slate-900">{formatXAF(totalFees)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white border border-emerald-100 p-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 mb-1">What your donation really supports</p>
+                    <div className="flex items-end justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-slate-600">Net amount sent to healthcare</p>
+                        <p className="text-2xl font-black text-emerald-700">{formatXAF(netContribution)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-slate-500">{finalAmount > 0 ? Math.round((netContribution / finalAmount) * 100) : 0}% of your donation</p>
+                        <p className="text-xs text-slate-500">{formatXAF(finalAmount)} total donation</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Message */}
@@ -292,8 +360,8 @@ function DonatePage() {
               {donateMutation.isPending ? <><Loader2 size={16} className="animate-spin" /> Initiating Payment…</> : `Donate ${formatXAF(finalAmount || 0)}`}
             </button>
 
-            <p className="text-center text-xs text-gray-400">
-              95% goes directly to healthcare. Secured by CamPay.
+            <p className="text-center text-xs text-gray-400 leading-relaxed">
+              3% covers the payment aggregator, 5% supports operations, and 92% goes to healthcare.
             </p>
           </div>
         </div>
