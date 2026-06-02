@@ -21,6 +21,7 @@ class DonorRegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     phone_number = serializers.CharField(max_length=15)
+    website = serializers.CharField(required=False, allow_blank=True, write_only=True)
     
 
     def validate_email(self, value):
@@ -33,8 +34,15 @@ class DonorRegisterSerializer(serializers.Serializer):
             raise serializers.ValidationError("A user with this phone number already exists.")
         return value
 
+    def validate(self, attrs):
+        # Honeypot: bots often fill hidden fields; legitimate users should leave it empty.
+        if attrs.get('website'):
+            raise serializers.ValidationError({"detail": "Invalid registration request."})
+        return attrs
+
     @transaction.atomic
     def create(self, validated_data):
+        validated_data.pop('website', None)
         password = validated_data.pop('password')
         user = User(**validated_data, role=Role.DONOR)
         user.set_password(password)
