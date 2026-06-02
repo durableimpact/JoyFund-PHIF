@@ -7,11 +7,11 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <Helmet>
-        <title>About JoyFund - Our Mission for Maternal Healthcare</title>
-        <meta name="description" content="Learn about JoyFund's mission to provide maternal healthcare for vulnerable women in Cameroon through community-powered crowdfunding." />
+        <title>About JoyFund | Transparent Health Insurance in Cameroon</title>
+        <meta name="description" content="Learn how JoyFund provides solidarity health insurance for vulnerable pregnant women in Cameroon through transparent crowdfunding." />
         <link rel="canonical" href="https://joy-fund.com/about" />
-        <meta property="og:title" content="About JoyFund - Our Mission" />
-        <meta property="og:description" content="JoyFund digitises Cameroon's Njangi solidarity culture, redirecting celebrations into maternal healthcare for vulnerable pregnant women." />
+        <meta property="og:title" content="About JoyFund | Transparent Health Insurance in Cameroon" />
+        <meta property="og:description" content="Learn how JoyFund provides solidarity health insurance for vulnerable pregnant women in Cameroon through transparent crowdfunding." />
         <meta property="og:url" content="https://joy-fund.com/about" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://joy-fund.com/og-image.png" />
@@ -20,7 +20,7 @@ export default function AboutPage() {
           "@type": "AboutPage",
           name: "About JoyFund",
           url: "https://joy-fund.com/about",
-          description: "JoyFund digitises Cameroon's Njangi solidarity culture, redirecting celebrations into maternal healthcare.",
+          description: "Learn how JoyFund provides solidarity health insurance for vulnerable pregnant women in Cameroon.",
           mainEntity: {
             "@type": "Organization",
             name: "JoyFund",
