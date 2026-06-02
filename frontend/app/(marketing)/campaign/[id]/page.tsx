@@ -1,27 +1,51 @@
-'use client';
+"use client";
 
-import { useParams, useRouter } from 'next/navigation';
-import { useState, useMemo } from 'react';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import Link from 'next/link';
+import { useParams, useRouter } from "next/navigation";
+import { useState, useMemo } from "react";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import {
-  Share2, ArrowLeft, CheckCircle, Heart, Loader2,
-  Award, TrendingUp, History,
-  CircleDollarSign, ShieldCheck, MapPin, Building2,
-  Calendar, CreditCard, ChevronRight, HandHeart, Globe
-} from 'lucide-react';
-import Navbar from '@/components/shared/Navbar';
-import { Helmet } from 'react-helmet-async';
-import { getCampaign, listCampaignDonations } from '@/actions/campaigns';
-import { formatXAF, cn } from '@/lib/utils';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+  Share2,
+  ArrowLeft,
+  CheckCircle,
+  Heart,
+  Loader2,
+  Award,
+  TrendingUp,
+  History,
+  CircleDollarSign,
+  ShieldCheck,
+  MapPin,
+  Building2,
+  Calendar,
+  CreditCard,
+  ChevronRight,
+  HandHeart,
+  Globe,
+} from "lucide-react";
+import Navbar from "@/components/shared/Navbar";
+import { Helmet } from "react-helmet-async";
+import { getCampaign, listCampaignDonations } from "@/actions/campaigns";
+import { formatXAF, cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
-} from '@/components/ui/dialog';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const VISIBLE_DONORS = 8;
 
@@ -43,10 +67,10 @@ function DonorListDialog({
     isFetchingNextPage,
     isFetching,
   } = useInfiniteQuery({
-    queryKey: ['campaign-donations-modal', campaignId],
+    queryKey: ["campaign-donations-modal", campaignId],
     queryFn: async ({ pageParam = 1 }) => {
       const res = await listCampaignDonations(campaignId, {
-        status: 'SUCCESS',
+        status: "SUCCESS",
         page: pageParam.toString(),
       });
       return res;
@@ -55,18 +79,20 @@ function DonorListDialog({
     getNextPageParam: (lastPage: any) => {
       const page = lastPage?.json || lastPage;
       if (page?.next) {
-        const url = new URL(page.next, 'http://localhost');
-        return parseInt(url.searchParams.get('page') || '2');
+        const url = new URL(page.next, "http://localhost");
+        return parseInt(url.searchParams.get("page") || "2");
       }
       return undefined;
     },
     enabled: open,
   });
 
-  const allDonations = pagesData?.pages.flatMap(page => {
-    const results = (page as any)?.json?.results || (page as any)?.results || [];
-    return results;
-  }) || [];
+  const allDonations =
+    pagesData?.pages.flatMap((page) => {
+      const results =
+        (page as any)?.json?.results || (page as any)?.results || [];
+      return results;
+    }) || [];
 
   const sentinelRef = (node: HTMLDivElement | null) => {
     if (!node || !hasNextPage || isFetchingNextPage) return;
@@ -76,7 +102,7 @@ function DonorListDialog({
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -91,8 +117,8 @@ function DonorListDialog({
           </DialogTitle>
           <DialogDescription>
             {allDonations.length > 0
-              ? `${allDonations.length} donor${allDonations.length !== 1 ? 's' : ''} have contributed to ${campaignTitle}`
-              : 'No donors yet'}
+              ? `${allDonations.length} donor${allDonations.length !== 1 ? "s" : ""} have contributed to ${campaignTitle}`
+              : "No donors yet"}
           </DialogDescription>
         </DialogHeader>
 
@@ -100,16 +126,21 @@ function DonorListDialog({
         <div className="flex-1 overflow-y-auto min-h-0 px-6 divide-y divide-gray-50">
           {allDonations.length > 0 ? (
             allDonations.map((donation: any, idx: number) => (
-              <div key={donation.id + '-modal-' + idx} className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
+              <div
+                key={donation.id + "-modal-" + idx}
+                className="flex items-start gap-3 py-4 first:pt-0 last:pb-0"
+              >
                 <Avatar className="w-10 h-10 border border-gray-100 shrink-0">
                   <AvatarFallback className="bg-gray-100 text-gray-600 font-bold text-xs uppercase">
-                    {(donation.donor_name || 'A')[0]}
+                    {(donation.donor_name || "A")[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <p className="text-sm font-bold text-[#1A1A2E] truncate">
-                      {donation.is_anonymous ? 'Anonymous' : donation.donor_name}
+                      {donation.is_anonymous
+                        ? "Anonymous"
+                        : donation.donor_name}
                     </p>
                     <span className="text-sm font-bold text-[#1DB1DB] whitespace-nowrap">
                       {formatXAF(donation.amount)}
@@ -117,10 +148,15 @@ function DonorListDialog({
                   </div>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {donation.created_at
-                      ? new Date(donation.created_at).toLocaleDateString('en-US', {
-                          month: 'short', day: 'numeric', year: 'numeric',
-                        })
-                      : 'Just now'}
+                      ? new Date(donation.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
+                      : "Just now"}
                   </p>
                   {donation.message && (
                     <p className="text-sm text-gray-500 mt-1.5 leading-relaxed line-clamp-3 italic">
@@ -133,25 +169,34 @@ function DonorListDialog({
           ) : (
             <div className="py-16 text-center">
               <HandHeart className="mx-auto text-gray-200 mb-3 w-10 h-10" />
-              <p className="text-gray-400 text-sm font-medium">Be the first to donate!</p>
+              <p className="text-gray-400 text-sm font-medium">
+                Be the first to donate!
+              </p>
             </div>
           )}
 
           {/* Infinite scroll sentinel */}
           {hasNextPage && (
             <div ref={sentinelRef} className="py-4 flex justify-center">
-              {isFetchingNextPage && <Loader2 className="w-5 h-5 text-[#1DB1DB] animate-spin" />}
+              {isFetchingNextPage && (
+                <Loader2 className="w-5 h-5 text-[#1DB1DB] animate-spin" />
+              )}
             </div>
           )}
 
           {!hasNextPage && allDonations.length > 0 && (
-            <p className="py-4 text-center text-xs text-gray-300 font-medium">That&apos;s everyone!</p>
+            <p className="py-4 text-center text-xs text-gray-300 font-medium">
+              That&apos;s everyone!
+            </p>
           )}
         </div>
 
         {/* CTA Footer */}
         <div className="border-t border-gray-100 px-6 py-4 bg-gray-50/80">
-          <Link href={`/campaign/${campaignId}/donate/`} onClick={() => onOpenChange(false)}>
+          <Link
+            href={`/campaign/${campaignId}/donate/`}
+            onClick={() => onOpenChange(false)}
+          >
             <Button className="w-full h-12 text-base font-bold bg-[#1DB1DB] hover:bg-[#1a9fc5] text-white rounded-full shadow-lg shadow-[#1DB1DB]/20 transition-all active:scale-[0.98]">
               Donate now
             </Button>
@@ -187,22 +232,29 @@ function DonorList({
       <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden">
         <div className="px-6 pt-5 pb-3 flex items-center justify-between">
           <h3 className="font-bold text-[#1A1A2E] text-sm">Recent donors</h3>
-          <span className="text-xs text-gray-400 font-medium">{totalDonors} total</span>
+          <span className="text-xs text-gray-400 font-medium">
+            {totalDonors} total
+          </span>
         </div>
 
-        <div className="max-h-[360px] overflow-y-auto px-6 pb-5 space-y-4 scrollbar-thin">
+        <div className="max-h-90 overflow-y-auto px-6 pb-5 space-y-4 scrollbar-thin">
           {visible.length > 0 ? (
             visible.map((donation: any, idx: number) => (
-              <div key={donation.id + '-' + idx} className="flex items-start gap-3">
-                <Avatar className="w-9 h-9 border border-gray-100 shrink-0">
+              <div
+                key={donation.id + "-" + idx}
+                className="flex items-start gap-3"
+              >
+                <Avatar className="w-10 h-10 border border-gray-100 shrink-0">
                   <AvatarFallback className="bg-gray-100 text-gray-600 font-bold text-xs uppercase">
-                    {(donation.donor_name || 'A')[0]}
+                    {(donation.donor_name || "A")[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <p className="text-sm font-bold text-[#1A1A2E] truncate">
-                      {donation.is_anonymous ? 'Anonymous' : donation.donor_name}
+                      {donation.is_anonymous
+                        ? "Anonymous"
+                        : donation.donor_name}
                     </p>
                     <span className="text-xs font-bold text-[#1DB1DB] whitespace-nowrap">
                       {formatXAF(donation.amount)}
@@ -210,8 +262,11 @@ function DonorList({
                   </div>
                   <p className="text-[11px] text-gray-400 mt-0.5">
                     {donation.created_at
-                      ? new Date(donation.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                      : 'Just now'}
+                      ? new Date(donation.created_at).toLocaleDateString(
+                          "en-US",
+                          { month: "short", day: "numeric" },
+                        )
+                      : "Just now"}
                   </p>
                   {donation.message && (
                     <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2 italic">
@@ -224,7 +279,9 @@ function DonorList({
           ) : (
             <div className="py-10 text-center">
               <HandHeart className="mx-auto text-gray-200 mb-3 w-8 h-8" />
-              <p className="text-gray-400 text-xs font-medium">Be the first to donate!</p>
+              <p className="text-gray-400 text-xs font-medium">
+                Be the first to donate!
+              </p>
             </div>
           )}
 
@@ -254,11 +311,11 @@ const TIMELINE_INLINE = 10;
 
 function getTimelineIcon(type: string) {
   switch (type) {
-    case 'donation':
+    case "donation":
       return <CircleDollarSign className="w-5 h-5 text-green-600" />;
-    case 'voucher-allocated':
+    case "voucher-allocated":
       return <Award className="w-5 h-5 text-blue-600" />;
-    case 'hospital-settled':
+    case "hospital-settled":
       return <Building2 className="w-5 h-5 text-purple-600" />;
     default:
       return <TrendingUp className="w-5 h-5 text-gray-400" />;
@@ -267,14 +324,14 @@ function getTimelineIcon(type: string) {
 
 function getTimelineColors(type: string) {
   switch (type) {
-    case 'donation':
-      return 'bg-green-50 border-green-200';
-    case 'voucher-allocated':
-      return 'bg-blue-50 border-blue-200';
-    case 'hospital-settled':
-      return 'bg-purple-50 border-purple-200';
+    case "donation":
+      return "bg-green-50 border-green-200";
+    case "voucher-allocated":
+      return "bg-blue-50 border-blue-200";
+    case "hospital-settled":
+      return "bg-purple-50 border-purple-200";
     default:
-      return 'bg-gray-50 border-gray-200';
+      return "bg-gray-50 border-gray-200";
   }
 }
 
@@ -282,10 +339,12 @@ function TimelineRow({ item }: { item: any }) {
   return (
     <div className="flex gap-4 group">
       <div className="flex flex-col items-center">
-        <div className={cn(
-          "w-10 h-10 rounded-full flex items-center justify-center border shrink-0 transition-all",
-          getTimelineColors(item.type)
-        )}>
+        <div
+          className={cn(
+            "w-10 h-10 rounded-full flex items-center justify-center border shrink-0 transition-all",
+            getTimelineColors(item.type),
+          )}
+        >
           {getTimelineIcon(item.type)}
         </div>
         <div className="flex-1 w-px bg-gray-200 my-1.5" />
@@ -293,24 +352,36 @@ function TimelineRow({ item }: { item: any }) {
       <div className="flex-1 pb-5">
         <div className="flex justify-between items-start">
           <p className="font-bold text-[#1A1A2E] text-sm">{item.label}</p>
-          <span className={cn(
-            "text-sm font-black ml-4 shrink-0",
-            item.type === 'donation' ? "text-green-600" : "text-[#1A1A2E]"
-          )}>
-            {item.type === 'donation' ? '+' : '-'}{formatXAF(item.amount)}
+          <span
+            className={cn(
+              "text-sm font-black ml-4 shrink-0",
+              item.type === "donation" ? "text-green-600" : "text-[#1A1A2E]",
+            )}
+          >
+            {item.type === "donation" ? "+" : "-"}
+            {formatXAF(item.amount)}
           </span>
         </div>
         {item.description && (
-          <p className="text-xs text-gray-500 mt-1 italic line-clamp-2">"{item.description}"</p>
+          <p className="text-xs text-gray-500 mt-1 italic line-clamp-2">
+            "{item.description}"
+          </p>
         )}
         <div className="flex items-center gap-2 mt-1">
           <time className="text-xs text-gray-400">
-            {new Date(item.date).toLocaleDateString('en-US', {
-              month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+            {new Date(item.date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </time>
-          <Badge variant="outline" className="text-[9px] py-0 h-4 border-gray-200 text-gray-500 uppercase font-bold rounded-full">
-            {item.type.replace(/-/g, ' ')}
+          <Badge
+            variant="outline"
+            className="text-[9px] py-0 h-4 border-gray-200 text-gray-500 uppercase font-bold rounded-full"
+          >
+            {item.type.replace(/-/g, " ")}
           </Badge>
         </div>
       </div>
@@ -335,7 +406,8 @@ function TransparencyDialog({
             Full financial trail
           </DialogTitle>
           <DialogDescription>
-            {timeline.length} item{timeline.length !== 1 ? 's' : ''} showing money in and money out
+            {timeline.length} item{timeline.length !== 1 ? "s" : ""} showing
+            money in and money out
           </DialogDescription>
         </DialogHeader>
 
@@ -364,17 +436,19 @@ function TransparencyTimeline({
     const items = [
       ...donations.map((d: any) => ({
         id: `donation-${d.id}`,
-        type: 'donation' as const,
+        type: "donation" as const,
         amount: d.amount,
-        label: d.is_anonymous ? 'Anonymous donation' : `${d.donor_name} donated`,
+        label: d.is_anonymous
+          ? "Anonymous donation"
+          : `${d.donor_name} donated`,
         description: d.message || null,
         date: d.created_at,
       })),
       ...transactions.map((tx: any) => ({
         id: `tx-${tx.id}`,
-        type: tx.transaction_type?.toLowerCase().replace(/_/g, '-') as string,
+        type: tx.transaction_type?.toLowerCase().replace(/_/g, "-") as string,
         amount: tx.amount,
-        label: tx.description || tx.transaction_type?.replace(/_/g, ' '),
+        label: tx.description || tx.transaction_type?.replace(/_/g, " "),
         description: null,
         date: tx.created_at,
       })),
@@ -387,7 +461,9 @@ function TransparencyTimeline({
     return (
       <div className="bg-gray-50 rounded-3xl p-14 text-center border-2 border-dashed border-gray-200">
         <History className="mx-auto mb-4 text-gray-300 w-10 h-10" />
-        <p className="text-gray-500 font-medium text-sm">No activity recorded yet.</p>
+        <p className="text-gray-500 font-medium text-sm">
+          No activity recorded yet.
+        </p>
       </div>
     );
   }
@@ -428,7 +504,7 @@ export default function CampaignPage() {
   const [copied, setCopied] = useState(false);
 
   const { data: campaignData, isLoading: isCampaignLoading } = useQuery({
-    queryKey: ['campaign', id],
+    queryKey: ["campaign", id],
     queryFn: async () => await getCampaign(id as string),
     enabled: !!id,
   });
@@ -441,10 +517,10 @@ export default function CampaignPage() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['campaign-donations', id, 'SUCCESS'],
+    queryKey: ["campaign-donations", id, "SUCCESS"],
     queryFn: async ({ pageParam = 1 }) => {
       const res = await listCampaignDonations(id as string, {
-        status: 'SUCCESS',
+        status: "SUCCESS",
         page: pageParam.toString(),
       });
       return res;
@@ -453,21 +529,26 @@ export default function CampaignPage() {
     getNextPageParam: (lastPage: any) => {
       const page = lastPage?.json || lastPage;
       if (page?.next) {
-        const url = new URL(page.next, 'http://localhost');
-        return parseInt(url.searchParams.get('page') || '2');
+        const url = new URL(page.next, "http://localhost");
+        return parseInt(url.searchParams.get("page") || "2");
       }
       return undefined;
     },
     enabled: !!id,
   });
 
-  const donations = donationsData?.pages.flatMap(page => {
-    const results = (page as any)?.json?.results || (page as any)?.results || [];
-    return results;
-  }) || [];
+  const donations =
+    donationsData?.pages.flatMap((page) => {
+      const results =
+        (page as any)?.json?.results || (page as any)?.results || [];
+      return results;
+    }) || [];
 
   const handleCopy = () => {
-    const url = typeof window !== 'undefined' ? `${window.location.origin}/campaign/${campaign?.id}` : '';
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/campaign/${campaign?.id}`
+        : "";
     navigator.clipboard.writeText(url).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -497,12 +578,19 @@ export default function CampaignPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Heart size={32} className="text-gray-300" />
             </div>
-            <CardTitle className="text-2xl font-bold">Campaign not found</CardTitle>
-            <CardDescription>The campaign you&apos;re looking for might have been closed or removed.</CardDescription>
+            <CardTitle className="text-2xl font-bold">
+              Campaign not found
+            </CardTitle>
+            <CardDescription>
+              The campaign you&apos;re looking for might have been closed or
+              removed.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center pb-8">
             <Link href="/explore">
-              <Button className="bg-[#1DB1DB] hover:bg-[#1a9fc5] text-white rounded-full px-8">Back to Explore</Button>
+              <Button className="bg-[#1DB1DB] hover:bg-[#1a9fc5] text-white rounded-full px-8">
+                Back to Explore
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -515,11 +603,14 @@ export default function CampaignPage() {
   const progressPct = campaign.progress_percentage || 0;
   const voucherFundings = campaign.voucher_fundings || [];
   const transactions = campaign.transactions || [];
-  const organizerName = campaign.organizer_name || campaign.donor_name || 'Campaign Organizer';
+  const organizerName =
+    campaign.organizer_name || campaign.donor_name || "Campaign Organizer";
   const organizerInitial = organizerName.charAt(0).toUpperCase();
 
-  const campaignTitle = campaign.title || 'Campaign';
-  const campaignDesc = campaign.description?.slice(0, 160) || `Support "${campaignTitle}" on JoyFund — help provide maternal healthcare for vulnerable women in Cameroon.`;
+  const campaignTitle = campaign.title || "Campaign";
+  const campaignDesc =
+    campaign.description?.slice(0, 160) ||
+    `Support "${campaignTitle}" on JoyFund — help provide maternal healthcare for vulnerable women in Cameroon.`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -529,30 +620,43 @@ export default function CampaignPage() {
         <link rel="canonical" href={`https://joy-fund.com/campaign/${id}`} />
         <meta property="og:title" content={`${campaignTitle} | JoyFund`} />
         <meta property="og:description" content={campaignDesc} />
-        <meta property="og:url" content={`https://joy-fund.com/campaign/${id}`} />
+        <meta
+          property="og:url"
+          content={`https://joy-fund.com/campaign/${id}`}
+        />
         <meta property="og:type" content="website" />
-        {campaign.cover_image && <meta property="og:image" content={campaign.cover_image} />}
+        {campaign.cover_image && (
+          <meta property="og:image" content={campaign.cover_image} />
+        )}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${campaignTitle} | JoyFund`} />
         <meta name="twitter:description" content={campaignDesc} />
-        {campaign.cover_image && <meta name="twitter:image" content={campaign.cover_image} />}
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FundAction",
-          name: campaignTitle,
-          description: campaign.description || undefined,
-          url: `https://joy-fund.com/campaign/${id}`,
-          image: campaign.cover_image || undefined,
-          organizer: organizerName ? { "@type": "Person", name: organizerName } : undefined,
-          location: campaign.location ? { "@type": "Place", name: campaign.location } : undefined,
-          offers: {
-            "@type": "Offer",
-            price: goalXAF,
-            priceCurrency: "XAF",
-            availability: "https://schema.org/InStock",
-            url: `https://joy-fund.com/campaign/${id}/donate/`
-          }
-        })}</script>
+        {campaign.cover_image && (
+          <meta name="twitter:image" content={campaign.cover_image} />
+        )}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FundAction",
+            name: campaignTitle,
+            description: campaign.description || undefined,
+            url: `https://joy-fund.com/campaign/${id}`,
+            image: campaign.cover_image || undefined,
+            organizer: organizerName
+              ? { "@type": "Person", name: organizerName }
+              : undefined,
+            location: campaign.location
+              ? { "@type": "Place", name: campaign.location }
+              : undefined,
+            offers: {
+              "@type": "Offer",
+              price: goalXAF,
+              priceCurrency: "XAF",
+              availability: "https://schema.org/InStock",
+              url: `https://joy-fund.com/campaign/${id}/donate/`,
+            },
+          })}
+        </script>
       </Helmet>
       <Navbar />
 
@@ -569,7 +673,7 @@ export default function CampaignPage() {
 
           <div className="space-y-4">
             <Badge className="bg-[#1DB1DB]/10 text-[#1DB1DB] border-none rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
-              {campaign.event_type || 'Social Impact'}
+              {campaign.event_type || "Social Impact"}
             </Badge>
             <h1 className="text-3xl md:text-[52px] font-black text-[#1A1A2E] leading-[1.1] tracking-tight max-w-4xl">
               {campaign.title}
@@ -584,7 +688,6 @@ export default function CampaignPage() {
         </div>
 
         <div className="grid lg:grid-cols-[1fr_400px] gap-12 lg:gap-16">
-
           {/* ── Left Column: Media & Story ── */}
           <div className="min-w-0 space-y-12">
             {/* Main Image */}
@@ -601,24 +704,42 @@ export default function CampaignPage() {
             </div>
 
             <Tabs defaultValue="story" className="w-full">
-              <TabsList className="w-full justify-start gap-6 border-b border-gray-200 bg-transparent p-0 h-auto rounded-none" variant="line">
-                <TabsTrigger value="story" className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors">
+              <TabsList
+                className="w-full justify-start gap-6 border-b border-gray-200 bg-transparent p-0 h-auto rounded-none"
+                variant="line"
+              >
+                <TabsTrigger
+                  value="story"
+                  className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors"
+                >
                   Story
                 </TabsTrigger>
-                <TabsTrigger value="impact" className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors">
+                <TabsTrigger
+                  value="impact"
+                  className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors"
+                >
                   Impact
                 </TabsTrigger>
-                <TabsTrigger value="transparency" className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors">
+                <TabsTrigger
+                  value="transparency"
+                  className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors"
+                >
                   Transparency
                 </TabsTrigger>
               </TabsList>
 
               {/* ── Story Tab ── */}
-              <TabsContent value="story" className="pt-8 focus-visible:outline-none">
+              <TabsContent
+                value="story"
+                className="pt-8 focus-visible:outline-none"
+              >
                 <div className="prose prose-gray max-w-none">
-                  <h2 className="text-xl font-bold text-[#1A1A2E] mb-4 font-heading">About this campaign</h2>
+                  <h2 className="text-xl font-bold text-[#1A1A2E] mb-4 font-heading">
+                    About this campaign
+                  </h2>
                   <p className="text-gray-600 leading-relaxed whitespace-pre-wrap text-[15px]">
-                    {campaign.description || 'No description provided for this campaign.'}
+                    {campaign.description ||
+                      "No description provided for this campaign."}
                   </p>
                 </div>
 
@@ -629,9 +750,14 @@ export default function CampaignPage() {
                       <Calendar className="w-4 h-4 text-gray-500" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Started</p>
+                      <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                        Started
+                      </p>
                       <p className="text-sm font-bold text-[#1A1A2E]">
-                        {new Date(campaign.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        {new Date(campaign.created_at).toLocaleDateString(
+                          "en-US",
+                          { month: "long", day: "numeric", year: "numeric" },
+                        )}
                       </p>
                     </div>
                   </div>
@@ -640,20 +766,31 @@ export default function CampaignPage() {
                       <Globe className="w-4 h-4 text-gray-500" />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Category</p>
-                      <p className="text-sm font-bold text-[#1A1A2E] capitalize">{campaign.event_type?.toLowerCase() || 'General'}</p>
+                      <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                        Category
+                      </p>
+                      <p className="text-sm font-bold text-[#1A1A2E] capitalize">
+                        {campaign.event_type?.toLowerCase() || "General"}
+                      </p>
                     </div>
                   </div>
                 </div>
               </TabsContent>
 
               {/* ── Impact Tab ── */}
-              <TabsContent value="impact" className="pt-8 focus-visible:outline-none">
+              <TabsContent
+                value="impact"
+                className="pt-8 focus-visible:outline-none"
+              >
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-bold text-[#1A1A2E] font-heading">Vouchers Funded</h2>
-                      <p className="text-sm text-gray-500 mt-1">Real-time tracking of how your donations help.</p>
+                      <h2 className="text-xl font-bold text-[#1A1A2E] font-heading">
+                        Vouchers Funded
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Real-time tracking of how your donations help.
+                      </p>
                     </div>
                     <Badge className="bg-[#1DB1DB]/10 text-[#1DB1DB] rounded-full px-3 py-1 text-xs font-bold">
                       {voucherFundings.length} total
@@ -672,26 +809,44 @@ export default function CampaignPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-[#1A1A2E] text-sm truncate">
-                              {funding.beneficiary_name || funding.voucher?.beneficiary?.full_name || 'Vulnerable Beneficiary'}
+                              {funding.beneficiary_name ||
+                                funding.voucher?.beneficiary?.full_name ||
+                                "Vulnerable Beneficiary"}
                             </p>
                             <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5">
                               <span className="text-xs text-gray-500 flex items-center gap-1">
-                                <Building2 size={11} /> {funding.hospital_name || funding.voucher?.hospital?.name || 'Local Facility'}
+                                <Building2 size={11} />{" "}
+                                {funding.hospital_name ||
+                                  funding.voucher?.hospital?.name ||
+                                  "Local Facility"}
                               </span>
                               <span className="text-xs text-gray-400 flex items-center gap-1">
-                                <CreditCard size={11} /> {funding.voucher_code || funding.voucher?.voucher_code || '---'}
+                                <CreditCard size={11} />{" "}
+                                {funding.voucher_code ||
+                                  funding.voucher?.voucher_code ||
+                                  "---"}
                               </span>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="text-sm font-bold text-[#1DB1DB]">{formatXAF(funding.amount)}</p>
-                            <Badge className={cn(
-                              "text-[9px] font-bold uppercase tracking-wider mt-1 rounded-full px-2 py-0.5",
-                              (funding.status || funding.voucher?.status) === 'USED' ? "bg-green-100 text-green-700" :
-                              (funding.status || funding.voucher?.status) === 'EXPIRED' ? "bg-red-100 text-red-700" :
-                              "bg-blue-100 text-blue-700"
-                            )}>
-                              {funding.status || funding.voucher?.status || 'Allocated'}
+                            <p className="text-sm font-bold text-[#1DB1DB]">
+                              {formatXAF(funding.amount)}
+                            </p>
+                            <Badge
+                              className={cn(
+                                "text-[9px] font-bold uppercase tracking-wider mt-1 rounded-full px-2 py-0.5",
+                                (funding.status || funding.voucher?.status) ===
+                                  "USED"
+                                  ? "bg-green-100 text-green-700"
+                                  : (funding.status ||
+                                        funding.voucher?.status) === "EXPIRED"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-blue-100 text-blue-700",
+                              )}
+                            >
+                              {funding.status ||
+                                funding.voucher?.status ||
+                                "Allocated"}
                             </Badge>
                           </div>
                         </div>
@@ -700,21 +855,34 @@ export default function CampaignPage() {
                   ) : (
                     <div className="bg-gray-50 rounded-3xl p-14 text-center border-2 border-dashed border-gray-200">
                       <HandHeart className="mx-auto mb-4 text-gray-300 w-10 h-10" />
-                      <p className="text-gray-500 font-medium text-sm">No vouchers funded yet. Donations will appear here as they are allocated.</p>
+                      <p className="text-gray-500 font-medium text-sm">
+                        No vouchers funded yet. Donations will appear here as
+                        they are allocated.
+                      </p>
                     </div>
                   )}
                 </div>
               </TabsContent>
 
               {/* ── Transparency Tab ── */}
-              <TabsContent value="transparency" className="pt-8 focus-visible:outline-none">
+              <TabsContent
+                value="transparency"
+                className="pt-8 focus-visible:outline-none"
+              >
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-bold text-[#1A1A2E] font-heading">Financial Transparency</h2>
-                    <p className="text-sm text-gray-500 mt-1">Complete trail of money in and money out.</p>
+                    <h2 className="text-xl font-bold text-[#1A1A2E] font-heading">
+                      Financial Transparency
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Complete trail of money in and money out.
+                    </p>
                   </div>
 
-                  <TransparencyTimeline donations={donations} transactions={transactions} />
+                  <TransparencyTimeline
+                    donations={donations}
+                    transactions={transactions}
+                  />
                 </div>
               </TabsContent>
             </Tabs>
@@ -722,7 +890,6 @@ export default function CampaignPage() {
 
           {/* ── Right Column: Donation Sidebar ── */}
           <div className="lg:sticky lg:top-24 self-start space-y-6">
-
             {/* ── Donation Card ── */}
             <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden">
               <div className="p-6 space-y-5">
@@ -732,7 +899,11 @@ export default function CampaignPage() {
                     {formatXAF(raisedXAF)}
                   </p>
                   <p className="text-sm text-gray-500 font-medium">
-                    raised of <span className="font-bold text-[#1A1A2E]">{formatXAF(goalXAF)}</span> goal
+                    raised of{" "}
+                    <span className="font-bold text-[#1A1A2E]">
+                      {formatXAF(goalXAF)}
+                    </span>{" "}
+                    goal
                   </p>
 
                   {/* Progress bar */}
@@ -745,16 +916,24 @@ export default function CampaignPage() {
 
                   {/* Stats row */}
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-bold text-[#1A1A2E]">{progressPct.toFixed(0)}% funded</span>
+                    <span className="font-bold text-[#1A1A2E]">
+                      {progressPct.toFixed(0)}% funded
+                    </span>
                     <span className="text-gray-500">
-                      <span className="font-bold text-[#1A1A2E]">{donations.length}</span> donor{donations.length !== 1 ? 's' : ''}
+                      <span className="font-bold text-[#1A1A2E]">
+                        {donations.length}
+                      </span>{" "}
+                      donor{donations.length !== 1 ? "s" : ""}
                     </span>
                   </div>
                 </div>
 
                 {/* CTA buttons */}
                 <div className="space-y-3">
-                  <Link href={`/campaign/${campaign.id}/donate/`} className="block">
+                  <Link
+                    href={`/campaign/${campaign.id}/donate/`}
+                    className="block"
+                  >
                     <Button className="w-full h-14 text-lg font-bold bg-[#1DB1DB] hover:bg-[#1a9fc5] text-white rounded-full shadow-lg shadow-[#1DB1DB]/25 transition-all hover:shadow-xl hover:shadow-[#1DB1DB]/30 active:scale-[0.98]">
                       Donate now
                     </Button>
@@ -782,14 +961,22 @@ export default function CampaignPage() {
               {/* Organizer */}
               <div className="border-t border-gray-100 px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#1DB1DB] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  {/* <div className="w-10 h-10 bg-[#1DB1DB] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                     {organizerInitial}
-                  </div>
+                  </div> */}
+                  <Avatar className="w-10 h-10 bg-[#1DB1DB]">
+                    <AvatarImage src={campaign.donor.user.profile_picture} />
+                    <AvatarFallback>{organizerInitial}</AvatarFallback>
+                  </Avatar>
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-400 font-medium">Organized by</p>
+                    <p className="text-xs text-gray-400 font-medium">
+                      Organized by
+                    </p>
                     {campaign.donor && (
-
-                    <p className="text-sm font-bold text-[#1A1A2E] truncate">{campaign.donor.user.first_name} {campaign.donor.user.last_name}</p>
+                      <p className="text-sm font-bold text-[#1A1A2E] truncate">
+                        {campaign.donor.user.first_name}{" "}
+                        {campaign.donor.user.last_name}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -814,20 +1001,31 @@ export default function CampaignPage() {
                   <HandHeart size={18} className="text-[#1DB1DB]" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-[#1A1A2E]">Your impact</p>
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Healthcare costs</p>
+                  <p className="text-sm font-bold text-[#1A1A2E]">
+                    Your impact
+                  </p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">
+                    Healthcare costs
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 {[
-                  ['6,000 XAF', 'Antenatal visit'],
-                  ['45,000 XAF', 'Normal delivery'],
-                  ['120,000 XAF', 'C-section + care'],
+                  ["6,000 XAF", "Antenatal visit"],
+                  ["45,000 XAF", "Normal delivery"],
+                  ["120,000 XAF", "C-section + care"],
                 ].map(([amt, label]) => (
-                  <div key={label} className="flex justify-between items-center bg-white rounded-xl p-3 border border-gray-100">
-                    <span className="text-xs text-gray-500 font-medium">{label}</span>
-                    <span className="text-xs font-bold text-[#1A1A2E]">{amt}</span>
+                  <div
+                    key={label}
+                    className="flex justify-between items-center bg-white rounded-xl p-3 border border-gray-100"
+                  >
+                    <span className="text-xs text-gray-500 font-medium">
+                      {label}
+                    </span>
+                    <span className="text-xs font-bold text-[#1A1A2E]">
+                      {amt}
+                    </span>
                   </div>
                 ))}
               </div>
