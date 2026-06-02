@@ -145,7 +145,7 @@ function DonorListDialog({
           )}
 
           {!hasNextPage && allDonations.length > 0 && (
-            <p className="py-4 text-center text-xs text-gray-300 font-medium">That's everyone!</p>
+            <p className="py-4 text-center text-xs text-gray-300 font-medium">That&apos;s everyone!</p>
           )}
         </div>
 
@@ -498,7 +498,7 @@ export default function CampaignPage() {
               <Heart size={32} className="text-gray-300" />
             </div>
             <CardTitle className="text-2xl font-bold">Campaign not found</CardTitle>
-            <CardDescription>The campaign you're looking for might have been closed or removed.</CardDescription>
+            <CardDescription>The campaign you&apos;re looking for might have been closed or removed.</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center pb-8">
             <Link href="/explore">
@@ -556,56 +556,50 @@ export default function CampaignPage() {
       </Helmet>
       <Navbar />
 
-      {/* ── Hero Section ── */}
-      <div className="relative w-full h-[320px] md:h-[420px]">
-        {campaign.cover_image ? (
-          <img
-            src={campaign.cover_image}
-            alt={campaign.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#1DB1DB] via-[#1D38DB] to-[#471DDB]" />
-        )}
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+      <main className="max-w-6xl mx-auto px-4 pt-28 pb-12 md:pt-36 md:pb-20">
+        {/* ── Campaign Header ── */}
+        <div className="mb-10 md:mb-14">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-500 hover:text-[#1DB1DB] text-sm mb-6 transition-colors font-semibold group"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            Back to Explore
+          </button>
 
-        <div className="absolute inset-0 flex flex-col justify-end">
-          <div className="max-w-6xl mx-auto w-full px-4 pb-10 md:pb-14">
-            {/* Back button */}
-            <button
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-white/80 hover:text-white text-sm mb-6 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Explore
-            </button>
-
-            {/* Title area */}
-            <div className="space-y-3">
-              <Badge className="bg-white/20 text-white backdrop-blur-md border-none rounded-full px-3 py-1 text-xs font-semibold">
-                {campaign.event_type || 'Social Impact'}
-              </Badge>
-              <h1 className="text-3xl md:text-[44px] font-black text-white max-w-3xl leading-tight tracking-tight">
-                {campaign.title}
-              </h1>
-              {campaign.location && (
-                <p className="flex items-center gap-1.5 text-white/70 text-sm">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {campaign.location}
-                </p>
-              )}
-            </div>
+          <div className="space-y-4">
+            <Badge className="bg-[#1DB1DB]/10 text-[#1DB1DB] border-none rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
+              {campaign.event_type || 'Social Impact'}
+            </Badge>
+            <h1 className="text-3xl md:text-[52px] font-black text-[#1A1A2E] leading-[1.1] tracking-tight max-w-4xl">
+              {campaign.title}
+            </h1>
+            {campaign.location && (
+              <p className="flex items-center gap-2 text-gray-500 font-medium">
+                <MapPin className="w-4 h-4 text-[#1DB1DB]" />
+                {campaign.location}
+              </p>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* ── Main Content ── */}
-      <main className="max-w-6xl mx-auto px-4 py-8 md:py-10">
-        <div className="grid lg:grid-cols-[1fr_380px] gap-10 lg:gap-14">
+        <div className="grid lg:grid-cols-[1fr_400px] gap-12 lg:gap-16">
 
-          {/* ── Left Column: Content ── */}
-          <div className="min-w-0">
+          {/* ── Left Column: Media & Story ── */}
+          <div className="min-w-0 space-y-12">
+            {/* Main Image */}
+            <div className="relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50">
+              {campaign.cover_image ? (
+                <img
+                  src={campaign.cover_image}
+                  alt={campaign.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#1DB1DB] via-[#1D38DB] to-[#471DDB]" />
+              )}
+            </div>
+
             <Tabs defaultValue="story" className="w-full">
               <TabsList className="w-full justify-start gap-6 border-b border-gray-200 bg-transparent p-0 h-auto rounded-none" variant="line">
                 <TabsTrigger value="story" className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors">
@@ -793,7 +787,10 @@ export default function CampaignPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs text-gray-400 font-medium">Organized by</p>
-                    <p className="text-sm font-bold text-[#1A1A2E] truncate">{organizerName}</p>
+                    {campaign.donor && (
+
+                    <p className="text-sm font-bold text-[#1A1A2E] truncate">{campaign.donor.user.first_name} {campaign.donor.user.last_name}</p>
+                    )}
                   </div>
                 </div>
               </div>
