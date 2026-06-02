@@ -16,6 +16,7 @@ export default function RegisterPage() {
     phone: '',
     password: '',
     confirmPassword: '',
+    website: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ export default function RegisterPage() {
         email: form.email,
         phone_number: form.phone,
         password: form.password,
+        website: form.website,
       });
 
       // Only proceed with login if account was successfully created
@@ -90,7 +92,7 @@ export default function RegisterPage() {
           <p className="text-gray-500 text-sm mt-2">Start creating campaigns for people you love</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="relative bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-5">
 
           {error && (
             <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">
@@ -144,6 +146,19 @@ export default function RegisterPage() {
             <input type="password" required value={form.confirmPassword} onChange={set('confirmPassword')}
               placeholder="Repeat your password"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+          </div>
+
+          <div aria-hidden="true" className="absolute -left-[10000px] top-auto w-px h-px overflow-hidden">
+            <label htmlFor="website">Website</label>
+            <input
+              id="website"
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.website}
+              onChange={set('website')}
+            />
           </div>
 
           <button type="submit" disabled={loading}
