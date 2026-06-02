@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "next-auth/react";
 import ReactQueryProvider from "@/provider/react-query-provider";
+import AppHelmetProvider from "@/provider/helmet-provider";
 import { Toaster } from "@/components/ui/sonner"
 
 const montserrat = localFont({
@@ -93,30 +94,34 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
         <link rel="icon" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
         
-        {/* Google tag (gtag.js) - GA4 */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYBNHE5J4B"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-XYBNHE5J4B');
-            `,
-          }}
-        />
+        {/* Google Analytics - Only in production */}
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            {/* Google tag (gtag.js) - GA4 */}
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYBNHE5J4B"></script>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'G-XYBNHE5J4B');
+                `,
+              }}
+            />
 
-        {/* Google Tag Manager */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-PDSWHHB9');`,
-          }}
-        />
-        {/* End Google Tag Manager */}
+            {/* Google Tag Manager */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','GTM-PDSWHHB9');`,
+              }}
+            />
+          </>
+        )}
 
         <script
           type="application/ld+json"
@@ -124,19 +129,22 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning suppressContentEditableWarning className={cn("min-h-full flex flex-col antialiased font-sans", geistMono.variable)}>
-        {/* Google Tag Manager (noscript) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-PDSWHHB9"
-            height="0"
-            width="0"
-            style={{ display: 'none', visibility: 'hidden' }}
-          />
-        </noscript>
-        {/* End Google Tag Manager (noscript) */}
+        {/* Google Tag Manager (noscript) - Only in production */}
+        {process.env.NODE_ENV === 'production' && (
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-PDSWHHB9"
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        )}
         <SessionProvider>
           <ReactQueryProvider>
-            {children}
+            <AppHelmetProvider>
+              {children}
+            </AppHelmetProvider>
           </ReactQueryProvider>
           <Toaster/>
         </SessionProvider>
