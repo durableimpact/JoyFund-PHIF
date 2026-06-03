@@ -22,7 +22,11 @@ def create_system_admin_profile_after_user_account_created(sender,instance,creat
     Create a system admin profile after a user with role of SYSTEM_ADMIN created
     """
     if created and instance.role == Role.SYSTEM_ADMIN:
-        SystemAdmin.objects.get_or_create(user=instance)
+        profile, created_profile = SystemAdmin.objects.get_or_create(user=instance)
+        if created_profile:
+            logger.info(f"SystemAdmin profile created for user {instance.id} ({instance.email})")
+        else:
+            logger.warning(f"SystemAdmin profile already existed for user {instance.id}")
 
 
 @receiver(post_save, sender=User, dispatch_uid='send_welcome_email_on_user_create')
@@ -53,7 +57,7 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
             'first_name': instance.first_name,
             'user_email': instance.email,
             'app_name': 'JoyFund',
-            'login_url': getattr(settings, 'FRONTEND_URL', 'https://joyfund.app'),
+            'login_url': getattr(settings, 'FRONTEND_URL', 'https://joy-fund.com'),
         }
         
         user_role = getattr(instance, 'role', None)
@@ -62,6 +66,7 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
         if user_role == 'DONOR':
             from accounts.utils.verification import send_verification_email
             send_verification_email(instance)
+            logger.info(f"Verification email queued for donor user {instance.id} ({instance.email})")
         else:
             # Render HTML email template
             html_message = render_to_string('emails/welcome.html', context)
@@ -72,6 +77,7 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
                 recipient_email=instance.email,
                 html_message=html_message,
             )
+            logger.info(f"Welcome email queued for user {instance.id} ({instance.email}) with role {user_role}")
         
         # Notify admin dashboard for donor account creations
         # (as per requirements: only donors and patients, not staff/system admin)
