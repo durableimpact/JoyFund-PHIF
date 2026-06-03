@@ -32,6 +32,8 @@ def send_email(self, subject, recipient_email, html_message, plain_message=None,
     Returns:
         str: Success or failure message
     """
+    logger.info(f"Starting send_email task — subject='{subject}', to='{recipient_email}'")
+    
     try:
         from_email = from_email or settings.DEFAULT_FROM_EMAIL
         
@@ -56,20 +58,23 @@ def send_email(self, subject, recipient_email, html_message, plain_message=None,
         )
         
         recipients_str = ', '.join(recipient_list)
+        logger.info(f"Email sent successfully to {recipients_str}")
         return f"Email sent successfully to {recipients_str}"
         
     except Exception as exc:
-        # Retry the task up to 3 times with exponential backoff
+        recipients_str = recipient_email if isinstance(recipient_email, str) else ', '.join(recipient_email)
         retry_count = self.request.retries
+        
         if retry_count < self.max_retries:
-            # Exponential backoff: 60s, 120s, 180s
+            logger.warning(
+                f"Email to {recipients_str} failed (attempt {retry_count + 1}/{self.max_retries + 1}), "
+                f"retrying in {60 * (retry_count + 1)}s. Error: {str(exc)}"
+            )
             retry_delay = 60 * (retry_count + 1)
             raise self.retry(exc=exc, countdown=retry_delay)
         else:
-            # Log the failure but don't raise - this prevents blocking the caller operation
-            recipients_str = recipient_email if isinstance(recipient_email, str) else ', '.join(recipient_email)
             logger.error(
-                f"Failed to send email to {recipients_str} after {self.max_retries} retries. "
-                f"Subject: {subject}. Error: {str(exc)}"
+                f"Failed to send email to {recipients_str} after {self.max_retries + 1} attempts. "
+                f"Subject: '{subject}'. Error: {str(exc)}"
             )
             return f"Failed to send email to {recipients_str} after {self.max_retries} retries"
