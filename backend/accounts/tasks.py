@@ -36,6 +36,7 @@ def notify_admin_user_created(self, user_id: int, user_data: dict):
         # Verify user exists
         try:
             user = User.objects.get(id=user_id)
+            logger.info(f"User {user_id} verified, creating notification for {user_data.get('role', 'User')} account")
         except User.DoesNotExist:
             logger.error(f"User {user_id} not found for notification")
             return
