@@ -45,24 +45,66 @@ function LoginPageContent() {
 
       console.log('[login] SignIn result:', result);
 
-      if (!result?.ok) {
-        const errorMsg = result?.error || 'Invalid email or password.';
-        console.error('[login] Sign in failed:', errorMsg);
+      // Prefer explicit error checking — some providers may return 200
+      // even when authentication failed. Check `error` first.
+      if (result?.error) {
+        let errorMsg = 'Invalid email or password.';
+
+        if (typeof result.error === 'string') {
+          // Try to parse JSON errors returned from the backend
+          try {
+            const parsed = JSON.parse(result.error);
+            if (parsed.error_description) errorMsg = parsed.error_description;
+            else if (parsed.detail) errorMsg = parsed.detail;
+            else if (parsed.message) errorMsg = parsed.message;
+            else if (parsed.error) errorMsg = String(parsed.error);
+          } catch (_) {
+            // Not JSON — map common NextAuth error codes to user-friendly messages
+            switch (result.error) {
+              case 'CredentialsSignin':
+                errorMsg = 'Invalid email or password. Please check your credentials and try again.';
+                break;
+              case 'OAuthAccountNotLinked':
+                errorMsg = 'An account with that email already exists. Please sign in using the original provider.';
+                break;
+              case 'SessionRequired':
+                errorMsg = 'Your session has expired. Please sign in again.';
+                break;
+              default:
+                // Fallback to the raw string but make it presentable
+                errorMsg = result.error.replace(/([A-Z])/g, ' $1').trim();
+            }
+          }
+        }
+
+        console.error('[login] Sign in failed:', result.error, result);
         setError(errorMsg);
         toast.error(errorMsg);
         return;
       }
 
+      // Fallback: check `ok` / `status` to ensure a successful response
+      if (!result?.ok || (result?.status && result.status >= 400)) {
+        const errorMsg = result?.status ? `Sign in failed (status ${result.status}).` : 'Invalid email or password.';
+        console.error('[login] Sign in failed:', errorMsg, result);
+        setError(errorMsg);
+        toast.error(errorMsg);
+        return;
+      }
+
+      // Success
       toast.success('Signed in successfully.');
       console.log('[login] Sign in successful, redirecting...');
 
-      const destination = result.url
+      const destination = result?.url
         ? result.url
         : redirectParam
         ? decodeURIComponent(redirectParam)
         : '/dashboard';
 
-      router.replace(destination);
+      // Use push + refresh to ensure app router updates and session is revalidated
+      await router.push(destination);
+      router.refresh();
 
     } catch (error) {
       console.error('[login] Unexpected error:', error);
