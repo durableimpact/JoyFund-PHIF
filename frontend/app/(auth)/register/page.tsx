@@ -6,84 +6,112 @@ import Link from 'next/link';
 import {createDonorAccount} from "@/actions/accounts"
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
 
 export default function RegisterPage() {
   const router = useRouter();
+  type RegisterInput = {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+    website?: string;
+  };
 
-  const [form, setForm] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    website: '',
+  const { register, handleSubmit, setError: setFieldError, formState: { errors }, reset } = useForm<RegisterInput>({
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      website: '',
+    }
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match.');
+  const onSubmit = async (data: RegisterInput) => {
+    setGeneralError('');
+    // client-side password checks
+    if (data.password !== data.confirmPassword) {
+      setGeneralError('Passwords do not match.');
+      setFieldError('confirmPassword' as any, { type: 'manual', message: 'Passwords do not match.' });
       return;
     }
-    if (form.password.length < 8) {
-      setError('Password must be at least 8 characters.');
+    if (data.password.length < 8) {
+      setGeneralError('Password must be at least 8 characters.');
+      setFieldError('password' as any, { type: 'manual', message: 'Password must be at least 8 characters.' });
       return;
     }
 
     setLoading(true);
 
     try {
-      // Create donor account
       const account = await createDonorAccount({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-        phone_number: form.phone,
-        password: form.password,
-        website: form.website,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        phone_number: data.phone,
+        password: data.password,
+        website: data.website,
       });
 
-      // Only proceed with login if account was successfully created
       if (!account) {
         const message = 'Account creation failed. Please try again.';
-        setError(message);
+        setGeneralError(message);
         toast.error(message);
         setLoading(false);
         return;
       }
 
-      // Store credentials temporarily for verification flow
-      sessionStorage.setItem('temp_email', form.email);
-      sessionStorage.setItem('temp_password', form.password);
+      sessionStorage.setItem('temp_email', data.email);
+      sessionStorage.setItem('temp_password', data.password);
       toast.success('Account created. Please verify your email.');
-
-      // Navigate to email verification page
       router.push('/verify-email');
+      reset();
+      } catch (err) {
+      let errorData: any = err;
+      try {
+        if (typeof err === 'string') errorData = JSON.parse(err);
+      } catch (_) {}
 
-    } catch (err) {
-      const errorData = typeof err === 'string' ? JSON.parse(err) : err;
       console.error('[register error]', errorData);
 
-      const errorMessage = 
-        errorData?.email?.[0] ||
-        errorData?.message ||
-        'Registration failed. Please try again.';
+      if (errorData && typeof errorData === 'object') {
+        for (const key of Object.keys(errorData)) {
+          const val = errorData[key];
+          const message = Array.isArray(val) ? val.join(' ') : String(val);
+          // Map backend keys to form field names (phone_number -> phone)
+          if (key === 'phone_number') {
+            setFieldError('phone' as any, { type: 'server', message });
+          } else if (key === 'non_field_errors' || key === 'detail') {
+            setGeneralError(message);
+          } else if (key in ({} as RegisterInput)) {
+            setFieldError(key as any, { type: 'server', message });
+          } else {
+            // unknown key -> show general banner
+            setGeneralError(message);
+          }
+        }
+      } else {
+        setGeneralError('Registration failed. Please try again.');
+      }
 
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const banner =
+        (errorData && (errorData.message || (Array.isArray(errorData) && errorData[0]))) ||
+        'Registration failed. Please try again.';
+      toast.error(banner);
     } finally {
       setLoading(false);
     }
   };
 
-  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [field]: e.target.value }));
 
   return (
     <div className="py-12 flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
@@ -103,46 +131,58 @@ export default function RegisterPage() {
           <p className="text-gray-500 text-sm mt-2">Start creating campaigns for people you love</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="relative bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="relative bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-5">
 
-          {error && (
+          {generalError && (
             <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">
-              {error}
+              {generalError}
             </div>
           )}
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">First name</label>
-            <input type="text" required value={form.first_name} onChange={set('first_name')}
+            <input {...register('first_name', { required: 'First name is required' })} type="text"
               placeholder="e.g. Jean-Pierre"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+            {errors.first_name && (
+              <div className="text-sm text-red-600 mt-1">{errors.first_name.message}</div>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Last name</label>
-            <input type="text" required value={form.last_name} onChange={set('last_name')}
+            <input {...register('last_name', { required: 'Last name is required' })} type="text"
               placeholder="e.g. Mbarga"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+            {errors.last_name && (
+              <div className="text-sm text-red-600 mt-1">{errors.last_name.message}</div>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Email address</label>
-            <input type="email" required value={form.email} onChange={set('email')}
+            <input {...register('email', { required: 'Email is required' })} type="email"
               placeholder="you@example.com"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+            {errors.email && (
+              <div className="text-sm text-red-600 mt-1">{errors.email.message}</div>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Phone (MTN / Orange)</label>
-            <input type="tel" required value={form.phone} onChange={set('phone')}
+            <input {...register('phone', { required: 'Phone number is required' })} type="tel"
               placeholder="e.g. +237 677 000 000"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+            {errors.phone && (
+              <div className="text-sm text-red-600 mt-1">{errors.phone.message}</div>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Password</label>
             <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} required value={form.password} onChange={set('password')}
+              <input {...register('password', { required: 'Password is required' })} type={showPassword ? 'text' : 'password'}
                 placeholder="At least 8 characters"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition pr-12" />
               <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -150,26 +190,24 @@ export default function RegisterPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {errors.password && (
+              <div className="text-sm text-red-600 mt-1">{errors.password.message}</div>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Confirm password</label>
-            <input type="password" required value={form.confirmPassword} onChange={set('confirmPassword')}
+            <input {...register('confirmPassword', { required: 'Please confirm your password' })} type="password"
               placeholder="Repeat your password"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+            {errors.confirmPassword && (
+              <div className="text-sm text-red-600 mt-1">{errors.confirmPassword.message}</div>
+            )}
           </div>
 
           <div aria-hidden="true" className="absolute -left-[10000px] top-auto w-px h-px overflow-hidden">
             <label htmlFor="website">Website</label>
-            <input
-              id="website"
-              name="website"
-              type="text"
-              tabIndex={-1}
-              autoComplete="off"
-              value={form.website}
-              onChange={set('website')}
-            />
+            <input {...register('website')} id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
           </div>
 
           <button type="submit" disabled={loading}
