@@ -99,8 +99,9 @@ export const config = {
   matcher: [
     // Apply proxy to all routes except:
     // - Next.js internals and static files
+    // - Sentry monitoring tunnel
     // - Images and media files
     // - Favicon and other assets
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|monitoring|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }
