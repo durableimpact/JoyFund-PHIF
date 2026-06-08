@@ -8,6 +8,7 @@ import { SessionProvider } from "next-auth/react";
 import ReactQueryProvider from "@/provider/react-query-provider";
 import AppHelmetProvider from "@/provider/helmet-provider";
 import { Toaster } from "@/components/ui/sonner"
+import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker"
 
 const montserrat = localFont({
   src: "../public/font/Montserrat-VariableFont_wght.ttf",
@@ -135,6 +136,11 @@ export default function RootLayout({
           </>
         )}
 
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#1DB1DB" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="JoyFund" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -158,7 +164,8 @@ export default function RootLayout({
               {children}
             </AppHelmetProvider>
           </ReactQueryProvider>
-          <Toaster/>
+          <Toaster />
+          <RegisterServiceWorker />
         </SessionProvider>
       </body>
     </html>
