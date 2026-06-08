@@ -12,8 +12,21 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
 
     useEffect(() => {
-        if (status === "authenticated" && session?.user?.role) {
-            router.replace(roleRedirectMap[session.user.role]);
+        if (status === "loading") return;
+
+        if (status === "unauthenticated") {
+            router.replace("/login");
+            return;
+        }
+
+        if (status === "authenticated") {
+            const role = session?.user?.role;
+            if (role && roleRedirectMap[role]) {
+                router.replace(roleRedirectMap[role]);
+            } else {
+                console.warn("[DashboardPage] No role found in session, redirecting to login", { session });
+                router.replace("/login");
+            }
         }
     }, [status, session, router]);
 
