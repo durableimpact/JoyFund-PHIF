@@ -40,6 +40,7 @@ function LoginPageContent() {
         email: form.email,
         password: form.password,
         redirect: false,
+        callbackUrl: redirectParam || '/dashboard',
       });
 
       console.log('[login] SignIn result:', result);
@@ -55,17 +56,13 @@ function LoginPageContent() {
       toast.success('Signed in successfully.');
       console.log('[login] Sign in successful, redirecting...');
 
-      // If a redirect query param is present, prefer it. Otherwise use role-based home.
-      if (redirectParam) {
-        try {
-          const dest = decodeURIComponent(redirectParam);
-          router.push(dest);
-        } catch {
-          router.push('/dashboard');
-        }
-      } else {
-        router.push('/dashboard');
-      }
+      const destination = result.url
+        ? result.url
+        : redirectParam
+        ? decodeURIComponent(redirectParam)
+        : '/dashboard';
+
+      router.replace(destination);
 
     } catch (error) {
       console.error('[login] Unexpected error:', error);
