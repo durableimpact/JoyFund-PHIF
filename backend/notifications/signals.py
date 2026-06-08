@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 
 from notifications.models import Notification
-from accounts.tasks.send_mail import send_email
+from accounts.tasks.send_mail import send_async_email
 
 
 @receiver(post_save, sender=Notification, dispatch_uid='send_notification_email')
@@ -45,7 +45,7 @@ def send_notification_email(sender, instance, created, **kwargs):
         html_message = render_to_string('emails/notification.html', context)
         
         # Trigger async task - this returns immediately, doesn't block
-        send_email.delay(
+        send_async_email.delay(
             subject=subject,
             recipient_email=instance.user.email,
             html_message=html_message,

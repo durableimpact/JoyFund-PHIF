@@ -10,7 +10,7 @@ import logging
 
 from accounts.models import User
 from accounts.models import Donor, HospitalAdmin, Receptionist, SocialWorker, SystemAdmin, Role
-from accounts.tasks.send_mail import send_email
+from accounts.tasks.send_mail import send_async_email
 from accounts.tasks import notify_admin_user_created
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
             html_message = render_to_string('emails/welcome.html', context)
             
             # Trigger async task - this returns immediately, doesn't block
-            send_email.delay(
+            send_async_email.delay(
                 subject=subject,
                 recipient_email=instance.email,
                 html_message=html_message,

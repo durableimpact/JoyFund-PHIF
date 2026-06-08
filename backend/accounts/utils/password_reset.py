@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.template.loader import render_to_string
 from accounts.models.password_reset import PasswordResetToken
-from accounts.tasks.send_mail import send_email
+from accounts.tasks.send_mail import send_async_email
 
 
 def send_password_reset_email(user, request):
@@ -43,7 +43,7 @@ def send_password_reset_email(user, request):
             html_message = f"Hello {user.first_name},<br><br>Your password reset code is <b>{reset_token.code}</b>. It expires in 24 hours."
         
         # Send email asynchronously
-        send_email.delay(
+        send_async_email.delay(
             subject=subject,
             recipient_email=user.email,
             html_message=html_message,

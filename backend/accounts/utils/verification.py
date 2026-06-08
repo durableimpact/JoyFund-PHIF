@@ -1,7 +1,7 @@
 from django.template.loader import render_to_string
 from django.conf import settings
 from accounts.models.verification import EmailVerificationToken
-from accounts.tasks.send_mail import send_email
+from accounts.tasks.send_mail import send_async_email
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def send_verification_email(user):
         except Exception:
             pass
 
-        send_email.delay(
+        send_async_email.delay(
             subject=subject,
             recipient_email=user.email,
             html_message=html_message,
