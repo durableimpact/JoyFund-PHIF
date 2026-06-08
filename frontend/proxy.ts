@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { NextResponse, type NextRequest } from "next/server"
 import type { NextProxy } from "next/server"
+import { roleRedirectMap } from "@/lib/role-redirect"
 
 // Route categories
 const protectedRoutes = ["/dashboard", "/profile", "/settings"]
@@ -12,9 +13,10 @@ const adminRoutes = ["/dashboard/admin", "/dashboard/system-admin"]
  * 
  * Responsibilities:
  * 1. Redirect unauthenticated users away from protected pages
- * 2. Redirect authenticated users away from auth pages (login, register)
- * 3. Handle admin route protection
- * 4. Refresh session cookies (automatic via NextAuth)
+ * 2. Redirect authenticated users to their role-specific dashboard
+ * 3. Redirect authenticated users away from auth pages (login, register)
+ * 4. Handle admin route protection
+ * 5. Refresh session cookies (automatic via NextAuth)
  * 
  * IMPORTANT: This proxy protects PAGE navigation only.
  * Server Actions are NOT protected by proxy and must verify auth internally.
@@ -49,8 +51,22 @@ export const proxy: NextProxy = async (request, event) => {
       // Redirect to login with return path
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = "/login"
-      loginUrl.searchParams.set("redirect", pathname)
+      // Preserve original path + query when sending user to login
+      const original = pathname + request.nextUrl.search
+      loginUrl.searchParams.set("redirect", original)
       return NextResponse.redirect(loginUrl)
+    }
+
+    // If authenticated on the root /dashboard, redirect to role-specific dashboard
+    // This avoids rendering an empty page while the client loads its session
+    if (pathname === "/dashboard") {
+      const userRole = (session.user as any)?.role as USER_ROLE
+      if (userRole && roleRedirectMap[userRole]) {
+        const url = request.nextUrl.clone()
+        url.pathname = roleRedirectMap[userRole]
+        url.search = ""
+        return NextResponse.redirect(url)
+      }
     }
   }
 
@@ -58,15 +74,23 @@ export const proxy: NextProxy = async (request, event) => {
   // Redirect logged-in users away from login/register to prevent confusion
   if (authRoutes.some((route) => pathname.startsWith(route))) {
     if (session) {
-      // Get the 'next' parameter for redirect, or default to dashboard
-      const next = request.nextUrl.searchParams.get("next") || "/dashboard"
-      
+      // Prefer 'redirect' query param (used elsewhere) but support 'next' too
+      const redirectParam = request.nextUrl.searchParams.get("redirect")
+      const next = request.nextUrl.searchParams.get("next")
+      const candidate = redirectParam || next || "/dashboard"
+
       // Safely validate redirect target (prevent open redirects)
-      const destination = 
-        next && next.startsWith("/") && !next.startsWith("//")
-          ? next
+      let destination =
+        candidate && candidate.startsWith("/") && !candidate.startsWith("//")
+          ? candidate
           : "/dashboard"
-      
+
+      // If session includes a role, prefer the role-specific dashboard
+      const userRole = (session.user as any)?.role as USER_ROLE
+      if (userRole && roleRedirectMap[userRole]) {
+        destination = roleRedirectMap[userRole]
+      }
+
       return redirect(destination)
     }
   }
@@ -76,7 +100,8 @@ export const proxy: NextProxy = async (request, event) => {
     if (!session) {
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = "/login"
-      loginUrl.searchParams.set("redirect", pathname)
+      const original = pathname + request.nextUrl.search
+      loginUrl.searchParams.set("redirect", original)
       return NextResponse.redirect(loginUrl)
     }
 
