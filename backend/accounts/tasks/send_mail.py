@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True, max_retries=3, default_retry_delay=60)
-def send_email(self, subject, recipient_email, html_message, plain_message=None, from_email=None):
+def send_async_email(self, subject, recipient_email, html_message, plain_message=None, from_email=None):
     """
     Generic task to send emails asynchronously with retry logic.
     
@@ -32,17 +32,25 @@ def send_email(self, subject, recipient_email, html_message, plain_message=None,
     Returns:
         str: Success or failure message
     """
-    logger.info(f"Starting send_email task — subject='{subject}', to='{recipient_email}'")
+    from_email = from_email or settings.DEFAULT_FROM_EMAIL
+    
+    # Ensure recipient_email is a list
+    if isinstance(recipient_email, str):
+        recipient_list = [recipient_email]
+    else:
+        recipient_list = list(recipient_email)
+    
+    recipients_str = ', '.join(recipient_list)
+    task_id = self.request.id or 'N/A'
+    
+    logger.info(
+        f"[EMAIL SENDING STARTED] Task ID: {task_id} | "
+        f"Sender: {from_email} | "
+        f"Recipients: {recipients_str} | "
+        f"Subject: '{subject}'"
+    )
     
     try:
-        from_email = from_email or settings.DEFAULT_FROM_EMAIL
-        
-        # Ensure recipient_email is a list
-        if isinstance(recipient_email, str):
-            recipient_list = [recipient_email]
-        else:
-            recipient_list = list(recipient_email)
-        
         # Create plain text fallback if not provided
         if plain_message is None:
             plain_message = strip_tags(html_message)
@@ -57,24 +65,36 @@ def send_email(self, subject, recipient_email, html_message, plain_message=None,
             fail_silently=False,
         )
         
-        recipients_str = ', '.join(recipient_list)
-        logger.info(f"Email sent successfully to {recipients_str}")
+        logger.info(
+            f"[EMAIL SENDING SUCCESS] Task ID: {task_id} | "
+            f"Sender: {from_email} | "
+            f"Recipients: {recipients_str} | "
+            f"Subject: '{subject}'"
+        )
         return f"Email sent successfully to {recipients_str}"
         
     except Exception as exc:
-        recipients_str = recipient_email if isinstance(recipient_email, str) else ', '.join(recipient_email)
         retry_count = self.request.retries
         
         if retry_count < self.max_retries:
             logger.warning(
-                f"Email to {recipients_str} failed (attempt {retry_count + 1}/{self.max_retries + 1}), "
-                f"retrying in {60 * (retry_count + 1)}s. Error: {str(exc)}"
+                f"[EMAIL SENDING RETRY] Task ID: {task_id} | "
+                f"Attempt {retry_count + 1}/{self.max_retries + 1} failed, "
+                f"retrying in {60 * (retry_count + 1)}s. | "
+                f"Sender: {from_email} | "
+                f"Recipients: {recipients_str} | "
+                f"Subject: '{subject}' | "
+                f"Error: {str(exc)}"
             )
             retry_delay = 60 * (retry_count + 1)
             raise self.retry(exc=exc, countdown=retry_delay)
         else:
             logger.error(
-                f"Failed to send email to {recipients_str} after {self.max_retries + 1} attempts. "
-                f"Subject: '{subject}'. Error: {str(exc)}"
+                f"[EMAIL SENDING FAILURE] Task ID: {task_id} | "
+                f"Failed permanently after {self.max_retries + 1} attempts. | "
+                f"Sender: {from_email} | "
+                f"Recipients: {recipients_str} | "
+                f"Subject: '{subject}' | "
+                f"Error: {str(exc)}"
             )
             return f"Failed to send email to {recipients_str} after {self.max_retries} retries"
