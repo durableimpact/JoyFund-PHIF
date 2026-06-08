@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {createDonorAccount} from "@/actions/accounts"
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -50,7 +51,9 @@ export default function RegisterPage() {
 
       // Only proceed with login if account was successfully created
       if (!account) {
-        setError('Account creation failed. Please try again.');
+        const message = 'Account creation failed. Please try again.';
+        setError(message);
+        toast.error(message);
         setLoading(false);
         return;
       }
@@ -58,6 +61,7 @@ export default function RegisterPage() {
       // Store credentials temporarily for verification flow
       sessionStorage.setItem('temp_email', form.email);
       sessionStorage.setItem('temp_password', form.password);
+      toast.success('Account created. Please verify your email.');
 
       // Navigate to email verification page
       router.push('/verify-email');
@@ -72,6 +76,7 @@ export default function RegisterPage() {
         'Registration failed. Please try again.';
 
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

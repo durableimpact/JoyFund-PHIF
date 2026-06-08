@@ -51,16 +51,16 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <Helmet>
-        <title>JoyFund: Maternal Health Crowdfunding in Cameroon</title>
+        <title>JoyFund</title>
         <meta name="description" content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare." />
         <link rel="canonical" href="https://joy-fund.com" />
-        <meta property="og:title" content="JoyFund: Maternal Health Crowdfunding in Cameroon" />
+        <meta property="og:title" content="JoyFund" />
         <meta property="og:description" content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare." />
         <meta property="og:url" content="https://joy-fund.com" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://joy-fund.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="JoyFund: Maternal Health Crowdfunding in Cameroon" />
+        <meta name="twitter:title" content="JoyFund" />
         <meta name="twitter:description" content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare." />
         <meta name="twitter:image" content="https://joy-fund.com/og-image.png" />
         <script type="application/ld+json">{JSON.stringify({
@@ -179,7 +179,7 @@ export default function HomePage() {
           <div className="relative rounded-3xl overflow-hidden shadow-2xl">
             <video
               src="/assets/videos/about-joyfund-intro-vid.mp4"
-              className="w-full h-full min-h-[320px]"
+              className="w-full h-full min-h-80"
               controls
               autoPlay
               muted

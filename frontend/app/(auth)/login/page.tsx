@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const ROLE_HOME: Record<string, string> = {
@@ -47,9 +48,11 @@ function LoginPageContent() {
         const errorMsg = result?.error || 'Invalid email or password.';
         console.error('[login] Sign in failed:', errorMsg);
         setError(errorMsg);
+        toast.error(errorMsg);
         return;
       }
 
+      toast.success('Signed in successfully.');
       console.log('[login] Sign in successful, redirecting...');
 
       // If a redirect query param is present, prefer it. Otherwise use role-based home.
@@ -66,7 +69,9 @@ function LoginPageContent() {
 
     } catch (error) {
       console.error('[login] Unexpected error:', error);
-      setError('Connection error. Please try again.');
+      const message = 'Connection error. Please try again.';
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

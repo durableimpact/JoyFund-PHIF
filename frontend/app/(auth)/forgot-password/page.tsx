@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { requestPasswordReset } from '@/actions/accounts';
 import { Heart, Loader2, ArrowLeft, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 type Step = 'form' | 'sent';
 
@@ -25,6 +26,7 @@ export default function ForgotPasswordPage() {
       
       // Move to next step and prepare to navigate after delay
       setStep('sent');
+      toast.success('Password reset code sent. Check your email.');
       
       // Auto-navigate to reset password page after 3 seconds
       setTimeout(() => {
@@ -40,6 +42,7 @@ export default function ForgotPasswordPage() {
         'Connection error. Please try again.';
       
       setError(errorMessage);
+      toast.error(errorMessage);
       setStep('form');
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Loader2, Eye, EyeOff, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type Step = 'code' | 'password' | 'done';
 
@@ -77,6 +78,7 @@ function ResetPasswordPageContent() {
       // Code verification will happen when user submits password
       // For now, just move to password step
       setStep('password');
+      toast.success('Code confirmed. Enter a new password.');
     } catch (err) {
       const errorData = typeof err === 'string' ? JSON.parse(err) : err;
       console.error('[verify code error]', errorData);
@@ -87,6 +89,7 @@ function ResetPasswordPageContent() {
         'Invalid code. Please try again.';
       
       setError(errorMessage);
+      toast.error(errorMessage);
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
@@ -101,11 +104,15 @@ function ResetPasswordPageContent() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      const message = 'Passwords do not match.';
+      setError(message);
+      toast.error(message);
       return;
     }
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      const message = 'Password must be at least 8 characters.';
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -121,6 +128,7 @@ function ResetPasswordPageContent() {
 
       // Move to success step
       setStep('done');
+      toast.success('Password reset successfully.');
     } catch (err) {
       const errorData = typeof err === 'string' ? JSON.parse(err) : err;
       console.error('[reset password error]', errorData);
@@ -131,6 +139,7 @@ function ResetPasswordPageContent() {
         'Could not reset password. Please request a new code.';
       
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

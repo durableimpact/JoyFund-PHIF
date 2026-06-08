@@ -52,7 +52,7 @@ const jsonLd = {
 
 export const metadata: Metadata = {
   title: {
-    default: "JoyFund: Maternal Health Crowdfunding in Cameroon",
+    default: "JoyFund",
     template: "%s | JoyFund",
   },
   description:
@@ -65,14 +65,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "JoyFund",
-    title: "JoyFund: Maternal Health Crowdfunding in Cameroon",
+    title: "JoyFund",
     description:
       "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "JoyFund - Solidarity Health Insurance for Cameroon" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JoyFund: Maternal Health Crowdfunding in Cameroon",
+    title: "JoyFund",
     description:
       "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
     images: ["/og-image.png"],

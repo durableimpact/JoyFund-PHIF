@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { resendVerificationEmail, verifyEmail } from '@/actions/accounts';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -22,7 +23,9 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const storedEmail = sessionStorage.getItem('temp_email');
     if (!storedEmail) {
-      setError('Email not found. Please register again.');
+      const message = 'Email not found. Please register again.';
+      setError(message);
+      toast.error(message);
       return;
     }
     setEmail(storedEmail);
@@ -45,6 +48,7 @@ export default function VerifyEmailPage() {
       await resendVerificationEmail(email);
       setResendSuccess(true);
       setResendCooldown(60); // 60 second cooldown
+      toast.success('Verification code sent.');
 
       // Clear success message after 3 seconds
       setTimeout(() => {
@@ -60,6 +64,7 @@ export default function VerifyEmailPage() {
         'Failed to resend verification code. Please try again.';
 
       setResendError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setResendLoading(false);
     }
@@ -70,7 +75,9 @@ export default function VerifyEmailPage() {
     setError('');
 
     if (code.length !== 6) {
-      setError('Please enter a 6-digit code');
+      const message = 'Please enter a 6-digit code';
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -84,12 +91,15 @@ export default function VerifyEmailPage() {
       });
 
       setSuccess(true);
+      toast.success('Email verified! Logging you in...');
 
       // Get stored credentials
       const storedPassword = sessionStorage.getItem('temp_password');
 
       if (!storedPassword) {
-        setError('Password not found. Please log in manually.');
+        const message = 'Password not found. Please log in manually.';
+        setError(message);
+        toast.error(message);
         setTimeout(() => {
           sessionStorage.removeItem('temp_email');
           router.push('/login');
@@ -112,7 +122,9 @@ export default function VerifyEmailPage() {
         // Redirect to dashboard
         router.push('/dashboard/donor');
       } else {
-        setError('Login failed. Please try logging in manually.');
+        const message = 'Login failed. Please try logging in manually.';
+        setError(message);
+        toast.error(message);
         setTimeout(() => {
           sessionStorage.removeItem('temp_email');
           sessionStorage.removeItem('temp_password');
@@ -130,6 +142,7 @@ export default function VerifyEmailPage() {
         'Verification failed. Please check your code and try again.';
       
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
