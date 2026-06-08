@@ -42,13 +42,32 @@ export async function authenticatedFetch<T = any>(
 
   const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000"
   const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url}`
-
-  return fetch(fullUrl, {
+  const fetchOptions: RequestInit = {
     ...options,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.accessToken}`,
       ...options.headers,
     },
-  })
+  };
+
+  // Log outgoing fetches when enabled (dev or ENABLE_SERVER_LOGS=true)
+  const shouldLog = process.env.NODE_ENV !== "production" || process.env.ENABLE_SERVER_LOGS === "true";
+  if (shouldLog) {
+    try {
+      const method = (fetchOptions.method || "GET").toString().toUpperCase();
+      console.info(`[fetch] → ${method} ${fullUrl}`);
+    } catch {}
+  }
+
+  const start = Date.now();
+  return fetch(fullUrl, fetchOptions).then((res) => {
+    if (shouldLog) {
+      try {
+        const dur = `${Date.now() - start}ms`;
+        console.info(`[fetch] ← ${res.status} ${fullUrl} ${dur}`);
+      } catch {}
+    }
+    return res;
+  });
 }
