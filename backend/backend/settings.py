@@ -406,17 +406,15 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # ─────────────────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
-    default=(
-        [
-            "http://localhost:3000",  # Next.js dev server
-            "http://localhost:3001",  # Alternative Next.js port
-            "http://localhost:8000",  # Django dev server
-            "http://127.0.0.1:3000",  # Next.js dev server (127.0.0.1)
-            "http://127.0.0.1:8000",  # Django dev server (127.0.0.1)
-        ]
-        if DEBUG
-        else []
-    ),  # Empty in production - use ALLOWED_HOSTS env var
+    default=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+        "https://joy-fund.com",
+        "https://www.joy-fund.com",
+    ],
 )
 
 CSRF_TRUSTED_ORIGINS = env.list(
@@ -424,6 +422,8 @@ CSRF_TRUSTED_ORIGINS = env.list(
     default=[
         "http://localhost:3000",
         "http://localhost:8000",
+        "https://joy-fund.com",
+        "https://www.joy-fund.com",
     ]
 )
 
@@ -447,6 +447,7 @@ CORS_ALLOW_HEADERS = [
     "accept-encoding",
     "authorization",
     "content-type",
+    "cache-control",
     "dnt",
     "origin",
     "user-agent",
