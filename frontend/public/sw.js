@@ -62,19 +62,8 @@ function isStaticAssetRequest(request, url) {
   );
 }
 
-function createNoStoreRequest(request) {
-  const headers = new Headers(request.headers);
-  headers.set("Cache-Control", "no-store");
-  headers.set("Pragma", "no-cache");
-
-  return new Request(request, {
-    headers,
-    cache: "no-store",
-  });
-}
-
 async function networkOnly(request) {
-  return fetch(createNoStoreRequest(request));
+  return fetch(request);
 }
 
 async function networkFirst(request) {
