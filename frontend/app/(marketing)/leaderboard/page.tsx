@@ -1,8 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useRef, useCallback } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Trophy, TrendingUp, ExternalLink } from 'lucide-react';
+import { Trophy, TrendingUp, ExternalLink, Loader2, User } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { Helmet } from 'react-helmet-async';
 import { getCampaignLeaderboard } from '@/actions/campaigns';
@@ -10,14 +11,57 @@ import { Table, TableBody, TableHeader, TableHead, TableRow, TableCell } from '@
 
 export default function LeaderboardPage() {
   const router = useRouter();
-  const { data: leaderboardResponse, isLoading, error } = useQuery({
+
+  const {
+    data: leaderboardResponse,
+    isLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['campaign-leaderboard'],
-    queryFn: async () => await getCampaignLeaderboard(),
-    initialData: undefined,
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await getCampaignLeaderboard({ page: pageParam, page_size: 20 });
+      return res;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: any) => {
+      const page = lastPage?.json || lastPage;
+      if (page?.next) {
+        const url = new URL(page.next, 'http://localhost');
+        return parseInt(url.searchParams.get('page') || '2');
+      }
+      return undefined;
+    },
   });
 
-  // Handle both paginated and non-paginated responses
-  const leaderboard = (leaderboardResponse?.results || leaderboardResponse || []) as any[];
+  const leaderboard =
+    leaderboardResponse?.pages.flatMap((page) => {
+      const results = (page as any)?.json?.results || (page as any)?.results || [];
+      return results;
+    }) || [];
+
+  const observerRef = React.useRef<IntersectionObserver | null>(null);
+  const sentinelRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetchingNextPage) return;
+      if (observerRef.current) observerRef.current.disconnect();
+
+      if (node) {
+        observerRef.current = new IntersectionObserver(
+          (entries) => {
+            if (entries[0].isIntersecting && hasNextPage) {
+              fetchNextPage();
+            }
+          },
+          { threshold: 0.1 }
+        );
+        observerRef.current.observe(node);
+      }
+    },
+    [isFetchingNextPage, hasNextPage, fetchNextPage]
+  );
 
   const getMedalIcon = (rank: number) => {
     switch (rank) {
@@ -32,9 +76,13 @@ export default function LeaderboardPage() {
     }
   };
 
-  // Get donor name from campaign (fallback handling)
-  const getDonorName = (campaign: any) => {
-    return campaign.donor_name || `Donor ${campaign.donor_id?.slice(0, 8)}` || 'Anonymous';
+  const getDonorName = (campaign: CampaignLeaderboardEntry) => {
+    return campaign.donor.user.first_name || 'Anonymous';
+  };
+
+  const handleDonorClick = (e: React.MouseEvent, campaign: CampaignLeaderboardEntry) => {
+    e.stopPropagation();
+    router.push(`/donor/${campaign.donor.id}`);
   };
 
   return (
@@ -184,8 +232,8 @@ export default function LeaderboardPage() {
                     const raisedAmount = parseFloat(campaign?.total_net_raised as string) || 0;
 
                     return (
-                      <TableRow 
-                        key={campaign?.id ?? index} 
+                      <TableRow
+                        key={campaign?.id ?? index}
                         className="hover:bg-blue-50/50 transition-colors cursor-pointer group"
                         onClick={() => router.push(`/campaign/${campaign?.id}`)}
                       >
@@ -205,7 +253,13 @@ export default function LeaderboardPage() {
                               {campaign?.title ?? 'Untitled'}
                               <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                             </p>
-                            <p className="text-xs text-gray-500">by {getDonorName(campaign)}</p>
+                            <button
+                              onClick={(e) => handleDonorClick(e, campaign)}
+                              className="text-xs text-gray-500 hover:text-[#1DB1DB] transition-colors flex items-center gap-1 mt-0.5"
+                            >
+                              <User size={10} />
+                              by {getDonorName(campaign)}
+                            </button>
                           </div>
                         </TableCell>
 
@@ -248,6 +302,21 @@ export default function LeaderboardPage() {
                   })}
                 </TableBody>
               </Table>
+
+              {/* Infinite scroll sentinel */}
+              {hasNextPage && (
+                <div ref={sentinelRef} className="py-4 flex justify-center border-t border-gray-100">
+                  {isFetchingNextPage && (
+                    <Loader2 className="w-5 h-5 text-[#1DB1DB] animate-spin" />
+                  )}
+                </div>
+              )}
+
+              {!hasNextPage && leaderboard.length > 0 && (
+                <p className="py-4 text-center text-xs text-gray-300 font-medium border-t border-gray-100">
+                  All campaigns loaded
+                </p>
+              )}
             </div>
           )}
         </div>
