@@ -87,8 +87,8 @@ export default function DonorDashboardPage() {
     enabled: !!session?.user,
   });
 
-  const campaigns = campaignsResponse?.results || [];
-  const donations = donationsResponse?.results || [];
+  const campaigns = (campaignsResponse as any)?.json?.results || campaignsResponse?.results || (Array.isArray((campaignsResponse as any)?.json) ? (campaignsResponse as any).json : ((campaignsResponse as any)?.json ? [(campaignsResponse as any).json] : []));
+  const donations = (donationsResponse as any)?.json?.results || donationsResponse?.results || (Array.isArray((donationsResponse as any)?.json) ? (donationsResponse as any).json : ((donationsResponse as any)?.json ? [(donationsResponse as any).json] : []));
   const loading = campaignsLoading || donationsLoading || dashboardLoading;
 
   const name = session?.user?.name || 'Donor';

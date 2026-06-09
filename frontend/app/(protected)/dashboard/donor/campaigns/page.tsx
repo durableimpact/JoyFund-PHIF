@@ -31,7 +31,7 @@ export default function CampaignsPage() {
     enabled: !!session?.user,
   });
 
-  const campaigns = campaignsResponse?.results || [];
+  const campaigns = (campaignsResponse as any)?.json?.results || campaignsResponse?.results || (Array.isArray((campaignsResponse as any)?.json) ? (campaignsResponse as any).json : ((campaignsResponse as any)?.json ? [(campaignsResponse as any).json] : []));
 
   if (isLoading) {
     return (
