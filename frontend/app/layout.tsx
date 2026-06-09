@@ -202,15 +202,15 @@ export default function RootLayout({
           </noscript>
         )}
         <SessionProvider>
-          <TokenRefreshProvider>
-            <ReactQueryProvider>
+          <ReactQueryProvider>
+            <TokenRefreshProvider>
               <AppHelmetProvider>
                 {children}
               </AppHelmetProvider>
-            </ReactQueryProvider>
+            </TokenRefreshProvider>
             <Toaster />
             <RegisterServiceWorker />
-          </TokenRefreshProvider>
+          </ReactQueryProvider>
         </SessionProvider>
       </body>
     </html>
