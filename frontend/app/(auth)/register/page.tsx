@@ -6,7 +6,9 @@ import Link from 'next/link';
 import {createDonorAccount} from "@/actions/accounts"
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
+import { InputPhone } from '@/components/ui/input-phone';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,7 +22,7 @@ export default function RegisterPage() {
     website?: string;
   };
 
-  const { register, handleSubmit, setError: setFieldError, formState: { errors }, reset } = useForm<RegisterInput>({
+  const { register, handleSubmit, setError: setFieldError, formState: { errors }, reset, control } = useForm<RegisterInput>({
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -141,9 +143,12 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">First name</label>
-            <input {...register('first_name', { required: 'First name is required' })} type="text"
+            <Input
+              {...register('first_name', { required: 'First name is required' })}
+              type="text"
               placeholder="e.g. Jean-Pierre"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+              className=" rounded-xl py-5 px-4"
+            />
             {errors.first_name && (
               <div className="text-sm text-red-600 mt-1">{errors.first_name.message}</div>
             )}
@@ -151,9 +156,12 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Last name</label>
-            <input {...register('last_name', { required: 'Last name is required' })} type="text"
+            <Input
+              {...register('last_name', { required: 'Last name is required' })}
+              type="text"
               placeholder="e.g. Mbarga"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+              className=" rounded-xl py-5 px-4"
+            />
             {errors.last_name && (
               <div className="text-sm text-red-600 mt-1">{errors.last_name.message}</div>
             )}
@@ -161,9 +169,12 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Email address</label>
-            <input {...register('email', { required: 'Email is required' })} type="email"
+            <Input
+              {...register('email', { required: 'Email is required' })}
+              type="email"
               placeholder="you@example.com"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+              className=" rounded-xl py-5 px-4"
+            />
             {errors.email && (
               <div className="text-sm text-red-600 mt-1">{errors.email.message}</div>
             )}
@@ -171,9 +182,20 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Phone (MTN / Orange)</label>
-            <input {...register('phone', { required: 'Phone number is required' })} type="tel"
-              placeholder="e.g. +237 677 000 000"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+            <Controller
+              name="phone"
+              control={control}
+              
+              rules={{ required: 'Phone number is required' }}
+              render={({ field }) => (
+                <InputPhone
+                  {...field}
+                  // placeholder=""
+                  defaultCountry="CM"
+                  className=''
+                />
+              )}
+            />
             {errors.phone && (
               <div className="text-sm text-red-600 mt-1">{errors.phone.message}</div>
             )}
@@ -182,11 +204,17 @@ export default function RegisterPage() {
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Password</label>
             <div className="relative">
-              <input {...register('password', { required: 'Password is required' })} type={showPassword ? 'text' : 'password'}
+              <Input
+                {...register('password', { required: 'Password is required' })}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="At least 8 characters"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition pr-12" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                className="pr-12 rounded-xl py-5 px-4"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
@@ -197,15 +225,18 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Confirm password</label>
-            <input {...register('confirmPassword', { required: 'Please confirm your password' })} type="password"
+            <Input
+              {...register('confirmPassword', { required: 'Please confirm your password' })}
+              type="password"
               placeholder="Repeat your password"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition" />
+              className="rounded-xl py-5 px-4"
+            />
             {errors.confirmPassword && (
               <div className="text-sm text-red-600 mt-1">{errors.confirmPassword.message}</div>
             )}
           </div>
 
-          <div aria-hidden="true" className="absolute -left-[10000px] top-auto w-px h-px overflow-hidden">
+          <div aria-hidden="true" className="absolute -left-2500 top-auto w-px h-px overflow-hidden">
             <label htmlFor="website">Website</label>
             <input {...register('website')} id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
           </div>
