@@ -1,12 +1,22 @@
-"use client";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
-import React from "react";
-import TokenRefreshProvider from "@/provider/token-refresh-provider";
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
 
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  console.log("Session : ",session)
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
   return (
-    <TokenRefreshProvider>
+    <div className="min-h-screen">
       {children}
-    </TokenRefreshProvider>
+    </div>
   );
 }

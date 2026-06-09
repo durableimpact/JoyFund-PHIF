@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, Search, ClipboardCheck, Ticket } from "lucide-react";
+import { LayoutDashboard, Search, ClipboardCheck, Ticket, User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 
@@ -10,6 +10,7 @@ const NAV: NavItem[] = [
   { label: "Process Voucher", href: "/dashboard/receptionist/process",      icon: <Search size={16} /> },
   { label: "Vouchers",        href: "/dashboard/receptionist/vouchers",     icon: <Ticket size={16} /> },
   { label: "My Claims",       href: "/dashboard/receptionist/claims",       icon: <ClipboardCheck size={16} /> },
+  { label: "Profile",         href: "/dashboard/receptionist/profile",      icon: <User size={16} /> },
 ];
 
 export default function ReceptionistLayout({ children }: { children: React.ReactNode }) {

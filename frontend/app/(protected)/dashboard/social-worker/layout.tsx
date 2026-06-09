@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, Users } from "lucide-react";
+import { LayoutDashboard, Users, User } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 
 const NAV: NavItem[] = [
   { label: "Dashboard",      href: "/dashboard/social-worker",              icon: <LayoutDashboard size={16} /> },
   { label: "Beneficiaries",  href: "/dashboard/social-worker/beneficiaries", icon: <Users size={16} /> },
+  { label: "Profile",        href: "/dashboard/social-worker/profile",      icon: <User size={16} /> },
 ];
 
 export default function SocialWorkerLayout({ children }: { children: React.ReactNode }) {

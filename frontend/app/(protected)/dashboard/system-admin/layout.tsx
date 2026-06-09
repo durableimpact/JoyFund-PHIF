@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, Users, Building2, Ticket, BarChart2, FileText } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Ticket, BarChart2, FileText, User } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 
 const NAV: NavItem[] = [
@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
   { label: "Disbursements",  href: "/dashboard/system-admin/disbursements", icon: <FileText size={16} /> },
   { label: "Logs",          href: "/dashboard/system-admin/logs",      icon: <FileText size={16} /> },
   { label: "Users",         href: "/dashboard/system-admin/users",     icon: <Users size={16} /> },
+  { label: "Profile",       href: "/dashboard/system-admin/profile",   icon: <User size={16} /> },
 ];
 
 export default function SystemAdminLayout({ children }: { children: React.ReactNode }) {
