@@ -2,12 +2,17 @@
 import { useState, Suspense, useRef, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ArrowLeft, Heart, Phone, Loader2 } from 'lucide-react';
+import { ArrowLeft, Heart, Loader2 } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { Helmet } from 'react-helmet-async';
 import { Confetti } from '@/components/ui/confetti';
 import { formatXAF } from '@/lib/utils';
 import { getCampaign, donateToCampaign } from '@/actions/campaigns';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { InputPhone } from '@/components/ui/input-phone';
+import { toast } from 'sonner';
 
 const PAYMENT_METHODS = [
   { id: 'MTN', label: 'MTN Mobile Money', color: '#FFC107', prefix: '67, 65, 68' },
@@ -15,6 +20,25 @@ const PAYMENT_METHODS = [
 ];
 
 const AMOUNTS = [5000, 10000, 25000, 50000, 100000];
+
+const donateSchema = z.object({
+  donorName: z.string().optional(),
+  isAnonymous: z.boolean().default(false),
+  amount: z.number().min(25, 'Minimum donation is 25 XAF'),
+  message: z.string().optional(),
+  paymentMethod: z.enum(['MTN', 'ORANGE'] as const),
+  phoneNumber: z.string().min(9, 'Please enter a valid phone number'),
+}).refine((data) => {
+  if (!data.isAnonymous && (!data.donorName || data.donorName.trim() === '')) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Please enter your name if you're not donating anonymously",
+  path: ["donorName"],
+});
+
+type DonateFormValues = z.infer<typeof donateSchema>;
 
 function DonatePage() {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +49,30 @@ function DonatePage() {
   // Check payment status from URL
   const paymentStatus = searchParams.get('status');
   const [showStatusMessage, setShowStatusMessage] = useState(!!paymentStatus);
+  const [useCustom, setUseCustom] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<DonateFormValues>({
+    resolver: zodResolver(donateSchema),
+    defaultValues: {
+      isAnonymous: false,
+      amount: 10000,
+      paymentMethod: 'MTN',
+      donorName: '',
+      message: '',
+      phoneNumber: '',
+    },
+  });
+
+  const amount = watch('amount');
+  const isAnonymous = watch('isAnonymous');
+  const paymentMethod = watch('paymentMethod');
 
   // Trigger confetti on success
   useEffect(() => {
@@ -46,21 +94,10 @@ function DonatePage() {
     enabled: !!id,
   });
 
-  const [donorName, setDonorName] = useState('');
-  const [amount, setAmount] = useState(10000);
-  const [customAmount, setCustomAmount] = useState('');
-  const [useCustom, setUseCustom] = useState(false);
-  const [message, setMessage] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('MTN');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [error, setError] = useState('');
-
-  const finalAmount = useCustom ? Number(customAmount) : amount;
-  const paymentAggregatorFee = Math.round(finalAmount * 0.03);
-  const operationsFee = Math.round(finalAmount * 0.05);
+  const paymentAggregatorFee = Math.round(amount * 0.03);
+  const operationsFee = Math.round(amount * 0.05);
   const totalFees = paymentAggregatorFee + operationsFee;
-  const netContribution = Math.max(finalAmount - totalFees, 0);
+  const netContribution = Math.max(amount - totalFees, 0);
 
   // Use mutation for donation
   const donateMutation = useMutation({
@@ -68,48 +105,31 @@ function DonatePage() {
       return await donateToCampaign(id as string, payload);
     },
     onSuccess: (response) => {
-      // Navigate to payment link
       if (response?.payment_link) {
         window.location.href = response.payment_link;
       } else {
-        setError('Payment link not available');
+        toast.error('Payment link not available');
       }
     },
     onError: (error: any) => {
-      // Parse error response
       try {
         const errorData = JSON.parse(error);
-        setError(errorData?.error || 'Payment failed. Please try again.');
+        toast.error(errorData?.error || 'Payment failed. Please try again.');
       } catch {
-        setError(error?.message || 'Payment failed. Please try again.');
+        toast.error(error?.message || 'Payment failed. Please try again.');
       }
     },
   });
 
-  const handleDonate = () => {
-    setError('');
-
-    if (!donorName && !isAnonymous) {
-      setError('Please enter your name');
-      return;
-    }
-    if (!finalAmount || finalAmount < 10) {
-      setError('Please enter a valid amount (min 10 XAF)');
-      return;
-    }
-    if (!phoneNumber || phoneNumber.length < 9) {
-      setError('Please enter your mobile money phone number');
-      return;
-    }
-
+  const onSubmit = (data: DonateFormValues) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const payload: DonationCreatePayload = {
-      donor_name: isAnonymous ? 'Anonymous' : donorName,
-      amount: finalAmount,
-      message: message || undefined,
-      is_anonymous: isAnonymous,
-      payment_method: paymentMethod,
-      phone_number: phoneNumber.replace(/\s/g, ''),
+      donor_name: data.isAnonymous ? 'Anonymous' : data.donorName,
+      amount: data.amount,
+      message: data.message || undefined,
+      is_anonymous: data.isAnonymous,
+      payment_method: data.paymentMethod,
+      phone_number: data.phoneNumber.replace(/\s/g, ''),
       success_url: `${origin}/campaign/${id}/donate/?status=success`,
       failure_url: `${origin}/campaign/${id}/donate/?status=failed`,
     };
@@ -234,23 +254,21 @@ function DonatePage() {
             </div>
           )}
 
-          <div className="card p-6 space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="card p-6 space-y-5">
             <h1 className="text-xl font-black text-[#1A1A2E]">Make a Donation</h1>
-
-            {/* Error display */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700 text-sm">{error}</p>
-              </div>
-            )}
 
             {/* Donor name */}
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block">Your Name *</label>
-              <input className="input-field" placeholder="e.g. Jean-Pierre Mbarga" value={donorName}
-                onChange={e => setDonorName(e.target.value)} disabled={isAnonymous} />
+              <input 
+                {...register('donorName')}
+                className={`input-field ${errors.donorName ? 'border-red-500' : ''}`} 
+                placeholder="e.g. Jean-Pierre Mbarga" 
+                disabled={isAnonymous} 
+              />
+              {errors.donorName && <p className="text-red-500 text-[10px] mt-1">{errors.donorName.message}</p>}
               <div className="flex items-center gap-2 mt-2">
-                <input type="checkbox" id="anon" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} />
+                <input type="checkbox" id="anon" {...register('isAnonymous')} />
                 <label htmlFor="anon" className="text-xs text-gray-500">Donate anonymously</label>
               </div>
             </div>
@@ -260,30 +278,43 @@ function DonatePage() {
               <label className="text-xs font-semibold text-gray-500 mb-2 block">Amount (XAF) *</label>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {AMOUNTS.map(a => (
-                  <button key={a} onClick={() => { setAmount(a); setUseCustom(false); }}
+                  <button 
+                    key={a} 
+                    type="button"
+                    onClick={() => { setValue('amount', a); setUseCustom(false); }}
                     className={`py-2 rounded-xl text-sm font-bold border-2 transition-all ${!useCustom && amount === a ? 'text-white' : 'border-gray-200 text-gray-700 hover:border-gray-300'}`}
                     style={!useCustom && amount === a ? { background: 'var(--primary)', borderColor: 'var(--primary)' } : {}}>
                     {(a/1000)}k
                   </button>
                 ))}
-                <button onClick={() => setUseCustom(true)}
+                <button 
+                  type="button"
+                  onClick={() => setUseCustom(true)}
                   className={`py-2 rounded-xl text-sm font-bold border-2 transition-all ${useCustom ? 'text-white' : 'border-gray-200 text-gray-700'}`}
                   style={useCustom ? { background: 'var(--secondary)', borderColor: 'var(--secondary)' } : {}}>
                   Custom
                 </button>
               </div>
               {useCustom && (
-                <input className="input-field" type="number" min={1000} step={1000}
+                <input 
+                  className={`input-field ${errors.amount ? 'border-red-500' : ''}`}
+                  type="number" 
+                  min={25} 
+                  step={25}
                   placeholder="Enter amount in XAF (min 1,000)"
-                  value={customAmount} onChange={e => setCustomAmount(e.target.value)} />
+                  value={amount}
+                  onChange={e => setValue('amount', Number(e.target.value))} 
+                />
               )}
-              {finalAmount > 0 && (
+              {errors.amount && <p className="text-red-500 text-[10px] mt-1">{errors.amount.message}</p>}
+              
+              {amount > 0 && (
                 <p className="text-xs text-emerald-600 font-medium mt-1">
-                  = {Math.round(finalAmount / 60000 * 10) / 10} safe {Math.round(finalAmount / 60000) === 1 ? 'delivery' : 'deliveries'} funded
+                  = {Math.round(amount / 60000 * 10) / 10} safe {Math.round(amount / 60000) === 1 ? 'delivery' : 'deliveries'} funded
                 </p>
               )}
 
-              {finalAmount > 0 && (
+              {amount > 0 && (
                 <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Donation breakdown</p>
@@ -311,8 +342,8 @@ function DonatePage() {
                         <p className="text-2xl font-black text-emerald-700">{formatXAF(netContribution)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-slate-500">{finalAmount > 0 ? Math.round((netContribution / finalAmount) * 100) : 0}% of your donation</p>
-                        <p className="text-xs text-slate-500">{formatXAF(finalAmount)} total donation</p>
+                        <p className="text-xs text-slate-500">{amount > 0 ? Math.round((netContribution / amount) * 100) : 0}% of your donation</p>
+                        <p className="text-xs text-slate-500">{formatXAF(amount)} total donation</p>
                       </div>
                     </div>
                   </div>
@@ -323,9 +354,12 @@ function DonatePage() {
             {/* Message */}
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block">Message <span className="font-normal text-gray-400">(optional)</span></label>
-              <textarea className="input-field resize-none" rows={2}
+              <textarea 
+                {...register('message')}
+                className="input-field resize-none" 
+                rows={2}
                 placeholder="Wishing you all the best on your special day!"
-                value={message} onChange={e => setMessage(e.target.value)} />
+              />
             </div>
 
             {/* Payment method */}
@@ -333,7 +367,10 @@ function DonatePage() {
               <label className="text-xs font-semibold text-gray-500 mb-2 block">Payment Method *</label>
               <div className="grid grid-cols-2 gap-3">
                 {PAYMENT_METHODS.map(pm => (
-                  <button key={pm.id} onClick={() => setPaymentMethod(pm.id as PaymentMethod)}
+                  <button 
+                    key={pm.id} 
+                    type="button"
+                    onClick={() => setValue('paymentMethod', pm.id as 'MTN' | 'ORANGE')}
                     className={`p-3 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? 'text-white' : 'border-gray-200 bg-white'}`}
                     style={paymentMethod === pm.id ? { background: pm.color, borderColor: pm.color } : {}}>
                     <div className={`font-bold text-sm ${paymentMethod === pm.id ? 'text-white' : 'text-gray-900'}`}>{pm.label}</div>
@@ -341,29 +378,39 @@ function DonatePage() {
                   </button>
                 ))}
               </div>
+              {errors.paymentMethod && <p className="text-red-500 text-[10px] mt-1">{errors.paymentMethod.message}</p>}
             </div>
 
             {/* Phone number */}
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block">Mobile Money Number *</label>
-              <div className="relative">
-                <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input className="input-field pl-9" type="tel"
-                  placeholder={paymentMethod === 'MTN' ? '+237 6XX XXX XXX (MTN)' : '+237 69X XXX XXX (Orange)'}
-                  value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
-              </div>
+              <Controller
+                name="phoneNumber"
+                control={control}
+                render={({ field }) => (
+                  <InputPhone
+                    {...field}
+                    defaultCountry="CM"
+                    placeholder={paymentMethod === 'MTN' ? '67X XXX XXX (MTN)' : '69X XXX XXX (Orange)'}
+                    className={errors.phoneNumber ? 'border-red-500' : ''}
+                  />
+                )}
+              />
+              {errors.phoneNumber && <p className="text-red-500 text-[10px] mt-1">{errors.phoneNumber.message}</p>}
               <p className="text-xs text-gray-400 mt-1">You will receive a payment prompt on this number.</p>
             </div>
 
-            <button className="btn-primary w-full text-sm py-3 flex items-center justify-center gap-2"
-              onClick={handleDonate} disabled={donateMutation.isPending || !finalAmount}>
-              {donateMutation.isPending ? <><Loader2 size={16} className="animate-spin" /> Initiating Payment…</> : `Donate ${formatXAF(finalAmount || 0)}`}
+            <button 
+              type="submit"
+              className="btn-primary w-full text-sm py-3 flex items-center justify-center gap-2"
+              disabled={donateMutation.isPending || !amount}>
+              {donateMutation.isPending ? <><Loader2 size={16} className="animate-spin" /> Initiating Payment…</> : `Donate ${formatXAF(amount || 0)}`}
             </button>
 
             <p className="text-center text-xs text-gray-400 leading-relaxed">
               3% covers the payment aggregator, 5% supports operations, and 92% goes to healthcare.
             </p>
-          </div>
+          </form>
         </div>
       </div>
     </div>
