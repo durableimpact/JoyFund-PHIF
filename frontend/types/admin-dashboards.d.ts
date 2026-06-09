@@ -175,3 +175,51 @@ declare interface SystemAdminDashboardSerializer {
   pending_claims: number;
   escrow_balance: number;
 }
+
+
+declare interface UserMinimal {
+  id: string
+  first_name: string
+  last_name: string
+  profile_picture: string | null
+}
+
+declare interface DonorMinimal {
+  id: string
+  user: UserMinimal
+}
+
+declare interface CampaignMinimal {
+  id: string
+  title: string
+  slug: string | null
+  goal_amount: number
+  current_amount: number
+  status: string
+  is_public: boolean
+  start_date: string
+  end_date: string
+  created_at: string
+}
+
+declare interface DonationMinimal {
+  id: string
+  campaign_id: string
+  campaign_title: string
+  campaign_slug: string | null
+  donor_name: string
+  amount: number
+  status: string
+  message: string
+  is_anonymous: boolean
+  created_at: string
+}
+
+declare interface DonorPublicSummary {
+  donor: DonorMinimal
+  campaign_count: number
+  donations_count: number
+  donations_total_amount: number
+  campaigns: CampaignMinimal[]
+  donations: DonationMinimal[]
+}

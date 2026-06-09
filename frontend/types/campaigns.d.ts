@@ -141,7 +141,15 @@ declare interface CampaignLeaderboardEntry {
   goal_amount: number;
   total_net_raised: number;
   progress_percentage: number;
-  donor_name: string;
+  donor: {
+    id:string;
+    user:{
+      id:string;
+      first_name:string;
+      last_name:string;
+      profile_picture:string|null;
+    }
+  };
 }
 
 // ── Donations ──
