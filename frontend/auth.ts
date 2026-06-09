@@ -40,18 +40,33 @@ async function fetchFromAPI<T>(
 async function refreshAccessToken(refreshToken: string): Promise<AuthResponse> {
   console.log("[auth] Refreshing access token")
 
-  const response = await fetchFromAPI<AuthResponse>("/auth/token/", {
+  // Call server-side refresh endpoint instead of exposing secrets to client
+  const response = await fetch("/api/auth/refresh", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: process.env.NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID || "",
-      client_secret: process.env.NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET || "",
+      refreshToken,
     }),
   })
 
+  if (!response.ok) {
+    let errorData: any
+    try {
+      errorData = await response.json()
+      console.error("[auth] Refresh error response:", errorData)
+    } catch {
+      const text = await response.text()
+      console.error("[auth] Refresh error (text):", text)
+      errorData = { error: text || `HTTP ${response.status}` }
+    }
+    throw new Error(JSON.stringify(errorData))
+  }
+
+  const data = await response.json() as AuthResponse
   console.log("[auth] Token refreshed successfully")
-  return response
+  return data
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -194,42 +209,56 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Initial login
       if (user) {
+        console.log("[auth] JWT: Initial login for user:", (user as any).email)
         token.accessToken = (user as any).accessToken
         token.refreshToken = (user as any).refreshToken
         token.role = (user as any).role
         token.userInfo = (user as any).userInfo
         token.expiresAt = (user as any).expiresAt
+        console.log("[auth] JWT: Token set to expire at:", new Date(token.expiresAt as number))
         return token
       }
 
-      // Check if token needs refresh (within 3 minutes of expiration or already expired)
+      // Check if token needs refresh
       const now = Date.now()
       const expiresAt = (token.expiresAt as number) || 0
       const timeUntilExpiry = expiresAt - now
-      const tenMinutesInMs = 10 * 60 * 1000
+      const bufferTimeMs = 5 * 60 * 1000 // Refresh 5 minutes before expiry (more aggressive)
 
-      // If token is expired or expiring within 10 minutes, refresh it
-      if (timeUntilExpiry < tenMinutesInMs) {
+      console.log(
+        `[auth] JWT check - Now: ${new Date(now).toISOString()}, Expires: ${new Date(expiresAt).toISOString()}, TTL: ${Math.round(timeUntilExpiry / 1000)}s`
+      )
+
+      // If token is already expired or expiring within 5 minutes, refresh it
+      if (timeUntilExpiry < bufferTimeMs) {
         console.log(
-          `[auth] Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, refreshing...`
+          `[auth] JWT: Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, attempting refresh...`
         )
 
+        if (!token.refreshToken) {
+          console.error("[auth] JWT: No refresh token available, cannot refresh")
+          return { ...token, error: "NoRefreshToken" }
+        }
+
         try {
-          const refreshedResponse = await refreshAccessToken(
-            token.refreshToken as string
+          const refreshedResponse = await refreshAccessToken(token.refreshToken as string)
+
+          const newExpiresAt = now + refreshedResponse.expires_in * 1000
+          console.log(
+            `[auth] JWT: Refresh successful. New expiry: ${new Date(newExpiresAt).toISOString()}`
           )
 
           return {
             ...token,
             accessToken: refreshedResponse.access_token,
-            refreshToken: refreshedResponse.refresh_token,
-            expiresAt: now + refreshedResponse.expires_in * 1000,
+            refreshToken: refreshedResponse.refresh_token || token.refreshToken,
+            expiresAt: newExpiresAt,
           }
         } catch (error) {
-          console.error("[auth] Token refresh failed - invalidating session:", error)
-          // If refresh fails, invalidate the session by returning null
-          // This will force the user to re-authenticate
-          return null
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          console.error(`[auth] JWT: Token refresh failed: ${errorMessage}`)
+          // Mark session as needing re-authentication
+          return { ...token, error: "RefreshAccessTokenError" }
         }
       }
 
@@ -248,6 +277,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.refreshToken = token.refreshToken as string
       session.role = token.role as USER_ROLE
       session.expiresAt = token.expiresAt as number
+      
+      if (token.error) {
+        (session as any).error = token.error
+      }
       return session
     },
   },
