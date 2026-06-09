@@ -30,7 +30,7 @@ class Donation(models.Model):
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING")
-    message = models.TextField(blank=True)  # "Congrats Junior!"
+    message = models.TextField(blank=True,null=True)  # "Congrats Junior!"
 
     platform_fee_amount = models.DecimalField(
         max_digits=10,

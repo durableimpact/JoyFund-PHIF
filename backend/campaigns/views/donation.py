@@ -351,8 +351,8 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
             failure_url = validated_data['failure_url']
             donor_name = validated_data.get('donor_name', '')
             amount = validated_data['amount']
-            message = validated_data['message']
-            is_anonymous = validated_data['is_anonymous']
+            message = validated_data.get('message', '')
+            is_anonymous = validated_data.get('is_anonymous', False)
 
             normalized_phone = phone_number.replace('+', '').replace(' ', '').replace('-', '')
             if normalized_phone.startswith('0') and len(normalized_phone) == 10:
