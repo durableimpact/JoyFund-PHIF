@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { setCachedToken } from "@/actions/api";
 import { refreshToken as apiRefreshToken } from "@/actions/auth";
 
 /**
@@ -14,13 +13,6 @@ export default function TokenRefreshProvider({ children }: { children: React.Rea
   const { data: session, update } = useSession();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isRefreshingRef = useRef(false);
-
-  // Keep cached token in sync with session
-  useEffect(() => {
-    if (session?.accessToken) {
-      setCachedToken(session.accessToken);
-    }
-  }, [session?.accessToken]);
 
   // Proactive refresh check every 1 minute
   useEffect(() => {
