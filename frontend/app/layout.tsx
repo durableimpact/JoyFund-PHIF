@@ -10,6 +10,7 @@ import TokenRefreshProvider from "@/provider/token-refresh-provider";
 import AppHelmetProvider from "@/provider/helmet-provider";
 import { Toaster } from "@/components/ui/sonner";
 import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const montserrat = localFont({
   src: "../public/font/Montserrat-VariableFont_wght.ttf",
@@ -201,11 +202,12 @@ export default function RootLayout({
             />
           </noscript>
         )}
+
         <SessionProvider>
           <ReactQueryProvider>
             <TokenRefreshProvider>
               <AppHelmetProvider>
-                {children}
+                <TooltipProvider>{children}</TooltipProvider>
               </AppHelmetProvider>
             </TokenRefreshProvider>
             <Toaster />
