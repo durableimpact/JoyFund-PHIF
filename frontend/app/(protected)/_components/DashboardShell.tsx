@@ -15,26 +15,32 @@ export interface NavItem {
 
 interface DashboardShellProps {
   children: React.ReactNode;
-  navItems: NavItem[];
+  navItems?: NavItem[];
   accentColor: string;       // e.g. '#471DDB'
   brandLabel: string;        // e.g. 'System Admin'
   brandSub?: string;         // e.g. 'Full platform oversight'
   headerExtra?: React.ReactNode;
   hospitalName?: string;     // e.g. 'Central Hospital Yaoundé'
+  hideSidebar?: boolean;
 }
 
 export default function DashboardShell({
   children,
-  navItems,
+  navItems = [],
   accentColor,
   brandLabel,
   brandSub,
   headerExtra,
   hospitalName,
+  hideSidebar = false,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
+  const showSidebar = !hideSidebar;
+  const mainContainerClass = showSidebar
+    ? "flex-1 lg:ml-60 flex flex-col min-h-screen"
+    : "flex-1 flex flex-col min-h-screen";
 
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: '/' });
@@ -126,15 +132,17 @@ export default function DashboardShell({
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--background)' }}>
       {/* Desktop Sidebar */}
-      <aside
-        className="hidden lg:flex flex-col w-60 fixed top-0 left-0 h-full z-40"
-        style={{ background: accentColor }}
-      >
-        <SidebarContent />
-      </aside>
+      {showSidebar && (
+        <aside
+          className="hidden lg:flex flex-col w-60 fixed top-0 left-0 h-full z-40"
+          style={{ background: accentColor }}
+        >
+          <SidebarContent />
+        </aside>
+      )}
 
       {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
+      {showSidebar && sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div
             className="flex flex-col w-64"
@@ -156,15 +164,17 @@ export default function DashboardShell({
       )}
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
+      <div className={mainContainerClass}>
         {/* Top bar */}
         <header className="bg-white border-b border-gray-100 px-4 lg:px-6 py-3 flex items-center gap-3 sticky top-0 z-30">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-gray-600 hover:text-gray-900 p-1"
-          >
-            <Menu size={20} />
-          </button>
+          {showSidebar && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden text-gray-600 hover:text-gray-900 p-1"
+            >
+              <Menu size={20} />
+            </button>
+          )}
 
           <div className="flex-1" />
 
