@@ -6,9 +6,10 @@ import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "next-auth/react";
 import ReactQueryProvider from "@/provider/react-query-provider";
+import TokenRefreshProvider from "@/provider/token-refresh-provider";
 import AppHelmetProvider from "@/provider/helmet-provider";
-import { Toaster } from "@/components/ui/sonner"
-import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker"
+import { Toaster } from "@/components/ui/sonner";
+import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker";
 
 const montserrat = localFont({
   src: "../public/font/Montserrat-VariableFont_wght.ttf",
@@ -26,29 +27,27 @@ const jsonLd = {
     {
       "@type": "NonprofitOrganization",
       "@id": "https://joy-fund.com/#organization",
-      "name": "JoyFund",
-      "description": "A digital Njangi and transparent crowdfunding platform funding maternal healthcare and safe deliveries for vulnerable women across Cameroon.",
-      "url": "https://joy-fund.com",
-      "logo": "https://joy-fund.com/logo.png",
-      "foundingLocation": {
+      name: "JoyFund",
+      description:
+        "A digital Njangi and transparent crowdfunding platform funding maternal healthcare and safe deliveries for vulnerable women across Cameroon.",
+      url: "https://joy-fund.com",
+      logo: "https://joy-fund.com/logo.png",
+      foundingLocation: {
         "@type": "Place",
-        "name": "Cameroon"
+        name: "Cameroon",
       },
-      "sameAs": [
-        "https://twitter.com/joyfund",
-        "https://facebook.com/joyfund"
-      ]
+      sameAs: ["https://twitter.com/joyfund", "https://facebook.com/joyfund"],
     },
     {
       "@type": "WebSite",
       "@id": "https://joy-fund.com/#website",
-      "url": "https://joy-fund.com",
-      "name": "JoyFund",
-      "publisher": {
-        "@id": "https://joy-fund.com/#organization"
-      }
-    }
-  ]
+      url: "https://joy-fund.com",
+      name: "JoyFund",
+      publisher: {
+        "@id": "https://joy-fund.com/#organization",
+      },
+    },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -69,7 +68,14 @@ export const metadata: Metadata = {
     title: "JoyFund",
     description:
       "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "JoyFund - Solidarity Health Insurance for Cameroon" }],
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "JoyFund - Solidarity Health Insurance for Cameroon",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -81,8 +87,16 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   icons: {
     icon: [
-      { url: "/assets/favicon_io/joyfund-android-chrome-192x192.png", type: "image/png", sizes: "192x192" },
-      { url: "/assets/favicon_io/joyfund-favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      {
+        url: "/assets/favicon_io/joyfund-android-chrome-192x192.png",
+        type: "image/png",
+        sizes: "192x192",
+      },
+      {
+        url: "/assets/favicon_io/joyfund-favicon-16x16.png",
+        type: "image/png",
+        sizes: "16x16",
+      },
     ],
     apple: "/assets/favicon_io/joyfund-apple-touch-icon.png",
     shortcut: "/assets/favicon_io/joyfund-android-chrome-192x192.png",
@@ -97,21 +111,43 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      suppressHydrationWarning suppressContentEditableWarning
+      suppressHydrationWarning
+      suppressContentEditableWarning
       className={cn("h-full", montserrat.variable)}
     >
       <head>
-        <meta name="google-site-verification" content="3Td7-qGUvMTtrrQ-0rVom8KwPSNikh9eLKgGzZMpCdk" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon_io/joyfund-apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
-        <link rel="shortcut icon" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
-        <link rel="icon" href="/assets/favicon_io/joyfund-android-chrome-192x192.png" />
-        
+        <meta
+          name="google-site-verification"
+          content="3Td7-qGUvMTtrrQ-0rVom8KwPSNikh9eLKgGzZMpCdk"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/assets/favicon_io/joyfund-apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/assets/favicon_io/joyfund-android-chrome-192x192.png"
+        />
+        <link
+          rel="shortcut icon"
+          href="/assets/favicon_io/joyfund-android-chrome-192x192.png"
+        />
+        <link
+          rel="icon"
+          href="/assets/favicon_io/joyfund-android-chrome-192x192.png"
+        />
+
         {/* Google Analytics - Only in production */}
-        {process.env.NODE_ENV === 'production' && (
+        {process.env.NODE_ENV === "production" && (
           <>
             {/* Google tag (gtag.js) - GA4 */}
-            <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYBNHE5J4B"></script>
+            <script
+              async
+              src="https://www.googletagmanager.com/gtag/js?id=G-XYBNHE5J4B"
+            ></script>
             <script
               dangerouslySetInnerHTML={{
                 __html: `
@@ -146,26 +182,35 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body suppressHydrationWarning suppressContentEditableWarning className={cn("min-h-full flex flex-col antialiased font-sans", geistMono.variable)}>
+      <body
+        suppressHydrationWarning
+        suppressContentEditableWarning
+        className={cn(
+          "min-h-full flex flex-col antialiased font-sans",
+          geistMono.variable,
+        )}
+      >
         {/* Google Tag Manager (noscript) - Only in production */}
-        {process.env.NODE_ENV === 'production' && (
+        {process.env.NODE_ENV === "production" && (
           <noscript>
             <iframe
               src="https://www.googletagmanager.com/ns.html?id=GTM-PDSWHHB9"
               height="0"
               width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
+              style={{ display: "none", visibility: "hidden" }}
             />
           </noscript>
         )}
         <SessionProvider>
-          <ReactQueryProvider>
-            <AppHelmetProvider>
-              {children}
-            </AppHelmetProvider>
-          </ReactQueryProvider>
-          <Toaster />
-          <RegisterServiceWorker />
+          <TokenRefreshProvider>
+            <ReactQueryProvider>
+              <AppHelmetProvider>
+                {children}
+              </AppHelmetProvider>
+            </ReactQueryProvider>
+            <Toaster />
+            <RegisterServiceWorker />
+          </TokenRefreshProvider>
         </SessionProvider>
       </body>
     </html>
