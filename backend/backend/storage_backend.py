@@ -1,17 +1,42 @@
 from storages.backends.s3boto3 import S3Boto3Storage
 import boto3
 from django.conf import settings
+import logging
+from logs.services import LogService
+
+logger = logging.getLogger(__name__)
 
 class MediaStorage(S3Boto3Storage):
     location = 'media'
-    default_acl = 'private'
+    default_acl = 'public-read'  # Changed to public-read as per settings.py AWS_DEFAULT_ACL
     file_overwrite = False
     custom_domain = False
     
+    def _save(self, name, content):
+        """
+        Override _save to catch and log errors during upload to Backblaze B2.
+        """
+        try:
+            return super()._save(name, content)
+        except Exception as e:
+            # Log the error with full context
+            LogService.log_error(e, extra={
+                'storage_action': 'save',
+                'file_name': name,
+                'bucket_name': self.bucket_name or getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'unknown'),
+                'endpoint': getattr(settings, 'AWS_S3_ENDPOINT_URL', 'unknown')
+            })
+            raise e
+
     def url(self, name, parameters=None, expire=3600):
         """
-        Generate a presigned URL for the file that expires in 1 hour
+        Generate a URL for the file. 
+        If it's private, it generates a presigned URL.
         """
+        # If AWS_QUERYSTRING_AUTH is False (from settings), we might want simple URLs
+        if not getattr(settings, 'AWS_QUERYSTRING_AUTH', True):
+            return super().url(name, parameters, expire)
+            
         try:
             s3_client = boto3.client(
                 's3',
@@ -31,44 +56,10 @@ class MediaStorage(S3Boto3Storage):
             )
             return url
         except Exception as e:
-            print(f"Error generating URL: {str(e)}")
-            return None
+            logger.error(f"Error generating presigned URL: {str(e)}")
+            # Fallback to default behavior
+            return super().url(name, parameters, expire)
 
-# from storages.backends.s3boto3 import S3Boto3Storage
-
-# class MediaStorage(S3Boto3Storage):
-#     location = 'media'
-#     default_acl = 'private'
-#     file_overwrite = False
-#     custom_domain = False
-
-# from storages.backends.s3boto3 import S3Boto3Storage
-# from django.conf import settings
-
-# class StaticStorage(S3Boto3Storage):
-#     location = 'static'
-#     default_acl = 'public-read'
-
-# class PublicMediaStorage(S3Boto3Storage):
-#     location = 'media'
-#     default_acl = 'public-read'
-#     file_overwrite = False
-
-# class PrivateMediaStorage(S3Boto3Storage):
-#     location = settings.AWS_PRIVATE_MEDIA_LOCATION
-#     bucket_name = settings.AWS_PRIVATE_BUCKET_NAME
-#     default_acl = 'private'
-#     file_overwrite = False
-#     custom_domain = False
-
-
-# class B2Storage(S3Boto3Storage):
-#     location = 'media'
-#     file_overwrite = False
-#     default_acl = 'private'
-    
-#     def get_default_settings(self):
-#         defaults = super().get_default_settings()
-#         defaults['AWS_S3_SIGNATURE_VERSION'] = 's3v4'
-#         defaults['AWS_S3_CHECKSUM_ALGORITHM'] = None
-#         return defaults
+class StaticStorage(S3Boto3Storage):
+    location = 'static'
+    default_acl = 'public-read'

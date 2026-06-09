@@ -5,12 +5,15 @@ LogService - Utility for logging activities, requests, and errors.
 import traceback
 import uuid
 import json
+import logging
 from typing import Optional, Any, Dict
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
 from .models import ActivityLog, ErrorLog
+import botocore.exceptions
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class LogService:
@@ -146,8 +149,6 @@ class LogService:
             return log_entry
         except Exception as e:
             # Log to console if there's an error creating the log entry
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"Failed to create activity log: {str(e)}")
             raise
 
@@ -294,6 +295,17 @@ class LogService:
         error_message = str(exc)
         stack_trace = traceback.format_exc()
 
+        # Specific handling for B2/S3 errors
+        if isinstance(exc, botocore.exceptions.ClientError):
+            extra['b2_error_code'] = exc.response.get('Error', {}).get('Code')
+            extra['b2_error_message'] = exc.response.get('Error', {}).get('Message')
+            extra['b2_response_metadata'] = exc.response.get('ResponseMetadata')
+            error_message = f"Backblaze B2 Error: {extra['b2_error_code']} - {extra['b2_error_message']}"
+            logger.error(f"Backblaze B2 Storage Error: {error_message}", extra=extra)
+        elif isinstance(exc, botocore.exceptions.EndpointConnectionError):
+            error_message = f"Backblaze B2 Connection Error: {str(exc)}"
+            logger.error(error_message)
+
         try:
             error_log = ErrorLog.objects.create(
                 request_id=request_meta['request_id'],
@@ -307,7 +319,5 @@ class LogService:
             return error_log
         except Exception as e:
             # Log to console if there's an error creating the error log
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"Failed to create error log: {str(e)}")
             raise
