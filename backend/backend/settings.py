@@ -448,6 +448,7 @@ CORS_ALLOW_HEADERS = [
     "authorization",
     "content-type",
     "cache-control",
+    "pragma",
     "dnt",
     "origin",
     "user-agent",
