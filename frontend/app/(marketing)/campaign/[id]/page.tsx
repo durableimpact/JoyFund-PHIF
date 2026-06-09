@@ -431,6 +431,17 @@ function TransparencyTimeline({
   transactions: any[];
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [filterType, setFilterType] = useState<string>("all");
+
+  const uniqueTypes = useMemo(() => {
+    const types = new Set<string>(["all"]);
+    if (donations.length > 0) types.add("donation");
+    transactions.forEach(tx => {
+       const t = tx.transaction_type?.toLowerCase().replace(/_/g, "-");
+       if (t) types.add(t);
+    });
+    return Array.from(types);
+  }, [donations.length, transactions]);
 
   const timeline = useMemo(() => {
     const items = [
@@ -454,10 +465,13 @@ function TransparencyTimeline({
       })),
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+    if (filterType !== "all") {
+      return items.filter((item) => item.type === filterType);
+    }
     return items;
-  }, [donations, transactions]);
+  }, [donations, transactions, filterType]);
 
-  if (timeline.length === 0) {
+  if (donations.length === 0 && transactions.length === 0) {
     return (
       <div className="bg-gray-50 rounded-3xl p-14 text-center border-2 border-dashed border-gray-200">
         <History className="mx-auto mb-4 text-gray-300 w-10 h-10" />
@@ -473,10 +487,33 @@ function TransparencyTimeline({
 
   return (
     <>
+      {uniqueTypes.length > 2 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {uniqueTypes.map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilterType(type)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-bold transition-colors capitalize border",
+                filterType === type 
+                  ? "bg-[#1DB1DB] text-white border-[#1DB1DB]" 
+                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700"
+              )}
+            >
+              {type.replace(/-/g, " ")}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="space-y-0">
-        {inline.map((item) => (
-          <TimelineRow key={item.id} item={item} />
-        ))}
+        {timeline.length === 0 ? (
+          <div className="py-8 text-center text-sm text-gray-500 italic">No items match this filter.</div>
+        ) : (
+          inline.map((item) => (
+            <TimelineRow key={item.id} item={item} />
+          ))
+        )}
       </div>
 
       {remaining > 0 && (
