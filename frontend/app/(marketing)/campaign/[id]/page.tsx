@@ -728,17 +728,15 @@ export default function CampaignPage() {
           {/* ── Left Column: Media & Story ── */}
           <div className="min-w-0 space-y-12">
             {/* Main Image */}
-            <div className="relative aspect-[16/10] w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50">
-              {campaign.cover_image ? (
+            {campaign.cover_image && (
+              <div className="relative aspect-16/10 w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50">
                 <img
                   src={campaign.cover_image}
                   alt={campaign.title}
                   className="w-full h-full object-cover"
                 />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#1DB1DB] via-[#1D38DB] to-[#471DDB]" />
-              )}
-            </div>
+              </div>
+            )}
 
             <Tabs defaultValue="story" className="w-full">
               <TabsList
