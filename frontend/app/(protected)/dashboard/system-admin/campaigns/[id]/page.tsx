@@ -22,7 +22,6 @@ import {
   Building2,
   Clock,
   CheckCircle2,
-  Filter,
 } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
 import { getCampaign, listCampaignDonations } from "@/actions/campaigns";
@@ -35,15 +34,16 @@ export default function AdminCampaignDetailPage() {
   const [txFilter, setTxFilter] = useState("ALL");
 
   // Fetch campaign
-  const { data: response, isLoading, isError } = useQuery({
-    queryKey: ["admin-campaign", id],
+  const { data: response, isLoading, isError, error: queryError } = useQuery({
+    queryKey: ["admin-campaign", id, token],
     queryFn: async () => await getCampaign(id as string, token),
     enabled: !!id && sessionStatus !== "loading",
+    retry: 1,
   });
 
   // Fetch donations
   const { data: donationsResponse, isLoading: donationsLoading } = useQuery({
-    queryKey: ["admin-campaign-donations", id],
+    queryKey: ["admin-campaign-donations", id, token],
     queryFn: async () =>
       await listCampaignDonations(id as string, { page_size: "100" }, token),
     enabled: !!id && sessionStatus !== "loading",
@@ -114,23 +114,32 @@ export default function AdminCampaignDetailPage() {
     );
   }
 
-  if (!campaign) {
+  if (isError || !campaign) {
+    const isUnauthorized = (queryError as any)?.message?.includes('401') || (queryError as any)?.message?.includes('403');
+    
     return (
-      <div className="text-center py-20">
+      <div className="text-center py-20 px-4">
         <AlertTriangle size={48} className="mx-auto text-amber-500 mb-4" />
         <h3 className="text-lg font-bold text-gray-900 mb-2">
-          Campaign Not Found
+          {isUnauthorized ? 'Access Denied' : 'Campaign Not Found'}
         </h3>
-        <p className="text-gray-500 mb-6">
-          The campaign you are looking for does not exist or has been removed.
+        <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+          {isUnauthorized 
+            ? 'You do not have the required permissions to audit this campaign or your session has expired.'
+            : 'The campaign you are looking for does not exist or has been removed.'}
         </p>
-        <button
-          onClick={() => router.back()}
-          className="btn-admin inline-flex items-center gap-2"
-          style={{ background: "#471DDB" }}
-        >
-          <ArrowLeft size={16} /> Go Back
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button onClick={() => router.back()} className="btn-secondary px-6 py-2 rounded-xl text-sm font-bold border border-gray-200">
+            Go Back
+          </button>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn-primary px-6 py-2 rounded-xl text-sm font-bold text-white"
+            style={{ background: '#471DDB' }}
+          >
+            Retry Fetch
+          </button>
+        </div>
       </div>
     );
   }
