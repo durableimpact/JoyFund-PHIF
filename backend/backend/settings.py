@@ -395,6 +395,13 @@ SWAGGER_SETTINGS = {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Security & SSL Configuration
+# ─────────────────────────────────────────────────────────────────────────────
+# If Django is behind an SSL-terminating proxy (like Nginx), this header
+# tells Django the request was originally HTTPS.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# ─────────────────────────────────────────────────────────────────────────────
 # CORS Configuration (django-cors-headers)
 # ─────────────────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = env.list(
