@@ -108,7 +108,7 @@ export default function DonorDashboardPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      {/* <Navbar /> */}
+      <Navbar />
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-start justify-between mb-8">
