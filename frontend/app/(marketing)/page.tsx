@@ -68,8 +68,18 @@ const testimonials = [
 export default function HomePage() {
   const [feedIdx, setFeedIdx] = useState(0);
   const activityFeed = [
-    { id: 1, type: 'donation', message: '20 XAF contributed to Solange & Eric\'s Wedding JoyFund', timeAgo: '3 hours ago' },
-    { id: 2, type: 'voucher', message: 'Voucher JF3R8T generated for BEN-0071', timeAgo: '4 hours ago' },
+    {
+      id: 1,
+      type: "donation",
+      message: "20 XAF contributed to Solange & Eric's Wedding JoyFund",
+      timeAgo: "3 hours ago",
+    },
+    {
+      id: 2,
+      type: "voucher",
+      message: "Voucher JF3R8T generated for BEN-0071",
+      timeAgo: "4 hours ago",
+    },
   ];
 
   // Fetch campaigns with React Query
@@ -86,7 +96,10 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    const t = setInterval(() => setFeedIdx((i: number) => (i + 1) % activityFeed.length), 3000);
+    const t = setInterval(
+      () => setFeedIdx((i: number) => (i + 1) % activityFeed.length),
+      3000,
+    );
     return () => clearInterval(t);
   }, []);
 
@@ -167,12 +180,12 @@ export default function HomePage() {
         {/* Hero content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-24">
           {/* Live toast pill */}
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
+          {/*<div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
               <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
               <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span>
-          </div>
+          </div>*/}
 
           {/* Headline */}
           <h1
@@ -261,7 +274,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-black text-[#1A1A2E]">Celebrate → Pool → Care</h2>
             <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">Three simple steps transform your personal milestone into life-saving maternal healthcare.</p>
           </div> */}
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+          {/*<div className="relative rounded-3xl overflow-hidden shadow-2xl">
             <video
               src="/assets/videos/about-joyfund-intro-vid.mp4"
               className="w-full h-full min-h-80"
@@ -271,7 +284,7 @@ export default function HomePage() {
               loop
               playsInline
             />
-          </div>
+          </div>*/}
         </div>
       </section>
 
@@ -304,7 +317,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="py-20 px-4">
+      {/*<section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-black text-[#1A1A2E]">
@@ -342,7 +355,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section>*/}
 
       {/* ── CTA Banner ── */}
       <section

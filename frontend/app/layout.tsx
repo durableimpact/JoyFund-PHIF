@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { SessionProvider } from "next-auth/react";
 import ReactQueryProvider from "@/provider/react-query-provider";
 import TokenRefreshProvider from "@/provider/token-refresh-provider";
+import AuthCacheSyncProvider from "@/provider/auth-cache-sync-provider";
 import AppHelmetProvider from "@/provider/helmet-provider";
 import { Toaster } from "@/components/ui/sonner";
 import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker";
@@ -205,11 +206,13 @@ export default function RootLayout({
 
         <SessionProvider>
           <ReactQueryProvider>
-            <TokenRefreshProvider>
-              <AppHelmetProvider>
-                <TooltipProvider>{children}</TooltipProvider>
-              </AppHelmetProvider>
-            </TokenRefreshProvider>
+            <AuthCacheSyncProvider>
+              <TokenRefreshProvider>
+                <AppHelmetProvider>
+                  <TooltipProvider>{children}</TooltipProvider>
+                </AppHelmetProvider>
+              </TokenRefreshProvider>
+            </AuthCacheSyncProvider>
             <Toaster />
             <RegisterServiceWorker />
           </ReactQueryProvider>

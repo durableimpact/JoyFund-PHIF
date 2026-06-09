@@ -1,63 +1,78 @@
-'use client';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
-import { Menu, X } from 'lucide-react';
+"use client";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Impact', href: '/#make-an-impact' },
+  { label: "Home", href: "/" },
+  { label: "Impact", href: "/#make-an-impact" },
   // { label: 'How it Works', href: '/#how-it-works' },
-  { label: 'About', href: '/about' },
-  { label: 'Explore', href: '/explore' },
+  { label: "About", href: "/about" },
+  { label: "Explore", href: "/explore" },
 ];
 
 const roleDashboardMap: Record<string, string> = {
-  DONOR: '/dashboard/donor',
-  SYSTEM_ADMIN: '/dashboard/system-admin',
-  HOSPITAL_ADMIN: '/dashboard/hospital-admin',
-  RECEPTIONIST: '/dashboard/receptionist',
-  SOCIAL_WORKER: '/dashboard/social-worker',
+  DONOR: "/dashboard/donor",
+  SYSTEM_ADMIN: "/dashboard/system-admin",
+  HOSPITAL_ADMIN: "/dashboard/hospital-admin",
+  RECEPTIONIST: "/dashboard/receptionist",
+  SOCIAL_WORKER: "/dashboard/social-worker",
 };
 
-export default function Navbar({ transparent = false }: { transparent?: boolean }) {
+export default function Navbar({
+  transparent = false,
+}: {
+  transparent?: boolean;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const queryClient = useQueryClient();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handler);
-    return () => window.removeEventListener('scroll', handler);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const isLoggedIn = !!session;
-  const useDark = (transparent || pathname === '/') && !scrolled && !mobileOpen;
-  const userRole = (session?.user as any)?.role as string || '';
-  const dashboardHref = roleDashboardMap[userRole] || '/dashboard';
+  const isLoggedIn = status === "authenticated" && !isSigningOut;
+  const useDark = (transparent || pathname === "/") && !scrolled && !mobileOpen;
+  const userRole = session?.role || session?.user?.role || "";
+  const dashboardHref = roleDashboardMap[userRole] || "/dashboard";
 
   const handleSignOut = async () => {
-    await signOut({ redirect: false });
-    router.push('/');
+    setIsSigningOut(true);
+    setMobileOpen(false);
+
+    try {
+      queryClient.clear();
+      await signOut({ redirect: false });
+      router.replace("/");
+      router.refresh();
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
     <nav
       className={`${
         useDark
-          ? 'absolute top-0 left-0'
-          : 'fixed top-0 left-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm'
+          ? "absolute top-0 left-0"
+          : "fixed top-0 left-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm"
       } w-full z-50 px-6 md:px-12 py-4 transition-all duration-300`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-
         {/* Logo */}
         <Link
           href="/"
-          className={`flex items-center gap-2 font-black text-xl tracking-tight ${useDark ? 'text-white' : 'text-[#1A1A2E]'}`}
+          className={`flex items-center gap-2 font-black text-xl tracking-tight ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
         >
           <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
             <img
@@ -77,12 +92,12 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
               href={link.href}
               className={`text-sm font-medium transition-colors ${
                 useDark
-                  ? 'text-white/85 hover:text-white'
-                  : 'text-gray-600 hover:text-[#1D38DB]'
+                  ? "text-white/85 hover:text-white"
+                  : "text-gray-600 hover:text-[#1D38DB]"
               } ${
                 pathname === link.href
-                  ? 'font-semibold underline underline-offset-4'
-                  : ''
+                  ? "font-semibold underline underline-offset-4"
+                  : ""
               }`}
             >
               {link.label}
@@ -105,7 +120,9 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
               <button
                 onClick={handleSignOut}
                 className={`text-sm font-medium transition-colors px-3 py-2 ${
-                  useDark ? 'text-white/85 hover:text-white' : 'text-gray-600 hover:text-[#1D38DB]'
+                  useDark
+                    ? "text-white/85 hover:text-white"
+                    : "text-gray-600 hover:text-[#1D38DB]"
                 }`}
               >
                 Sign Out
@@ -116,7 +133,9 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
               <Link
                 href="/login"
                 className={`text-sm font-medium transition-colors px-3 py-2 ${
-                  useDark ? 'text-white/85 hover:text-white' : 'text-gray-600 hover:text-[#1D38DB]'
+                  useDark
+                    ? "text-white/85 hover:text-white"
+                    : "text-gray-600 hover:text-[#1D38DB]"
                 }`}
               >
                 Sign In
@@ -133,7 +152,7 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
 
         {/* Mobile hamburger */}
         <button
-          className={`md:hidden ${useDark ? 'text-white' : 'text-[#1A1A2E]'}`}
+          className={`md:hidden ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -149,7 +168,7 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
               href={link.href}
               onClick={() => setMobileOpen(false)}
               className={`text-gray-700 hover:text-[#1D38DB] font-medium transition-colors ${
-                pathname === link.href ? 'font-semibold text-[#1D38DB]' : ''
+                pathname === link.href ? "font-semibold text-[#1D38DB]" : ""
               }`}
             >
               {link.label}

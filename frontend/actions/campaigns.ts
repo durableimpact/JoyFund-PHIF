@@ -41,9 +41,11 @@ export const listCampaigns = async (params?: Partial<CampaignFilter>) => {
   }
 };
 
-export const getCampaign = async (id: string) => {
+export const getCampaign = async (id: string, access_token?: string) => {
   try {
-    const { data } = await api.get<CampaignDetail>(`/api/campaigns/${id}/`);
+    const { data } = await api.get<CampaignDetail>(`/api/campaigns/${id}/`, {
+      headers: access_token ? { Authorization: `Bearer ${access_token}` } : {},
+    });
     return data;
   } catch (e) {
     handleError(e);
@@ -161,11 +163,15 @@ export const donateToCampaign = async (
 export const listCampaignDonations = async (
   campaignId: string,
   params?: Record<string, string>,
+  access_token?: string,
 ) => {
   try {
     const { data } = await api.get<PaginationResponse<Donation>>(
       `/api/campaigns/${campaignId}/donations/`,
-      { params },
+      { 
+        params,
+        headers: access_token ? { Authorization: `Bearer ${access_token}` } : {},
+      },
     );
     return data;
   } catch (e) {

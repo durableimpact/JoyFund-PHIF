@@ -1,56 +1,58 @@
-'use client';
-import Image from 'next/image';
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { signIn } from 'next-auth/react';
-import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+"use client";
+import Image from "next/image";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const ROLE_HOME: Record<string, string> = {
-  DONOR: '/dashboard/donor',
-  SYSTEM_ADMIN: '/dashboard/admin',
-  HOSPITAL_ADMIN: '/dashboard/hospital-admin',
-  RECEPTIONIST: '/dashboard/receptionist',
-  SOCIAL_WORKER: '/dashboard/social-worker',
+  DONOR: "/dashboard/donor",
+  SYSTEM_ADMIN: "/dashboard/admin",
+  HOSPITAL_ADMIN: "/dashboard/hospital-admin",
+  RECEPTIONIST: "/dashboard/receptionist",
+  SOCIAL_WORKER: "/dashboard/social-worker",
 };
 
 function getRedirectPath(role: string | undefined) {
-  return ROLE_HOME[role as keyof typeof ROLE_HOME] ?? '/dashboard';
+  return ROLE_HOME[role as keyof typeof ROLE_HOME] ?? "/dashboard";
 }
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectParam = searchParams?.get('redirect') || undefined;
+  const queryClient = useQueryClient();
+  const redirectParam = searchParams?.get("redirect") || undefined;
 
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
-      console.log('[login] Attempting to sign in with:', { email: form.email });
-      const result = await signIn('credentials', {
+      console.log("[login] Attempting to sign in with:", { email: form.email });
+      const result = await signIn("credentials", {
         email: form.email,
         password: form.password,
         redirect: false,
-        callbackUrl: redirectParam || '/dashboard',
+        callbackUrl: redirectParam || "/dashboard",
       });
 
-      console.log('[login] SignIn result:', result);
+      console.log("[login] SignIn result:", result);
 
       // Prefer explicit error checking — some providers may return 200
       // even when authentication failed. Check `error` first.
       if (result?.error) {
-        let errorMsg = 'Invalid email or password.';
+        let errorMsg = "Invalid email or password.";
 
-        if (typeof result.error === 'string') {
+        if (typeof result.error === "string") {
           // Try to parse JSON errors returned from the backend
           try {
             const parsed = JSON.parse(result.error);
@@ -61,23 +63,25 @@ function LoginPageContent() {
           } catch (_) {
             // Not JSON — map common NextAuth error codes to user-friendly messages
             switch (result.error) {
-              case 'CredentialsSignin':
-                errorMsg = 'Invalid email or password. Please check your credentials and try again.';
+              case "CredentialsSignin":
+                errorMsg =
+                  "Invalid email or password. Please check your credentials and try again.";
                 break;
-              case 'OAuthAccountNotLinked':
-                errorMsg = 'An account with that email already exists. Please sign in using the original provider.';
+              case "OAuthAccountNotLinked":
+                errorMsg =
+                  "An account with that email already exists. Please sign in using the original provider.";
                 break;
-              case 'SessionRequired':
-                errorMsg = 'Your session has expired. Please sign in again.';
+              case "SessionRequired":
+                errorMsg = "Your session has expired. Please sign in again.";
                 break;
               default:
                 // Fallback to the raw string but make it presentable
-                errorMsg = result.error.replace(/([A-Z])/g, ' $1').trim();
+                errorMsg = result.error.replace(/([A-Z])/g, " $1").trim();
             }
           }
         }
 
-        console.error('[login] Sign in failed:', result.error, result);
+        console.error("[login] Sign in failed:", result.error, result);
         setError(errorMsg);
         toast.error(errorMsg);
         return;
@@ -85,30 +89,33 @@ function LoginPageContent() {
 
       // Fallback: check `ok` / `status` to ensure a successful response
       if (!result?.ok || (result?.status && result.status >= 400)) {
-        const errorMsg = result?.status ? `Sign in failed (status ${result.status}).` : 'Invalid email or password.';
-        console.error('[login] Sign in failed:', errorMsg, result);
+        const errorMsg = result?.status
+          ? `Sign in failed (status ${result.status}).`
+          : "Invalid email or password.";
+        console.error("[login] Sign in failed:", errorMsg, result);
         setError(errorMsg);
         toast.error(errorMsg);
         return;
       }
 
       // Success
-      toast.success('Signed in successfully.');
-      console.log('[login] Sign in successful, redirecting...');
+      toast.success("Signed in successfully.");
+      console.log("[login] Sign in successful, redirecting...");
 
       const destination = result?.url
         ? result.url
         : redirectParam
-        ? decodeURIComponent(redirectParam)
-        : '/dashboard';
+          ? decodeURIComponent(redirectParam)
+          : "/dashboard";
 
-      // Use push + refresh to ensure app router updates and session is revalidated
-      await router.push(destination);
-      router.refresh();
+      queryClient.clear();
 
+      // Force a full document navigation so the authenticated session cookie is
+      // available before the dashboard route initializes.
+      window.location.replace(destination);
     } catch (error) {
-      console.error('[login] Unexpected error:', error);
-      const message = 'Connection error. Please try again.';
+      console.error("[login] Unexpected error:", error);
+      const message = "Connection error. Please try again.";
       setError(message);
       toast.error(message);
     } finally {
@@ -117,9 +124,11 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="py-12 flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
+    <div
+      className="py-12 flex items-center justify-center px-4"
+      style={{ background: "var(--background)" }}
+    >
       <div className="w-full max-w-xl">
-
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white mx-auto mb-4 flex items-center justify-center">
@@ -131,13 +140,19 @@ function LoginPageContent() {
               className="object-cover"
             />
           </div>
-          <h1 className="text-2xl font-black text-[#1A1A2E]">Sign in to JoyFund</h1>
-          <p className="text-gray-500 text-sm mt-2">Enter your credentials to access your portal</p>
+          <h1 className="text-2xl font-black text-[#1A1A2E]">
+            Sign in to JoyFund
+          </h1>
+          <p className="text-gray-500 text-sm mt-2">
+            Enter your credentials to access your portal
+          </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-5">
-
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-5"
+        >
           {error && (
             <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">
               {error}
@@ -146,7 +161,9 @@ function LoginPageContent() {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">Email address</label>
+            <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
+              Email address
+            </label>
             <input
               type="email"
               required
@@ -160,12 +177,19 @@ function LoginPageContent() {
           {/* Password */}
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-sm font-semibold text-[#1A1A2E]">Password</label>
-              <Link href="/forgot-password" className="text-xs text-[#1DB1DB] hover:underline">Forgot password?</Link>
+              <label className="block text-sm font-semibold text-[#1A1A2E]">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[#1DB1DB] hover:underline"
+              >
+                Forgot password?
+              </Link>
             </div>
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 required
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -187,15 +211,24 @@ function LoginPageContent() {
             type="submit"
             disabled={loading}
             className="w-full py-3 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-opacity disabled:opacity-60"
-            style={{ background: 'var(--primary)' }}
+            style={{ background: "var(--primary)" }}
           >
-            {loading ? <><Loader2 size={16} className="animate-spin" /> Signing in...</> : 'Sign In'}
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Signing in...
+              </>
+            ) : (
+              "Sign In"
+            )}
           </button>
 
           {/* Register link */}
           <p className="text-center text-sm text-gray-500">
-            New donor?{' '}
-            <Link href="/register" className="text-[#1DB1DB] font-semibold hover:underline">
+            New donor?{" "}
+            <Link
+              href="/register"
+              className="text-[#1DB1DB] font-semibold hover:underline"
+            >
               Create a JoyFund account
             </Link>
           </p>
@@ -207,7 +240,13 @@ function LoginPageContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#1DB1DB] border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[#1DB1DB] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
       <LoginPageContent />
     </Suspense>
   );

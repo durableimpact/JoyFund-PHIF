@@ -55,6 +55,8 @@ import { redirect } from "next/navigation"
 export async function requireAuth() {
   const session = await auth()
 
+  console.log("Session : ",session)
+
   if (!session) {
     redirect("/login")
   }
