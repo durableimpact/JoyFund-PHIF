@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "puml_generator",
     "django_smart_ratelimit",
-    "axes",
+    # "axes",  # temporarily disabled
     "django_prometheus",
     # Local apps
     "logs",  # Logging system - must be before other apps to ensure proper app initialization
@@ -92,7 +92,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "axes.middleware.AxesMiddleware",
+    # "axes.middleware.AxesMiddleware",  # temporarily disabled
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
@@ -280,7 +280,7 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "/login/"
 
 AUTHENTICATION_BACKENDS = (
-    "axes.backends.AxesStandaloneBackend",
+    # "axes.backends.AxesStandaloneBackend",  # temporarily disabled
     "social_core.backends.google.GoogleOAuth2",
     "drf_social_oauth2.backends.DjangoOAuth2",
     "django.contrib.auth.backends.ModelBackend",
@@ -338,7 +338,7 @@ SOCIAL_AUTH_PIPELINE = (
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
     # Axes brute-force protection
-    "axes.backends.AxesStandaloneBackend",
+    # "axes.backends.AxesStandaloneBackend",  # temporarily disabled
     # Google OAuth2
     "social_core.backends.google.GoogleOAuth2",
     # Django
@@ -348,6 +348,13 @@ AUTHENTICATION_BACKENDS = (
     # OAuth2
     "oauth2_provider.backends.OAuth2Backend",
 )
+
+# Axes brute-force protection (temporarily disabled)
+# https://django-axes.readthedocs.io/en/latest/4_configuration.html
+# AXES_FAILURE_LIMIT = 8  # Block after 5 failed attempts (instead of default 3)
+# AXES_COOL_OFF_TIME = 0.25  # 15 minutes (0.25 hours) before user can try again
+# AXES_RESET_ON_SUCCESS = True  # Reset failure counter on successful login
+# AXES_LOCKOUT_BY_COMBINATION_USER_AND_IP = True  # Lockout per user/IP combo rather than just IP
 
 # django-oauth-toolkit v3.x requires explicit model settings (as top-level settings)
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"
