@@ -153,6 +153,17 @@ export const getDonorDashboard = async (id: string, access_token: string) => {
   }
 };
 
+export const getDonorPublicSumarry = async (id: string) => {
+  try {
+    const { data } = await api.get<DonorPublicSummary>(
+      `/api/accounts/donors/${id}/public-summary/`,
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
 // ── Hospital Admins CRUD ──
 
 export const listHospitalAdmins = async (

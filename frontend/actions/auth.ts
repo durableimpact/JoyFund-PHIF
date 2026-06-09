@@ -11,43 +11,38 @@ function handleError(e: unknown) {
 
 // ── Token Authentication (OAuth2 password / refresh flow) ──
 
+/**
+ * @deprecated Login is now handled by NextAuth in auth.ts
+ * Use signIn() from next-auth/react instead
+ */
 export const login = async (data: {username:string,password:string}) => {
-  try {
-    const response = await api.post<AuthResponse>("/auth/token/", {
-        username: data.username,
-        password: data.password,
-        grant_type: "password",
-        client_id: process.env.NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID,
-        client_secret: process.env.NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET,
-    });
-    return response.data;
-  } catch (e) { handleError(e); }
+  throw new Error(
+    "Direct login API call is deprecated. Use signIn() from next-auth/react instead."
+  );
 };
 
+/**
+ * Refresh token via server-side endpoint.
+ * The server-side endpoint has access to client credentials securely.
+ * @param refresh_token The refresh token
+ * @returns New access token
+ */
 export const refreshToken = async (refresh_token: string) => {
   try {
-    const response = await api.post<AuthResponse>("/auth/token/", {
-      grant_type: "refresh_token",
-      refresh_token,
-      client_id: process.env.NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID,
-      client_secret: process.env.NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET,
+    const response = await fetch("/api/auth/refresh", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken: refresh_token }),
     });
-    return response.data;
-  } catch (e) { handleError(e); }
-};
 
-// ── OAuth2 Proxy (social auth / convert token) ──
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(JSON.stringify(errorData));
+    }
 
-export const convertToken = async (data: {
-  grant_type: string;
-  backend: string;
-  token: string;
-  client_id: string;
-  client_secret: string;
-}) => {
-  try {
-    const { data: result } = await api.post<AuthResponse>("/auth/convert-token/", data);
-    return result;
+    return await response.json();
   } catch (e) { handleError(e); }
 };
 
