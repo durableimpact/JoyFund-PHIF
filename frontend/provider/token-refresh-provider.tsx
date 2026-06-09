@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { refreshToken as apiRefreshToken } from "@/actions/auth";
 
 /**
@@ -11,13 +12,26 @@ import { refreshToken as apiRefreshToken } from "@/actions/auth";
 
 export default function TokenRefreshProvider({ children }: { children: React.ReactNode }) {
   const { data: session, update } = useSession();
+  const queryClient = useQueryClient();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isRefreshingRef = useRef(false);
+  const hasLoggedOutRef = useRef(false);
 
-  // Proactive refresh check every 1 minute
   useEffect(() => {
-    intervalRef.current = setInterval(async () => {
-      if (!session?.refreshToken || !session?.expiresAt || isRefreshingRef.current) {
+    if (!session || (session as any).error) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
+
+    if (!session.refreshToken || !session.expiresAt) {
+      return;
+    }
+
+    const refreshInterval = setInterval(async () => {
+      if (isRefreshingRef.current || hasLoggedOutRef.current) {
         return;
       }
 
@@ -25,9 +39,10 @@ export default function TokenRefreshProvider({ children }: { children: React.Rea
       const timeUntilExpiry = session.expiresAt - now;
       const tenMinutesInMs = 10 * 60 * 1000;
 
-      // If token is expiring within 10 minutes, proactively refresh it
       if (timeUntilExpiry < tenMinutesInMs) {
-        console.log(`[TokenRefreshProvider] Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, refreshing...`);
+        console.log(
+          `[TokenRefreshProvider] Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, refreshing...`
+        );
         isRefreshingRef.current = true;
         try {
           const refreshed = await apiRefreshToken(session.refreshToken);
@@ -44,16 +59,26 @@ export default function TokenRefreshProvider({ children }: { children: React.Rea
           }
         } catch (error) {
           console.error("[TokenRefreshProvider] Failed to proactively refresh token:", error);
+          try {
+            queryClient.clear();
+          } catch (clearError) {
+            console.error("[TokenRefreshProvider] Failed to clear React Query cache:", clearError);
+          }
+          hasLoggedOutRef.current = true;
+          await signOut({ redirect: true, callbackUrl: "/login" });
         } finally {
           isRefreshingRef.current = false;
         }
       }
-    }, 60 * 1000); // Check every minute
+    }, 60 * 1000);
+
+    intervalRef.current = refreshInterval;
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(refreshInterval);
+      intervalRef.current = null;
     };
-  }, [session, update]);
+  }, [session?.refreshToken, session?.expiresAt, (session as any)?.error, queryClient, update]);
 
   return <>{children}</>;
 }
