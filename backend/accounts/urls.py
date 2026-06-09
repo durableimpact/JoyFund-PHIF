@@ -6,6 +6,7 @@ from accounts.views import (
     DonorListView,
     DonorRegisterView,
     DonorUpdateView,
+    DonorPublicSummaryView,
     DonorDashboardView,
     DonorInfoView,
     HospitalAdminViewSet,
@@ -65,6 +66,7 @@ urlpatterns = [
     path('donors/<uuid:id>/', DonorDetailView.as_view(), name='donor-detail'),
     path('donors/<uuid:id>/update/', DonorUpdateView.as_view(), name='donor-update'),
     path('donors/<uuid:id>/dashboard/', DonorDashboardView.as_view(), name='donor-dashboard'),
+    path('donors/<uuid:id>/public-summary/', DonorPublicSummaryView.as_view(), name='donor-public-summary'),
 
     # -----------------------------------------------------------------------
     # ViewSet Router URLs (Hospital Admins, Social Workers, Receptionists, System Admins)

@@ -11,6 +11,7 @@ from .donor import (
     DonorRegisterSerializer,
     DonorDetailSerializer,
     DonorUpdateSerializer,
+    DonorPublicSummarySerializer,
 )
 from .dashboard import (
     DonorDashboardSerializer,
@@ -74,6 +75,7 @@ __all__ = [
     'DonorRegisterSerializer',
     'DonorDetailSerializer',
     'DonorUpdateSerializer',
+    'DonorPublicSummarySerializer',
     'DonorDashboardSerializer',
     'SocialWorkerDashboardSerializer',
     'ReceptionistDashboardSerializer',

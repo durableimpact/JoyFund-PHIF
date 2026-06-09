@@ -2,6 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from accounts.models import Donor, Role, User
+from campaigns.models import Campaign, Donation
 from .user import UserReadSerializer, UserMinimalSerializer
 
 
@@ -66,12 +67,59 @@ class DonorDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'user']
 
 
+class CampaignMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'goal_amount',
+            'current_amount',
+            'status',
+            'is_public',
+            'start_date',
+            'end_date',
+            'created_at',
+        ]
+
+
+class DonationMinimalSerializer(serializers.ModelSerializer):
+    campaign_id = serializers.UUIDField(source='campaign.id', read_only=True)
+    campaign_title = serializers.CharField(source='campaign.title', read_only=True)
+    campaign_slug = serializers.CharField(source='campaign.slug', read_only=True)
+
+    class Meta:
+        model = Donation
+        fields = [
+            'id',
+            'campaign_id',
+            'campaign_title',
+            'campaign_slug',
+            'donor_name',
+            'amount',
+            'status',
+            'message',
+            'is_anonymous',
+            'created_at',
+        ]
+
+
 class DonorMinimalSerializer(serializers.ModelSerializer):
     user = UserMinimalSerializer(read_only=True)
 
     class Meta:
         model = Donor
         fields = ['id', 'user']
+
+
+class DonorPublicSummarySerializer(serializers.Serializer):
+    donor = DonorMinimalSerializer(read_only=True)
+    campaign_count = serializers.IntegerField(read_only=True)
+    donations_count = serializers.IntegerField(read_only=True)
+    donations_total_amount = serializers.FloatField(read_only=True)
+    campaigns = CampaignMinimalSerializer(many=True, read_only=True)
+    donations = DonationMinimalSerializer(many=True, read_only=True)
 
 
 # ---------------------------------------------------------------------------

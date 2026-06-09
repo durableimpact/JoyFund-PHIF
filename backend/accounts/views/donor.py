@@ -1,4 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
+from django.db.models import Sum
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import status
@@ -10,11 +12,13 @@ from rest_framework.views import APIView
 from accounts.models import Donor
 from accounts.serializers import (
     DonorDetailSerializer,
+    DonorPublicSummarySerializer,
     DonorRegisterSerializer,
     DonorUpdateSerializer,
 )
 from accounts.utils import IsOwnerOrSystemAdmin, IsSystemAdmin, cache_response, invalidate_cache
 from accounts.filters import DonorFilter
+from campaigns.models import Campaign, Donation
 
 _TAG = ['Donors']
 
@@ -128,4 +132,42 @@ class DonorUpdateView(UpdateAPIView):
             pass
         
         return response
+
+
+class DonorPublicSummaryView(APIView):
+    """
+    GET /api/accounts/donors/<id>/public-summary/
+    Public endpoint returning minimal campaign and donation summaries for a donor.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get_object(self, donor_id):
+        return get_object_or_404(Donor, id=donor_id)
+
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: DonorPublicSummarySerializer},
+        operation_description="Get public donor summary with minimal campaigns, donations, and stats.",
+    )
+    def get(self, request, id):
+        donor = self.get_object(id)
+
+        campaigns = Campaign.objects.filter(donor=donor).order_by('-created_at')
+        donations = Donation.objects.filter(donor=donor).select_related('campaign').order_by('-created_at')
+
+        donations_total_agg = donations.filter(status='SUCCESS').aggregate(total=Sum('amount'))
+        donations_total = donations_total_agg['total'] or 0
+
+        payload = {
+            'donor': donor,
+            'campaign_count': campaigns.count(),
+            'donations_count': donations.count(),
+            'donations_total_amount': float(donations_total),
+            'campaigns': campaigns,
+            'donations': donations,
+        }
+
+        serializer = DonorPublicSummarySerializer(instance=payload)
+        return Response(serializer.data)
 
