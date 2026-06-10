@@ -2,7 +2,6 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from django_smart_ratelimit import rate_limit
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -137,20 +136,11 @@ def logout_view(request):
 @permission_classes([AllowAny])
 @authentication_classes([])
 @csrf_exempt
-# @rate_limit(key='user_or_ip', rate='10/h')
 def oauth2_token_view(request):
     """
-    Rate-limited OAuth2 token endpoint wrapper.
+    OAuth2 token endpoint wrapper.
     
-    This wraps the drf-social-oauth2 token endpoint with rate limiting to prevent:
-    - Brute force attacks on OAuth2 token endpoint
-    - Credential stuffing attacks
-    - Denial of service attacks
-    
-    Rate Limiting:
-    - 10 token requests per hour per IP/user
-    - Applies to password grant, refresh token, and other flows
-    
+    This wraps the drf-social-oauth2 token endpoint.
     The actual OAuth2 token logic is handled by drf-social-oauth2.
     """
     import json
