@@ -12,15 +12,10 @@ from rest_framework.response import Response
 
 @require_http_methods(["GET", "POST"])
 @csrf_protect
-@rate_limit(key='user_or_ip', rate='5/h')
 def login_view(request):
     """
     Custom login view for API documentation access.
     Redirects to 'next' parameter after successful login.
-    
-    Rate Limiting:
-    - 5 login attempts per hour per IP/user
-    - Prevents brute force attacks on admin/donor accounts
     """
     # Get the next URL from query params or POST data
     next_url = request.POST.get('next') or request.GET.get('next', '/')
