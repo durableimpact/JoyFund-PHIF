@@ -28,18 +28,6 @@ export default function DonorDashboardPage() {
     }
   }, [status, router]);
 
-  // Debug session
-  useEffect(() => {
-    if (session) {
-      console.log("Session loaded:", {
-        userId: session.user?.id,
-        userName: session.user?.name,
-        hasAccessToken: !!(session as any).accessToken,
-        hasUserAccessToken: !!session.user?.accessToken,
-      });
-    }
-  }, [session]);
-
   // Fetch donor dashboard stats with React Query
   const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
     queryKey: ["donor-dashboard", authUserId, donorProfileId],
