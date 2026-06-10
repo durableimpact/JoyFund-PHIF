@@ -25,6 +25,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from .views import login_view, logout_view, oauth2_token_view
 from chanx.channels import urls as chanx_urls
+from django.views.static import serve
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -36,17 +37,15 @@ schema_view = get_schema_view(
     ),
     public=settings.DEBUG,
     permission_classes=(
-        permissions.AllowAny,
-    ) if settings.DEBUG else (
-        permissions.IsAuthenticated,
+        (permissions.AllowAny,) if settings.DEBUG else (permissions.IsAuthenticated,)
     ),
 )
 
 # Standard Django Error Handlers to prevent Celery startup errors
-handler400 = 'django.views.defaults.bad_request'
-handler403 = 'django.views.defaults.permission_denied'
-handler404 = 'django.views.defaults.page_not_found'
-handler500 = 'django.views.defaults.server_error'
+handler400 = "django.views.defaults.bad_request"
+handler403 = "django.views.defaults.permission_denied"
+handler404 = "django.views.defaults.page_not_found"
+handler500 = "django.views.defaults.server_error"
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="landing.html"), name="landing"),
@@ -79,5 +78,10 @@ urlpatterns = [
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# if settings.DEBUG:
+#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# else:
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+]
