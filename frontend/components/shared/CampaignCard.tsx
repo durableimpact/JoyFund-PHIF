@@ -56,7 +56,7 @@ export default function CampaignCard({ campaign }: { campaign: Campaign }) {
         <div className="mb-3">
           <div className="flex justify-between items-center mb-1.5">
             <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>
-              {formatXAF(raisedXAF)}
+              {/* {formatXAF(raisedXAF)} */} {raisedXAF.toLocaleString()} XAF
             </span>
             <span className="text-xs text-gray-400">{pct.toFixed(2)}%</span>
           </div>
@@ -64,7 +64,7 @@ export default function CampaignCard({ campaign }: { campaign: Campaign }) {
             <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
           <div className="flex justify-between mt-1.5">
-            <span className="text-xs text-gray-400">Goal: {formatXAF(goalXAF)}</span>
+            <span className="text-xs text-gray-400">Goal: {/* {formatXAF(goalXAF)} */} {goalXAF.toLocaleString()} XAF</span>
           </div>
         </div>
 
