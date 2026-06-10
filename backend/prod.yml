@@ -181,6 +181,7 @@ services:
       RUN_MIGRATIONS: "true"
     volumes:
       - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -236,8 +237,11 @@ services:
     restart: unless-stopped
     env_file:
       - ./envs/prod/.env
+    environment:
+      # USE_S3 is handled by .env
     volumes:
       - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -270,6 +274,11 @@ services:
   celery-worker-2:
     extends: celery-worker-1
     container_name: joyfund_celery_2
+    environment:
+      # USE_S3 is handled by .env
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
     command: >
       celery -A backend worker
       -n worker2@%h
@@ -446,8 +455,11 @@ volumes:
   postgres_data:
   pgadmin_data:
   static_volume:
-    name: joyfund_static_volume    # ← same name
-    external: true                 # ← already exists, just reference it
+    name: joyfund_static_volume
+    external: true
+  media_volume:
+    name: joyfund_media_volume
+    external: true
 
 networks:
   joyfund_network:
