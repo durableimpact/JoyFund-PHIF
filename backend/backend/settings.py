@@ -66,7 +66,6 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "phonenumber_field",
     "puml_generator",
-    "django_smart_ratelimit",
     # "axes",  # temporarily disabled
     "django_prometheus",
     # Local apps
@@ -541,18 +540,6 @@ CHANX = {
     "ASYNCAPI_TITLE": "JoyFund WebSocket API",
     "ASYNCAPI_DESCRIPTION": "Real-time notifications for donors, admins, and hospital staff",
     "ASYNCAPI_VERSION": "1.0.0",
-}
-
-
-# ============================================================================
-# Rate limiting settings for django-smart-ratelimit
-# ─────────────────────────────────────────────────────────────────────────────
-# Configure Redis as the backend
-RATELIMIT_BACKEND = "redis"
-RATELIMIT_REDIS = {
-    "host": env("REDIS_HOST", default="localhost"),
-    "port": 6379,
-    "db": 3,
 }
 
 
