@@ -1,7 +1,7 @@
-'use client';
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useQuery } from '@tanstack/react-query';
+"use client";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   AlertCircle,
@@ -9,28 +9,44 @@ import {
   ChevronRight,
   FileText,
   Globe,
-  RefreshCw
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+  RefreshCw,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { listActivityLogs, listRequestLogs, listErrorLogs, getLogStats } from '@/actions/logs';
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  listActivityLogs,
+  listRequestLogs,
+  listErrorLogs,
+  getLogStats,
+} from "@/actions/logs";
 
-type LogTab = 'activity' | 'requests' | 'errors';
+type LogTab = "activity" | "requests" | "errors";
 const PAGE_SIZE = 15;
 
 export default function AdminLogs() {
   const { data: session } = useSession();
-  const [tab, setTab] = useState<LogTab>('activity');
+  const [tab, setTab] = useState<LogTab>("activity");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedLog, setSelectedLog] = useState<any | null>(null);
-  const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
+  const [selectedLog, setSelectedLog] = useState<
+    ActivityLog | RequestLog | ErrorLog | null
+  >(null);
+  const token =
+    session?.accessToken ||
+    (session?.user as { accessToken?: string })?.accessToken;
 
   const handleTabChange = (newTab: LogTab) => {
     setTab(newTab);
@@ -38,39 +54,58 @@ export default function AdminLogs() {
   };
 
   const { data: activityData, isLoading: loadingActivity } = useQuery({
-    queryKey: ['logs-activity', token, currentPage],
+    queryKey: ["logs-activity", token, currentPage],
     queryFn: async () => {
-      const res = await listActivityLogs(token, { page: currentPage.toString(), page_size: PAGE_SIZE.toString() });
+      const res = await listActivityLogs(token!, {
+        page: currentPage.toString(),
+        page_size: PAGE_SIZE.toString(),
+      });
       return res || { results: [], next: null, previous: null, count: 0 };
     },
-    enabled: !!token && tab === 'activity',
+    enabled: !!token && tab === "activity",
   });
 
   const { data: requestData, isLoading: loadingRequests } = useQuery({
-    queryKey: ['logs-requests', token, currentPage],
+    queryKey: ["logs-requests", token, currentPage],
     queryFn: async () => {
-      const res = await listRequestLogs(token, { page: currentPage.toString(), page_size: PAGE_SIZE.toString() });
+      const res = await listRequestLogs(token, {
+        page: currentPage.toString(),
+        page_size: PAGE_SIZE.toString(),
+      });
       return res || { results: [], next: null, previous: null, count: 0 };
     },
-    enabled: !!token && tab === 'requests',
+    enabled: !!token && tab === "requests",
   });
 
   const { data: errorData, isLoading: loadingErrors } = useQuery({
-    queryKey: ['logs-errors', token, currentPage],
+    queryKey: ["logs-errors", token, currentPage],
     queryFn: async () => {
-      const res = await listErrorLogs(token, { page: currentPage.toString(), page_size: PAGE_SIZE.toString() });
+      const res = await listErrorLogs(token, {
+        page: currentPage.toString(),
+        page_size: PAGE_SIZE.toString(),
+      });
       return res || { results: [], next: null, previous: null, count: 0 };
     },
-    enabled: !!token && tab === 'errors',
+    enabled: !!token && tab === "errors",
   });
 
-  const activeData = tab === 'activity' ? activityData : tab === 'requests' ? requestData : errorData;
+  const activeData =
+    tab === "activity"
+      ? activityData
+      : tab === "requests"
+        ? requestData
+        : errorData;
   const logs = activeData?.results || [];
   const totalCount = activeData?.count || 0;
   const hasNextPage = !!activeData?.next;
   const hasPreviousPage = !!activeData?.previous;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-  const loading = tab === 'activity' ? loadingActivity : tab === 'requests' ? loadingRequests : loadingErrors;
+  const loading =
+    tab === "activity"
+      ? loadingActivity
+      : tab === "requests"
+        ? loadingRequests
+        : loadingErrors;
 
   const getVisiblePages = () => {
     if (totalPages <= 7) {
@@ -78,26 +113,42 @@ export default function AdminLogs() {
     }
 
     if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, '...', totalPages];
+      return [1, 2, 3, 4, 5, "...", totalPages];
     }
 
     if (currentPage >= totalPages - 3) {
-      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      return [
+        1,
+        "...",
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
     }
 
-    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+    return [
+      1,
+      "...",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "...",
+      totalPages,
+    ];
   };
 
   const { data: stats } = useQuery<LogStats>({
-    queryKey: ['logs-stats', token],
+    queryKey: ["logs-stats", token],
     queryFn: () => getLogStats(token),
     enabled: !!token,
   });
 
   const TABS: { key: LogTab; label: string; icon: React.ReactNode }[] = [
-    { key: 'activity', label: 'Activity', icon: <Activity size={14} /> },
-    { key: 'requests', label: 'Requests', icon: <Globe size={14} /> },
-    { key: 'errors', label: 'Errors', icon: <AlertCircle size={14} /> },
+    { key: "activity", label: "Activity", icon: <Activity size={14} /> },
+    { key: "requests", label: "Requests", icon: <Globe size={14} /> },
+    { key: "errors", label: "Errors", icon: <AlertCircle size={14} /> },
   ];
 
   const refetch = () => {
@@ -106,18 +157,18 @@ export default function AdminLogs() {
 
   const formatFieldLabel = (key: string) =>
     key
-      .replace(/_/g, ' ')
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .replace(/\b\w/g, c => c.toUpperCase());
+      .replace(/_/g, " ")
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
 
   const formatFieldValue = (value: unknown) => {
-    if (value === null || value === undefined || value === '') {
-      return '—';
+    if (value === null || value === undefined || value === "") {
+      return "—";
     }
-    if (typeof value === 'boolean') {
-      return value ? 'True' : 'False';
+    if (typeof value === "boolean") {
+      return value ? "True" : "False";
     }
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       try {
         return JSON.stringify(value, null, 2);
       } catch {
@@ -127,14 +178,19 @@ export default function AdminLogs() {
     return String(value);
   };
 
-  return (<>
-
-          <div className="flex items-center justify-between mb-6">
+  return (
+    <>
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-900">System Logs</h1>
-          <p className="text-gray-500 text-sm">Platform activity, API requests, and errors</p>
+          <p className="text-gray-500 text-sm">
+            Platform activity, API requests, and errors
+          </p>
         </div>
-        <button onClick={refetch} className="btn-outline text-sm flex items-center gap-2">
+        <button
+          onClick={refetch}
+          className="btn-outline text-sm flex items-center gap-2"
+        >
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
@@ -143,15 +199,21 @@ export default function AdminLogs() {
       {stats && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="card p-4 text-center">
-            <div className="text-xl font-black" style={{ color: '#471DDB' }}>{stats.activity_count}</div>
+            <div className="text-xl font-black" style={{ color: "#471DDB" }}>
+              {stats.activity_count}
+            </div>
             <div className="text-xs text-gray-500">Total Activity</div>
           </div>
           <div className="card p-4 text-center">
-            <div className="text-xl font-black" style={{ color: '#1DB1DB' }}>{stats.request_count}</div>
+            <div className="text-xl font-black" style={{ color: "#1DB1DB" }}>
+              {stats.request_count}
+            </div>
             <div className="text-xs text-gray-500">API Requests</div>
           </div>
           <div className="card p-4 text-center">
-            <div className="text-xl font-black" style={{ color: '#ef4444' }}>{stats.error_count}</div>
+            <div className="text-xl font-black" style={{ color: "#ef4444" }}>
+              {stats.error_count}
+            </div>
             <div className="text-xs text-gray-500">Errors</div>
           </div>
         </div>
@@ -159,14 +221,16 @@ export default function AdminLogs() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-5">
-        {TABS.map(t => (
+        {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => handleTabChange(t.key)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              tab === t.key ? 'text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+              tab === t.key
+                ? "text-white"
+                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
             }`}
-            style={tab === t.key ? { background: '#471DDB' } : {}}
+            style={tab === t.key ? { background: "#471DDB" } : {}}
           >
             {t.icon} {t.label}
           </button>
@@ -176,7 +240,12 @@ export default function AdminLogs() {
       <div className="card overflow-hidden">
         {loading ? (
           <div className="p-8 space-y-3">
-            {[...Array(8)].map((_, i) => <div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse" />)}
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="h-10 bg-gray-100 rounded-xl animate-pulse"
+              />
+            ))}
           </div>
         ) : logs.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">
@@ -188,64 +257,119 @@ export default function AdminLogs() {
             <Table className="text-sm">
               <TableHeader>
                 <TableRow className="border-b border-gray-100">
-                  {tab === 'activity' && ['User', 'Action', 'Level', 'Description', 'Time'].map(h => (
-                    <TableHead key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {h}
-                    </TableHead>
-                  ))}
-                  {tab === 'requests' && ['Method', 'Path', 'Status', 'Duration', 'IP', 'Time'].map(h => (
-                    <TableHead key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {h}
-                    </TableHead>
-                  ))}
-                  {tab === 'errors' && ['Type', 'Message', 'Path', 'Time'].map(h => (
-                    <TableHead key={h} className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {h}
-                    </TableHead>
-                  ))}
+                  {tab === "activity" &&
+                    ["User", "Action", "Level", "Description", "Time"].map(
+                      (h) => (
+                        <TableHead
+                          key={h}
+                          className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                        >
+                          {h}
+                        </TableHead>
+                      ),
+                    )}
+                  {tab === "requests" &&
+                    [
+                      "Method",
+                      "Path",
+                      "View Name",
+                      "Action",
+                      "Status",
+                      "Duration",
+                      "IP",
+                      "Time",
+                    ].map((h) => (
+                      <TableHead
+                        key={h}
+                        className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                      >
+                        {h}
+                      </TableHead>
+                    ))}
+                  {tab === "errors" &&
+                    ["Type", "Message", "Path", "Time"].map((h) => (
+                      <TableHead
+                        key={h}
+                        className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                      >
+                        {h}
+                      </TableHead>
+                    ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {logs.map((log, i) => (
                   <TableRow
-                    key={(log as any).id || i}
+                    key={(log as ActivityLog | RequestLog | ErrorLog).id || i}
                     className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer"
                     onClick={() => setSelectedLog(log)}
                   >
-                    {tab === 'activity' && (<>
-                        <TableCell className="p-4 text-xs text-gray-700">{(log as ActivityLog).actor_label || '—'}</TableCell>
-                        <TableCell className="p-4 text-xs font-mono text-blue-600">{(log as ActivityLog).action || '—'}</TableCell>
+                    {tab === "activity" && (
+                      <>
+                        <TableCell className="p-4 text-xs text-gray-700">
+                          {(log as ActivityLog).actor_label || "—"}
+                        </TableCell>
+                        <TableCell className="p-4 text-xs font-mono text-blue-600">
+                          {(log as ActivityLog).action || "—"}
+                        </TableCell>
                         <TableCell className="p-4">
-                          <span className={`badge text-[10px] ${
-                            (log as ActivityLog).level === 'ERROR' ? 'bg-red-100 text-red-600' :
-                            (log as ActivityLog).level === 'WARNING' ? 'bg-amber-100 text-amber-600' :
-                            (log as ActivityLog).level === 'CRITICAL' ? 'bg-red-200 text-red-700' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>{(log as ActivityLog).level}</span>
+                          <span
+                            className={`badge text-[10px] ${
+                              (log as ActivityLog).level === "ERROR"
+                                ? "bg-red-100 text-red-600"
+                                : (log as ActivityLog).level === "WARNING"
+                                  ? "bg-amber-100 text-amber-600"
+                                  : (log as ActivityLog).level === "CRITICAL"
+                                    ? "bg-red-200 text-red-700"
+                                    : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {(log as ActivityLog).level}
+                          </span>
                         </TableCell>
                         <TableCell className="p-4 text-xs text-gray-600 max-w-xs truncate">
-                          {(log as ActivityLog).description || (log as ActivityLog).action}
+                          {(log as ActivityLog).description ||
+                            (log as ActivityLog).action}
                         </TableCell>
                         <TableCell className="p-4 text-xs text-gray-400">
-                          {(log as ActivityLog).created_at ? new Date((log as ActivityLog).created_at).toLocaleString() : '—'}
+                          {(log as ActivityLog).created_at
+                            ? new Date(
+                                (log as ActivityLog).created_at,
+                              ).toLocaleString()
+                            : "—"}
                         </TableCell>
-                    </>)}
-                    {tab === 'requests' && (<>
+                      </>
+                    )}
+                    {tab === "requests" && (
+                      <>
                         <TableCell className="p-4">
-                          <span className={`badge text-xs font-mono ${
-                            (log as RequestLog).method === 'GET' ? 'bg-blue-100 text-blue-700' :
-                            (log as RequestLog).method === 'POST' ? 'bg-green-100 text-green-700' :
-                            (log as RequestLog).method === 'DELETE' ? 'bg-red-100 text-red-700' :
-                            'bg-amber-100 text-amber-700'
-                          }`}>
+                          <span
+                            className={`badge text-xs font-mono ${
+                              (log as RequestLog).method === "GET"
+                                ? "bg-blue-100 text-blue-700"
+                                : (log as RequestLog).method === "POST"
+                                  ? "bg-green-100 text-green-700"
+                                  : (log as RequestLog).method === "DELETE"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
                             {(log as RequestLog).method}
                           </span>
                         </TableCell>
                         <TableCell className="p-4 text-xs font-mono text-gray-700 max-w-xs truncate">
                           {(log as RequestLog).path}
                         </TableCell>
+                        <TableCell className="p-4 text-xs text-gray-600 max-w-xs truncate">
+                          {(log as RequestLog).view_name || "—"}
+                        </TableCell>
+                        <TableCell className="p-4 text-xs font-mono text-purple-600 max-w-xs truncate">
+                          {(log as RequestLog).action || "—"}
+                        </TableCell>
                         <TableCell className="p-4">
-                          <span className={`badge text-xs ${(log as RequestLog).status_code >= 400 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'}`}>
+                          <span
+                            className={`badge text-xs ${(log as RequestLog).status_code >= 400 ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-700"}`}
+                          >
                             {(log as RequestLog).status_code}
                           </span>
                         </TableCell>
@@ -253,13 +377,19 @@ export default function AdminLogs() {
                           {(log as RequestLog).response_time_ms}ms
                         </TableCell>
                         <TableCell className="p-4 text-xs text-gray-500">
-                          {(log as RequestLog).ip_address || '—'}
+                          {(log as RequestLog).ip_address || "—"}
                         </TableCell>
                         <TableCell className="p-4 text-xs text-gray-400">
-                          {(log as RequestLog).created_at ? new Date((log as RequestLog).created_at).toLocaleString() : '—'}
+                          {(log as RequestLog).created_at
+                            ? new Date(
+                                (log as RequestLog).created_at,
+                              ).toLocaleString()
+                            : "—"}
                         </TableCell>
-                    </>)}
-                    {tab === 'errors' && (<>
+                      </>
+                    )}
+                    {tab === "errors" && (
+                      <>
                         <TableCell className="p-4">
                           <span className="badge bg-red-100 text-red-600 text-[10px]">
                             {(log as ErrorLog).error_type}
@@ -268,13 +398,18 @@ export default function AdminLogs() {
                         <TableCell className="p-4 text-xs text-gray-700 max-w-xs truncate">
                           {(log as ErrorLog).error_message}
                         </TableCell>
-                        <TableCell className="p-4 text-xs font-mono text-gray-500 max-w-[150px] truncate">
-                          {(log as ErrorLog).path || '—'}
+                        <TableCell className="p-4 text-xs font-mono text-gray-500 max-w-37.5 truncate">
+                          {(log as ErrorLog).path || "—"}
                         </TableCell>
                         <TableCell className="p-4 text-xs text-gray-400">
-                          {(log as ErrorLog).created_at ? new Date((log as ErrorLog).created_at).toLocaleString() : '—'}
+                          {(log as ErrorLog).created_at
+                            ? new Date(
+                                (log as ErrorLog).created_at,
+                              ).toLocaleString()
+                            : "—"}
                         </TableCell>
-                    </>)}
+                      </>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -285,12 +420,20 @@ export default function AdminLogs() {
         {totalCount > PAGE_SIZE && (
           <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50 lg:flex-row lg:items-center lg:justify-between">
             <div className="text-xs text-gray-600">
-              Showing <span className="font-semibold">{(currentPage - 1) * PAGE_SIZE + 1}</span> to <span className="font-semibold">{Math.min(currentPage * PAGE_SIZE, totalCount)}</span> of <span className="font-semibold">{totalCount}</span> results
+              Showing{" "}
+              <span className="font-semibold">
+                {(currentPage - 1) * PAGE_SIZE + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-semibold">
+                {Math.min(currentPage * PAGE_SIZE, totalCount)}
+              </span>{" "}
+              of <span className="font-semibold">{totalCount}</span> results
             </div>
 
             <div className="flex items-center justify-start lg:justify-end gap-2 flex-wrap max-w-full">
               <button
-                onClick={() => setCurrentPage(prev => prev - 1)}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
                 disabled={!hasPreviousPage}
                 className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Previous page"
@@ -300,9 +443,12 @@ export default function AdminLogs() {
 
               <div className="flex items-center gap-1 flex-wrap">
                 {getVisiblePages().map((item, index) => {
-                  if (item === '...') {
+                  if (item === "...") {
                     return (
-                      <span key={`ellipsis-${index}`} className="px-1 text-sm text-gray-400 select-none">
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="px-1 text-sm text-gray-400 select-none"
+                      >
                         ...
                       </span>
                     );
@@ -316,10 +462,10 @@ export default function AdminLogs() {
                       onClick={() => setCurrentPage(pageNum)}
                       className={`h-8 min-w-8 px-2 rounded-md text-sm font-medium transition-colors ${
                         isCurrentPage
-                          ? 'text-white shadow-sm'
-                          : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100'
+                          ? "text-white shadow-sm"
+                          : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
                       }`}
-                      style={isCurrentPage ? { background: '#471DDB' } : {}}
+                      style={isCurrentPage ? { background: "#471DDB" } : {}}
                     >
                       {pageNum}
                     </button>
@@ -328,7 +474,7 @@ export default function AdminLogs() {
               </div>
 
               <button
-                onClick={() => setCurrentPage(prev => prev + 1)}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
                 disabled={!hasNextPage}
                 className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 title="Next page"
@@ -340,7 +486,10 @@ export default function AdminLogs() {
         )}
       </div>
 
-      <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
+      <Dialog
+        open={!!selectedLog}
+        onOpenChange={(open) => !open && setSelectedLog(null)}
+      >
         <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-hidden p-0 gap-0 flex flex-col">
           <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
             <DialogTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -357,35 +506,38 @@ export default function AdminLogs() {
           <div className="flex-1 min-h-0 px-6 py-4 overflow-y-auto">
             {selectedLog && (
               <div className="space-y-4">
-                {Object.entries(selectedLog as Record<string, unknown>).map(([key, value]) => {
-                  const formatted = formatFieldValue(value);
-                  const isJsonLike =
-                    typeof value === 'object' && value !== null;
+                {Object.entries(selectedLog as Record<string, unknown>).map(
+                  ([key, value]) => {
+                    const formatted = formatFieldValue(value);
+                    const isJsonLike =
+                      typeof value === "object" && value !== null;
 
-                  return (
-                    <div key={key} className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2 sm:gap-4 border-b border-gray-50 pb-3">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        {formatFieldLabel(key)}
-                      </div>
-                      {isJsonLike ? (
-                        <pre className="text-xs text-gray-700 bg-gray-50 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-words">
-                          {formatted}
-                        </pre>
-                      ) : (
-                        <div className="text-sm text-gray-800 break-words">
-                          {formatted}
+                    return (
+                      <div
+                        key={key}
+                        className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2 sm:gap-4 border-b border-gray-50 pb-3"
+                      >
+                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                          {formatFieldLabel(key)}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        {isJsonLike ? (
+                          <pre className="text-xs text-gray-700 bg-gray-50 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap">
+                            {formatted}
+                          </pre>
+                        ) : (
+                          <div className="text-sm text-gray-800 break-normal">
+                            {formatted}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  },
+                )}
               </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
-
-</>
-)
-;
+    </>
+  );
 }
