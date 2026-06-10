@@ -1,7 +1,6 @@
 name: joyfund
 
 services:
-
   # ──── Postgres (Database) ──────────────────────────
   postgres:
     image: postgis/postgis:16-3.4-alpine
@@ -100,7 +99,7 @@ services:
         max-file: "3"
   # ─── RabbitMQ (Message Broker) ─────────────────────
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine 
+    image: rabbitmq:3.13-management-alpine
     container_name: joyfund_rabbitmq
     restart: unless-stopped
     env_file:
@@ -114,7 +113,11 @@ services:
     #   retries: 5
     #   start_period: 60s
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmqctl await_startup 2>/dev/null && echo OK || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "rabbitmqctl await_startup 2>/dev/null && echo OK || exit 1",
+        ]
       interval: 15s
       timeout: 15s
       retries: 10
@@ -151,7 +154,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-      start_period: 20s 
+      start_period: 20s
     volumes:
       - redis_data:/data
     deploy:
@@ -187,7 +190,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      postgres:           # ← add this
+      postgres: # ← add this
         condition: service_healthy
     expose:
       - "8000"
@@ -237,8 +240,6 @@ services:
     restart: unless-stopped
     env_file:
       - ./envs/prod/.env
-    environment:
-      # USE_S3 is handled by .env
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
@@ -274,8 +275,6 @@ services:
   celery-worker-2:
     extends: celery-worker-1
     container_name: joyfund_celery_2
-    environment:
-      # USE_S3 is handled by .env
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
@@ -335,8 +334,8 @@ services:
     expose:
       - "9090"
     networks:
-      - joyfund_network     # NPM proxies prometheus.joyfund.cm here
-      - backend             # scrapes Django workers metrics
+      - joyfund_network # NPM proxies prometheus.joyfund.cm here
+      - backend # scrapes Django workers metrics
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -374,10 +373,10 @@ services:
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
-      - loki                # ← wait for Loki before starting
+      - loki # ← wait for Loki before starting
     networks:
-      - joyfund_network     # NPM proxies grafana.joyfund.cm here
-      - backend             # reaches Prometheus and Loki
+      - joyfund_network # NPM proxies grafana.joyfund.cm here
+      - backend # reaches Prometheus and Loki
     deploy:
       resources:
         limits:
@@ -403,8 +402,8 @@ services:
     volumes:
       - loki_data:/loki
     networks:
-      - joyfund_network     # Grafana reaches Loki here
-      - backend             # Promtail ships logs here
+      - joyfund_network # Grafana reaches Loki here
+      - backend # Promtail ships logs here
     deploy:
       resources:
         limits:
@@ -425,14 +424,14 @@ services:
     container_name: joyfund_promtail
     restart: unless-stopped
     volumes:
-      - ./promtail.yml:/etc/promtail/config.yml:ro    # your config file
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro  # all container logs
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker metadata
+      - ./promtail.yml:/etc/promtail/config.yml:ro # your config file
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro # all container logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Docker metadata
     command: -config.file=/etc/promtail/config.yml
     depends_on:
-      - loki                # ← wait for Loki before shipping logs
+      - loki # ← wait for Loki before shipping logs
     networks:
-      - backend             # ships logs to Loki
+      - backend # ships logs to Loki
     deploy:
       resources:
         limits:
@@ -463,6 +462,6 @@ volumes:
 
 networks:
   joyfund_network:
-    external: true        # shared with NPM and frontend
+    external: true # shared with NPM and frontend
   backend:
     driver: bridge
