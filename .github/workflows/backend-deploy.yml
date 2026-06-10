@@ -28,6 +28,7 @@
 
               docker compose -f prod.yml --env-file ./envs/prod/.env up \
                 --build \
+                --remove-orphans \
                 -d
 
               docker image prune -f

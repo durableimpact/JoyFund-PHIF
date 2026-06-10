@@ -30,7 +30,7 @@ jobs:
             
             # Deploy frontend using docker-compose
             
-            docker compose --env-file .env up -d --build
+            docker compose --env-file .env up -d --build --remove-orphans
             
             # Optional: Clean up unused images to save space
             docker image prune -f
