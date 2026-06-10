@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-deploy.yml'
+      - "frontend/**"
+      - ".github/workflows/frontend-deploy.yml"
 
 jobs:
   deploy:
@@ -23,15 +23,15 @@ jobs:
           sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << 'ENDSSH'
             # Navigate to the project root
             cd /root/projects/JoyFund/frontend
-            
+
             # Forced sync with main branch
             git fetch origin main
             git reset --hard origin/main
-            
+
             # Deploy frontend using docker-compose
-            
-            docker compose --env-file .env up -d --build --remove-orphans
-            
+
+            docker compose --env-file .env up -d --build
+
             # Optional: Clean up unused images to save space
             docker image prune -f
           ENDSSH
