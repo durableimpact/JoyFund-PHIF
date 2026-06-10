@@ -32,6 +32,16 @@ def custom_exception_handler(exc, context):
     if response is None:
         # Log the unhandled exception
         LogService.log_error(exc, request, extra={'view': view_name})
+        
+        # Also print to console for easier debugging in dev
+        import traceback
+        print("\n" + "="*80)
+        print(f"UNHANDLED EXCEPTION in {view_name}")
+        print(f"Path: {request.path if request else 'Unknown'}")
+        print(f"Error: {str(exc)}")
+        traceback.print_exc()
+        print("="*80 + "\n")
+        
         # Return a generic 500 response
         return Response(
             {'error': 'An unexpected error occurred'},
