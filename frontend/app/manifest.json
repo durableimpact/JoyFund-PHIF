@@ -4,10 +4,11 @@
   "description": "JoyFund is a transparent crowdfunding platform funding maternal healthcare and safe deliveries across Cameroon.",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "browser",
   "orientation": "portrait",
   "theme_color": "#1DB1DB",
   "background_color": "#ffffff",
+  "note": "PWA DISABLED - Manifest present but PWA features are disabled to prevent caching issues. Re-enable when cache strategy is reviewed.",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

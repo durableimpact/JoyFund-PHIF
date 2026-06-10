@@ -10,7 +10,7 @@ import TokenRefreshProvider from "@/provider/token-refresh-provider";
 import AuthCacheSyncProvider from "@/provider/auth-cache-sync-provider";
 import AppHelmetProvider from "@/provider/helmet-provider";
 import { Toaster } from "@/components/ui/sonner";
-import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker";
+// import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker"; // PWA DISABLED - Causing cache issues
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const montserrat = localFont({
@@ -174,9 +174,10 @@ export default function RootLayout({
           </>
         )}
 
-        <link rel="manifest" href="/manifest.json" />
+        {/* PWA DISABLED - Commenting out manifest and PWA meta tags to prevent caching issues */}
+        {/* <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1DB1DB" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" /> */}
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="JoyFund" />
         <script
@@ -214,7 +215,8 @@ export default function RootLayout({
               </TokenRefreshProvider>
             </AuthCacheSyncProvider>
             <Toaster />
-            <RegisterServiceWorker />
+            {/* PWA DISABLED - Commenting out RegisterServiceWorker component */}
+            {/* <RegisterServiceWorker /> */}
           </ReactQueryProvider>
         </SessionProvider>
       </body>

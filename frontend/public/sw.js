@@ -1,3 +1,9 @@
+// PWA SERVICE WORKER - DISABLED FOR NOW
+// This service worker was causing caching issues that prevented some pages from fetching fresh data.
+// Disabled temporarily while the caching strategy is reviewed.
+// TODO: Re-enable with improved cache strategy once issues are resolved
+
+/*
 const STATIC_CACHE_NAME = "joyfund-static-v2";
 const APP_SHELL_ASSETS = [
   "/",
@@ -134,3 +140,9 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(networkFirst(event.request));
 });
+*/
+
+// Service worker disabled - no active caching
+console.warn(
+  "[PWA] Service worker is disabled to prevent caching issues. Re-enable when cache strategy is fixed.",
+);

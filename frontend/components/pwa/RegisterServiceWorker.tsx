@@ -1,5 +1,11 @@
 "use client";
 
+// PWA SERVICE WORKER REGISTRATION - DISABLED FOR NOW
+// This component handles PWA service worker registration.
+// Disabled temporarily to prevent caching issues affecting data fetches.
+// TODO: Re-enable once cache strategy is reviewed and fixed
+
+/*
 import { useEffect } from "react";
 
 export default function RegisterServiceWorker() {
@@ -77,5 +83,11 @@ export default function RegisterServiceWorker() {
     }
   }, []);
 
+  return null;
+}
+*/
+
+// PWA DISABLED - Returning empty component to prevent caching issues
+export default function RegisterServiceWorker() {
   return null;
 }
