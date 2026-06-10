@@ -71,11 +71,12 @@ cd /root/projects/JoyFund
 git clone https://github.com/your-org/JoyFund.git .
 ```
 
-### Step 4 — Create external network and volume
+### Step 4 — Create external network and volumes
 
 ```bash
 docker network create joyfund_network
 docker volume create joyfund_static_volume
+docker volume create joyfund_media_volume
 ```
 
 ### Step 5 — Create environment file
@@ -502,6 +503,23 @@ HOST      → 75.119.133.208
 USER      → root
 PASSWORD  → your VPS root password
 ```
+
+---
+
+## Server Migration & Storage Logic
+
+If you change servers, remember that **Media & Static files** are stored in external Docker volumes to ensure they persist across container updates.
+
+### 1. Storage Architecture
+- **`joyfund_static_volume`**: Stores collected CSS, JS, and admin assets.
+- **`joyfund_media_volume`**: Stores user-uploaded images and documents.
+- These volumes are shared between the `backend` containers (to write) and the `npm` (Nginx Proxy Manager) container (to serve).
+
+### 2. Migration Checklist
+When moving to a new VPS:
+1. **Recreate Volumes**: You MUST run the `docker volume create` commands from Step 4.
+2. **Transfer Data**: If you want to keep existing images, you must back up the contents of `/var/lib/docker/volumes/joyfund_media_volume/_data` and restore them to the same path on the new server.
+3. **Environment Toggles**: In your `.env`, ensure `USE_S3=False` if you want to keep using the VPS disk for storage.
 
 ---
 
