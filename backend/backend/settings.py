@@ -482,11 +482,11 @@ else:
                 "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
             },
             "KEY_PREFIX": "joyfund",
-            "TIMEOUT": 60 * 15,  # 15 minutes default
+            "TIMEOUT": 60,  # 1 minutes default
         }
     }
 
-CACHE_MIDDLEWARE_SECONDS = 60 * 15
+CACHE_MIDDLEWARE_SECONDS = 60
 CACHE_MIDDLEWARE_KEY_PREFIX = "joyfund"
 
 # ─────────────────────────────────────────────────────────────────────────────
