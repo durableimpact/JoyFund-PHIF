@@ -4,7 +4,7 @@ services:
   # PostgreSQL + PostGIS  (optimized for 1M+ users/day, 50k peak req/sec)
   # ────────────────────────────────────────────────────────────────────────────
   db:
-    image: postgis/postgis:17-3.5-alpine
+    image: postgis/postgis:16-3.4-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: joyfund
@@ -38,7 +38,7 @@ services:
   # RabbitMQ  (optimized for high throughput - 1M+ users/day)
   # ────────────────────────────────────────────────────────────────────────────
   rabbitmq:
-    image: rabbitmq:3.10-management-alpine
+    image: rabbitmq:3.13-management-alpine
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: joyfund
