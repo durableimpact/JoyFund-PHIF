@@ -216,6 +216,8 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
     volumes:
       - .:/app
+      - media_volume:/app/media
+      - static_volume:/app/static
     depends_on:
       db:
         condition: service_healthy
@@ -265,6 +267,8 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
     volumes:
       - .:/app
+      - media_volume:/app/media
+      - static_volume:/app/static
     depends_on:
       db:
         condition: service_healthy
