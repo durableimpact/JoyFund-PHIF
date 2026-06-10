@@ -40,6 +40,18 @@ class RequestLog(models.Model):
     )
     method = models.CharField(max_length=10, choices=HTTP_METHODS)
     path = models.CharField(max_length=500, db_index=True)
+    view_name = models.CharField(
+        max_length=255,
+        blank=True,
+        db_index=True,
+        help_text="Resolved Django view name",
+    )
+    action = models.CharField(
+        max_length=255,
+        blank=True,
+        db_index=True,
+        help_text="Human-readable description of the action",
+    )
     query_params = models.JSONField(default=dict, blank=True)
     request_body = models.TextField(
         blank=True,

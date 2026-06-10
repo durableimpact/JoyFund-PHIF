@@ -59,20 +59,23 @@ class RequestLogAdmin(admin.ModelAdmin):
     list_display = (
         'method',
         'path',
+        'action',
         'status_code',
         'response_time_ms',
         'user',
         'ip_address',
         'created_at',
     )
-    list_filter = ('method', 'status_code', 'user', 'created_at')
-    search_fields = ('path', 'ip_address', 'user__email')
+    list_filter = ('method', 'status_code', 'user', 'created_at', 'view_name')
+    search_fields = ('path', 'ip_address', 'user__email', 'action', 'view_name')
     readonly_fields = (
         'id',
         'request_id',
         'user',
         'method',
         'path',
+        'view_name',
+        'action',
         'query_params',
         'request_body',
         'status_code',

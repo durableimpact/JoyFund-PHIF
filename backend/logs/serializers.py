@@ -47,6 +47,8 @@ class RequestLogSerializer(serializers.ModelSerializer):
             'user_email',
             'method',
             'path',
+            'view_name',
+            'action',
             'query_params',
             'request_body',
             'status_code',

@@ -9,6 +9,7 @@ import logging
 from typing import Callable, Any
 from django.http import HttpRequest, HttpResponse
 from django.utils.deprecation import MiddlewareMixin
+from django.urls import resolve, Resolver404
 from .models import RequestLog
 
 logger = logging.getLogger(__name__)
@@ -90,6 +91,17 @@ class LoggingMiddleware(MiddlewareMixin):
             # Get client IP
             ip_address = self._get_client_ip(request)
 
+            # Resolve view name and action
+            view_name = ''
+            action = ''
+            try:
+                match = resolve(request.path_info)
+                view_name = match.view_name
+                action = self._get_action_description(request, match)
+            except Resolver404:
+                view_name = 'not_found'
+                action = f'Accessed unknown path: {request.path}'
+
             # Get request body (only for non-GET/HEAD requests)
             request_body = ''
             if request.method not in ['GET', 'HEAD']:
@@ -110,6 +122,8 @@ class LoggingMiddleware(MiddlewareMixin):
                 user=user,
                 method=request.method,
                 path=request.path,
+                view_name=view_name,
+                action=action,
                 query_params=query_params,
                 request_body=request_body,
                 status_code=response.status_code,
@@ -131,6 +145,47 @@ class LoggingMiddleware(MiddlewareMixin):
             if path.startswith(skip_path):
                 return True
         return False
+
+    @staticmethod
+    def _get_action_description(request: HttpRequest, match: Any) -> str:
+        """
+        Generate a human-readable action description.
+        """
+        view_name = match.view_name
+        method = request.method
+        
+        # DRF ViewSet actions mapping
+        action_map = {
+            'list': 'Viewed List',
+            'retrieve': 'Viewed Details',
+            'create': 'Created',
+            'update': 'Updated',
+            'partial_update': 'Updated (Partial)',
+            'destroy': 'Deleted',
+        }
+
+        # Try to get DRF action
+        drf_action = getattr(match.func, 'actions', {}).get(method.lower())
+        if not drf_action:
+            # Fallback if it's an @action decorated method
+            drf_action = getattr(match.func, 'cls', None)
+            if drf_action and hasattr(request, 'method'):
+                # This is more complex for standard APIViews, but view_name usually suffices
+                pass
+        
+        # Determine resource name from view name (e.g., 'campaign-list' -> 'Campaign')
+        resource = view_name.split(':')[-1].replace('-list', '').replace('-detail', '').replace('_', ' ').title()
+        
+        action_desc = action_map.get(drf_action, method)
+        
+        if drf_action in ['list', 'retrieve', 'create', 'update', 'partial_update', 'destroy']:
+            return f"{action_desc} {resource}"
+        
+        # Handle custom actions (like 'stats', 'verify', etc.)
+        if drf_action:
+            return f"Performed {drf_action.replace('_', ' ')} on {resource}"
+
+        return f"{method} {request.path}"
 
     @staticmethod
     def _get_client_ip(request: HttpRequest) -> str:
