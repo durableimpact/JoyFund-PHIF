@@ -166,13 +166,22 @@ export default function HomePage() {
         />
 
         {/* Soft gradient overlay: dark at top, fades to page bg at bottom */}
-        <div
+        {/* <div
           className="absolute inset-0"
           style={{
             background:
               "linear-gradient(to bottom, rgba(10,20,60,0.58) 0%, rgba(15,30,90,0.38) 38%, rgba(249,250,251,0.90) 80%, #F9FAFB 100%)",
           }}
-        />
+        /> */}
+
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+  "linear-gradient(to bottom, rgba(10,20,60,0.55) 0%, rgba(15,30,90,0.30) 45%, rgba(249,250,251,0.25) 70%, rgba(249,250,251,0.75) 90%, #F9FAFB 100%)"
+             }}
+        /> 
+        
 
         {/* Navbar sits on top of everything */}
         <Navbar transparent />
@@ -182,7 +191,7 @@ export default function HomePage() {
           {/* Live toast pill */}
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+            {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" /> */}
               {/* <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
               <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
           </div>*
@@ -226,19 +235,19 @@ export default function HomePage() {
               {
                 v: stats?.lives_supported,
                 l: "Lives Supported",
-                icon: Heart,
+                // icon: Heart,
                 color: "text-rose-300",
               },
               {
                 v: stats?.active_campaigns,
                 l: "Active Campaigns",
-                icon: Sparkles,
+                // icon: Sparkles,
                 color: "text-amber-300",
               },
               {
                 v: stats?.total_raised,
                 l: "XAF Raised",
-                icon: DollarSign,
+                // icon: DollarSign,
                 color: "text-emerald-300",
               },
             ].map((s) => (
@@ -246,7 +255,7 @@ export default function HomePage() {
                 key={s.l}
                 className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20 flex flex-col items-center text-center"
               >
-                <s.icon size={28} className={`${s.color} mb-2`} />
+                {/* <s.icon size={28} className={`${s.color} mb-2`} /> */}
                 <div className="text-lg font-black">{s.v}</div>
                 <div className="text-xs opacity-70">{s.l}</div>
               </div>
