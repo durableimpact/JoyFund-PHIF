@@ -182,7 +182,7 @@ class LoggingMiddleware(MiddlewareMixin):
             return f"{action_desc} {resource}"
         
         # Handle custom actions (like 'stats', 'verify', etc.)
-        if drf_action:
+        if drf_action and isinstance(drf_action, str):
             return f"Performed {drf_action.replace('_', ' ')} on {resource}"
 
         return f"{method} {request.path}"
