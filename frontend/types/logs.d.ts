@@ -54,7 +54,15 @@ declare interface ErrorLog {
 
 // ── Request Log ──
 
-declare type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS" | "TRACE";
+declare type HttpMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "PATCH"
+  | "DELETE"
+  | "HEAD"
+  | "OPTIONS"
+  | "TRACE";
 
 declare interface RequestLog {
   id: string;
@@ -63,6 +71,8 @@ declare interface RequestLog {
   source: LogSource;
   method: HttpMethod;
   path: string;
+  view_name: string | null;
+  action: string | null;
   query_params: Record<string, any>;
   request_body: string;
   status_code: number;
