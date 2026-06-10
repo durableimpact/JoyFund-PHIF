@@ -10,7 +10,6 @@ from ..filters import FeePolicyFilter
 from ..models import FeePolicy
 from ..serializers.fee_policy import FeePolicySerializer
 
-CACHE_TIMEOUT = 5 * 60  # 5 minutes
 _tag = ['Payments — Fee Policies']
 
 
@@ -38,6 +37,7 @@ _tag = ['Payments — Fee Policies']
     tags=_tag, operation_summary="Delete Fee Policy",
 ))
 class FeePolicyViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
+    cache_timeout = 60
 
     """
     Full CRUD for Fee Policies.

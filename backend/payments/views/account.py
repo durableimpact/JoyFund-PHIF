@@ -4,10 +4,10 @@ from rest_framework import generics
 
 from accounts.utils.permissions import IsSystemAdmin
 
-CACHE_TIMEOUT = 5 * 60  # 5 minutes
 from ..models import Account, EscrowAccount, FeeAccount
 from ..serializers.account import AccountSerializer, EscrowAccountSerializer, FeeAccountSerializer
 
+CACHE_TIMEOUT = 60
 
 class AccountListView(generics.ListAPIView):
     """

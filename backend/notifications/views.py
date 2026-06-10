@@ -13,7 +13,7 @@ from notifications.models import Notification, NotificationType
 from notifications.serializers import NotificationSerializer, NotificationListSerializer
 
 _TAG = ['Notifications']
-CACHE_TIMEOUT = 5 * 60  # 5 minutes
+CACHE_TIMEOUT = 60 
 
 
 @method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))

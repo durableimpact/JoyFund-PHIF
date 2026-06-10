@@ -8,7 +8,7 @@ from ..filters import TransactionFilter, FeeSplitFilter
 from ..models import Transaction, FeeSplit
 from ..serializers.transaction import TransactionSerializer, FeeSplitSerializer
 
-CACHE_TIMEOUT = 5 * 60  # 5 minutes
+CACHE_TIMEOUT = 60  # 5 minutes
 
 
 @method_decorator(name='list', decorator=swagger_auto_schema(

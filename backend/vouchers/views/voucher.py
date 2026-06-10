@@ -21,8 +21,7 @@ from accounts.models import Role
 from vouchers.services import check_in_voucher
 
 VOUCHERS_CACHE_GROUP = 'vouchers'
-VOUCHERS_CACHE_TIMEOUT = 5 * 60  # 5 minutes
-
+VOUCHERS_CACHE_TIMEOUT = 60
 
 class IsReceptionist(IsAuthenticated):
     def has_permission(self, request, view):

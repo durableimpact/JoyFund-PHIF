@@ -9,7 +9,6 @@ from ..filters import PaymentGatewayFilter
 from ..models import PaymentGateway
 from ..serializers.gateway import PaymentGatewaySerializer
 
-CACHE_TIMEOUT = 5 * 60  # 5 minutes
 _tag = ['Payments — Gateways']
 
 
@@ -37,6 +36,7 @@ _tag = ['Payments — Gateways']
     tags=_tag, operation_summary="Delete Payment Gateway",
 ))
 class PaymentGatewayViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
+    cache_timeout = 60
 
     """
     Full CRUD for Payment Gateways.

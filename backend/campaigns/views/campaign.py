@@ -21,9 +21,6 @@ from campaigns.serializers import (
 )
 
 _TAG = ["Campaigns"]
-CACHE_TIMEOUT = 3 ##* 24 * 60 * 60  # 3 days
-
-
 class IsDonor(BasePermission):
     message = "Only Donors can perform this action."
 
@@ -60,6 +57,7 @@ from core.mixins import CacheInvalidationMixin
 
 class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     cache_group = "campaigns"
+    cache_timeout = 60
     """
     ViewSet for managing campaigns.
     - Public: list, retrieve (only active/public)

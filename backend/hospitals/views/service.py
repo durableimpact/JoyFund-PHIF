@@ -13,7 +13,6 @@ from hospitals.serializers import ServiceCreateUpdateSerializer, ServiceDetailSe
 from .hospital import IsSystemOrHospitalAdmin
 
 _TAG = ['Services']
-CACHE_TIMEOUT = 3 * 24 * 60 * 60  # 3 days
 
 
 @method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
@@ -23,6 +22,7 @@ CACHE_TIMEOUT = 3 * 24 * 60 * 60  # 3 days
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=_TAG))
 class ServiceViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
+    cache_timeout = 60
 
     """
     ViewSet for managing hospital services.

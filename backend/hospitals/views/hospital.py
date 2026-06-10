@@ -25,7 +25,6 @@ from logs.services import LogService
 from vouchers.models import Voucher
 
 _TAG = ["Hospitals"]
-CACHE_TIMEOUT = 60 * 5  # 5 minutes
 
 
 class IsSystemOrHospitalAdmin(BasePermission):
@@ -46,6 +45,7 @@ class IsSystemOrHospitalAdmin(BasePermission):
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=_TAG))
 class HospitalViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
+    cache_timeout = 60
     """
     ViewSet for managing hospitals.
     - System Admin: full CRUD

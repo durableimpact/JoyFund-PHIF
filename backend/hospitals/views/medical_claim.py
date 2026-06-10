@@ -53,7 +53,7 @@ from vouchers.services import settle_voucher_with_campaign_updates
 from accounts.models import Role
 
 CLAIMS_CACHE_GROUP = 'medical_claims'
-CLAIMS_CACHE_TIMEOUT = 5 * 60  # 5 minutes
+CLAIMS_CACHE_TIMEOUT = 10 
 
 
 class IsReceptionist(IsAuthenticated):

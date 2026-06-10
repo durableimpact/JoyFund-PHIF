@@ -27,7 +27,7 @@ from logs.services import LogService
 from utils.campay import CamPayManager
 
 _TAG = ['Donations']
-CACHE_TIMEOUT = 3 * 24 * 60 * 60  # 3 days
+CACHE_TIMEOUT = 30
 
 
 class NestedDonationViewSet(
