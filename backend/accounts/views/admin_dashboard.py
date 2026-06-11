@@ -53,7 +53,7 @@ def _date_range_from_params(request):
     today = date.today()
 
     if period == "day":
-        start = today
+        start = today - timedelta(days=6)
         end = today
     elif period == "week":
         start = today - timedelta(days=today.weekday())
@@ -82,6 +82,34 @@ def _date_range_from_params(request):
             end = parsed
 
     return start, end
+
+
+def _fill_date_range(data, start, end, value_key="value"):
+    """Fill missing dates in a list of {date, value} dicts with zeros."""
+    result = []
+    current = start
+    lookup = {item["date"]: item[value_key] for item in data if item.get("date")}
+    while current <= end:
+        result.append({"date": current, value_key: lookup.get(current, 0)})
+        current += timedelta(days=1)
+    return result
+
+
+def _fill_month_range(data, start, end, value_key="value"):
+    """Fill missing months in a list of {date, value} dicts with zeros."""
+    from dateutil.relativedelta import relativedelta
+    result = []
+    current = start.replace(day=1)
+    end_first = end.replace(day=1)
+    lookup = {}
+    for item in data:
+        d = item.get("date")
+        if d:
+            lookup[d.replace(day=1)] = item[value_key]
+    while current <= end_first:
+        result.append({"date": current, value_key: lookup.get(current, 0)})
+        current += relativedelta(months=1)
+    return result
 
 
 def _previous_period(start, end):
@@ -295,9 +323,12 @@ class AdminDonationTrendsView(APIView):
             .order_by("month")
         )
 
+        donations_over_time = [{"date": _as_date(d["date"]), "value": d["value"]} for d in daily]
+        donations_by_month_list = [{"date": _as_date(m["month"]), "value": m["value"]} for m in monthly]
+
         data = {
-            "donations_over_time": [{"date": _as_date(d["date"]), "value": d["value"]} for d in daily],
-            "donations_by_month": [{"date": _as_date(m["month"]), "value": m["value"]} for m in monthly],
+            "donations_over_time": _fill_date_range(donations_over_time, start, end),
+            "donations_by_month": _fill_month_range(donations_by_month_list, start, end),
         }
         return Response(DonationTrendsSerializer(data).data)
 
@@ -340,6 +371,8 @@ class AdminUserAnalyticsView(APIView):
             .order_by("date")
         )
 
+        registrations_over_time = [{"date": _as_date(r["date"]), "value": r["value"]} for r in registrations]
+
         data = {
             "total_users": _growth(total_curr, total_prev),
             "donors": _role_growth(Role.DONOR),
@@ -347,7 +380,7 @@ class AdminUserAnalyticsView(APIView):
             "receptionists": _role_growth(Role.RECEPTIONIST),
             "social_workers": _role_growth(Role.SOCIAL_WORKER),
             "system_admins": _role_growth(Role.SYSTEM_ADMIN),
-            "registrations_over_time": [{"date": _as_date(r["date"]), "value": r["value"]} for r in registrations],
+            "registrations_over_time": _fill_date_range(registrations_over_time, start, end),
         }
         return Response(UserGrowthSerializer(data).data)
 
@@ -399,12 +432,15 @@ class AdminBeneficiaryVoucherView(APIView):
             .order_by("date")
         )
 
+        vouchers_over_time_list = [{"date": _as_date(v["date"]), "value": v["value"]} for v in vouchers_over_time]
+        beneficiaries_over_time_list = [{"date": _as_date(b["date"]), "value": b["value"]} for b in beneficiaries_over_time]
+
         data = {
             "total_beneficiaries": _growth(ben_curr, ben_prev),
             "total_vouchers_generated": _growth(vouch_curr, vouch_prev),
             "total_vouchers_redeemed": _growth(redeemed_curr, redeemed_prev),
-            "vouchers_over_time": [{"date": _as_date(v["date"]), "value": v["value"]} for v in vouchers_over_time],
-            "beneficiaries_over_time": [{"date": _as_date(b["date"]), "value": b["value"]} for b in beneficiaries_over_time],
+            "vouchers_over_time": _fill_date_range(vouchers_over_time_list, start, end),
+            "beneficiaries_over_time": _fill_date_range(beneficiaries_over_time_list, start, end),
         }
         return Response(BeneficiaryVoucherSerializer(data).data)
 
@@ -548,6 +584,10 @@ class AdminTrendsReportView(APIView):
             })
             current += timedelta(days=1)
 
+        user_registrations_list = [{"date": _as_date(r["date"]), "value": r["value"]} for r in user_registrations]
+        donations_daily_list = [{"date": _as_date(d["date"]), "value": float(d["value"] or 0)} for d in donations_daily]
+        vouchers_daily_list = [{"date": _as_date(v["date"]), "value": v["value"]} for v in vouchers_daily]
+
         data = {
             "period_start": start,
             "period_end": end,
@@ -560,9 +600,9 @@ class AdminTrendsReportView(APIView):
                 "donations_amount": donations_amount,
                 "platform_fees": platform_fees,
             },
-            "user_registrations": [{"date": _as_date(r["date"]), "value": r["value"]} for r in user_registrations],
-            "donations": [{"date": _as_date(d["date"]), "value": float(d["value"] or 0)} for d in donations_daily],
-            "vouchers": [{"date": _as_date(v["date"]), "value": v["value"]} for v in vouchers_daily],
+            "user_registrations": _fill_date_range(user_registrations_list, start, end),
+            "donations": _fill_date_range(donations_daily_list, start, end, value_key="value"),
+            "vouchers": _fill_date_range(vouchers_daily_list, start, end),
             "daily_breakdown": daily_breakdown,
         }
         return Response(TrendsReportSerializer(data).data)
