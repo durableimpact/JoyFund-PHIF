@@ -7,6 +7,7 @@ from .social_worker import SocialWorker
 from .donor import Donor
 from .verification import EmailVerificationToken
 from .password_reset import PasswordResetToken
+from .device import UserDevice
 
 __all__ = [
     'BaseProfile',
@@ -20,4 +21,5 @@ __all__ = [
     'Donor',
     'EmailVerificationToken',
     'PasswordResetToken',
+    'UserDevice',
 ]
