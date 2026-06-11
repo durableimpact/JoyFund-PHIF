@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Ticket,
   User,
+  Shield,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
@@ -32,6 +33,11 @@ const NAV: NavItem[] = [
     label: "My Claims",
     href: "/dashboard/receptionist/claims",
     icon: <ClipboardCheck size={16} />,
+  },
+  {
+    label: "Security",
+    href: "/dashboard/receptionist/devices",
+    icon: <Shield size={16} />,
   },
   {
     label: "Profile",
