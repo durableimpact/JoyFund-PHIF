@@ -15,11 +15,12 @@ export default function GatewaysPage() {
   const [form, setForm] = useState({ name: "", description: "", is_active: true });
   const [error, setError] = useState("");
 
-  const { data: gateways, isLoading } = useQuery({
+  const { data: gatewaysRes, isLoading } = useQuery({
     queryKey: ["gateways", token],
     queryFn: async () => await listGateways(token),
     enabled: !!token,
   });
+  const gateways = gatewaysRes?.results ?? [];
 
   const createMut = useMutation({
     mutationFn: async () => await createGateway(token, form),
@@ -92,7 +93,7 @@ export default function GatewaysPage() {
       <div className="card p-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#471DDB] animate-spin" /></div>
-        ) : !gateways?.length ? (
+        ) : !gateways.length ? (
           <p className="text-gray-400 text-sm text-center py-12">No gateways configured yet</p>
         ) : (
           <div className="overflow-x-auto">
@@ -105,7 +106,7 @@ export default function GatewaysPage() {
                 </tr>
               </thead>
               <tbody>
-                {gateways.map((g: PaymentGateway) => (
+                {gateways.map((g) => (
                   <tr key={g.id} className="border-b border-gray-50">
                     <td className="py-3 text-gray-400 font-mono text-xs">{g.id}</td>
                     <td className="py-3 font-semibold text-gray-900">{g.name}</td>

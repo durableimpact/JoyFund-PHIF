@@ -89,7 +89,7 @@ export const deleteFeePolicy = async (id: number, access_token: string) => {
 
 export const listGateways = async (access_token: string) => {
   try {
-    const { data } = await api.get("/api/payments/gateways/", {
+    const { data } = await api.get<PaginationResponse<PaymentGateway>>("/api/payments/gateways/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
     return data;
