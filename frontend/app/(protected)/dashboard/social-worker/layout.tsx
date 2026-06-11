@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, Users, User } from "lucide-react";
+import { LayoutDashboard, Users, User, Shield } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
 
@@ -15,6 +15,11 @@ const NAV: NavItem[] = [
     label: "Beneficiaries",
     href: "/dashboard/social-worker/beneficiaries",
     icon: <Users size={16} />,
+  },
+  {
+    label: "Security",
+    href: "/dashboard/social-worker/devices",
+    icon: <Shield size={16} />,
   },
   {
     label: "Profile",
