@@ -15,6 +15,18 @@ declare type CampaignStatus =
   | "CLOSED"
   | "CANCELLED";
 
+declare interface CampaignList {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  cover_image?: string | null;
+  goal: number;
+  total_net_raised: number;
+  progress_percentage: number;
+  total_number_of_successfull_donations: number;
+}
+
 declare interface Campaign {
   id: string;
   donor_id: string;
@@ -43,12 +55,12 @@ declare interface CampaignDetail {
   id: string;
   donor: {
     id: string;
-    user:{
+    user: {
       id: string;
       first_name: string;
       last_name: string;
-      profile_picture:string | null;
-    }
+      profile_picture: string | null;
+    };
   };
   title: string;
   slug: string;
@@ -142,13 +154,13 @@ declare interface CampaignLeaderboardEntry {
   total_net_raised: number;
   progress_percentage: number;
   donor: {
-    id:string;
-    user:{
-      id:string;
-      first_name:string;
-      last_name:string;
-      profile_picture:string|null;
-    }
+    id: string;
+    user: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      profile_picture: string | null;
+    };
   };
 }
 
