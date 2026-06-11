@@ -1,7 +1,8 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftRight, Loader2, Search } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeftRight, Loader2, Search, Eye } from "lucide-react";
 import { useState } from "react";
 import { formatXAF, formatDate } from "@/lib/utils";
 import { listTransactions } from "@/actions/payments";
@@ -80,6 +81,10 @@ export default function TransactionsPage() {
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" : t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{t.status_display}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Gateway TX</span><span className="text-gray-400 font-mono text-xs truncate max-w-[140px]">{t.gateway_transaction_id || "—"}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="text-gray-400 text-xs">{formatDate(t.created_at)}</span></div>
+                  <div className="pt-1">
+                    <Link href={`/dashboard/system-admin/transactions/${t.id}`}
+                      className="text-xs font-semibold text-[#471DDB] hover:underline">View details →</Link>
+                  </div>
                 </div>
               ))}
             </div>
@@ -88,7 +93,7 @@ export default function TransactionsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["ID", "Type", "Direction", "Amount", "Currency", "Status", "Gateway TX ID", "Date"].map(h => (
+                    {["ID", "Type", "Direction", "Amount", "Currency", "Status", "Gateway TX ID", "Date", ""].map(h => (
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -120,6 +125,12 @@ export default function TransactionsPage() {
                       </td>
                       <td className="py-3 text-gray-400 font-mono text-xs max-w-[100px] truncate">{t.gateway_transaction_id || "—"}</td>
                       <td className="py-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(t.created_at)}</td>
+                      <td className="py-3">
+                        <Link href={`/dashboard/system-admin/transactions/${t.id}`}
+                          className="p-1.5 hover:bg-[#471DDB]/10 rounded-lg text-gray-400 hover:text-[#471DDB] inline-block">
+                          <Eye size={14} />
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
