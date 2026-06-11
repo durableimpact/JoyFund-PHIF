@@ -31,7 +31,7 @@ type CampaignFilter = {
 
 export const listCampaigns = async (params?: Partial<CampaignFilter>) => {
   try {
-    const { data } = await api.get<PaginationResponse<Campaign>>(
+    const { data } = await api.get<PaginationResponse<CampaignList>>(
       "/api/campaigns/",
       { params },
     );
@@ -119,9 +119,10 @@ export const getMyCampaigns = async (access_token: string) => {
   }
 };
 
-export const getAvailableBalances = async (access_token: string) => {
+export const getAvailableBalances = async (access_token: string,params:{min_amount:number,page_size?:number,page?:number}) => {
   try {
-    const { data } = await api.get("/api/campaigns/available-balances/", {
+    const { data } = await api.get<PaginationResponse<CampaignBalance>>("/api/campaigns/available-balances/", {
+      params,
       headers: { Authorization: `Bearer ${access_token}` },
     });
     return data;
