@@ -28,10 +28,10 @@ class SingletonAccountMixin:
     @classmethod
     def get_instance(cls):
         """Return the sole instance, creating it if it does not yet exist."""
-        obj, _ = cls.objects.get_or_create(
-            pk=cls._singleton_pk(),
-        )
-        return obj
+        obj = cls.objects.first()
+        if obj is not None:
+            return obj
+        return cls.objects.create(pk=cls._singleton_pk())
 
     @classmethod
     def _singleton_pk(cls):
