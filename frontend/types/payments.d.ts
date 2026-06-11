@@ -73,6 +73,20 @@ declare type TransactionType =
 declare type TransactionStatus = "SUCCESSFUL" | "FAILED" | "PENDING";
 declare type TransactionDirection = "IN" | "OUT";
 
+declare interface TransactionList {
+  id: string;
+  type: TransactionType;
+  type_display: string;
+  direction: TransactionDirection;
+  direction_display: string;
+  amount: number;
+  currency: string;
+  status: TransactionStatus;
+  status_display: string;
+  gateway_transaction_id: string;
+  created_at: string;
+}
+
 declare interface Transaction {
   id: string;
   donation_id?: string | null;
@@ -102,6 +116,15 @@ declare interface TransactionEvent {
 
 // ── Fee Splits ──
 
+declare interface FeeSplitList {
+  id: number;
+  gross_amount: number;
+  escrow_amount: number;
+  platform_amount: number;
+  fee_policy_name: string;
+  created_at: string;
+}
+
 declare interface FeeSplit {
   id: number;
   transaction_id: string;
@@ -113,6 +136,13 @@ declare interface FeeSplit {
 }
 
 // ── Webhook Events ──
+
+declare interface WebhookEventList {
+  id: number;
+  gateway: string;
+  event_type: string;
+  received_at: string;
+}
 
 declare interface WebhookEvent {
   id: number;

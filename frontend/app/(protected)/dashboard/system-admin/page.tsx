@@ -5,13 +5,17 @@ import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
+  ArrowLeftRight,
   Building2,
   Calendar,
   CheckCircle,
   FileText,
+  Globe,
+  Percent,
   Ticket,
   TrendingUp,
-  Users
+  Users,
+  Wallet,
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { formatXAF } from '@/lib/utils';
@@ -113,10 +117,14 @@ export default function AdminDashboard() {
           {/* Quick nav */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Hospitals',    href: '/dashboard/system-admin/hospitals',    icon: <Building2 size={20} />, color: '#1D38DB' },
-              { label: 'Vouchers',     href: '/dashboard/system-admin/vouchers',     icon: <Ticket size={20} />,   color: '#471DDB' },
-              { label: 'Beneficiaries',href: '/dashboard/system-admin/beneficiaries',icon: <Users size={20} />,    color: '#1DB1DB' },
-              { label: 'Logs',         href: '/dashboard/system-admin/logs',         icon: <FileText size={20} />, color: '#1CDBC9' },
+              { label: 'Accounts',     href: '/dashboard/system-admin/accounts',     icon: <Wallet size={20} />,       color: '#471DDB' },
+              { label: 'Transactions', href: '/dashboard/system-admin/transactions', icon: <ArrowLeftRight size={20} />, color: '#1DB1DB' },
+              { label: 'Fee Splits',   href: '/dashboard/system-admin/fee-splits',   icon: <Percent size={20} />,      color: '#1CDBC9' },
+              { label: 'Gateways',     href: '/dashboard/system-admin/gateways',     icon: <Globe size={20} />,        color: '#f59e0b' },
+              { label: 'Hospitals',    href: '/dashboard/system-admin/hospitals',    icon: <Building2 size={20} />,    color: '#1D38DB' },
+              { label: 'Vouchers',     href: '/dashboard/system-admin/vouchers',     icon: <Ticket size={20} />,       color: '#471DDB' },
+              { label: 'Beneficiaries',href: '/dashboard/system-admin/beneficiaries',icon: <Users size={20} />,        color: '#1DB1DB' },
+              { label: 'Logs',         href: '/dashboard/system-admin/logs',         icon: <FileText size={20} />,     color: '#1CDBC9' },
             ].map(n => (
               <Link key={n.label} href={n.href} className="card p-4 hover:shadow-md transition-shadow flex flex-col gap-2">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white" style={{ background: n.color }}>{n.icon}</div>

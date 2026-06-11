@@ -13,7 +13,7 @@ function handleError(e: unknown): never {
 
 export const listAccounts = async (access_token: string) => {
   try {
-    const { data } = await api.get("/api/payments/accounts/", {
+    const { data } = await api.get<PaginationResponse<Account>>("/api/payments/accounts/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
     return data;
@@ -136,7 +136,7 @@ export const deleteGateway = async (id: number, access_token: string) => {
 
 export const listTransactions = async (access_token: string, params?: Record<string, string>) => {
   try {
-    const { data } = await api.get("/api/payments/transactions/", {
+    const { data } = await api.get<PaginationResponse<TransactionList>>("/api/payments/transactions/", {
       headers: { Authorization: `Bearer ${access_token}` },
       params,
     });
@@ -157,7 +157,7 @@ export const getTransaction = async (id: string, access_token: string) => {
 
 export const listFeeSplits = async (access_token: string) => {
   try {
-    const { data } = await api.get("/api/payments/fee-splits/", {
+    const { data } = await api.get<PaginationResponse<FeeSplitList>>("/api/payments/fee-splits/", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
     return data;
@@ -175,10 +175,11 @@ export const getFeeSplit = async (id: number, access_token: string) => {
 
 // ── Webhooks ──
 
-export const listWebhookEvents = async (access_token: string) => {
+export const listWebhookEvents = async (access_token: string,params?:Partial<{gateway:string,event_type:string,received_after:string,received_before:string,page:number,page_size:number}>) => {
   try {
-    const { data } = await api.get("/api/payments/webhooks/", {
+    const { data } = await api.get<PaginationResponse<WebhookEventList>>("/api/payments/webhooks/", {
       headers: { Authorization: `Bearer ${access_token}` },
+      params
     });
     return data;
   } catch (e) { handleError(e); }
