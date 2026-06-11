@@ -85,7 +85,7 @@ export default function HomePage() {
   // Fetch campaigns with React Query
   const { data: campaignsResponse, isLoading: campaignsLoading } = useQuery({
     queryKey: ["campaigns"],
-    queryFn: async () => await listCampaigns(),
+    queryFn: async () => await listCampaigns({ status: "ACTIVE" }),
   });
 
   // Fetch platform stats with React Query
@@ -103,9 +103,7 @@ export default function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  const activeCampaigns = (campaignsResponse?.results || [])
-    .filter((c) => c.status === "ACTIVE")
-    .slice(0, 3);
+  const activeCampaigns = (campaignsResponse?.results || []).slice(0, 3);
 
   return (
     <div className="min-h-screen">
