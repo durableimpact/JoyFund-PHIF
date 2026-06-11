@@ -147,6 +147,8 @@ def oauth2_token_view(request):
     from oauth2_provider.views import TokenView
     from oauth2_provider.models import AccessToken
     from django.http import QueryDict
+    from accounts.models import UserDevice
+    from accounts.utils.user_agent import parse_user_agent
     
     try:
         # Get the underlying Django request from the DRF Request object
@@ -182,7 +184,7 @@ def oauth2_token_view(request):
         print(f"OAuth2 Response Status: {response.status_code}")
         print(f"OAuth2 Response Content: {response.content}")
         
-        # If the token request is successful, inject the user's role
+        # If the token request is successful, inject the user's role and record device
         if response.status_code == 200:
             try:
                 response_data = json.loads(response.content.decode('utf-8'))
@@ -195,6 +197,29 @@ def oauth2_token_view(request):
                     
                     if token_obj and token_obj.user:
                         response_data['role'] = token_obj.user.role
+                        
+                        # Record device only on initial password login, not refresh
+                        if django_request.POST.get('grant_type') == 'password':
+                            # Use browser's UA forwarded from frontend, fall back to server UA
+                            user_agent_str = (
+                                django_request.META.get('HTTP_X_DEVICE_USER_AGENT', '')
+                                or django_request.META.get('HTTP_USER_AGENT', '')
+                            )
+                            ip = django_request.META.get('REMOTE_ADDR', '')
+                            device_info = parse_user_agent(user_agent_str)
+                            
+                            UserDevice.objects.update_or_create(
+                                user=token_obj.user,
+                                user_agent=user_agent_str,
+                                ip_address=ip,
+                                defaults={
+                                    'device_name': device_info['device_name'],
+                                    'device_type': device_info['device_type'],
+                                    'browser': device_info['browser'],
+                                    'os': device_info['os'],
+                                },
+                            )
+                        
                         return Response(response_data, status=200)
                 
                 return Response(response_data, status=200)
