@@ -9,8 +9,9 @@ import ReactQueryProvider from "@/provider/react-query-provider";
 import TokenRefreshProvider from "@/provider/token-refresh-provider";
 import AuthCacheSyncProvider from "@/provider/auth-cache-sync-provider";
 import AppHelmetProvider from "@/provider/helmet-provider";
+import WebSocketProvider from "@/provider/websocket-provider";
 import { Toaster } from "@/components/ui/sonner";
-// import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker"; // PWA DISABLED - Causing cache issues
+import PushSubscriptionManager from "@/components/pwa/PushSubscriptionManager";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const montserrat = localFont({
@@ -103,6 +104,7 @@ export const metadata: Metadata = {
     apple: "/assets/favicon_io/joyfund-apple-touch-icon.png",
     shortcut: "/assets/favicon_io/joyfund-android-chrome-192x192.png",
   },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -174,10 +176,9 @@ export default function RootLayout({
           </>
         )}
 
-        {/* PWA DISABLED - Commenting out manifest and PWA meta tags to prevent caching issues */}
-        {/* <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1DB1DB" />
-        <meta name="apple-mobile-web-app-capable" content="yes" /> */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="JoyFund" />
         <script
@@ -209,14 +210,15 @@ export default function RootLayout({
           <ReactQueryProvider>
             <AuthCacheSyncProvider>
               <TokenRefreshProvider>
-                <AppHelmetProvider>
-                  <TooltipProvider>{children}</TooltipProvider>
-                </AppHelmetProvider>
+                <WebSocketProvider>
+                  <AppHelmetProvider>
+                    <TooltipProvider>{children}</TooltipProvider>
+                  </AppHelmetProvider>
+                </WebSocketProvider>
               </TokenRefreshProvider>
             </AuthCacheSyncProvider>
             <Toaster />
-            {/* PWA DISABLED - Commenting out RegisterServiceWorker component */}
-            {/* <RegisterServiceWorker /> */}
+            <PushSubscriptionManager />
           </ReactQueryProvider>
         </SessionProvider>
       </body>
