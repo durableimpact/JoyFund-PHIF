@@ -1,16 +1,9 @@
-// PWA SERVICE WORKER - DISABLED FOR NOW
-// This service worker was causing caching issues that prevented some pages from fetching fresh data.
-// Disabled temporarily while the caching strategy is reviewed.
-// TODO: Re-enable with improved cache strategy once issues are resolved
+// JoyFund Service Worker
+// Handles web push notifications and offline caching
 
-/*
-const STATIC_CACHE_NAME = "joyfund-static-v2";
+const STATIC_CACHE_NAME = "joyfund-static-v3";
 const APP_SHELL_ASSETS = [
   "/",
-  "/favicon.ico",
-  "/assets/favicon_io/joyfund-android-chrome-192x192.png",
-  "/assets/favicon_io/joyfund-android-chrome-512x512.png",
-  "/assets/favicon_io/joyfund-apple-touch-icon.png",
   "/web-app-manifest-192x192.png",
   "/web-app-manifest-512x512.png",
 ];
@@ -45,104 +38,49 @@ self.addEventListener("message", (event) => {
   }
 });
 
-function isHtmlRequest(request) {
-  return (
-    request.mode === "navigate" ||
-    request.headers.get("accept")?.includes("text/html")
-  );
-}
+// ── Push Notification Event ─────────────────────────────────────────────
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
 
-function isApiRequest(url) {
-  return (
-    url.origin === self.location.origin && url.pathname.startsWith("/api/")
-  );
-}
-
-function isStaticAssetRequest(request, url) {
-  if (url.origin !== self.location.origin) return false;
-
-  if (APP_SHELL_ASSETS.includes(url.pathname)) return true;
-
-  return ["style", "script", "image", "font", "worker"].includes(
-    request.destination,
-  );
-}
-
-async function networkOnly(request) {
-  return fetch(request);
-}
-
-async function networkFirst(request) {
+  let data;
   try {
-    return await fetch(request);
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    if (isHtmlRequest(request)) {
-      const shellResponse = await caches.match("/");
-      if (shellResponse) {
-        return shellResponse;
-      }
-    }
-
-    throw error;
-  }
-}
-
-async function cacheFirstStatic(request) {
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) {
-    return cachedResponse;
+    data = event.data.json();
+  } catch {
+    data = { title: "JoyFund", body: event.data.text() };
   }
 
-  const networkResponse = await fetch(request);
+  const title = data.title || "JoyFund";
+  const options = {
+    body: data.body || "",
+    icon: data.icon || "/web-app-manifest-192x192.png",
+    badge: data.badge || "/web-app-manifest-192x192.png",
+    data: data.data || { url: "/" },
+    tag: data.tag || "default",
+    requireInteraction: true,
+    vibrate: [200, 100, 200],
+  };
 
-  if (
-    networkResponse &&
-    networkResponse.status === 200 &&
-    networkResponse.type === "basic"
-  ) {
-    const cache = await caches.open(STATIC_CACHE_NAME);
-    cache.put(request, networkResponse.clone());
-  }
-
-  return networkResponse;
-}
-
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-
-  const requestUrl = new URL(event.request.url);
-  const hasAuthorizationHeader = event.request.headers.has("authorization");
-
-  if (isApiRequest(requestUrl) || hasAuthorizationHeader) {
-    event.respondWith(networkOnly(event.request));
-    return;
-  }
-
-  if (isStaticAssetRequest(event.request, requestUrl)) {
-    event.respondWith(cacheFirstStatic(event.request));
-    return;
-  }
-
-  if (isHtmlRequest(event.request)) {
-    event.respondWith(networkFirst(event.request));
-    return;
-  }
-
-  if (requestUrl.origin !== self.location.origin) {
-    return;
-  }
-
-  event.respondWith(networkFirst(event.request));
+  event.waitUntil(self.registration.showNotification(title, options));
 });
-*/
 
-// Service worker disabled - no active caching
-console.warn(
-  "[PWA] Service worker is disabled to prevent caching issues. Re-enable when cache strategy is fixed.",
-);
+// ── Notification Click Event ────────────────────────────────────────────
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url === url && "focus" in client) {
+            return client.focus();
+          }
+        }
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(url);
+        }
+      }),
+  );
+});
