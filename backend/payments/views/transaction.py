@@ -33,7 +33,7 @@ class TransactionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
     or deleted via the API.
     """
     queryset = Transaction.objects.select_related(
-        'donation', 'provider', 'source', 'destination',
+        'donation', 'gateway', 'source', 'destination',
         'fee_split', 'fee_split__fee_policy',
     ).order_by('-created_at')
     permission_classes = [IsSystemAdmin]
