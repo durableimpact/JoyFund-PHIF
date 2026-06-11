@@ -1,5 +1,4 @@
 services:
-
   # ─── Nginx Proxy Manager ───────────────────────────
   npm:
     image: jc21/nginx-proxy-manager:latest
@@ -10,12 +9,12 @@ services:
       # - "81:81"
       - "443:443"
     environment:
-      TZ: 'Africa/Douala'
+      TZ: "Africa/Douala"
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
-      - static_volume:/app/static:ro    # ← read static files
-      - media_volume:/app/media:ro      # ← read media files
+      - static_volume:/app/static:ro # ← read static files
+      - media_volume:/app/media:ro # ← read media files
     networks:
       - joyfund_network
     deploy:
@@ -99,11 +98,11 @@ services:
     deploy:
       resources:
         limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
           cpus: "0.5"
           memory: 256M
-        reservations:
-          cpus: "0.25"
-          memory: 128M
     logging:
       driver: json-file
       options:
