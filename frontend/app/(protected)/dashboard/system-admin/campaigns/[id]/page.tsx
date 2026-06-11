@@ -155,40 +155,38 @@ export default function AdminCampaignDetailPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors shadow-sm"
+            className="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors shadow-sm shrink-0"
           >
             <ArrowLeft size={20} className="text-gray-600" />
           </button>
-          <div>
-            <h1 className="text-2xl font-black text-gray-900">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900">
               Campaign Audit
             </h1>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusColor(campaign.status)}`}
               >
                 {campaign.status}
               </span>
               <span className="text-gray-400 text-xs">•</span>
-              <span className="text-gray-500 text-xs font-medium">
+              <span className="text-gray-500 text-xs font-medium truncate">
                 ID: {campaign.id}
               </span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/campaign/${campaign.id}`}
-            target="_blank"
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
-          >
-            <ExternalLink size={16} /> Public View
-          </Link>
-        </div>
+        <Link
+          href={`/campaign/${campaign.id}`}
+          target="_blank"
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm self-start sm:self-auto"
+        >
+          <ExternalLink size={16} /> Public View
+        </Link>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -205,7 +203,7 @@ export default function AdminCampaignDetailPage() {
                 />
               </div>
             )}
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               <div className="flex items-center gap-2 mb-2 text-[#471DDB] font-bold text-xs uppercase tracking-wider">
                 <Tag size={14} />
                 {campaign.event_type}
@@ -260,7 +258,7 @@ export default function AdminCampaignDetailPage() {
           </div>
 
           {/* Transaction Ledger */}
-          <div className="card p-6">
+          <div className="card p-4 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-[#471DDB]/10 rounded-lg text-[#471DDB]">
@@ -302,75 +300,69 @@ export default function AdminCampaignDetailPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-hidden border border-gray-100 rounded-2xl">
-                <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white shadow-sm z-10">
-                      <tr className="text-left border-b border-gray-100">
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">
-                          Type
-                        </th>
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">
-                          Description
-                        </th>
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">
-                          Amount
-                        </th>
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">
-                          Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {transactions.map((tx: any) => {
-                        const info = txTypeInfo(tx.transaction_type);
-                        return (
-                          <tr
-                            key={tx.id}
-                            className="group hover:bg-gray-50/50 transition-colors"
-                          >
-                            <td className="p-4">
-                              <span
-                                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${info.color}`}
-                              >
-                                {info.icon}
-                                {info.label}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <p
-                                className="text-xs text-gray-600 line-clamp-1"
-                                title={tx.description}
-                              >
-                                {tx.description}
-                              </p>
-                            </td>
-                            <td className="p-4 text-right">
-                              <p
-                                className={`font-black text-xs ${tx.transaction_type === "DONATION" || tx.transaction_type === "SURPLUS_REFUND" ? "text-green-600" : "text-red-600"}`}
-                              >
-                                {tx.transaction_type === "DONATION" ||
-                                tx.transaction_type === "SURPLUS_REFUND"
-                                  ? "+"
-                                  : "-"}{" "}
-                                {formatXAF(tx.amount)}
-                              </p>
-                            </td>
-                            <td className="p-4 text-gray-400 text-[10px] text-right">
-                              {new Date(tx.created_at).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+              <>
+                {/* Mobile: cards */}
+                <div className="md:hidden space-y-3">
+                  {transactions.map((tx: any) => {
+                    const info = txTypeInfo(tx.transaction_type);
+                    return (
+                      <div key={tx.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${info.color}`}>{info.icon}{info.label}</span>
+                          <span className={`font-black text-xs ${tx.transaction_type === "DONATION" || tx.transaction_type === "SURPLUS_REFUND" ? "text-green-600" : "text-red-600"}`}>
+                            {tx.transaction_type === "DONATION" || tx.transaction_type === "SURPLUS_REFUND" ? "+" : "-"} {formatXAF(tx.amount)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm"><span className="text-gray-500">Description</span><span className="text-xs text-gray-600 truncate max-w-[200px]">{tx.description}</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="text-gray-400 text-xs">{new Date(tx.created_at).toLocaleDateString()}</span></div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+                {/* Desktop: table */}
+                <div className="hidden md:block overflow-hidden border border-gray-100 rounded-2xl">
+                  <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                    <table className="w-full text-sm">
+                      <thead className="sticky top-0 bg-white shadow-sm z-10">
+                        <tr className="text-left border-b border-gray-100">
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Type</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Description</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Amount</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {transactions.map((tx: any) => {
+                          const info = txTypeInfo(tx.transaction_type);
+                          return (
+                            <tr key={tx.id} className="group hover:bg-gray-50/50 transition-colors">
+                              <td className="p-4">
+                                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${info.color}`}>
+                                  {info.icon}{info.label}
+                                </span>
+                              </td>
+                              <td className="p-4">
+                                <p className="text-xs text-gray-600 line-clamp-1" title={tx.description}>{tx.description}</p>
+                              </td>
+                              <td className="p-4 text-right">
+                                <p className={`font-black text-xs ${tx.transaction_type === "DONATION" || tx.transaction_type === "SURPLUS_REFUND" ? "text-green-600" : "text-red-600"}`}>
+                                  {tx.transaction_type === "DONATION" || tx.transaction_type === "SURPLUS_REFUND" ? "+" : "-"} {formatXAF(tx.amount)}
+                                </p>
+                              </td>
+                              <td className="p-4 text-gray-400 text-[10px] text-right">{new Date(tx.created_at).toLocaleDateString()}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
           {/* Detailed Donation History */}
-          <div className="card p-6">
+          <div className="card p-4 md:p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-green-50 rounded-lg text-green-600">
@@ -397,80 +389,74 @@ export default function AdminCampaignDetailPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-hidden border border-gray-100 rounded-2xl">
-                <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white shadow-sm z-10">
-                      <tr className="text-left border-b border-gray-100">
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">
-                          Donor
-                        </th>
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">
-                          Email
-                        </th>
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">
-                          Amount
-                        </th>
-                        <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-center">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {donations.map((d: any) => (
-                        <tr
-                          key={d.id}
-                          className="group hover:bg-gray-50/50 transition-colors"
-                        >
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 shrink-0">
-                                <UserIcon size={12} />
-                              </div>
-                              <p className="font-bold text-gray-900 text-xs">
-                                {d.is_anonymous
-                                  ? "Anonymous"
-                                  : d.donor_name || "Guest"}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <p className="text-[11px] text-gray-500 font-medium">
-                              {d.donor_email || "—"}
-                            </p>
-                          </td>
-                          <td className="p-4 text-right">
-                            <p className="font-black text-xs text-[#471DDB]">
-                              {formatXAF(d.amount)}
-                            </p>
-                            <p className="text-[9px] text-gray-400 mt-0.5">
-                              {new Date(d.created_at).toLocaleDateString()}
-                            </p>
-                          </td>
-                          <td className="p-4 text-center">
-                            <span
-                              className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                                d.status === "SUCCESS"
-                                  ? "text-green-600 bg-green-50"
-                                  : d.status === "FAILED"
-                                    ? "text-red-600 bg-red-50"
-                                    : "text-amber-600 bg-amber-50"
-                              }`}
-                            >
-                              {d.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <>
+                {/* Mobile: cards */}
+                <div className="md:hidden space-y-3">
+                  {donations.map((d: any) => (
+                    <div key={d.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
+                      <div className="flex justify-between text-sm"><span className="text-gray-500">Donor</span><span className="font-bold text-gray-900 text-xs">{d.is_anonymous ? "Anonymous" : d.donor_name || "Guest"}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-gray-500">Email</span><span className="text-[11px] text-gray-500">{d.donor_email || "—"}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-gray-500">Amount</span><span><p className="font-black text-xs text-[#471DDB] text-right">{formatXAF(d.amount)}</p><p className="text-[9px] text-gray-400 text-right">{new Date(d.created_at).toLocaleDateString()}</p></span></div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Status</span>
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                          d.status === "SUCCESS" ? "text-green-600 bg-green-50" :
+                          d.status === "FAILED" ? "text-red-600 bg-red-50" : "text-amber-600 bg-amber-50"
+                        }`}>{d.status}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+                {/* Desktop: table */}
+                <div className="hidden md:block overflow-hidden border border-gray-100 rounded-2xl">
+                  <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                    <table className="w-full text-sm">
+                      <thead className="sticky top-0 bg-white shadow-sm z-10">
+                        <tr className="text-left border-b border-gray-100">
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Donor</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Email</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Amount</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {donations.map((d: any) => (
+                          <tr key={d.id} className="group hover:bg-gray-50/50 transition-colors">
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 shrink-0">
+                                  <UserIcon size={12} />
+                                </div>
+                                <p className="font-bold text-gray-900 text-xs">
+                                  {d.is_anonymous ? "Anonymous" : d.donor_name || "Guest"}
+                                </p>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <p className="text-[11px] text-gray-500 font-medium">{d.donor_email || "—"}</p>
+                            </td>
+                            <td className="p-4 text-right">
+                              <p className="font-black text-xs text-[#471DDB]">{formatXAF(d.amount)}</p>
+                              <p className="text-[9px] text-gray-400 mt-0.5">{new Date(d.created_at).toLocaleDateString()}</p>
+                            </td>
+                            <td className="p-4 text-center">
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                                d.status === "SUCCESS" ? "text-green-600 bg-green-50" :
+                                d.status === "FAILED" ? "text-red-600 bg-red-50" : "text-amber-600 bg-amber-50"
+                              }`}>{d.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
           {/* Voucher Fundings / Impact */}
-          <div className="card p-6">
+          <div className="card p-4 md:p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
@@ -545,7 +531,7 @@ export default function AdminCampaignDetailPage() {
         {/* Right Column: Financials & Events */}
         <div className="space-y-6">
           {/* Wallet Summary */}
-          <div className="card p-6 bg-[#471DDB] text-white">
+          <div className="card p-4 md:p-6 bg-[#471DDB] text-white">
             <h3 className="font-bold text-white/80 text-xs uppercase tracking-wider mb-6 flex items-center gap-2">
               <Wallet size={14} />
               Campaign Wallet
@@ -606,7 +592,7 @@ export default function AdminCampaignDetailPage() {
           </div>
 
           {/* Timeline / Events */}
-          <div className="card p-6">
+          <div className="card p-4 md:p-6">
             <h3 className="font-bold text-gray-900 text-sm mb-6 flex items-center gap-2">
               <Clock size={18} className="text-[#471DDB]" />
               Status History
@@ -642,7 +628,7 @@ export default function AdminCampaignDetailPage() {
           </div>
 
           {/* Admin Oversight */}
-          <div className="card p-6 border-2 border-amber-100 bg-amber-50/30">
+          <div className="card p-4 md:p-6 border-2 border-amber-100 bg-amber-50/30">
             <h3 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2">
               <ShieldCheck size={18} className="text-amber-600" />
               Administrative View
