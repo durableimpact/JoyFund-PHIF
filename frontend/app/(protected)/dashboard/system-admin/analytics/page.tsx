@@ -15,11 +15,12 @@ export default function AdminAnalytics() {
   const { data: campaignsData, isLoading: loading } = useQuery({
     queryKey: ['analytics-campaigns', token],
     queryFn: async () => {
-      const res = await listCampaigns({ page_size: '1000' });
+      const res = await listCampaigns({ page_size: 1000 });
       return res || { results: [], next: null, previous: null, count: 0 };
     },
     enabled: !!token,
   });
+  const campaigns: any[] = campaignsData?.results || [];
 
   const { data: beneficiariesData } = useQuery({
     queryKey: ['analytics-beneficiaries', token],
@@ -48,13 +49,11 @@ export default function AdminAnalytics() {
     enabled: !!token,
   });
 
-  const campaigns: Campaign[] = campaignsData?.results || [];
   const beneficiaries: Beneficiary[] = beneficiariesData?.results || [];
   const vouchers: Voucher[] = vouchersData?.results || [];
   const hospitals: Hospital[] = hospitalsData?.results || [];
 
   const totalRaised = campaigns.reduce((s, c) => s + (c.available_balance ?? 0), 0);
-  const totalGoal = campaigns.reduce((s, c) => s + (c.goal_amount ?? 0), 0);
   const vouchersUsed = vouchers.filter(v => v.status === 'USED').length;
   const activeHospitals = hospitals.filter(h => h.is_active !== false).length;
 
@@ -110,7 +109,7 @@ export default function AdminAnalytics() {
           <div className="space-y-3">
             {[
               { label: 'Total Donated',   value: totalRaised,                 color: '#471DDB' },
-              { label: 'Goal Target',     value: totalGoal,                   color: '#1DB1DB' },
+              { label: 'Available Balance', value: totalRaised,               color: '#1DB1DB' },
               { label: 'Vouchers Issued', value: vouchers.length * 60000,     color: '#1CDBC9' },
             ].map(row => (
               <div key={row.label}>
@@ -119,16 +118,10 @@ export default function AdminAnalytics() {
                   <span className="font-bold" style={{ color: row.color }}>{formatXAF(row.value)}</span>
                 </div>
                 <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${Math.min(100, totalGoal > 0 ? Math.round(row.value / totalGoal * 100) : 0)}%`, background: row.color }} />
+                  <div className="progress-fill" style={{ width: `${Math.min(100, totalRaised > 0 ? Math.round(row.value / totalRaised * 100) : 0)}%`, background: row.color }} />
                 </div>
               </div>
             ))}
-          </div>
-          <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm">
-            <span className="text-gray-500">Overall progress</span>
-            <span className="font-bold" style={{ color: '#471DDB' }}>
-              {totalGoal > 0 ? Math.round(totalRaised / totalGoal * 100) : 0}%
-            </span>
           </div>
         </div>
 
@@ -164,7 +157,7 @@ export default function AdminAnalytics() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {['#','Campaign','Event Type','Raised','Goal','Status'].map(h=>(
+                    {['#','Campaign','Raised','Status'].map(h=>(
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                     ))}
                   </tr>
@@ -172,20 +165,13 @@ export default function AdminAnalytics() {
                 <tbody>
                   {leaderboard.map((c, i) => {
                     const raised = c.available_balance ?? 0;
-                    const goal = c.goal_amount ?? 0;
-                    const pct = goal > 0 ? Math.min(Math.round(raised / goal * 100), 100) : 0;
                     return (
                       <tr key={c.id} className="border-b border-gray-50">
                         <td className="py-3 font-black text-sm" style={{ color: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#b45309' : '#94a3b8' }}>
                           {i < 3 ? ['🥇','🥈','🥉'][i] : `#${i+1}`}
                         </td>
                         <td className="py-3 font-medium text-gray-900 max-w-[180px] truncate">{c.title}</td>
-                        <td className="py-3 text-gray-500 capitalize text-xs">{c.event_type || '—'}</td>
                         <td className="py-3 font-bold" style={{ color: 'var(--primary)' }}>{formatXAF(raised)}</td>
-                        <td className="py-3 text-gray-500 text-xs">
-                          {formatXAF(goal)}
-                          <span className="ml-1 text-emerald-600">({pct}%)</span>
-                        </td>
                         <td className="py-3">
                           <span className={`badge text-[10px] ${c.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{c.status}</span>
                         </td>
