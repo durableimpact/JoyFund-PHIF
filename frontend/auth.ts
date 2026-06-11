@@ -99,9 +99,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         try {
+          // Forward the browser's User-Agent so Django records the real device
+          const headers: Record<string, string> = {}
+          const userAgent = (credentials as any)?.userAgent
+          if (userAgent) {
+            headers["X-Device-User-Agent"] = userAgent
+          }
+
           // Login via Django API
           const response = await fetchFromAPI<AuthResponse>("/auth/token/", {
             method: "POST",
+            headers,
             body: JSON.stringify({
               grant_type: "password",
               username: credentials.email as string,
