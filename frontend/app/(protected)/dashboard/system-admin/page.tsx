@@ -29,43 +29,54 @@ import {
 
 
 import { formatXAF } from '@/lib/utils';
-import { listBeneficiaries } from '@/actions/beneficiaries';
-import { listCampaigns } from '@/actions/campaigns';
-import { listHospitals } from '@/actions/hospital';
-import { listVouchers } from '@/actions/vouchers';
+import {
+  getAdminOverview,
+  getAdminOrganization,
+  getAdminBeneficiaryVoucher,
+  getAdminFinancial,
+  getAdminDonationTrends,
+  getAdminUserAnalytics,
+} from '@/actions/accounts';
 export default function AdminDashboard() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
-  const { data: beneficiaries = [], isLoading: bLoading } = useQuery<Beneficiary[]>({
-    queryKey: ['admin-beneficiaries', token],
-    queryFn: async () => { const res = await listBeneficiaries(token); return res?.results || res; },
+  const { data: overview, isLoading: oLoading } = useQuery({
+    queryKey: ['admin-overview', token],
+    queryFn: async () => await getAdminOverview(token),
     enabled: !!token,
   });
-  const { data: campaigns = [], isLoading: cLoading } = useQuery<Campaign[]>({
-    queryKey: ['admin-campaigns', token],
-    queryFn: async () => { const res = await listCampaigns(); return res?.results || res; },
+  const { data: org, isLoading: orgLoading } = useQuery({
+    queryKey: ['admin-organization', token],
+    queryFn: async () => await getAdminOrganization(token),
     enabled: !!token,
   });
-  const { data: hospitals = [], isLoading: hLoading } = useQuery<Hospital[]>({
-    queryKey: ['admin-hospitals', token],
-    queryFn: async () => { const res = await listHospitals(token); return res?.results || res; },
+  const { data: bv, isLoading: bvLoading } = useQuery({
+    queryKey: ['admin-beneficiary-voucher', token],
+    queryFn: async () => await getAdminBeneficiaryVoucher(token),
     enabled: !!token,
   });
-  const { data: vouchers = [], isLoading: vLoading } = useQuery<Voucher[]>({
-    queryKey: ['admin-vouchers', token],
-    queryFn: async () => { const res = await listVouchers(token); return res?.results || res; },
+  const { data: financial, isLoading: finLoading } = useQuery({
+    queryKey: ['admin-financial', token],
+    queryFn: async () => await getAdminFinancial(token),
     enabled: !!token,
   });
-  const loading = bLoading || cLoading || hLoading || vLoading;
-  const totalRaised = campaigns.reduce((s, c) => s + (c.available_balance ?? 0), 0);
-  const activeCampaigns = campaigns.filter((c) => c.status === 'ACTIVE').length;
-  const vouchersUsed = vouchers.filter((v) => v.status === 'USED').length;
+  const { data: trends, isLoading: trLoading } = useQuery({
+    queryKey: ['admin-donation-trends', token],
+    queryFn: async () => await getAdminDonationTrends(token),
+    enabled: !!token,
+  });
+  const { data: userGrowth, isLoading: ugLoading } = useQuery({
+    queryKey: ['admin-user-analytics', token],
+    queryFn: async () => await getAdminUserAnalytics(token),
+    enabled: !!token,
+  });
+  const loading = oLoading || orgLoading || bvLoading || finLoading || trLoading || ugLoading;
   const kpis = [
-    { label: 'Total Raised',       value: formatXAF(totalRaised), icon: TrendingUp,  color: '#471DDB', sub: 'Across all campaigns' },
-    { label: 'Active Campaigns',   value: activeCampaigns,        icon: Activity,    color: '#1DB1DB', sub: `${campaigns.length} total` },
-    { label: 'Vouchers Redeemed',  value: vouchersUsed,           icon: CheckCircle, color: '#1CDBC9', sub: `${vouchers.length} total issued` },
-    { label: 'Hospitals',          value: hospitals.length,       icon: Building2,   color: '#f59e0b', sub: 'Partner hospitals' },
+    { label: 'Total Donations',    value: formatXAF(overview?.total_donations?.current ?? 0), icon: TrendingUp,  color: '#471DDB', sub: 'All time' },
+    { label: 'Total Campaigns',    value: overview?.total_campaigns?.current ?? 0,            icon: Activity,    color: '#1DB1DB', sub: 'All campaigns' },
+    { label: 'Total Beneficiaries',value: overview?.total_beneficiaries?.current ?? 0,        icon: CheckCircle, color: '#1CDBC9', sub: 'Enrolled' },
+    { label: 'Hospitals',          value: overview?.total_hospitals?.current ?? 0,            icon: Building2,   color: '#f59e0b', sub: 'Partner hospitals' },
   ];
   return (<>
 
@@ -110,35 +121,66 @@ export default function AdminDashboard() {
               </Link>
             ))}
           </div>
-          {/* Recent campaigns */}
+          {/* Financial Summary */}
           <div className="card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900">Recent Campaigns</h3>
-              <Link href="/explore" className="text-xs font-semibold" style={{ color: '#471DDB' }}>Explore</Link>
-            </div>
+            <h3 className="font-bold text-gray-900 mb-4">Financial Summary</h3>
             {loading ? (
               <div className="space-y-2">{[1,2,3].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
-            ) : campaigns.slice(0, 5).map((c) => (
-              <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                <p className="text-sm font-medium text-gray-800 truncate flex-1 mr-2">{c.title}</p>
-                <span className="font-bold text-xs shrink-0" style={{ color: 'var(--primary)' }}>
-                  {formatXAF(c.available_balance ?? 0)}
-                </span>
+            ) : (
+              <div className="space-y-3">
+                {[
+                  ['Escrow Balance',     formatXAF(financial?.summary?.escrow_balance ?? 0)],
+                  ['Platform Fees',      formatXAF(financial?.summary?.platform_fees_collected ?? 0)],
+                  ['Total Donations',    formatXAF(financial?.summary?.total_donations_received ?? 0)],
+                  ['Total Disbursements',formatXAF(financial?.summary?.total_disbursements ?? 0)],
+                  ['Donation Count',     financial?.summary?.total_donations_count ?? 0],
+                ].map(([label, value]) => (
+                  <div key={label as string} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">{label}</span>
+                    <span className="font-bold text-gray-900">{String(value)}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+          </div>
+          {/* User Growth */}
+          <div className="card p-5">
+            <h3 className="font-bold text-gray-900 mb-4">User Growth</h3>
+            {loading ? (
+              <div className="space-y-2">{[1,2,3].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Total Users</span>
+                  <span className="font-bold text-gray-900">{userGrowth?.total_users ?? 0}</span>
+                </div>
+                {[
+                  ['Donors',           userGrowth?.donors?.current],
+                  ['Hospital Admins',  userGrowth?.hospital_admins?.current],
+                  ['Social Workers',   userGrowth?.social_workers?.current],
+                  ['Receptionists',    userGrowth?.receptionists?.current],
+                  ['System Admins',    userGrowth?.system_admins?.current],
+                ].map(([label, value]) => (
+                  <div key={label as string} className="flex justify-between items-center text-sm pl-4">
+                    <span className="text-gray-500">{label}</span>
+                    <span className="font-semibold text-gray-900">{value ?? 0}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div className="space-y-5">
-          {/* Summary stats */}
+          {/* Platform Summary */}
           <div className="card p-5">
             <h3 className="font-bold text-gray-900 mb-4">Platform Summary</h3>
             <div className="space-y-3">
               {[
-                ['Total Campaigns',    campaigns.length],
-                ['Active Campaigns',   activeCampaigns],
-                ['Total Beneficiaries',beneficiaries.length],
-                ['Total Vouchers',     vouchers.length],
-                ['Partner Hospitals',  hospitals.length],
+                ['Total Campaigns',    overview?.total_campaigns?.current ?? 0],
+                ['Total Donations',    overview?.total_donations?.current ?? 0],
+                ['Total Beneficiaries',overview?.total_beneficiaries?.current ?? 0],
+                ['Total Vouchers',     overview?.total_vouchers?.current ?? 0],
+                ['Partner Hospitals',  overview?.total_hospitals?.current ?? 0],
               ].map(([label, value]) => (
                 <div key={label as string} className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">{label}</span>
@@ -147,19 +189,39 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
-          {/* Partner hospitals */}
+          {/* Voucher & Beneficiary metrics */}
+          <div className="card p-5">
+            <h3 className="font-bold text-gray-900 mb-4">Voucher & Beneficiary</h3>
+            {loading ? (
+              <div className="space-y-2">{[1,2,3].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
+            ) : (
+              <div className="space-y-3">
+                {[
+                  ['Total Beneficiaries',  bv?.total_beneficiaries?.current ?? 0],
+                  ['Vouchers Generated',   bv?.total_vouchers_generated?.current ?? 0],
+                  ['Vouchers Redeemed',    bv?.total_vouchers_redeemed?.current ?? 0],
+                ].map(([label, value]) => (
+                  <div key={label as string} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">{label}</span>
+                    <span className="font-bold text-gray-900">{String(value)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Top hospitals */}
           <div className="card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-900">Partner Hospitals</h3>
+              <h3 className="font-bold text-gray-900">Top Hospitals</h3>
               <Link href="/dashboard/system-admin/hospitals" className="text-xs font-semibold" style={{ color: '#471DDB' }}>Manage</Link>
             </div>
             {loading ? (
               <div className="space-y-2">{[1,2].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
-            ) : hospitals.slice(0, 4).map((h) => (
+            ) : org?.top_hospitals?.slice(0, 4).map((h) => (
               <div key={h.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">{h.name}</p>
-                  <p className="text-xs text-gray-400">{h.city}, {h.region}</p>
+                  <p className="text-xs text-gray-400">{h.city}</p>
                 </div>
               </div>
             ))}
@@ -167,6 +229,6 @@ export default function AdminDashboard() {
         </div>
       </div>
   
-</>
+  </>
 );
 }
