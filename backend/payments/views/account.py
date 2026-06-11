@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
+from rest_framework.response import Response
 
 from accounts.utils.permissions import IsSystemAdmin
 
@@ -31,12 +32,12 @@ class AccountListView(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         cache_key = 'account_list'
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached['data'], status=cached['status'])
         
         response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, {'data': response.data, 'status': response.status_code}, CACHE_TIMEOUT)
         return response
 
 
@@ -58,12 +59,12 @@ class EscrowAccountDetailView(generics.RetrieveAPIView):
     )
     def get(self, request, *args, **kwargs):
         cache_key = 'escrow_account_detail'
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached['data'], status=cached['status'])
         
         response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, {'data': response.data, 'status': response.status_code}, CACHE_TIMEOUT)
         return response
 
 
@@ -85,10 +86,10 @@ class FeeAccountDetailView(generics.RetrieveAPIView):
     )
     def get(self, request, *args, **kwargs):
         cache_key = 'fee_account_detail'
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached['data'], status=cached['status'])
         
         response = super().get(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, {'data': response.data, 'status': response.status_code}, CACHE_TIMEOUT)
         return response
