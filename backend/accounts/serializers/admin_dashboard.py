@@ -49,6 +49,7 @@ class OverviewKpiSerializer(serializers.Serializer):
     total_vouchers = GrowthIndicatorSerializer()
     total_users = GrowthIndicatorSerializer()
     total_hospitals = GrowthIndicatorSerializer()
+    total_campaigns = GrowthIndicatorSerializer()
 
 
 # ---------------------------------------------------------------------------
