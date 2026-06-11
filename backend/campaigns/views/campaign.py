@@ -102,10 +102,10 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                     ),
                     Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
                 ),
-                total_number_of_successfull_donations_calc=Coalesce(
-                    Count("donations", filter=Q(donations__status="SUCCESS")),
-                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=0)),
-                ),
+            total_number_of_successfull_donations_calc=Coalesce(
+                Count("donations", filter=Q(donations__status="SUCCESS")),
+                Value(0),
+            ),
             )
             page = self.paginate_queryset(queryset)
             if page is not None:
