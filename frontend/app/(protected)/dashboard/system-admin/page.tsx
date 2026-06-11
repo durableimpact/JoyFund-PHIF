@@ -28,7 +28,9 @@ import {
 
 
 
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { formatXAF } from '@/lib/utils';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import {
   getAdminOverview,
   getAdminOrganization,
@@ -121,52 +123,52 @@ export default function AdminDashboard() {
               </Link>
             ))}
           </div>
-          {/* Financial Summary */}
+          {/* Donation Trends Chart */}
           <div className="card p-5">
-            <h3 className="font-bold text-gray-900 mb-4">Financial Summary</h3>
+            <h3 className="font-bold text-gray-900 mb-4">Donation Trends (Monthly)</h3>
             {loading ? (
-              <div className="space-y-2">{[1,2,3].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
+              <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
+            ) : !trends?.donations_by_month?.length ? (
+              <p className="text-gray-400 text-sm text-center py-12">No donation data yet</p>
             ) : (
-              <div className="space-y-3">
-                {[
-                  ['Escrow Balance',     formatXAF(financial?.summary?.escrow_balance ?? 0)],
-                  ['Platform Fees',      formatXAF(financial?.summary?.platform_fees_collected ?? 0)],
-                  ['Total Donations',    formatXAF(financial?.summary?.total_donations_received ?? 0)],
-                  ['Total Disbursements',formatXAF(financial?.summary?.total_disbursements ?? 0)],
-                  ['Donation Count',     financial?.summary?.total_donations_count ?? 0],
-                ].map(([label, value]) => (
-                  <div key={label as string} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">{label}</span>
-                    <span className="font-bold text-gray-900">{String(value)}</span>
-                  </div>
-                ))}
-              </div>
+              <ChartContainer
+                config={{
+                  amount: { label: 'Donations', color: '#471DDB' },
+                }}
+                className="h-64"
+              >
+                <BarChart data={trends.donations_by_month.map(d => ({ month: d.date, amount: d.value }))} margin={{ top: 8, right: 8, left: -16, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatXAF(Number(value))} />} />
+                  <Bar dataKey="amount" fill="var(--color-amount)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
             )}
           </div>
-          {/* User Growth */}
+          {/* User Registrations Chart */}
           <div className="card p-5">
-            <h3 className="font-bold text-gray-900 mb-4">User Growth</h3>
+            <h3 className="font-bold text-gray-900 mb-4">User Registrations</h3>
             {loading ? (
-              <div className="space-y-2">{[1,2,3].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
+              <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
+            ) : !userGrowth?.registrations_over_time?.length ? (
+              <p className="text-gray-400 text-sm text-center py-12">No registration data yet</p>
             ) : (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Total Users</span>
-                  <span className="font-bold text-gray-900">{userGrowth?.total_users ?? 0}</span>
-                </div>
-                {[
-                  ['Donors',           userGrowth?.donors?.current],
-                  ['Hospital Admins',  userGrowth?.hospital_admins?.current],
-                  ['Social Workers',   userGrowth?.social_workers?.current],
-                  ['Receptionists',    userGrowth?.receptionists?.current],
-                  ['System Admins',    userGrowth?.system_admins?.current],
-                ].map(([label, value]) => (
-                  <div key={label as string} className="flex justify-between items-center text-sm pl-4">
-                    <span className="text-gray-500">{label}</span>
-                    <span className="font-semibold text-gray-900">{value ?? 0}</span>
-                  </div>
-                ))}
-              </div>
+              <ChartContainer
+                config={{
+                  users: { label: 'New Users', color: '#1DB1DB' },
+                }}
+                className="h-64"
+              >
+                <LineChart data={userGrowth.registrations_over_time.map(r => ({ date: r.date, users: r.value }))} margin={{ top: 8, right: 8, left: -16, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line type="monotone" dataKey="users" stroke="var(--color-users)" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ChartContainer>
             )}
           </div>
         </div>
