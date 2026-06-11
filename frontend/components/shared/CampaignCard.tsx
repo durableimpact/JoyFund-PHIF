@@ -1,17 +1,13 @@
 import Link from 'next/link';
 import { Users } from 'lucide-react';
-import { formatXAF } from '@/lib/utils';
 
-export default function CampaignCard({ campaign }: { campaign: Campaign }) {
+export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
   const raisedXAF = Number(campaign.total_net_raised) || 0;
-  const goalXAF = Number(campaign.goal_amount) || 100000;
+  const goalXAF = Number(campaign.goal) || 100000;
   const pct = campaign.progress_percentage || 0;
-  const color = (campaign as any).coverColor || '#1DB1DB';
-  const donorName = (campaign as any).donor_name || 'JoyFund Donor';
-  const avatar = donorName.charAt(0).toUpperCase();
   const coverImage = campaign.cover_image;
   const story = campaign.description;
-  const contributors = (campaign as any).contributors ?? 0;
+  const contributors = campaign.total_number_of_successfull_donations ?? 0;
 
   return (
     <Link href={`/campaign/${campaign.id}`} className="card block hover:shadow-md transition-shadow duration-200 overflow-hidden group">
@@ -23,24 +19,10 @@ export default function CampaignCard({ campaign }: { campaign: Campaign }) {
           className="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-200"
         />
       ) : (
-        <div className="h-2 w-full" style={{ backgroundColor: color }} />
+        <div className="h-2 w-full" style={{ backgroundColor: '#1DB1DB' }} />
       )}
 
       <div className="p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0"
-              style={{ backgroundColor: color }}
-            >
-              {avatar}
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-700">{donorName}</p>
-            </div>
-          </div>
-        </div>
 
         {/* Title */}
         <h3 className="font-bold text-[#1A1A2E] text-sm mb-2 group-hover:text-[#1DB1DB] transition-colors line-clamp-2">
