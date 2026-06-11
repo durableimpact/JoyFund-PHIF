@@ -4,8 +4,17 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, User, Shield, LogOut, Loader2 } from "lucide-react";
 import NotificationsPanel from "@/components/shared/NotificationsPanel";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 
 export interface NavItem {
   label: string;
@@ -48,17 +57,11 @@ export default function DashboardShell({
 
   const handleLogout = async () => {
     setIsSigningOut(true);
-
-    try {
-      queryClient.clear();
-      await signOut({ redirect: false });
-      router.replace("/");
-      router.refresh();
-    } finally {
-      setIsSigningOut(false);
-    }
+    queryClient.clear();
+    await signOut({ redirect: true, redirectTo: "/login" });
   };
 
+  const role = session?.user?.role as string | undefined;
   const currentUser = session?.user?.userInfo;
   const initials =
     currentUser?.first_name && currentUser?.last_name
@@ -71,6 +74,28 @@ export default function DashboardShell({
             .slice(0, 2)
             .toUpperCase()
         : "U";
+
+  const displayName =
+    currentUser?.first_name ||
+    session?.user?.name?.split(" ")[0] ||
+    "User";
+
+  const PROFILE_PATHS: Record<string, string> = {
+    SYSTEM_ADMIN: "/dashboard/system-admin/profile",
+    HOSPITAL_ADMIN: "/dashboard/hospital-admin/profile",
+    RECEPTIONIST: "/dashboard/receptionist/profile",
+    SOCIAL_WORKER: "/dashboard/social-worker/profile",
+    DONOR: "/dashboard/donor/profile",
+  };
+  const DEVICE_PATHS: Record<string, string> = {
+    SYSTEM_ADMIN: "/dashboard/system-admin/devices",
+    HOSPITAL_ADMIN: "/dashboard/hospital-admin/devices",
+    RECEPTIONIST: "/dashboard/receptionist/devices",
+    SOCIAL_WORKER: "/dashboard/social-worker/devices",
+    DONOR: "/dashboard/donor/devices",
+  };
+  const profilePath = PROFILE_PATHS[role || ""] || "/dashboard";
+  const devicesPath = DEVICE_PATHS[role || ""] || "/dashboard";
 
   const renderSidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -138,7 +163,11 @@ export default function DashboardShell({
 
       {/* User footer */}
       <div className="px-3 py-4 border-t border-white/10">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-all">
+        <button
+          onClick={handleLogout}
+          disabled={isSigningOut}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl w-full hover:bg-white/10 transition-all text-left disabled:cursor-not-allowed disabled:opacity-50"
+        >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
             style={{ background: "rgba(255,255,255,0.25)" }}
@@ -153,15 +182,11 @@ export default function DashboardShell({
             </p>
             <p className="text-white/50 text-xs truncate">{brandLabel}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            title="Sign out"
-            disabled={isSigningOut}
-            className="text-white/50 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <LogOut size={15} />
-          </button>
-        </div>
+          <LogOut
+            size={15}
+            className="text-white/50 hover:text-white transition-colors shrink-0"
+          />
+        </button>
       </div>
     </div>
   );
@@ -231,20 +256,55 @@ export default function DashboardShell({
 
           <NotificationsPanel />
 
-          {/* User pill */}
-          <div className="flex items-center gap-2 pl-2">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs"
-              style={{ background: accentColor }}
-            >
-              {initials}
-            </div>
-            <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-              {currentUser?.first_name ||
-                session?.user?.name?.split(" ")[0] ||
-                "User"}
-            </span>
-          </div>
+          {/* User dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button className="flex items-center gap-2 pl-2 outline-none">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs"
+                    style={{ background: accentColor }}
+                  >
+                    {initials}
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700 hidden sm:block">
+                    {displayName}
+                  </span>
+                </button>
+              }
+            />
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{session?.user?.email}</DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => router.push(profilePath)}
+              >
+                <User size={16} />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(devicesPath)}
+              >
+                <Shield size={16} />
+                Security & Devices
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleLogout}
+                disabled={isSigningOut}
+              >
+                {isSigningOut ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <LogOut size={16} />
+                )}
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
 
         {/* Page content */}
