@@ -554,7 +554,11 @@ export const getAdminFinancial = async (access_token: string) => {
 
 export const getAdminDonationTrends = async (
   access_token: string,
-  params?: Record<string, string>,
+  params?: {
+    period:string; // day|week|month|year (default: month)
+    start_date:string;
+    end_date:string; 
+  },
 ) => {
   try {
     const { data } = await api.get<DonationTrends>(
@@ -567,11 +571,15 @@ export const getAdminDonationTrends = async (
   }
 };
 
-export const getAdminUserAnalytics = async (access_token: string) => {
+export const getAdminUserAnalytics = async (access_token: string,params?: {
+    period:string; // day|week|month|year (default: month)
+    start_date:string;
+    end_date:string; 
+  },) => {
   try {
     const { data } = await api.get<UserGrowth>(
       "/api/accounts/system-admins/dashboard/user-analytics/",
-      { headers: getAuthHeader(access_token) },
+      { headers: getAuthHeader(access_token),params },
     );
     return data;
   } catch (e) {
@@ -579,11 +587,15 @@ export const getAdminUserAnalytics = async (access_token: string) => {
   }
 };
 
-export const getAdminBeneficiaryVoucher = async (access_token: string) => {
+export const getAdminBeneficiaryVoucher = async (access_token: string,params?: {
+    period:string; // day|week|month|year (default: month)
+    start_date:string;
+    end_date:string; 
+  },) => {
   try {
     const { data } = await api.get<BeneficiaryVoucher>(
       "/api/accounts/system-admins/dashboard/beneficiaries-vouchers/",
-      { headers: getAuthHeader(access_token) },
+      { headers: getAuthHeader(access_token),params },
     );
     return data;
   } catch (e) {
@@ -605,7 +617,11 @@ export const getAdminOrganization = async (access_token: string) => {
 
 export const getAdminTrendsReport = async (
   access_token: string,
-  params?: Record<string, string>,
+  params?: {
+    period:string; // day|week|month|year (default: month)
+    start_date:string;
+    end_date:string; 
+  },
 ) => {
   try {
     const { data } = await api.get<TrendsReport>(
