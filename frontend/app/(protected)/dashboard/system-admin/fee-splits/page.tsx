@@ -32,8 +32,19 @@ export default function FeeSplitsPage() {
           </div>
         ) : !splits.length ? (
           <p className="text-gray-400 text-sm text-center py-12">No fee splits recorded yet</p>
-        ) : (
-          <div className="overflow-x-auto">
+        ) : (<>
+          <div className="md:hidden space-y-3">
+            {splits.map((s) => (
+              <div key={s.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Gross</span><span className="font-semibold text-gray-900">{formatXAF(s.gross_amount)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Escrow</span><span className="font-semibold text-[#1DB1DB]">{formatXAF(s.escrow_amount)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Platform</span><span className="font-semibold text-[#471DDB]">{formatXAF(s.platform_amount)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Policy</span><span className="text-gray-600">{s.fee_policy_name}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Created</span><span className="text-gray-400 text-xs">{formatDate(s.created_at)}</span></div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
@@ -56,7 +67,7 @@ export default function FeeSplitsPage() {
               </tbody>
             </table>
           </div>
-        )}
+        </>)}
       </div>
     </>
   );
