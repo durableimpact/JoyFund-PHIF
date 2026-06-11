@@ -35,6 +35,7 @@ declare interface OverviewKpi {
   total_vouchers: GrowthIndicator;
   total_users: GrowthIndicator;
   total_hospitals: GrowthIndicator;
+  total_campaigns:GrowthIndicator;
 }
 
 // ── Financial Dashboard ──
