@@ -141,8 +141,7 @@ function CreateCampaignContent() {
   const steps = ['Event Type', 'Details', 'Goal', 'Preview'];
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <Navbar />
+    <div className="h-full" style={{ background: 'var(--background)' }}>
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-lg mx-auto">
           {step < 5 && (
