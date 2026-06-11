@@ -121,7 +121,6 @@ export default function EditCampaignPage() {
   if (isLoading || !campaign) {
     return (
       <div className="min-h-screen" style={{ background: "var(--background)" }}>
-        <Navbar />
         <div className="pt-32 flex items-center justify-center">
           <Loader2 size={28} className="animate-spin text-[#1DB1DB]" />
         </div>
@@ -147,7 +146,6 @@ export default function EditCampaignPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
-      <Navbar />
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-2xl mx-auto">
           <button
