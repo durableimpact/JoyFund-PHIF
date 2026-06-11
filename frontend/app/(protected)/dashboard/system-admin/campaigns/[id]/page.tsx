@@ -153,7 +153,7 @@ export default function AdminCampaignDetailPage() {
   const donor = campaign.donor?.user || {};
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12 w-full overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-4">
@@ -208,10 +208,10 @@ export default function AdminCampaignDetailPage() {
                 <Tag size={14} />
                 {campaign.event_type}
               </div>
-              <h2 className="text-2xl font-black text-gray-900 mb-4">
+              <h2 className="text-xl sm:text-2xl font-black text-gray-900 mb-4 break-words">
                 {campaign.title}
               </h2>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed break-words">
                 {campaign.description}
               </p>
 
@@ -232,7 +232,7 @@ export default function AdminCampaignDetailPage() {
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
                       Organized By
                     </p>
-                    <p className="text-sm font-bold text-gray-900">
+                    <p className="text-sm font-bold text-gray-900 truncate max-w-[180px] sm:max-w-none">
                       {donor.first_name
                         ? `${donor.first_name} ${donor.last_name}`
                         : "Anonymous Donor"}
@@ -259,8 +259,8 @@ export default function AdminCampaignDetailPage() {
 
           {/* Transaction Ledger */}
           <div className="card p-4 md:p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 min-w-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <div className="p-2 bg-[#471DDB]/10 rounded-lg text-[#471DDB]">
                   <TrendingUp size={20} />
                 </div>
@@ -269,7 +269,7 @@ export default function AdminCampaignDetailPage() {
                 </h3>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-100 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-100 overflow-x-auto no-scrollbar w-full md:w-auto">
                 {[
                   "ALL",
                   "DONATION",
@@ -363,8 +363,8 @@ export default function AdminCampaignDetailPage() {
 
           {/* Detailed Donation History */}
           <div className="card p-4 md:p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
+            <div className="flex items-start sm:items-center justify-between mb-6 gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <div className="p-2 bg-green-50 rounded-lg text-green-600">
                   <Gift size={20} />
                 </div>
@@ -372,7 +372,7 @@ export default function AdminCampaignDetailPage() {
                   Donation History
                 </h3>
               </div>
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded-md">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded-md shrink-0">
                 Verified Contributions
               </span>
             </div>
@@ -457,15 +457,13 @@ export default function AdminCampaignDetailPage() {
 
           {/* Voucher Fundings / Impact */}
           <div className="card p-4 md:p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-                  <Gift size={20} />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  Beneficiary Support
-                </h3>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                <Gift size={20} />
               </div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Beneficiary Support
+              </h3>
             </div>
 
             <div className="grid gap-4">
@@ -487,7 +485,7 @@ export default function AdminCampaignDetailPage() {
                         <p className="text-sm font-bold text-gray-900">
                           {vf.voucher.beneficiary_name}
                         </p>
-                        <p className="text-[10px] text-gray-500 font-medium">
+                        <p className="text-[10px] text-gray-500 font-medium truncate max-w-[200px]">
                           {vf.voucher.hospital} • {vf.voucher.voucher_code}
                         </p>
                         <div className="mt-1">
@@ -539,7 +537,7 @@ export default function AdminCampaignDetailPage() {
 
             <div className="space-y-6">
               <div>
-                <p className="text-4xl font-black mb-1">
+                <p className="text-3xl sm:text-4xl font-black mb-1 truncate">
                   {formatXAF(campaign.available_balance || 0)}
                 </p>
                 <p className="text-white/60 text-xs font-medium uppercase tracking-tight">
