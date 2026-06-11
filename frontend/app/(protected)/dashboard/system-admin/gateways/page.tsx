@@ -1,7 +1,8 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Globe, Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import Link from "next/link";
+import { Globe, Loader2, Plus, Pencil, Trash2, Check, X, Eye } from "lucide-react";
 import { useState } from "react";
 import { formatDate } from "@/lib/utils";
 import { listGateways, createGateway, updateGateway, deleteGateway } from "@/actions/payments";
@@ -106,6 +107,8 @@ export default function GatewaysPage() {
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${g.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{g.is_active ? "Active" : "Inactive"}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Created</span><span className="text-gray-400 text-xs">{formatDate(g.created_at)}</span></div>
                   <div className="flex justify-end gap-2 pt-1">
+                    <Link href={`/dashboard/system-admin/gateways/${g.id}`}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#471DDB]/10 text-[#471DDB] hover:bg-[#471DDB]/20">View</Link>
                     <button onClick={() => { setEditingId(g.id); setForm({ name: g.name, description: g.description, is_active: g.is_active }); setShowCreate(false); }}
                       className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">Edit</button>
                     <button onClick={() => deleteMut.mutate(g.id)}
@@ -138,6 +141,10 @@ export default function GatewaysPage() {
                       <td className="py-3 text-gray-400 text-xs">{formatDate(g.created_at)}</td>
                       <td className="py-3">
                         <div className="flex items-center gap-1">
+                          <Link href={`/dashboard/system-admin/gateways/${g.id}`}
+                            className="p-1.5 hover:bg-[#471DDB]/10 rounded-lg text-gray-400 hover:text-[#471DDB]">
+                            <Eye size={14} />
+                          </Link>
                           <button onClick={() => { setEditingId(g.id); setForm({ name: g.name, description: g.description, is_active: g.is_active }); setShowCreate(false); }}
                             className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-700">
                             <Pencil size={14} />
