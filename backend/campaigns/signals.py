@@ -3,8 +3,28 @@ from django.dispatch import receiver
 from django.core.cache import cache
 from django.db.models import F
 
-from campaigns.models import Campaign, Donation,CampaignTransaction
+from campaigns.models import Campaign, Donation, CampaignTransaction
 from notifications.models import Notification, NotificationType
+
+
+@receiver(post_save, sender=Campaign, dispatch_uid="broadcast_campaign_created_push")
+def broadcast_campaign_created_push(sender, instance, created, **kwargs):
+    """Send web push notification to all users when a campaign is created."""
+    if created and instance.status != Campaign.CampaignStatus.DRAFT:
+        from notifications.webpush import send_push_notification_to_all_users
+
+        donor_name = ""
+        try:
+            donor_name = instance.donor.user.first_name
+        except Exception:
+            pass
+
+        send_push_notification_to_all_users(
+            title=f"New Campaign: {instance.title}",
+            body=f"{donor_name} started a new campaign! Help them reach their goal of {instance.goal_amount} XAF." if donor_name else f"A new campaign '{instance.title}' has started! Help reach the goal of {instance.goal_amount} XAF.",
+            url=f"/campaign/{instance.id}/",
+            tag="new_campaign",
+        )
 
 
 
