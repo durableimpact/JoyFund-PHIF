@@ -53,6 +53,7 @@ from .social_worker import (
     SocialWorkerDetailSerializer,
     SocialWorkerUpdateSerializer,
 )
+from .device import DeviceSerializer
 from .system_admin import (
     SystemAdminCreateSerializer,
     SystemAdminDetailSerializer,
@@ -61,6 +62,7 @@ from .system_admin import (
 )
 
 __all__ = [
+    'DeviceSerializer',
     'UserReadSerializer',
     'UserInfoSerializer',
     'DonorInfoSerializer',
