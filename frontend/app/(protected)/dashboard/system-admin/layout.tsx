@@ -15,6 +15,7 @@ import {
   Percent,
   ArrowLeftRight,
   Receipt,
+  Shield,
 } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -89,6 +90,11 @@ const NAV: NavItem[] = [
     label: "Users",
     href: "/dashboard/system-admin/users",
     icon: <Users size={16} />,
+  },
+  {
+    label: "Security",
+    href: "/dashboard/system-admin/devices",
+    icon: <Shield size={16} />,
   },
   {
     label: "Profile",
