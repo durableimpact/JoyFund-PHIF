@@ -31,8 +31,7 @@ export default function ExplorePage() {
     }),
   });
 
-  // Extract campaigns from paginated response
-  const campaignList = (campaignsResponse as any)?.json?.results || campaignsResponse?.results || (Array.isArray((campaignsResponse as any)?.json) ? (campaignsResponse as any).json : ((campaignsResponse as any)?.json ? [(campaignsResponse as any).json] : []));
+  const campaignList = campaignsResponse?.results || [];
 
   const filtered = campaignList.filter(c => {
     const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
