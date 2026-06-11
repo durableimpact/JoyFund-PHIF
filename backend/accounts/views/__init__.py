@@ -15,6 +15,7 @@ from .info import (
     SystemAdminInfoView,
 )
 from .unified_user import UnifiedUserViewSet
+from .device import list_devices, remove_device, block_device, unblock_device, trust_device
 from .admin_dashboard import (
     AdminOverviewView,
     AdminFinancialView,
@@ -55,4 +56,9 @@ __all__ = [
     'AdminOrganizationView',
     'AdminTrendsReportView',
     'UnifiedUserViewSet',
+    'list_devices',
+    'remove_device',
+    'block_device',
+    'unblock_device',
+    'trust_device',
 ]
