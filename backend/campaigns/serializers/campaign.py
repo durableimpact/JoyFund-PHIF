@@ -15,6 +15,41 @@ class CampaignTransactionSerializer(serializers.ModelSerializer):
         exclude = ["campaign"]
 
 
+class CampaignListSerializer(serializers.ModelSerializer):
+    total_net_raised = serializers.SerializerMethodField()
+    progress_percentage = serializers.SerializerMethodField()
+    total_number_of_successfull_donations = serializers.SerializerMethodField()
+    goal = serializers.DecimalField(
+        source="goal_amount", max_digits=12, decimal_places=2, read_only=True
+    )
+
+    class Meta:
+        model = Campaign
+        fields = [
+            "id",
+            "title",
+            "description",
+            "cover_image",
+            "goal",
+            "slug",
+            "total_net_raised",
+            "progress_percentage",
+            "total_number_of_successfull_donations",
+        ]
+
+    def get_total_net_raised(self, obj):
+        return getattr(obj, "total_net_raised_calc", obj.total_net_raised)
+
+    def get_progress_percentage(self, obj):
+        return obj.progress_percentage
+
+    def get_total_number_of_successfull_donations(self, obj):
+        return getattr(
+            obj, "total_number_of_successfull_donations_calc",
+            obj.donations.filter(status="SUCCESS").count(),
+        )
+
+
 class CampaignDetailSerializer(serializers.ModelSerializer):
     from vouchers.serializers.voucher_funding import VoucherFundingDetailSerializer
     from accounts.serializers.donor import DonorMinimalSerializer

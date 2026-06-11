@@ -1,4 +1,4 @@
-from django.db.models import Q, Sum, F, DecimalField, Value, ExpressionWrapper
+from django.db.models import Q, Sum, Count, F, DecimalField, Value, ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
@@ -18,6 +18,7 @@ from campaigns.serializers import (
     CampaignCreateUpdateSerializer,
     CampaignDetailSerializer,
     CampaignBalanceSerializer,
+    CampaignListSerializer,
 )
 
 _TAG = ["Campaigns"]
@@ -86,11 +87,33 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
             return CampaignCreateUpdateSerializer
+        elif self.action == "list":
+            return CampaignListSerializer
         return CampaignDetailSerializer
 
     @swagger_auto_schema(tags=_TAG)
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        def _list(request, *args, **kwargs):
+            queryset = self.filter_queryset(self.get_queryset()).annotate(
+                total_net_raised_calc=Coalesce(
+                    Sum(
+                        "donations__net_amount",
+                        filter=Q(donations__status="SUCCESS"),
+                    ),
+                    Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
+                ),
+                total_number_of_successfull_donations_calc=Coalesce(
+                    Count("donations", filter=Q(donations__status="SUCCESS")),
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=0)),
+                ),
+            )
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        return self._cached_action(_list, request, *args, **kwargs)
 
     @swagger_auto_schema(tags=_TAG)
     def retrieve(self, request, *args, **kwargs):
