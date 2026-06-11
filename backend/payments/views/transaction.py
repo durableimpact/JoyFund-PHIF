@@ -2,6 +2,7 @@ from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins
+from rest_framework.response import Response
 
 from accounts.utils.permissions import IsSystemAdmin
 from ..filters import TransactionFilter, FeeSplitFilter
@@ -57,23 +58,23 @@ class TransactionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
 
     def list(self, request, *args, **kwargs):
         cache_key = self._get_list_cache_key()
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached['data'], status=cached['status'])
         
         response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, {'data': response.data, 'status': response.status_code}, CACHE_TIMEOUT)
         return response
 
     def retrieve(self, request, *args, **kwargs):
         transaction_id = kwargs.get('pk')
         cache_key = self._get_detail_cache_key(transaction_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached['data'], status=cached['status'])
         
         response = super().retrieve(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, {'data': response.data, 'status': response.status_code}, CACHE_TIMEOUT)
         return response
 
 
@@ -114,21 +115,21 @@ class FeeSplitViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
 
     def list(self, request, *args, **kwargs):
         cache_key = self._get_list_cache_key()
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached['data'], status=cached['status'])
         
         response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, {'data': response.data, 'status': response.status_code}, CACHE_TIMEOUT)
         return response
 
     def retrieve(self, request, *args, **kwargs):
         fee_split_id = kwargs.get('pk')
         cache_key = self._get_detail_cache_key(fee_split_id)
-        cached_response = cache.get(cache_key)
-        if cached_response is not None:
-            return cached_response
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached['data'], status=cached['status'])
         
         response = super().retrieve(request, *args, **kwargs)
-        cache.set(cache_key, response, CACHE_TIMEOUT)
+        cache.set(cache_key, {'data': response.data, 'status': response.status_code}, CACHE_TIMEOUT)
         return response
