@@ -41,6 +41,7 @@ function LoginPageContent() {
       const result = await signIn("credentials", {
         email: form.email,
         password: form.password,
+        userAgent: navigator.userAgent,
         redirect: false,
         callbackUrl: redirectParam || "/dashboard",
       });
