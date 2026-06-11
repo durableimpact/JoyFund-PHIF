@@ -1,15 +1,18 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Bell, X } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listNotifications } from "@/actions/notifications";
 import { formatDate } from "@/lib/utils";
+import { useWebSocket } from "@/hooks/use-websocket";
+import { toast } from "sonner";
 
 export default function NotificationsPanel() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
   const authUserId = session?.user?.id;
   const token = session?.accessToken || session?.user?.accessToken;
 
@@ -25,7 +28,33 @@ export default function NotificationsPanel() {
   const notifications =
     (notificationsData as any)?.results ||
     (Array.isArray(notificationsData) ? notificationsData : []);
-  const unread = notifications.filter((n) => !n.is_read && !n.read).length;
+  const unread = notifications.filter((n: any) => !n.is_read && !n.read).length;
+
+  // WebSocket connection for real-time notifications
+  const apiUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000";
+  const wsUrl = apiUrl.replace(/^http/, "ws") + "/ws/notifications/";
+
+  const handleWsMessage = useCallback(
+    (data: Record<string, unknown>) => {
+      if (data.type === "notification_event" || data.type === "notification") {
+        queryClient.invalidateQueries({ queryKey: ["notifications", authUserId] });
+        const msgData = data as { data?: { title?: string; message?: string } };
+        if (msgData.data?.title) {
+          toast(msgData.data.title, {
+            description: msgData.data.message,
+          });
+        }
+      }
+    },
+    [queryClient, authUserId],
+  );
+
+  useWebSocket({
+    url: wsUrl,
+    token,
+    enabled: !!token && !!authUserId,
+    onMessage: handleWsMessage,
+  });
 
   // Close on outside click
   useEffect(() => {
@@ -78,7 +107,7 @@ export default function NotificationsPanel() {
                 No notifications yet
               </div>
             ) : (
-              notifications.slice(0, 20).map((n) => (
+              notifications.slice(0, 20).map((n: any) => (
                 <div
                   key={n.id}
                   className={`px-4 py-3 border-b border-gray-50 last:border-0 ${!n.is_read && !n.read ? "bg-blue-50/50" : ""}`}
