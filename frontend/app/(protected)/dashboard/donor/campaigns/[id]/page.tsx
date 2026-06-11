@@ -58,7 +58,7 @@ export default function CampaignDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <div className="h-full" style={{ background: "var(--background)" }}>
         <Navbar />
         <div className="pt-32 flex items-center justify-center">
           <Loader2 size={28} className="animate-spin text-[#1DB1DB]" />
@@ -87,8 +87,7 @@ export default function CampaignDetailPage() {
     ((campaign.total_net_raised || 0) / (campaign.goal_amount || 1)) * 100;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--background)" }}>
-      <Navbar />
+    <div className="h-full" style={{ background: "var(--background)" }}>
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
