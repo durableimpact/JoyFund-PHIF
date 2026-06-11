@@ -14,6 +14,7 @@ import {
   Globe,
   Percent,
   ArrowLeftRight,
+  Receipt,
 } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -38,6 +39,11 @@ const NAV: NavItem[] = [
     label: "Fee Splits",
     href: "/dashboard/system-admin/fee-splits",
     icon: <Percent size={16} />,
+  },
+  {
+    label: "Fee Policies",
+    href: "/dashboard/system-admin/fee-policies",
+    icon: <Receipt size={16} />,
   },
   {
     label: "Gateways",

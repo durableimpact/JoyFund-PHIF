@@ -40,10 +40,17 @@ export const getFeeAccount = async (access_token: string) => {
 
 // ── Fee Policies ──
 
-export const listFeePolicies = async (access_token: string) => {
+export const listFeePolicies = async (access_token: string, params?: {
+  is_active?: boolean;
+  page?: number;
+  page_size?: number;
+  created_after?: string;
+  created_before?: string;
+}) => {
   try {
-    const { data } = await api.get("/api/payments/fee-policies/", {
+    const { data } = await api.get<PaginationResponse<FeePolicy>>("/api/payments/fee-policies/", {
       headers: { Authorization: `Bearer ${access_token}` },
+      params,
     });
     return data;
   } catch (e) { handleError(e); }
