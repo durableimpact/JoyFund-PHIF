@@ -27,7 +27,7 @@ from accounts.serializers.admin_dashboard import (
 )
 from accounts.utils import IsSystemAdmin
 from beneficiaries.models import Beneficiary
-from campaigns.models import Donation
+from campaigns.models import Campaign, Donation
 from hospitals.models import Hospital
 from payments.models.account import EscrowAccount, FeeAccount
 from payments.models.transaction import Transaction
@@ -180,6 +180,9 @@ class AdminOverviewView(APIView):
         hospitals_current = Hospital.objects.filter(created_at__date__lte=current_end).count()
         hospitals_prev = Hospital.objects.filter(created_at__date__lte=prev_end).count()
 
+        campaigns_current = Campaign.objects.filter(created_at__date__lte=current_end).count()
+        campaigns_prev = Campaign.objects.filter(created_at__date__lte=prev_end).count()
+
         data = {
             "escrow_balance": {"current": escrow_current, "previous": escrow_current + prev_disbursed, "change_percent": None, "direction": "up" if escrow_current > 0 else "flat"},
             "total_donations": _financial_growth(donations_current, donations_prev),
@@ -187,6 +190,7 @@ class AdminOverviewView(APIView):
             "total_vouchers": _growth(vouchers_current, vouchers_prev),
             "total_users": _growth(users_current, users_prev),
             "total_hospitals": _growth(hospitals_current, hospitals_prev),
+            "total_campaigns": _growth(campaigns_current, campaigns_prev),
         }
         return Response(OverviewKpiSerializer(data).data)
 
