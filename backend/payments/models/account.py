@@ -44,7 +44,7 @@ class SingletonAccountMixin:
 
     def save(self, *args, **kwargs):
         """Prevent creating a second row and default name to class name."""
-        if not self.pk:
+        if self._state.adding:
             # New object — check whether one already exists
             if self.__class__.objects.exists():
                 raise ValidationError(
