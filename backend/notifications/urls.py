@@ -1,9 +1,19 @@
+from django.urls import path
 from rest_framework.routers import SimpleRouter
 from notifications.views import NotificationViewSet
+from notifications.views_push import (
+    register_push_subscription,
+    unregister_push_subscription,
+    list_push_subscriptions,
+)
 
 app_name = 'notifications'
 
 router = SimpleRouter()
 router.register(r'', NotificationViewSet, basename='notification')
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path("push/register/", register_push_subscription, name="push-register"),
+    path("push/unregister/", unregister_push_subscription, name="push-unregister"),
+    path("push/subscriptions/", list_push_subscriptions, name="push-subscriptions"),
+]
