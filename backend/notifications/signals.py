@@ -11,6 +11,23 @@ from notifications.models import Notification
 from accounts.tasks.send_mail import send_async_email
 
 
+@receiver(post_save, sender=Notification, dispatch_uid='send_web_push')
+def send_web_push_notification(sender, instance, created, **kwargs):
+    """
+    Send a web push notification when a new Notification is created.
+    """
+    if created:
+        from notifications.webpush import send_push_notification_to_user
+
+        send_push_notification_to_user(
+            user=instance.user,
+            title=instance.title,
+            body=instance.message[:200],
+            url=instance.action_url,
+            tag=str(instance.notification_type),
+        )
+
+
 @receiver(post_save, sender=Notification, dispatch_uid='send_notification_email')
 def send_notification_email(sender, instance, created, **kwargs):
     """
