@@ -15,6 +15,7 @@ from accounts.models import (
     User,
     PasswordResetToken,
     EmailVerificationToken,
+    UserDevice,
 )
 
 # ---------------------------------------------------------------------------
@@ -530,3 +531,94 @@ class EmailVerificationTokenAdmin(admin.ModelAdmin):
     @admin.display(description="Email")
     def get_email(self, obj):
         return obj.user.email
+
+
+# ---------------------------------------------------------------------------
+# Device Management
+# ---------------------------------------------------------------------------
+
+
+@admin.register(UserDevice)
+class UserDeviceAdmin(admin.ModelAdmin):
+    list_display = (
+        "device_name",
+        "get_email",
+        "device_type",
+        "browser",
+        "os",
+        "ip_address",
+        "last_active",
+        "is_blocked",
+        "is_trusted",
+    )
+    list_filter = ("device_type", "is_blocked", "is_trusted", "last_active", "created_at")
+    search_fields = ("device_name", "user__email", "ip_address", "browser", "os")
+    readonly_fields = (
+        "id",
+        "user",
+        "device_name",
+        "device_type",
+        "browser",
+        "os",
+        "ip_address",
+        "user_agent",
+        "last_active",
+        "created_at",
+    )
+    raw_id_fields = ("user",)
+    ordering = ("-last_active",)
+    date_hierarchy = "last_active"
+
+    fieldsets = (
+        (
+            "Device Info",
+            {
+                "fields": (
+                    "device_name",
+                    "device_type",
+                    "browser",
+                    "os",
+                ),
+            },
+        ),
+        (
+            "Network",
+            {
+                "fields": ("ip_address", "user_agent"),
+            },
+        ),
+        (
+            "User",
+            {
+                "fields": ("user",),
+            },
+        ),
+        (
+            "Status",
+            {
+                "fields": ("is_blocked", "is_trusted"),
+            },
+        ),
+        (
+            "Timestamps",
+            {
+                "fields": ("last_active", "created_at"),
+            },
+        ),
+    )
+
+    actions = ["block_selected", "unblock_selected"]
+
+    @admin.display(description="User")
+    def get_email(self, obj):
+        return obj.user.email
+
+    @admin.action(description="Block selected devices")
+    def block_selected(self, request, queryset):
+        updated = queryset.update(is_blocked=True, is_trusted=False)
+        self.message_user(request, f"{updated} device(s) blocked.")
+
+    @admin.action(description="Unblock selected devices")
+    def unblock_selected(self, request, queryset):
+        updated = queryset.update(is_blocked=False)
+        self.message_user(request, f"{updated} device(s) unblocked.")
