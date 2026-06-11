@@ -1,7 +1,8 @@
 'use client';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
-import { Download, TrendingUp, Users, Ticket, Building2 } from 'lucide-react';
+import { Calendar, Download, TrendingUp, Users, Ticket, Building2 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { formatXAF } from '@/lib/utils';
 import {
@@ -17,6 +18,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 export default function AdminAnalytics() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
+  const [period, setPeriod] = useState('month');
 
   const { data: overview, isLoading: oLoading } = useQuery({
     queryKey: ['aa-overview', token],
@@ -29,18 +31,18 @@ export default function AdminAnalytics() {
     enabled: !!token,
   });
   const { data: trends, isLoading: tLoading } = useQuery({
-    queryKey: ['aa-trends', token],
-    queryFn: async () => await getAdminDonationTrends(token),
+    queryKey: ['aa-trends', token, period],
+    queryFn: async () => await getAdminDonationTrends(token, { period } as any),
     enabled: !!token,
   });
   const { data: bv, isLoading: bLoading } = useQuery({
-    queryKey: ['aa-bv', token],
-    queryFn: async () => await getAdminBeneficiaryVoucher(token),
+    queryKey: ['aa-bv', token, period],
+    queryFn: async () => await getAdminBeneficiaryVoucher(token, { period } as any),
     enabled: !!token,
   });
   const { data: report, isLoading: rLoading } = useQuery({
-    queryKey: ['aa-report', token],
-    queryFn: async () => await getAdminTrendsReport(token),
+    queryKey: ['aa-report', token, period],
+    queryFn: async () => await getAdminTrendsReport(token, { period } as any),
     enabled: !!token,
   });
   const { data: beneficiariesData } = useQuery({
@@ -92,10 +94,25 @@ export default function AdminAnalytics() {
           <h1 className="text-2xl font-black text-gray-900">Impact Analytics</h1>
           <p className="text-gray-500 text-sm">Platform-wide metrics and fund transparency</p>
         </div>
-        <button className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}
-          onClick={() => alert('Export feature coming soon')}>
-          <Download size={16} /> Export Report
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
+            <Calendar size={14} className="text-gray-400" />
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="text-sm font-medium text-gray-700 bg-transparent border-none outline-none cursor-pointer"
+            >
+              <option value="day">Daily</option>
+              <option value="week">Weekly</option>
+              <option value="month">Monthly</option>
+              <option value="year">Yearly</option>
+            </select>
+          </div>
+          <button className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}
+            onClick={() => alert('Export feature coming soon')}>
+            <Download size={16} /> Export Report
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

@@ -1,33 +1,18 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
   Building2,
+  Calendar,
   CheckCircle,
   FileText,
   Ticket,
   TrendingUp,
   Users
 } from 'lucide-react';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { formatXAF } from '@/lib/utils';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -43,6 +28,7 @@ export default function AdminDashboard() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
+  const [period, setPeriod] = useState('month');
   const { data: overview, isLoading: oLoading } = useQuery({
     queryKey: ['admin-overview', token],
     queryFn: async () => await getAdminOverview(token),
@@ -54,8 +40,8 @@ export default function AdminDashboard() {
     enabled: !!token,
   });
   const { data: bv, isLoading: bvLoading } = useQuery({
-    queryKey: ['admin-beneficiary-voucher', token],
-    queryFn: async () => await getAdminBeneficiaryVoucher(token),
+    queryKey: ['admin-beneficiary-voucher', token, period],
+    queryFn: async () => await getAdminBeneficiaryVoucher(token, { period } as any),
     enabled: !!token,
   });
   const { data: financial, isLoading: finLoading } = useQuery({
@@ -64,13 +50,13 @@ export default function AdminDashboard() {
     enabled: !!token,
   });
   const { data: trends, isLoading: trLoading } = useQuery({
-    queryKey: ['admin-donation-trends', token],
-    queryFn: async () => await getAdminDonationTrends(token),
+    queryKey: ['admin-donation-trends', token, period],
+    queryFn: async () => await getAdminDonationTrends(token, { period } as any),
     enabled: !!token,
   });
   const { data: userGrowth, isLoading: ugLoading } = useQuery({
-    queryKey: ['admin-user-analytics', token],
-    queryFn: async () => await getAdminUserAnalytics(token),
+    queryKey: ['admin-user-analytics', token, period],
+    queryFn: async () => await getAdminUserAnalytics(token, { period } as any),
     enabled: !!token,
   });
   const loading = oLoading || orgLoading || bvLoading || finLoading || trLoading || ugLoading;
@@ -88,9 +74,24 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-black text-gray-900">System Overview</h1>
           <p className="text-gray-500 text-sm">Welcome, {currentUser?.first_name || 'Admin'}</p>
         </div>
-        <Link href="/dashboard/system-admin/users/create" className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
-          <Users size={15} /> Create User
-        </Link>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
+            <Calendar size={14} className="text-gray-400" />
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="text-sm font-medium text-gray-700 bg-transparent border-none outline-none cursor-pointer"
+            >
+              <option value="day">Daily</option>
+              <option value="week">Weekly</option>
+              <option value="month">Monthly</option>
+              <option value="year">Yearly</option>
+            </select>
+          </div>
+          <Link href="/dashboard/system-admin/users/create" className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
+            <Users size={15} /> Create User
+          </Link>
+        </div>
       </div>
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
