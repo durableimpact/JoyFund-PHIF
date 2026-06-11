@@ -1,8 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   Share2,
@@ -60,53 +59,69 @@ function DonorListDialog({
   campaignId: string;
   campaignTitle: string;
 }) {
-  const {
-    data: pagesData,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-    isFetching,
-  } = useInfiniteQuery({
-    queryKey: ["campaign-donations-modal", campaignId],
-    queryFn: async ({ pageParam = 1 }) => {
-      const res = await listCampaignDonations(campaignId, {
-        status: "SUCCESS",
-        page: pageParam.toString(),
-      });
-      return res;
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage: any) => {
-      const page = lastPage?.json || lastPage;
-      if (page?.next) {
-        const url = new URL(page.next, "http://localhost");
-        return parseInt(url.searchParams.get("page") || "2");
+  const [pages, setPages] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const fetchDonations = useCallback(
+    async (page: number) => {
+      try {
+        setIsFetching(true);
+        const res = await listCampaignDonations(campaignId, {
+          status: "SUCCESS",
+          page: page.toString(),
+        });
+        const pageData = (res as any)?.json || res;
+        setPages((prev) => [...prev, pageData]);
+        setHasNextPage(!!pageData?.next);
+      } finally {
+        setIsFetching(false);
       }
-      return undefined;
     },
-    enabled: open,
-  });
+    [campaignId],
+  );
+
+  const fetchNextPage = useCallback(async () => {
+    setIsFetchingNextPage(true);
+    try {
+      await fetchDonations(currentPage + 1);
+      setCurrentPage((p) => p + 1);
+    } finally {
+      setIsFetchingNextPage(false);
+    }
+  }, [currentPage, fetchDonations]);
+
+  useEffect(() => {
+    if (open) {
+      setPages([]);
+      setCurrentPage(1);
+      fetchDonations(1);
+    }
+  }, [open, campaignId, fetchDonations]);
 
   const allDonations =
-    pagesData?.pages.flatMap((page) => {
-      const results =
-        (page as any)?.json?.results || (page as any)?.results || [];
+    pages.flatMap((page) => {
+      const results = (page as any)?.results || [];
       return results;
     }) || [];
 
-  const sentinelRef = (node: HTMLDivElement | null) => {
-    if (!node || !hasNextPage || isFetchingNextPage) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  };
+  const sentinelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (!node || !hasNextPage || isFetchingNextPage) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            fetchNextPage();
+          }
+        },
+        { threshold: 0.1 },
+      );
+      observer.observe(node);
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -149,13 +164,13 @@ function DonorListDialog({
                   <p className="text-xs text-gray-400 mt-0.5">
                     {donation.created_at
                       ? new Date(donation.created_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        },
-                      )
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
                       : "Just now"}
                   </p>
                   {donation.message && (
@@ -263,9 +278,9 @@ function DonorList({
                   <p className="text-[11px] text-gray-400 mt-0.5">
                     {donation.created_at
                       ? new Date(donation.created_at).toLocaleDateString(
-                        "en-US",
-                        { month: "short", day: "numeric" },
-                      )
+                          "en-US",
+                          { month: "short", day: "numeric" },
+                        )
                       : "Just now"}
                   </p>
                   {donation.message && (
@@ -436,9 +451,9 @@ function TransparencyTimeline({
   const uniqueTypes = useMemo(() => {
     const types = new Set<string>(["all"]);
     if (donations.length > 0) types.add("donation");
-    transactions.forEach(tx => {
-       const t = tx.transaction_type?.toLowerCase().replace(/_/g, "-");
-       if (t) types.add(t);
+    transactions.forEach((tx) => {
+      const t = tx.transaction_type?.toLowerCase().replace(/_/g, "-");
+      if (t) types.add(t);
     });
     return Array.from(types);
   }, [donations.length, transactions]);
@@ -495,9 +510,9 @@ function TransparencyTimeline({
               onClick={() => setFilterType(type)}
               className={cn(
                 "px-3 py-1.5 rounded-full text-xs font-bold transition-colors capitalize border",
-                filterType === type 
-                  ? "bg-[#1DB1DB] text-white border-[#1DB1DB]" 
-                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700"
+                filterType === type
+                  ? "bg-[#1DB1DB] text-white border-[#1DB1DB]"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700",
               )}
             >
               {type.replace(/-/g, " ")}
@@ -508,11 +523,11 @@ function TransparencyTimeline({
 
       <div className="space-y-0">
         {timeline.length === 0 ? (
-          <div className="py-8 text-center text-sm text-gray-500 italic">No items match this filter.</div>
+          <div className="py-8 text-center text-sm text-gray-500 italic">
+            No items match this filter.
+          </div>
         ) : (
-          inline.map((item) => (
-            <TimelineRow key={item.id} item={item} />
-          ))
+          inline.map((item) => <TimelineRow key={item.id} item={item} />)
         )}
       </div>
 
@@ -539,45 +554,76 @@ export default function CampaignPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [campaignData, setCampaignData] = useState<any>(null);
+  const [isCampaignLoading, setIsCampaignLoading] = useState(true);
+  const [donationPages, setDonationPages] = useState<any[]>([]);
+  const [currentDonationPage, setCurrentDonationPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const hasFetchedCampaign = useRef(false);
 
-  const { data: campaignData, isLoading: isCampaignLoading } = useQuery({
-    queryKey: ["campaign", id],
-    queryFn: async () => await getCampaign(id as string),
-    enabled: !!id,
-  });
+  // Fetch campaign
+  useEffect(() => {
+    if (!id || hasFetchedCampaign.current) return;
 
-  const campaign = (campaignData as any)?.json || campaignData;
+    hasFetchedCampaign.current = true;
+    const fetchCampaign = async () => {
+      try {
+        setIsCampaignLoading(true);
+        const res = await getCampaign(id as string);
+        const data = (res as any)?.json || res;
+        setCampaignData(data);
+      } finally {
+        setIsCampaignLoading(false);
+      }
+    };
 
-  const {
-    data: donationsData,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["campaign-donations", id, "SUCCESS"],
-    queryFn: async ({ pageParam = 1 }) => {
+    fetchCampaign();
+  }, [id]);
+
+  // Fetch initial donations
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchDonations = async () => {
+      try {
+        const res = await listCampaignDonations(id as string, {
+          status: "SUCCESS",
+          page: "1",
+        });
+        const pageData = (res as any)?.json || res;
+        setDonationPages([pageData]);
+        setHasNextPage(!!pageData?.next);
+        setCurrentDonationPage(1);
+      } catch (error) {
+        console.error("Error fetching donations:", error);
+      }
+    };
+
+    fetchDonations();
+  }, [id]);
+
+  const fetchNextDonationPage = useCallback(async () => {
+    const nextPage = currentDonationPage + 1;
+    setIsFetchingNextPage(true);
+    try {
       const res = await listCampaignDonations(id as string, {
         status: "SUCCESS",
-        page: pageParam.toString(),
+        page: nextPage.toString(),
       });
-      return res;
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage: any) => {
-      const page = lastPage?.json || lastPage;
-      if (page?.next) {
-        const url = new URL(page.next, "http://localhost");
-        return parseInt(url.searchParams.get("page") || "2");
-      }
-      return undefined;
-    },
-    enabled: !!id,
-  });
+      const pageData = (res as any)?.json || res;
+      setDonationPages((prev) => [...prev, pageData]);
+      setHasNextPage(!!pageData?.next);
+      setCurrentDonationPage(nextPage);
+    } finally {
+      setIsFetchingNextPage(false);
+    }
+  }, [id, currentDonationPage]);
 
+  const campaign = campaignData;
   const donations =
-    donationsData?.pages.flatMap((page) => {
-      const results =
-        (page as any)?.json?.results || (page as any)?.results || [];
+    donationPages.flatMap((page) => {
+      const results = (page as any)?.results || [];
       return results;
     }) || [];
 
@@ -586,7 +632,7 @@ export default function CampaignPage() {
       typeof window !== "undefined"
         ? `${window.location.origin}/campaign/${campaign?.id}`
         : "";
-    navigator.clipboard.writeText(url).catch(() => { });
+    navigator.clipboard.writeText(url).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -874,7 +920,7 @@ export default function CampaignPage() {
                                   "USED"
                                   ? "bg-green-100 text-green-700"
                                   : (funding.status ||
-                                    funding.voucher?.status) === "EXPIRED"
+                                        funding.voucher?.status) === "EXPIRED"
                                     ? "bg-red-100 text-red-700"
                                     : "bg-blue-100 text-blue-700",
                               )}
@@ -996,10 +1042,11 @@ export default function CampaignPage() {
               {/* Organizer */}
               <div className="border-t border-gray-100 px-6 py-4">
                 <div className="flex items-center gap-3">
-
                   {campaign.donor ? (
                     <Avatar className="w-10 h-10 bg-[#1DB1DB]">
-                      <AvatarImage src={campaign.donor?.user?.profile_picture} />
+                      <AvatarImage
+                        src={campaign.donor?.user?.profile_picture}
+                      />
                       <AvatarFallback>{organizerInitial}</AvatarFallback>
                     </Avatar>
                   ) : (
