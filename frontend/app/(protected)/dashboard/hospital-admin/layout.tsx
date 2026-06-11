@@ -11,6 +11,7 @@ import {
   HeartPulse,
   Stethoscope,
   User,
+  Shield,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
@@ -56,6 +57,11 @@ const NAV: NavItem[] = [
     label: "Disbursements",
     href: "/dashboard/hospital-admin/disbursement",
     icon: <FileText size={16} />,
+  },
+  {
+    label: "Security",
+    href: "/dashboard/hospital-admin/devices",
+    icon: <Shield size={16} />,
   },
   {
     label: "Profile",
