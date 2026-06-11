@@ -513,6 +513,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "campaigns.tasks.generate_missing_campaign_slugs",
         "schedule": 300.0,  # 300 seconds = 5 minutes
     },
+    "check-pending-donations": {
+        "task": "payments.tasks.process_payment.check_pending_donations",
+        "schedule": 300.0,  # 300 seconds = 5 minutes
+    },
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
