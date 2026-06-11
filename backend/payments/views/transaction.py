@@ -6,7 +6,7 @@ from rest_framework import viewsets, mixins
 from accounts.utils.permissions import IsSystemAdmin
 from ..filters import TransactionFilter, FeeSplitFilter
 from ..models import Transaction, FeeSplit
-from ..serializers.transaction import TransactionSerializer, FeeSplitSerializer
+from ..serializers.transaction import TransactionListSerializer, TransactionSerializer, FeeSplitListSerializer, FeeSplitSerializer
 
 CACHE_TIMEOUT = 60  # 5 minutes
 
@@ -36,8 +36,12 @@ class TransactionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
         'donation', 'provider', 'source', 'destination',
         'fee_split', 'fee_split__fee_policy',
     ).order_by('-created_at')
-    serializer_class = TransactionSerializer
     permission_classes = [IsSystemAdmin]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return TransactionListSerializer
+        return TransactionSerializer
     filterset_class = TransactionFilter
     search_fields = ['gateway_transaction_id']
     ordering_fields = ['amount', 'status', 'created_at']
@@ -90,8 +94,12 @@ class FeeSplitViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
     Accessible by System Admins only.
     """
     queryset = FeeSplit.objects.select_related('transaction', 'fee_policy').order_by('-created_at')
-    serializer_class = FeeSplitSerializer
     permission_classes = [IsSystemAdmin]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return FeeSplitListSerializer
+        return FeeSplitSerializer
     filterset_class = FeeSplitFilter
     ordering_fields = ['gross_amount', 'escrow_amount', 'platform_amount', 'created_at']
     ordering = ['-created_at']

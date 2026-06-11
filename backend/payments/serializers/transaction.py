@@ -3,6 +3,33 @@ from rest_framework import serializers
 from ..models import Transaction, FeeSplit
 
 
+class TransactionListSerializer(serializers.ModelSerializer):
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+    direction_display = serializers.CharField(source='get_direction_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Transaction
+        fields = [
+            'id', 'type', 'type_display', 'direction', 'direction_display',
+            'amount', 'currency', 'status', 'status_display',
+            'gateway_transaction_id', 'created_at',
+        ]
+        read_only_fields = fields
+
+
+class FeeSplitListSerializer(serializers.ModelSerializer):
+    fee_policy_name = serializers.CharField(source='fee_policy.name', read_only=True)
+
+    class Meta:
+        model = FeeSplit
+        fields = [
+            'id', 'gross_amount', 'escrow_amount', 'platform_amount',
+            'fee_policy_name', 'created_at',
+        ]
+        read_only_fields = fields
+
+
 class FeeSplitSerializer(serializers.ModelSerializer):
     fee_policy_name = serializers.CharField(source='fee_policy.name', read_only=True)
     escrow_percentage = serializers.DecimalField(

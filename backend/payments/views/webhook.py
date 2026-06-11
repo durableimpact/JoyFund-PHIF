@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from accounts.utils.permissions import IsSystemAdmin
 from ..filters import WebhookEventFilter
 from ..models import WebhookEvent, PaymentGateway, Transaction
-from ..serializers.webhook import WebhookEventSerializer
+from ..serializers.webhook import WebhookEventListSerializer, WebhookEventSerializer
 
 from ..tasks.process_payment import process_payment_task, process_disbursement_task
 from rest_framework.permissions import AllowAny
@@ -49,8 +49,12 @@ class WebhookEventViewSet(
     """
 
     queryset = WebhookEvent.objects.select_related("gateway").order_by("-received_at")
-    serializer_class = WebhookEventSerializer
     permission_classes = [IsSystemAdmin]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return WebhookEventListSerializer
+        return WebhookEventSerializer
     filterset_class = WebhookEventFilter
     search_fields = ["event_type"]
     ordering_fields = ["event_type", "received_at"]
