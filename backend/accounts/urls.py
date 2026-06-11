@@ -23,6 +23,11 @@ from accounts.views import (
     PasswordResetConfirmView,
     PasswordChangeView,
     UnifiedUserViewSet,
+    list_devices,
+    remove_device,
+    block_device,
+    unblock_device,
+    trust_device,
 )
 
 app_name = 'accounts'
@@ -67,6 +72,15 @@ urlpatterns = [
     path('donors/<uuid:id>/update/', DonorUpdateView.as_view(), name='donor-update'),
     path('donors/<uuid:id>/dashboard/', DonorDashboardView.as_view(), name='donor-dashboard'),
     path('donors/<uuid:id>/public-summary/', DonorPublicSummaryView.as_view(), name='donor-public-summary'),
+
+    # -----------------------------------------------------------------------
+    # Device Management (signed-in sessions / logged-in devices)
+    # -----------------------------------------------------------------------
+    path('devices/', list_devices, name='device-list'),
+    path('devices/<uuid:device_id>/remove/', remove_device, name='device-remove'),
+    path('devices/<uuid:device_id>/block/', block_device, name='device-block'),
+    path('devices/<uuid:device_id>/unblock/', unblock_device, name='device-unblock'),
+    path('devices/<uuid:device_id>/trust/', trust_device, name='device-trust'),
 
     # -----------------------------------------------------------------------
     # ViewSet Router URLs (Hospital Admins, Social Workers, Receptionists, System Admins)
