@@ -12,9 +12,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse
+
 import environ
 import sentry_sdk
-from urllib.parse import urlparse, parse_qsl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,10 +37,34 @@ SECRET_KEY = env(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=True)
 
+# Allow monitoring systems (Prometheus, health checks) to access internal endpoints
+# These often use container hostnames like 'joyfund_web_1:8000'
+ALLOW_MONITORING_INTERNAL_HOSTS = True
+
 # Accept all hosts in development
 # ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"] if DEBUG else ["localhost"])
 _allowed_hosts = env.list("ALLOWED_HOSTS", default=["*"])
 ALLOWED_HOSTS = ["*"] if "*" in _allowed_hosts else _allowed_hosts
+
+# Allow internal Docker container hostnames for monitoring (Prometheus, health checks)
+# Container names with underscores need to be explicitly allowed even with ALLOWED_HOSTS = ["*"]
+if ALLOWED_HOSTS == ["*"]:
+    # In production with ALLOWED_HOSTS = ["*"], we're already permissive
+    # But ensure container names are in the list for health checks
+    pass
+else:
+    # If specific hosts are configured, add container names
+    ALLOWED_HOSTS = list(
+        set(
+            ALLOWED_HOSTS
+            + [
+                "joyfund_web_1",
+                "joyfund_web_2",
+                "localhost",
+                "127.0.0.1",
+            ]
+        )
+    )
 
 # Application definition
 
@@ -88,6 +113,7 @@ MIDDLEWARE = [
     # Logging middleware - must be after SessionMiddleware to have access to session
     "logs.middleware.LoggingMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "backend.middleware.FixRemoteAddrMiddleware",  # Fix container hostnames for monitoring
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -129,28 +155,28 @@ if has_db_url:
     tmpPostgres = urlparse(has_db_url)
     # Determine SSL mode: use 'require' for cloud databases (Neon), 'disable' for Docker
     _is_cloud_db = tmpPostgres.hostname and not any(
-        tmpPostgres.hostname.startswith(x) 
-        for x in ('postgres', 'localhost', '127.0.0.1', '172.')
+        tmpPostgres.hostname.startswith(x)
+        for x in ("postgres", "localhost", "127.0.0.1", "172.")
     )
-    _sslmode = 'require' if _is_cloud_db else 'disable'
-    
+    _sslmode = "require" if _is_cloud_db else "disable"
+
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': tmpPostgres.path.lstrip('/'),
-            'USER': tmpPostgres.username,
-            'PASSWORD': tmpPostgres.password,
-            'HOST': tmpPostgres.hostname,
-            'PORT': tmpPostgres.port or 5432,
-            'CONN_MAX_AGE': 0,          # ← critical for Neon pooler
-            'CONN_HEALTH_CHECKS': False, # ← disable health checks on pooler
-            'OPTIONS': {
-                'sslmode': _sslmode,
-                'connect_timeout': 30,   # ← give Neon time to wake up
-                'keepalives': 1,
-                'keepalives_idle': 30,
-                'keepalives_interval': 5,
-                'keepalives_count': 5,
+        "default": {
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "NAME": tmpPostgres.path.lstrip("/"),
+            "USER": tmpPostgres.username,
+            "PASSWORD": tmpPostgres.password,
+            "HOST": tmpPostgres.hostname,
+            "PORT": tmpPostgres.port or 5432,
+            "CONN_MAX_AGE": 0,  # ← critical for Neon pooler
+            "CONN_HEALTH_CHECKS": False,  # ← disable health checks on pooler
+            "OPTIONS": {
+                "sslmode": _sslmode,
+                "connect_timeout": 30,  # ← give Neon time to wake up
+                "keepalives": 1,
+                "keepalives_idle": 30,
+                "keepalives_interval": 5,
+                "keepalives_count": 5,
             },
         }
     }
@@ -162,7 +188,6 @@ if has_db_url:
     #     )
     # }
 else:
-
     DATABASES = {
         "default": {
             "ENGINE": env(
@@ -260,13 +285,11 @@ if USER_S3:
         },
     }
 
-
     # ── Media files — served via Backblaze B2 ─────────────────────────────────────
     DEFAULT_FILE_STORAGE = "backend.storage_backend.MediaStorage"
     MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
 
 else:
-
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 
@@ -415,7 +438,7 @@ CSRF_TRUSTED_ORIGINS = env.list(
         "http://localhost:8000",
         "https://joy-fund.com",
         "https://www.joy-fund.com",
-    ]
+    ],
 )
 
 # Allow credentials (cookies, authorization headers) in CORS requests
@@ -540,6 +563,16 @@ CHANNEL_LAYERS = {
 
 
 # Chanx Configuration for AsyncAPI documentation
+# ─────────────────────────────────────────────────────────────────────────────
+# Web Push Notifications (VAPID)
+# ─────────────────────────────────────────────────────────────────────────────
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
+VAPID_CLAIMS = {
+    "sub": "mailto:ivan.tomdieu@gmail.com",
+}
+
+
 CHANX = {
     "CAMELIZE": False,  # Keep snake_case (convert from camelCase if True)
     "ASYNCAPI_TITLE": "JoyFund WebSocket API",
