@@ -627,6 +627,7 @@ export default function CampaignPage() {
       return results;
     }) || [];
 
+  const fetchNextPage = fetchNextDonationPage;
   const handleCopy = () => {
     const url =
       typeof window !== "undefined"
