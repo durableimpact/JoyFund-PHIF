@@ -32,7 +32,6 @@ interface SelectedAllocation {
 export default function AdminVouchers() {
   const { data: session } = useSession();
   const token = session?.accessToken || session?.user?.accessToken;
-  const authUserId = session?.user?.id;
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
@@ -44,7 +43,6 @@ export default function AdminVouchers() {
   const [healthIssueId, setHealthIssueId] = useState("");
   const [hospitalId, setHospitalId] = useState("");
   const [requestedAmount, setRequestedAmount] = useState("");
-  const [fundingSearchAmount, setFundingSearchAmount] = useState("");
   const [selectedAllocations, setSelectedAllocations] = useState<
     SelectedAllocation[]
   >([]);
@@ -59,7 +57,7 @@ export default function AdminVouchers() {
       };
       if (search) params.search = search;
       if (filter !== "all") params.status = filter;
-      return await listVouchers(token, params);
+      return await listVouchers(token!, params);
     },
     enabled: !!token,
   });
@@ -72,7 +70,7 @@ export default function AdminVouchers() {
 
   const { data: healthIssuesData } = useQuery({
     queryKey: ["healthIssues", token],
-    queryFn: async () => await listHealthIssues(token, { page_size: "1000" }),
+    queryFn: async () => await listHealthIssues(token!, { page_size: "1000" }),
     enabled: !!token,
   });
 
@@ -83,19 +81,19 @@ export default function AdminVouchers() {
 
   const { data: hospitalsData } = useQuery({
     queryKey: ["hospitals", token],
-    queryFn: async () => await listHospitals(token, { page_size: "1000" }),
+    queryFn: async () => await listHospitals(token!, { page_size: "1000" }),
     enabled: !!token,
   });
 
   const hospitals: Hospital[] = hospitalsData?.results || [];
 
   const { data: campaignsData } = useQuery({
-    queryKey: ["admin-campaigns-picker", authUserId],
+    queryKey: ["admin-campaigns-picker", token],
     queryFn: async () => await listCampaigns({ page_size: 1000 }),
-    enabled: !!token && !!authUserId,
+    enabled: !!token,
   });
 
-  const campaigns: Campaign[] = campaignsData?.results || [];
+  const campaigns: CampaignList[] = campaignsData?.results || [];
 
   const createVoucherMutation = useMutation({
     mutationFn: () => {
@@ -103,7 +101,7 @@ export default function AdminVouchers() {
       const valid = selectedAllocations.filter(
         (a) => a.campaign_id && Number(a.value) > 0,
       );
-      return createVouchersFromCampaigns(token, {
+      return createVouchersFromCampaigns(token!, {
         health_issue_id: healthIssueId,
         hospital_id: hospitalId,
         total_amount: total,
@@ -114,13 +112,13 @@ export default function AdminVouchers() {
         ),
       });
     },
+    
     onSuccess: () => {
       setShowCreate(false);
       setCreateStep(1);
       setHealthIssueId("");
       setHospitalId("");
       setRequestedAmount("");
-      setFundingSearchAmount("");
       setSelectedAllocations([]);
       setCreateError("");
       queryClient.invalidateQueries({ queryKey: ["vouchers"] });
@@ -128,11 +126,6 @@ export default function AdminVouchers() {
   });
 
   const numericRequestedAmount = Number(requestedAmount) || 0;
-  const numericSearchAmount =
-    Number(fundingSearchAmount || requestedAmount) || 0;
-  const eligibleCampaigns = campaigns.filter(
-    (c) => c.is_active && c.available_balance >= numericSearchAmount,
-  );
 
   const getCampaign = (id: string) => campaigns.find((c) => c.id === id);
   const selectedCampaignIds = new Set(
@@ -507,10 +500,7 @@ export default function AdminVouchers() {
                     className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
                     style={{ background: "#471DDB" }}
                     disabled={!canMoveToFundingStep}
-                    onClick={() => {
-                      setFundingSearchAmount(requestedAmount);
-                      setCreateStep(2);
-                    }}
+                    onClick={() => setCreateStep(2)}
                   >
                     Continue
                   </button>
@@ -526,27 +516,13 @@ export default function AdminVouchers() {
                     {formatXAF(numericRequestedAmount)}
                   </span>
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                    Search campaigns by available balance (XAF)
-                  </label>
-                  <input
-                    className="input-field"
-                    type="number"
-                    min={1}
-                    placeholder="Try a lower amount if no campaign appears"
-                    value={fundingSearchAmount}
-                    onChange={(e) => setFundingSearchAmount(e.target.value)}
-                  />
-                </div>
                 <div className="max-h-64 overflow-y-auto border border-gray-100 rounded-xl p-2 space-y-2">
-                  {eligibleCampaigns.length === 0 ? (
+                  {campaigns.length === 0 ? (
                     <div className="text-xs text-gray-500 p-3">
-                      No campaigns match this amount. Reduce search amount to
-                      discover more campaigns.
+                      No campaigns available.
                     </div>
                   ) : (
-                    eligibleCampaigns.map((campaign) => (
+                    campaigns.map((campaign) => (
                       <button
                         key={campaign.id}
                         type="button"
@@ -559,10 +535,6 @@ export default function AdminVouchers() {
                       >
                         <div className="text-sm font-semibold text-gray-900">
                           {campaign.title}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Available balance:{" "}
-                          {formatXAF(campaign.available_balance)}
                         </div>
                       </button>
                     ))
@@ -603,10 +575,6 @@ export default function AdminVouchers() {
                       >
                         <div className="text-sm font-semibold text-gray-900">
                           {campaign?.title}
-                        </div>
-                        <div className="text-xs text-gray-500 mb-2">
-                          Available:{" "}
-                          {formatXAF(campaign?.available_balance || 0)}
                         </div>
                         <div className="flex gap-2">
                           <select
