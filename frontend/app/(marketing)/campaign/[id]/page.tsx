@@ -3,7 +3,6 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   Share2,
   ArrowLeft,
@@ -778,11 +777,10 @@ export default function CampaignPage() {
             {/* Main Image */}
             {campaign.cover_image && (
               <div className="relative aspect-16/10 w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50">
-                <Image
+                <img
                   src={campaign.cover_image}
                   alt={campaign.title}
-                  fill
-                  className="object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
             )}
