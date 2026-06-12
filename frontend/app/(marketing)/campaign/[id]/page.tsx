@@ -1102,7 +1102,7 @@ export default function CampaignPage() {
                 {[
                   ["6,000 XAF", "Antenatal visit"],
                   ["45,000 XAF", "Normal delivery"],
-                  ["120,000 XAF", "C-section + care"],
+                  // ["120,000 XAF", "C-section + care"],
                 ].map(([amt, label]) => (
                   <div
                     key={label}
