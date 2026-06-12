@@ -76,7 +76,7 @@ export default function Navbar({
         >
           <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
             <img
-              src="/assets/joyfund-logo-half-removebg-preview.png"
+              src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
               className="w-full h-full object-contain"
             />
@@ -154,6 +154,7 @@ export default function Navbar({
         <button
           className={`md:hidden ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
