@@ -41,17 +41,25 @@ class DeviceTrackingMiddleware(MiddlewareMixin):
             if device:
                 if device.last_active and (now - device.last_active) < _UPDATE_INTERVAL:
                     return
-                UserDevice.objects.filter(id=device.id).update(last_active=now)
+                updates = {"last_active": now}
+                auth = getattr(request, "auth", None)
+                if auth:
+                    updates["access_token"] = auth
+                UserDevice.objects.filter(id=device.id).update(**updates)
             else:
                 info = parse_user_agent(user_agent)
-                UserDevice.objects.create(
-                    user=request.user,
-                    device_name=info["device_name"],
-                    device_type=info["device_type"],
-                    browser=info["browser"],
-                    os=info["os"],
-                    ip_address=ip,
-                    user_agent=user_agent,
-                )
+                device_kwargs = {
+                    "user": request.user,
+                    "device_name": info["device_name"],
+                    "device_type": info["device_type"],
+                    "browser": info["browser"],
+                    "os": info["os"],
+                    "ip_address": ip,
+                    "user_agent": user_agent,
+                }
+                auth = getattr(request, "auth", None)
+                if auth:
+                    device_kwargs["access_token"] = auth
+                UserDevice.objects.create(**device_kwargs)
         except Exception:
             pass
