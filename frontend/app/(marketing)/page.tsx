@@ -245,8 +245,7 @@ export default function HomePage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage:
-              // "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1600&auto=format&fit=crop')",
-              "url('/assets/images/joyfund-hero-image.jpeg')",
+              "url('/assets/images/joyfund-hero-image.webp')",
           }}
         />
 
