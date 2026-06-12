@@ -42,7 +42,7 @@ export default function TermsPage() {
             </div>
             <div className="text-gray-600 leading-relaxed space-y-4">
               <p>
-                JoyFund is a transparent digital platform operated by <strong>Solidarity Health Bridge</strong>. We digitise the traditional Cameroonian &quot;Njangi&quot; culture to create a People&apos;s Health Insurance Fund (PHIF) dedicated to maternal healthcare for vulnerable women across Cameroon.
+                JoyFund is a transparent digital platform operated by <strong>Solidarity Health Bridge</strong>. We digitise the traditional Cameroonian culture of community mutual aid to create a People&apos;s Health Insurance Fund (PHIF) dedicated to maternal healthcare for vulnerable women across Cameroon.
               </p>
               <p>
                 By using JoyFund, you agree to these terms. If you are using the platform on behalf of a hospital or organisation, you represent that you have the authority to bind that entity to these terms.

@@ -41,7 +41,7 @@ const jsonLd = {
       "@id": "https://joy-fund.com/#organization",
       name: "JoyFund",
       description:
-        "A digital Njangi and transparent crowdfunding platform funding maternal healthcare and safe deliveries for vulnerable women across Cameroon.",
+        "A transparent crowdfunding platform pooling community resources for maternal healthcare and safe deliveries for vulnerable women across Cameroon.",
       url: "https://joy-fund.com",
       logo: "https://joy-fund.com/logo.png",
       foundingLocation: {
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     template: "%s | JoyFund",
   },
   description:
-    "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
+    "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
   metadataBase: new URL("https://joy-fund.com"),
   verification: {
     google: "OyspcSNhwrr5zCVrvp1J0iPhdZEvX2iAAl3nuEkiUZo",
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     siteName: "JoyFund",
     title: "JoyFund",
     description:
-      "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
+      "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
     images: [
       {
         url: "/og-image.png",
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "JoyFund",
     description:
-      "Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
+      "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
     images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
