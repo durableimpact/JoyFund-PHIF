@@ -10,12 +10,16 @@ function handleError(e: unknown): never {
 }
 
 export async function registerPushSubscription(
-  accessToken: string,
   subscription: PushSubscription,
+  accessToken?: string,
   userAgent?: string,
 ) {
   try {
     const sub = subscription.toJSON();
+    const headers: Record<string, string> = {};
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
     const { data } = await api.post(
       "/api/notifications/push/register/",
       {
@@ -24,7 +28,7 @@ export async function registerPushSubscription(
         auth_key: sub.keys!.auth,
         user_agent: userAgent || navigator.userAgent || "",
       },
-      { headers: { Authorization: `Bearer ${accessToken}` } },
+      { headers },
     );
     return data;
   } catch (e) {
@@ -33,14 +37,18 @@ export async function registerPushSubscription(
 }
 
 export async function unregisterPushSubscription(
-  accessToken: string,
   endpoint: string,
+  accessToken?: string,
 ) {
   try {
+    const headers: Record<string, string> = {};
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
     const { data } = await api.post(
       "/api/notifications/push/unregister/",
       { endpoint },
-      { headers: { Authorization: `Bearer ${accessToken}` } },
+      { headers },
     );
     return data;
   } catch (e) {
