@@ -8,7 +8,12 @@ class TestPushSerializer(serializers.Serializer):
     user_ids = serializers.ListField(
         child=serializers.UUIDField(),
         required=False,
-        help_text="Send to specific users by ID. Ignored if broadcast is true.",
+        help_text="Send to specific users by ID. Ignored if broadcast or roles is set.",
+    )
+    roles = serializers.ListField(
+        child=serializers.ChoiceField(choices=["SYSTEM_ADMIN", "HOSPITAL_ADMIN", "RECEPTIONIST", "SOCIAL_WORKER", "DONOR"]),
+        required=False,
+        help_text="Send to all users with these roles. Ignored if broadcast is true.",
     )
     broadcast = serializers.BooleanField(
         required=False,
