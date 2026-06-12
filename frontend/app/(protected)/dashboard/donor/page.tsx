@@ -1,11 +1,9 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, TrendingUp, Users, Heart, History, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import Navbar from "@/components/shared/Navbar";
+import { Plus, TrendingUp, Users, Heart, History } from "lucide-react";
 import CampaignDashboardCard from "@/components/dashboard/cards/CampaignDashboardCard";
 import { formatXAF } from "@/lib/utils";
 import { getMyCampaigns, getMyDonations } from "@/actions/campaigns";
@@ -14,12 +12,20 @@ import { getDonorDashboard } from "@/actions/accounts";
 export default function DonorDashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const authUserId = session?.user?.id;
   const token = session?.accessToken || session?.user?.accessToken;
   const donorProfileId = (session?.user?.userInfo as DonorInfo | undefined)
     ?.profile?.id;
 
-  console.log("Session : ", session);
+  const [campaigns, setCampaigns] = useState<CampaignList[]>([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(true);
+  const [campaignsError, setCampaignsError] = useState(false);
+  const [campaignsErrorMsg, setCampaignsErrorMsg] = useState<string | null>(null);
+
+  const [donations, setDonations] = useState<any[]>([]);
+  const [donationsLoading, setDonationsLoading] = useState(true);
+
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -28,76 +34,76 @@ export default function DonorDashboardPage() {
     }
   }, [status, router]);
 
-  // Fetch donor dashboard stats with React Query
-  const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
-    queryKey: ["donor-dashboard", authUserId, donorProfileId],
-    queryFn: async () => {
-      console.log("Fetching dashboard with:", {
-        userId: donorProfileId,
-        hasToken: !!token,
-        user: session?.user,
-      });
-      if (!token || !donorProfileId) {
-        console.warn("Missing token or user ID for dashboard:", {
-          hasToken: !!token,
-          userId: donorProfileId,
-        });
-        throw new Error("No access token or user ID");
-      }
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+
+    async function fetchData() {
       try {
-        return await getDonorDashboard(donorProfileId, token);
+        const data = await getMyCampaigns(token);
+        if (!cancelled) setCampaigns(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Error fetching dashboard:", err);
-        throw err;
+        if (!cancelled) {
+          setCampaignsError(true);
+          setCampaignsErrorMsg(String(err));
+        }
+      } finally {
+        if (!cancelled) setCampaignsLoading(false);
       }
-    },
-    enabled: !!token && !!authUserId && !!donorProfileId,
-  });
+    }
+    fetchData();
 
-  // Fetch campaigns with React Query
-  const {
-    data: campaignsResponse,
-    isLoading: campaignsLoading,
-    isError: campaignsError,
-    error: campaignsErrorMsg,
-  } = useQuery({
-    queryKey: ["my-campaigns", authUserId],
-    queryFn: async () => {
-      if (!token) throw new Error("No access token");
+    return () => { cancelled = true; };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+
+    async function fetchData() {
       try {
-        return await getMyCampaigns(token);
-      } catch (err) {
-        console.error("Error fetching campaigns:", err);
-        throw err;
+        const data = await getMyDonations(token);
+        if (!cancelled) {
+          setDonations(
+            (data as any)?.json?.results ||
+            (data as any)?.results ||
+            (Array.isArray((data as any)?.json) ? (data as any).json : (data as any)?.json ? [(data as any).json] : [])
+          );
+        }
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setDonationsLoading(false);
       }
-    },
-    enabled: !!token && !!authUserId,
-  });
+    }
+    fetchData();
 
-  // Fetch donations with React Query
-  const { data: donationsResponse, isLoading: donationsLoading } = useQuery({
-    queryKey: ["my-donations", authUserId],
-    queryFn: async () => {
-      if (!token) throw new Error("No access token");
-      return await getMyDonations(token);
-    },
-    enabled: !!token && !!authUserId,
-  });
+    return () => { cancelled = true; };
+  }, [token]);
 
-  const campaigns = Array.isArray(campaignsResponse) ? campaignsResponse : [];
-  const donations =
-    (donationsResponse as any)?.json?.results ||
-    donationsResponse?.results ||
-    (Array.isArray((donationsResponse as any)?.json)
-      ? (donationsResponse as any).json
-      : (donationsResponse as any)?.json
-        ? [(donationsResponse as any).json]
-        : []);
+  useEffect(() => {
+    if (!token || !donorProfileId) return;
+    let cancelled = false;
+
+    async function fetchData() {
+      try {
+        const data = await getDonorDashboard(donorProfileId, token);
+        if (!cancelled) setDashboardData(data);
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setDashboardLoading(false);
+      }
+    }
+    fetchData();
+
+    return () => { cancelled = true; };
+  }, [token, donorProfileId]);
+
   const loading = campaignsLoading || donationsLoading || dashboardLoading;
 
   const name = session?.user?.name || "Donor";
 
-  // Use dashboard data if available, otherwise fallback to calculated values
   const totalRaised =
     dashboardData?.total_raised ??
     campaigns.reduce((s, c) => s + (c.total_net_raised || 0), 0);
@@ -215,7 +221,7 @@ export default function DonorDashboardPage() {
                     Unable to load campaigns
                   </h3>
                   <p className="text-gray-500 text-sm mb-4">
-                    {campaignsErrorMsg?.message ||
+                    {campaignsErrorMsg ||
                       "Please try refreshing the page"}
                   </p>
                   <button

@@ -1,8 +1,7 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -11,10 +10,7 @@ import {
   Heart,
   Share2,
   Edit,
-  TrendingUp,
   Gift,
-  Zap,
-  Clock,
 } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import { formatXAF } from "@/lib/utils";
@@ -24,8 +20,11 @@ export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const authUserId = session?.user?.id;
   const token = session?.accessToken || session?.user?.accessToken;
+
+  const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [donations, setDonations] = useState<any[]>([]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -34,28 +33,45 @@ export default function CampaignDetailPage() {
     }
   }, [status, router, id]);
 
-  // Fetch campaign with React Query
-  const { data: campaign, isLoading } = useQuery({
-    queryKey: ["donor-campaign", authUserId, id],
-    queryFn: async () => await getCampaign(id as string),
-    enabled: !!token && !!authUserId && !!id,
-  });
+  useEffect(() => {
+    if (!token || !id) return;
+    let cancelled = false;
 
-  // Fetch donations
-  const { data: donationsResponse } = useQuery({
-    queryKey: ["donor-campaign-donations", authUserId, id],
-    queryFn: async () => await listCampaignDonations(id as string),
-    enabled: !!token && !!authUserId && !!id,
-  });
+    async function fetchData() {
+      try {
+        const data = await getCampaign(id as string, token);
+        if (!cancelled) setCampaign(data as CampaignDetail);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+    fetchData();
 
-  const donations =
-    (donationsResponse as any)?.json?.results ||
-    donationsResponse?.results ||
-    (Array.isArray((donationsResponse as any)?.json)
-      ? (donationsResponse as any).json
-      : (donationsResponse as any)?.json
-        ? [(donationsResponse as any).json]
-        : []);
+    return () => { cancelled = true; };
+  }, [token, id]);
+
+  useEffect(() => {
+    if (!token || !id) return;
+    let cancelled = false;
+
+    async function fetchDonations() {
+      try {
+        const data = await listCampaignDonations(id as string);
+        if (!cancelled) {
+          setDonations(
+            (data as any)?.json?.results ||
+            (data as any)?.results ||
+            (Array.isArray((data as any)?.json) ? (data as any).json : (data as any)?.json ? [(data as any).json] : [])
+          );
+        }
+      } catch {
+        // ignore
+      }
+    }
+    fetchDonations();
+
+    return () => { cancelled = true; };
+  }, [token, id]);
 
   if (isLoading) {
     return (

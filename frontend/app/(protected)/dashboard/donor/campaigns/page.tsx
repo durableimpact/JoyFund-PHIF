@@ -1,8 +1,7 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Plus, Loader2, Heart, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
@@ -12,8 +11,10 @@ import { getMyCampaigns } from "@/actions/campaigns";
 export default function CampaignsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const authUserId = session?.user?.id;
   const token = session?.accessToken || session?.user?.accessToken;
+
+  const [campaigns, setCampaigns] = useState<CampaignList[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -22,17 +23,24 @@ export default function CampaignsPage() {
     }
   }, [status, router]);
 
-  // Fetch campaigns with React Query
-  const { data: campaignsResponse, isLoading } = useQuery({
-    queryKey: ["my-campaigns", authUserId],
-    queryFn: async () => {
-      if (!token) throw new Error("No access token");
-      return await getMyCampaigns(token);
-    },
-    enabled: !!token && !!authUserId,
-  });
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
 
-  const campaigns = Array.isArray(campaignsResponse) ? campaignsResponse : [];
+    async function fetchData() {
+      try {
+        const data = await getMyCampaigns(token);
+        if (!cancelled) setCampaigns(Array.isArray(data) ? data : []);
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+    fetchData();
+
+    return () => { cancelled = true; };
+  }, [token]);
 
   if (isLoading) {
     return (

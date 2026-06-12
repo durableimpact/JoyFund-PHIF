@@ -40,7 +40,7 @@ export default function EditCampaignPage() {
   // Fetch campaign
   const { data: campaign, isLoading: campaignLoading } = useQuery({
     queryKey: ["donor-campaign", authUserId, id],
-    queryFn: async () => await getCampaign(id as string),
+    queryFn: async () => await getCampaign(id as string, token),
     enabled: !!token && !!authUserId && !!id,
   });
 

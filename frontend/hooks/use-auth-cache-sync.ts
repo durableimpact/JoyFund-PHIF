@@ -33,7 +33,6 @@ export function useAuthCacheSync() {
         previousAuthState.sessionKey !== sessionKey;
 
       if (
-        becameAuthenticated ||
         becameUnauthenticated ||
         switchedAuthenticatedUser
       ) {
