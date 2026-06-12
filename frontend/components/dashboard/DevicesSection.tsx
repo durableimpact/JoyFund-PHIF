@@ -57,8 +57,8 @@ export default function DevicesSection() {
       const updated = await blockDevice(device.id);
       setDevices((prev) => prev.map((d) => (d.id === device.id ? updated : d)));
       toast.success("Device blocked");
-    } catch {
-      toast.error("Failed to block device");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to block device");
     } finally {
       setActionId(null);
     }
@@ -186,14 +186,19 @@ export default function DevicesSection() {
                     {device.os} &middot; {device.browser}
                     {device.ip_address && <> &middot; <span className="font-mono">{device.ip_address}</span></>}
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Last active: {timeAgo(device.last_active)}
-                    {device.created_at && <> &middot; First seen: {new Date(device.created_at).toLocaleDateString()}</>}
-                  </p>
-                </div>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        Last active: {timeAgo(device.last_active)}
+                        {device.created_at && <> &middot; First seen: {new Date(device.created_at).toLocaleDateString()}</>}
+                      </p>
+                      {device.is_current && (
+                        <p className="text-xs text-blue-500 mt-0.5">
+                          This is your current session. You cannot block or remove this device.
+                        </p>
+                      )}
+                    </div>
 
-                {/* Actions */}
-                {!device.is_current && (
+                    {/* Actions */}
+                    {!device.is_current && (
                   <div className="flex items-center gap-1 shrink-0">
                     {device.is_blocked ? (
                       <button
@@ -264,7 +269,8 @@ export default function DevicesSection() {
           <p className="font-semibold text-amber-800 text-xs">Why manage devices?</p>
           <p className="text-amber-700 text-xs mt-0.5 leading-relaxed">
             If you notice a device you don&apos;t recognize, block it immediately. This will prevent
-            that device from accessing your account. Blocked devices are signed out automatically.
+            that device from accessing your account. An email notification will be sent to confirm the block.
+            You cannot block your own current session.
           </p>
         </div>
       </div>
