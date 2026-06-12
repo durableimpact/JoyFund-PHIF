@@ -34,19 +34,19 @@ const steps: StepItem[] = [
     icon: Cake,
     step: "01",
     title: "Celebrate",
-    desc: "Create a JoyFund campaign for your birthday, wedding, promotion, or graduation instead of asking for traditional gifts.",
+    desc: "Turn birthdays, weddings, graduations, promotions, and anniversaries into opportunities to support vulnerable people who cannot afford healthcare.",
   },
   {
     icon: Gift,
     step: "02",
     title: "Pool",
-    desc: "Friends and family donate via MTN MoMo, Orange Money or Bank. The bulk of every contribution goes directly to the healthcare fund.",
+    desc: "Help vulnerable pregnant women access antenatal care, safe deliveries, and emergency obstetric services.",
   },
   {
     icon: Hospital,
     step: "03",
     title: "Care",
-    desc: "A verified vulnerable pregnant woman or elderly person receives a care voucher, redeemable at partner hospitals across Cameroon.",
+    desc: "Contribute to clearing unpaid hospital bills and ensuring elderly people receive the care they deserve.",
   },
 ];
 
@@ -244,8 +244,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage:
-              "url('/assets/images/joyfund-hero-image.webp')",
+            backgroundImage: "url('/assets/images/joyfund-hero-image.webp')",
           }}
         />
 
@@ -262,10 +261,9 @@ export default function HomePage() {
           className="absolute inset-0"
           style={{
             background:
-  "linear-gradient(to bottom, rgba(10,20,60,0.55) 0%, rgba(15,30,90,0.30) 45%, rgba(249,250,251,0.25) 70%, rgba(249,250,251,0.75) 90%, #F9FAFB 100%)"
-             }}
-        /> 
-        
+              "linear-gradient(to bottom, rgba(10,20,60,0.55) 0%, rgba(15,30,90,0.30) 45%, rgba(249,250,251,0.25) 70%, rgba(249,250,251,0.75) 90%, #F9FAFB 100%)",
+          }}
+        />
 
         {/* Navbar sits on top of everything */}
         <Navbar transparent />
@@ -276,7 +274,7 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
             {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" /> */}
-              {/* <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
+            {/* <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
               <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
           </div>
 
@@ -285,16 +283,22 @@ export default function HomePage() {
             className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md"
             style={{ letterSpacing: "-1px" }}
           >
-            Turn your <span style={{ color: "#7de8c0" }}>celebration</span> into
-            <br />
-            someone&apos;s safe delivery
+            Your <span style={{ color: "#7de8c0" }}>Joy</span> Saves Lives
+            
           </h1>
 
           {/* Subtext */}
           <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
-            JoyFund digitalises Cameroon&apos;s tradition of community solidarity - redirecting
-            birthday gifts and wedding contributions into a transparent
-            People&apos;s Health Insurance Fund for vulnerable pregnant women.
+             Turn your birthdays, weddings,
+            graduations, and anniversaries into opportunities to raise funds
+            that help pay hospital bills for vulnerable mothers, support elderly
+            people detained in hospitals because they cannot afford care, and
+            provide life-saving assistance to individuals facing critical
+            medical emergencies.
+          </p>
+
+          <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
+             No one should be denied healthcare because they cannot afford it
           </p>
 
           {/* CTAs */}
@@ -363,26 +367,23 @@ export default function HomePage() {
       <section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <p
-              className="text-xs font-bold uppercase tracking-widest mb-2"
+            <h2
+              className="text-3xl font-bold uppercase tracking-widest mb-2"
               style={{ color: "var(--primary)" }}
             >
-              How It Works
-            </p>
-            <h2 className="text-3xl font-black text-[#1A1A2E]">
-              Celebrate. Pool. Care.
+              Launch a JoyFund to Save Lives
             </h2>
-            <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">
+            {/* <h2 className="text-3xl font-black text-[#1A1A2E]">
+              Celebrate. Pool. Care.
+            </h2> */}
+            {/* <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">
               Three simple steps turn your personal milestone into life-saving
               maternal and emergency healthcare for someone who needs it most.
-            </p>
+            </p> */}
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((s) => (
-              <div
-                key={s.step}
-                className="card p-8 text-center relative"
-              >
+              <div key={s.step} className="card p-8 text-center relative">
                 <div
                   className="absolute -top-4 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-black"
                   style={{ background: "var(--primary)" }}
@@ -486,10 +487,10 @@ export default function HomePage() {
             </h2>
             <p className="text-gray-500 text-sm leading-relaxed mb-4">
               Cameroonians have always pooled resources for one another through
-              community pooling groups and alumni giving. JoyFund brings that same spirit
-              online - channelling everyday celebratory contributions from
-              friends, family, and the diaspora into a shared fund that pays
-              hospital bills directly.
+              community pooling groups and alumni giving. JoyFund brings that
+              same spirit online - channelling everyday celebratory
+              contributions from friends, family, and the diaspora into a shared
+              fund that pays hospital bills directly.
             </p>
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
               Beneficiaries are vulnerable pregnant women, indigent mothers, and
@@ -543,9 +544,7 @@ export default function HomePage() {
                 className="mx-auto mb-3"
                 style={{ color: "var(--primary)" }}
               />
-              <p className="text-sm font-bold text-[#1A1A2E]">
-                Diaspora Ready
-              </p>
+              <p className="text-sm font-bold text-[#1A1A2E]">Diaspora Ready</p>
               <p className="text-xs text-gray-500 mt-1">
                 Give to Cameroon from anywhere in the world
               </p>
@@ -626,10 +625,7 @@ export default function HomePage() {
           </div>
           <div className="space-y-3">
             {faqs.map((f, i) => (
-              <div
-                key={f.q}
-                className="card overflow-hidden"
-              >
+              <div key={f.q} className="card overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between gap-4 p-5 text-left"
@@ -682,11 +678,6 @@ export default function HomePage() {
     </div>
   );
 }
-
-
-
-
-
 
 // "use client";
 // import { useQuery } from "@tanstack/react-query";
@@ -868,8 +859,7 @@ export default function HomePage() {
 //             background:
 //   "linear-gradient(to bottom, rgba(10,20,60,0.55) 0%, rgba(15,30,90,0.30) 45%, rgba(249,250,251,0.25) 70%, rgba(249,250,251,0.75) 90%, #F9FAFB 100%)"
 //              }}
-//         /> 
-        
+//         />
 
 //         {/* Navbar sits on top of everything */}
 //         <Navbar transparent />

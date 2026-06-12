@@ -149,6 +149,14 @@ export default function Navbar({
               >
                 Start a JoyFund
               </Link>
+              <a
+                href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#25D366] hover:text-[#1fb855] text-sm font-semibold px-5 py-2.5 rounded-full transition-all flex items-center gap-2"
+              >
+                Talk with us →
+              </a>
             </>
           )}
         </div>
@@ -215,6 +223,15 @@ export default function Navbar({
                 >
                   Create Account
                 </Link>
+                <a
+                  href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+                  onClick={() => setMobileOpen(false)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#25D366]font-semibold px-5 py-3 rounded-full text-center"
+                >
+                  Talk with us →
+                </a>
               </>
             )}
           </div>
