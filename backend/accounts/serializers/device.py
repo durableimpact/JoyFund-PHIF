@@ -34,6 +34,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     def get_is_current(self, obj):
         request = self.context.get("request")
-        if request:
-            return obj.ip_address == request.META.get("REMOTE_ADDR")
-        return False
+        if not request:
+            return False
+        auth = getattr(request, "auth", None)
+        return bool(auth and obj.access_token_id == auth.id)
