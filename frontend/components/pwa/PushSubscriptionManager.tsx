@@ -13,26 +13,26 @@ export default function PushSubscriptionManager() {
   const { data: session } = useSession();
   const token = session?.accessToken || session?.user?.accessToken;
   const registeredRef = useRef(false);
-  const [status, setStatus] = useState("idle");
-
-  useEffect(() => {
+  const [status, setStatus] = useState(() => {
+    if (typeof window === "undefined") return "idle";
     if (!VAPID_PUBLIC_KEY) {
       console.warn("[Push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set");
-      setStatus("missing VAPID key");
-      return;
+      return "missing VAPID key";
     }
-    if (registeredRef.current) return;
-    if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator)) {
       console.warn("[Push] Service Worker not supported");
-      setStatus("SW not supported");
-      return;
+      return "SW not supported";
     }
     if (!("PushManager" in window)) {
       console.warn("[Push] PushManager not supported");
-      setStatus("Push not supported");
-      return;
+      return "Push not supported";
     }
+    return "idle";
+  });
+
+  useEffect(() => {
+    if (registeredRef.current) return;
+    if (status !== "idle") return;
 
     let cancelled = false;
     setStatus("registering...");
