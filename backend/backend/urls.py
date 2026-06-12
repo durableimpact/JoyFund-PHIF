@@ -15,17 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
-from django.urls import path, include, re_path
+from accounts.views.auth_token import refresh_token_handler
+from chanx.channels import urls as chanx_urls
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path, re_path
 from django.views.generic import TemplateView
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from .views import login_view, logout_view, oauth2_token_view
-from chanx.channels import urls as chanx_urls
 from django.views.static import serve
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+
+from .views import login_view, logout_view, oauth2_token_view
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -58,8 +60,10 @@ urlpatterns = [
     path("asyncapi/", include(chanx_urls.urlpatterns)),
     # API endpoints
     # OAuth2 authentication with rate limiting
-    # ✓ Rate limited token endpoint: 10 requests/hour
+    # ✓ Rate limited token endpoint: 10 requests/hour (password & client_credentials grants)
     path("auth/token/", oauth2_token_view, name="oauth2_token"),
+    # ✓ Dedicated refresh token endpoint (refresh_token grant)
+    path("auth/refresh/", refresh_token_handler, name="auth_refresh"),
     # Include remaining drf-social-oauth2 endpoints (convert-token, refresh, etc.)
     path("auth/", include("drf_social_oauth2.urls", namespace="drf")),
     # Versioned API
