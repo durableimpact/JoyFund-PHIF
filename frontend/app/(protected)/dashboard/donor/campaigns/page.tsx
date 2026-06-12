@@ -32,14 +32,7 @@ export default function CampaignsPage() {
     enabled: !!token && !!authUserId,
   });
 
-  const campaigns =
-    (campaignsResponse as any)?.json?.results ||
-    campaignsResponse?.results ||
-    (Array.isArray((campaignsResponse as any)?.json)
-      ? (campaignsResponse as any).json
-      : (campaignsResponse as any)?.json
-        ? [(campaignsResponse as any).json]
-        : []);
+  const campaigns = Array.isArray(campaignsResponse) ? campaignsResponse : [];
 
   if (isLoading) {
     return (

@@ -107,7 +107,7 @@ export const deleteCampaign = async (id: string, access_token: string) => {
 
 export const getMyCampaigns = async (access_token: string) => {
   try {
-    const { data } = await api.get<PaginationResponse<Campaign>>(
+    const { data } = await api.get<CampaignList[]>(
       "/api/campaigns/my-campaigns/",
       {
         headers: { Authorization: `Bearer ${access_token}` },
@@ -119,12 +119,18 @@ export const getMyCampaigns = async (access_token: string) => {
   }
 };
 
-export const getAvailableBalances = async (access_token: string,params:{min_amount:number,page_size?:number,page?:number}) => {
+export const getAvailableBalances = async (
+  access_token: string,
+  params: { min_amount: number; page_size?: number; page?: number },
+) => {
   try {
-    const { data } = await api.get<PaginationResponse<CampaignBalance>>("/api/campaigns/available-balances/", {
-      params,
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
+    const { data } = await api.get<PaginationResponse<CampaignBalance>>(
+      "/api/campaigns/available-balances/",
+      {
+        params,
+        headers: { Authorization: `Bearer ${access_token}` },
+      },
+    );
     return data;
   } catch (e) {
     handleError(e);
@@ -169,9 +175,11 @@ export const listCampaignDonations = async (
   try {
     const { data } = await api.get<PaginationResponse<Donation>>(
       `/api/campaigns/${campaignId}/donations/`,
-      { 
+      {
         params,
-        headers: access_token ? { Authorization: `Bearer ${access_token}` } : {},
+        headers: access_token
+          ? { Authorization: `Bearer ${access_token}` }
+          : {},
       },
     );
     return data;
