@@ -1,27 +1,29 @@
-from django.db.models import Q, Sum, Count, F, DecimalField, Value, ExpressionWrapper
-from django.db.models.functions import Coalesce
+from accounts.models import Role
 from django.core.cache import cache
+from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum, Value
+from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
-from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
-from accounts.models import Role
 from campaigns.filters import CampaignFilter
 from campaigns.models import Campaign
 from campaigns.serializers import (
+    CampaignBalanceSerializer,
     CampaignCreateUpdateSerializer,
     CampaignDetailSerializer,
-    CampaignBalanceSerializer,
     CampaignListSerializer,
 )
 
 _TAG = ["Campaigns"]
+
+
 class IsDonor(BasePermission):
     message = "Only Donors can perform this action."
 
@@ -56,6 +58,7 @@ class IsSystemAdmin(BasePermission):
 
 from core.mixins import CacheInvalidationMixin
 
+
 class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     cache_group = "campaigns"
     cache_timeout = 60
@@ -87,7 +90,7 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
             return CampaignCreateUpdateSerializer
-        elif self.action == "list":
+        elif self.action in ["list", "my_campaigns"]:
             return CampaignListSerializer
         return CampaignDetailSerializer
 
@@ -100,12 +103,14 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                         "donations__net_amount",
                         filter=Q(donations__status="SUCCESS"),
                     ),
-                    Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
+                    Value(
+                        0, output_field=DecimalField(max_digits=12, decimal_places=2)
+                    ),
                 ),
-            total_number_of_successfull_donations_calc=Coalesce(
-                Count("donations", filter=Q(donations__status="SUCCESS")),
-                Value(0),
-            ),
+                total_number_of_successfull_donations_calc=Coalesce(
+                    Count("donations", filter=Q(donations__status="SUCCESS")),
+                    Value(0),
+                ),
             )
             page = self.paginate_queryset(queryset)
             if page is not None:
@@ -113,6 +118,7 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                 return self.get_paginated_response(serializer.data)
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
+
         return self._cached_action(_list, request, *args, **kwargs)
 
     @swagger_auto_schema(tags=_TAG)
@@ -196,18 +202,25 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     )
     def leaderboard(self, request, *args, **kwargs):
         """
-        Get campaigns sorted by total net raised.
+        Get campaigns sorted by total net raised.Campaign
         """
-        queryset = Campaign.objects.select_related("donor__user").annotate(
-            total_net_raised_calc=Coalesce(
-                Sum(
-                    "donations__net_amount",
-                    filter=Q(donations__status="SUCCESS"),
-                ),
-                Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
+        queryset = (
+            Campaign.objects.select_related("donor__user")
+            .annotate(
+                total_net_raised_calc=Coalesce(
+                    Sum(
+                        "donations__net_amount",
+                        filter=Q(donations__status="SUCCESS"),
+                    ),
+                    Value(
+                        0, output_field=DecimalField(max_digits=12, decimal_places=2)
+                    ),
+                )
             )
-        ).filter(is_public=True, is_active=True).order_by("-total_net_raised_calc")
-        
+            .filter(is_public=True, is_active=True)
+            .order_by("-total_net_raised_calc")
+        )
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -262,7 +275,6 @@ class CampaignAvailableBalanceListView(ListAPIView):
                 openapi.IN_QUERY,
                 description="Filter campaigns with available balance >= this amount",
                 type=openapi.TYPE_NUMBER,
-                
             )
         ],
         operation_description="Returns a list of active campaigns and their currently available balance for allocation.",
