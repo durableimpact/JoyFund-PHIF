@@ -142,7 +142,7 @@ class NotificationAuthenticator(DjangoAuthenticator):
     """Custom authenticator for notification consumer using OAuth2 access tokens."""
     queryset = None  # No specific object auth needed
     
-    async def authenticate(self) -> bool:
+    async def authenticate(self, scope) -> bool:
         """Authenticate user from OAuth2 access token (drf-social-oauth2)."""
         from backend.auth import extract_token_from_scope, get_user_from_oauth2_token
         
