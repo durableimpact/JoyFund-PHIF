@@ -12,7 +12,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
                 <img
-                  src="/assets/joyfund-logo-half-removebg-preview.png"
+                  src="/assets/joyfund-logo-half-removebg-preview.webp"
                   alt="JoyFund logo"
                   className="w-full h-full object-contain"
                 />
@@ -52,7 +52,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between gap-3 text-white/40 text-xs">
+        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between gap-3 text-white/55 text-xs">
           <p>© {currentYear} JoyFund - Solidarity Health Bridge. All rights reserved.</p>
           <p>Built for Cameroon, with love 🇨🇲</p>
         </div>
