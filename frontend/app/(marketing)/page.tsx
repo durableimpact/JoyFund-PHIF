@@ -28,27 +28,58 @@ import CampaignCard from "@/components/shared/CampaignCard";
 import { listCampaigns, getPlatformStats } from "@/actions/campaigns";
 import { useEffect, useState } from "react";
 
-type StepItem = { icon: LucideIcon; step: string; title: string; desc: string };
+type StepItem = { icon: LucideIcon; step: string; title: string; points: [string, string] };
 const steps: StepItem[] = [
   {
     icon: Cake,
     step: "01",
     title: "Celebrate",
-    desc: "Turn birthdays, weddings, graduations, promotions, and anniversaries into opportunities to support vulnerable people who cannot afford healthcare.",
+    points: [
+      "Turn birthdays, weddings, graduations, promotions, and anniversaries into opportunities to support vulnerable people who cannot afford healthcare.",
+      "Support individuals facing urgent and life-threatening health conditions.",
+    ],
   },
   {
     icon: Gift,
     step: "02",
     title: "Pool",
-    desc: "Help vulnerable pregnant women access antenatal care, safe deliveries, and emergency obstetric services.",
+    points: [
+      "Help vulnerable pregnant women access antenatal care, safe deliveries, and emergency obstetric services.",
+      "Funds are securely transferred directly to partner healthcare facilities.",
+    ],
   },
   {
     icon: Hospital,
     step: "03",
     title: "Care",
-    desc: "Contribute to clearing unpaid hospital bills and ensuring elderly people receive the care they deserve.",
+    points: [
+      "Contribute to clearing unpaid hospital bills and ensuring elderly people receive the care they deserve.",
+      "Join a movement proving that local philanthropy can work in Cameroon.",
+    ],
   },
 ];
+
+// type StepItem = { icon: LucideIcon; step: string; title: string; desc: string };
+// const steps: StepItem[] = [
+//   {
+//     icon: Cake,
+//     step: "01",
+//     title: "Celebrate",
+//     desc: "Turn birthdays, weddings, graduations, promotions, and anniversaries into opportunities to support vulnerable people who cannot afford healthcare.",
+//   },
+//   {
+//     icon: Gift,
+//     step: "02",
+//     title: "Pool",
+//     desc: "Help vulnerable pregnant women access antenatal care, safe deliveries, and emergency obstetric services.",
+//   },
+//   {
+//     icon: Hospital,
+//     step: "03",
+//     title: "Care",
+//     desc: "Contribute to clearing unpaid hospital bills and ensuring elderly people receive the care they deserve.",
+//   },
+// ];
 
 type FeatureItem = { icon: LucideIcon; title: string; desc: string };
 const features: FeatureItem[] = [
@@ -363,8 +394,36 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Launch a JoyFund ── */}
+<section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
+  <div className="max-w-5xl mx-auto">
+    <div className="text-center mb-14">
+      <h2
+        className="text-3xl font-bold uppercase tracking-widest mb-2"
+        style={{ color: "var(--primary)" }}
+      >
+        Launch a JoyFund to Save Lives
+      </h2>
+    </div>
+    <div className="grid md:grid-cols-3 gap-6">
+      {steps.map((s) => (
+        <div key={s.title} className="flex flex-col gap-4">
+          {s.points.map((point, i) => (
+            <div
+              key={i}
+              className="card p-5 text-sm text-gray-600 leading-relaxed"
+            >
+              {point}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
       {/* ── How It Works ── */}
-      <section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
+      {/* <section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <h2
@@ -373,13 +432,7 @@ export default function HomePage() {
             >
               Launch a JoyFund to Save Lives
             </h2>
-            {/* <h2 className="text-3xl font-black text-[#1A1A2E]">
-              Celebrate. Pool. Care.
-            </h2> */}
-            {/* <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">
-              Three simple steps turn your personal milestone into life-saving
-              maternal and emergency healthcare for someone who needs it most.
-            </p> */}
+          
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((s) => (
@@ -406,7 +459,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ── Why JoyFund ── */}
       <section className="py-20 px-4 bg-white">
