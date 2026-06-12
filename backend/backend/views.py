@@ -1,5 +1,8 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
@@ -7,6 +10,8 @@ from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
+from accounts.tasks.send_mail import send_async_email
 
 
 @require_http_methods(["GET", "POST"])
@@ -208,7 +213,7 @@ def oauth2_token_view(request):
                             ip = django_request.META.get('REMOTE_ADDR', '')
                             device_info = parse_user_agent(user_agent_str)
                             
-                            UserDevice.objects.update_or_create(
+                            device, created = UserDevice.objects.update_or_create(
                                 user=token_obj.user,
                                 user_agent=user_agent_str,
                                 ip_address=ip,
@@ -217,8 +222,19 @@ def oauth2_token_view(request):
                                     'device_type': device_info['device_type'],
                                     'browser': device_info['browser'],
                                     'os': device_info['os'],
+                                    'access_token': token_obj,
                                 },
                             )
+
+                            if created and UserDevice.objects.filter(
+                                user=token_obj.user,
+                            ).exclude(id=device.id).exists():
+                                _send_new_device_notification(
+                                    token_obj.user,
+                                    device_info,
+                                    ip,
+                                    user_agent_str,
+                                )
                         
                         return Response(response_data, status=200)
                 
@@ -247,3 +263,24 @@ def oauth2_token_view(request):
             {'error': 'Internal server error during token generation'},
             status=500
         )
+
+
+def _send_new_device_notification(user, device_info, ip, user_agent_str):
+    subject = "New device signed in to your JoyFund account"
+    context = {
+        "user_name": user.first_name or user.email,
+        "device_name": device_info["device_name"] or "Unknown device",
+        "device_type": device_info["device_type"] or "Unknown",
+        "browser": device_info["browser"] or "Unknown",
+        "os": device_info["os"] or "Unknown",
+        "ip_address": ip or "Unknown",
+        "user_agent": user_agent_str or "Unknown",
+        "signed_in_at": timezone.now().strftime("%B %d, %Y at %H:%M UTC"),
+        "app_url": settings.FRONTEND_URL,
+    }
+    html_message = render_to_string("emails/new_device_login.html", context)
+    send_async_email.delay(
+        subject=subject,
+        recipient_email=user.email,
+        html_message=html_message,
+    )
