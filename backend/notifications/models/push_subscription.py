@@ -8,9 +8,10 @@ User = get_user_model()
 class PushSubscription(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="push_subscriptions"
+        User, on_delete=models.CASCADE, related_name="push_subscriptions",
+        null=True, blank=True,
     )
-    endpoint = models.URLField(max_length=500)
+    endpoint = models.URLField(max_length=500, unique=True)
     p256dh_key = models.CharField(max_length=256)
     auth_key = models.CharField(max_length=64)
     user_agent = models.CharField(max_length=500, blank=True, default="")
@@ -25,4 +26,6 @@ class PushSubscription(models.Model):
         ]
 
     def __str__(self):
-        return f"PushSubscription for {self.user.email}"
+        if self.user:
+            return f"PushSubscription for {self.user.email}"
+        return f"PushSubscription (anonymous, {self.endpoint[:40]}...)"
