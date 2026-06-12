@@ -562,6 +562,7 @@ class UserDeviceAdmin(admin.ModelAdmin):
         "os",
         "ip_address",
         "user_agent",
+        "access_token",
         "last_active",
         "created_at",
     )
