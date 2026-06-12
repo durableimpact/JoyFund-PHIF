@@ -90,7 +90,7 @@ export default function AboutPage() {
         <img
           // src="https://images.unsplash.com/photo-1576765608866-5b51046452be?w=1920&h=900&fit=crop"
           // src="https://plus.unsplash.com/premium_photo-1733353246419-07b62e12d28b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZWxkZXJseSUyMGhlYWx0aCUyMGJsYWNrc3xlbnwwfHwwfHx8MA%3D%3D"
-          src="/assets/images/elderly-hospital-image-gemini.jpeg"
+          src="/assets/images/elderly-hospital-image-gemini.webp"
           alt="Elderly patient receiving care from a doctor"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -249,7 +249,7 @@ export default function AboutPage() {
  
           <div className="rounded-3xl overflow-hidden my-10 h-64 sm:h-80">
             <img
-              src="/assets/images/joyfund-hero-image.jpeg"
+              src="/assets/images/joyfund-hero-image.webp"
               alt="Community health workers and volunteers"
               className="w-full h-full object-cover"
             />
@@ -422,7 +422,7 @@ export default function AboutPage() {
           <div className="relative rounded-3xl overflow-hidden h-48 sm:h-56 flex items-center">
             <img
               // src="https://images.unsplash.com/photo-1576765608866-5b51046452be?w=900&h=500&fit=crop"
-              src="/assets/images/elderly-hospital-image-gemini.jpeg"
+              src="/assets/images/elderly-hospital-image-gemini.webp"
               alt="Donors supporting a JoyFund campaign"
               className="absolute inset-0 w-full h-full object-cover"
             />
