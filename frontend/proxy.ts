@@ -113,7 +113,8 @@ export const proxy: NextProxy = async (request, event) => {
   // ============================================================================
   // Redirect logged-in users away from login/register to prevent confusion
   if (authRoutes.some((route) => pathname.startsWith(route))) {
-    if (session) {
+    // Only redirect away if the session is VALID (no errors)
+    if (session && !(session as any).error) {
       // Prefer 'redirect' query param (used elsewhere) but support 'next' too
       const redirectParam = request.nextUrl.searchParams.get("redirect");
       const next = request.nextUrl.searchParams.get("next");
