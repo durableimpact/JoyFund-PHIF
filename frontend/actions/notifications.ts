@@ -81,3 +81,17 @@ export const deleteNotification = async (id: string, access_token: string) => {
     return data;
   } catch (e) { handleError(e); }
 };
+
+export const sendTestPush = async (
+  access_token: string,
+  payload: TestPushPayload,
+) => {
+  try {
+    const { data } = await api.post<TestPushResponse>(
+      "/api/notifications/push/test-send/",
+      payload,
+      { headers: { Authorization: `Bearer ${access_token}` } },
+    );
+    return data;
+  } catch (e) { handleError(e); }
+};
