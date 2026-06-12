@@ -55,7 +55,12 @@ export const proxy: NextProxy = async (request, event) => {
   // 0. CHECK FOR REFRESH TOKEN ERRORS
   // ============================================================================
   // If token refresh failed, force user to login again
-  if (session && (session as any).error === "RefreshAccessTokenError") {
+  // Skip this check if already on login page to avoid redirect loops
+  if (
+    session &&
+    (session as any).error === "RefreshAccessTokenError" &&
+    !pathname.startsWith("/login")
+  ) {
     console.error("[proxy] Token refresh failed - forcing logout");
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
@@ -64,7 +69,11 @@ export const proxy: NextProxy = async (request, event) => {
   }
 
   // If session exists but has no access token, force logout
-  if (session && !session.accessToken) {
+  if (
+    session &&
+    !session.accessToken &&
+    !pathname.startsWith("/login")
+  ) {
     console.error("[proxy] No access token in session - forcing logout");
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
