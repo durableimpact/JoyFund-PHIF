@@ -225,6 +225,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (session.refreshToken) token.refreshToken = session.refreshToken;
         if (session.expiresAt) token.expiresAt = session.expiresAt;
         if (session.role) token.role = session.role;
+        if (session.id) token.id = session.id;
         if (session.userInfo) token.userInfo = session.userInfo;
         return token;
       }
@@ -232,6 +233,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Initial login
       if (user) {
         console.log("[auth] JWT: Initial login for user:", (user as any).email);
+        token.id = (user as any).id;
         token.accessToken = (user as any).accessToken;
         token.refreshToken = (user as any).refreshToken;
         token.role = (user as any).role;
@@ -297,6 +299,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       session.user = {
         ...session.user,
+        id: token.id as string,
         accessToken: token.accessToken as string,
         refreshToken: token.refreshToken as string,
         role: token.role as USER_ROLE,
