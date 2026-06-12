@@ -6,8 +6,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Loader2, ImagePlus, X } from "lucide-react";
-import Navbar from "@/components/shared/Navbar";
-import { formatXAF } from "@/lib/utils";
 import { getCampaign, updateCampaign } from "@/actions/campaigns";
 
 export default function EditCampaignPage() {
@@ -147,7 +145,7 @@ export default function EditCampaignPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
-      <div className="pt-24 pb-16 px-4">
+      <div className=" pb-16 px-4">
         <div className="max-w-2xl mx-auto">
           <button
             onClick={() => router.back()}

@@ -19,7 +19,9 @@ export default function DonorDashboardPage() {
   const [campaigns, setCampaigns] = useState<CampaignList[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [campaignsError, setCampaignsError] = useState(false);
-  const [campaignsErrorMsg, setCampaignsErrorMsg] = useState<string | null>(null);
+  const [campaignsErrorMsg, setCampaignsErrorMsg] = useState<string | null>(
+    null,
+  );
 
   const [donations, setDonations] = useState<any[]>([]);
   const [donationsLoading, setDonationsLoading] = useState(true);
@@ -53,7 +55,9 @@ export default function DonorDashboardPage() {
     }
     fetchData();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [token]);
 
   useEffect(() => {
@@ -66,8 +70,12 @@ export default function DonorDashboardPage() {
         if (!cancelled) {
           setDonations(
             (data as any)?.json?.results ||
-            (data as any)?.results ||
-            (Array.isArray((data as any)?.json) ? (data as any).json : (data as any)?.json ? [(data as any).json] : [])
+              (data as any)?.results ||
+              (Array.isArray((data as any)?.json)
+                ? (data as any).json
+                : (data as any)?.json
+                  ? [(data as any).json]
+                  : []),
           );
         }
       } catch {
@@ -78,7 +86,9 @@ export default function DonorDashboardPage() {
     }
     fetchData();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [token]);
 
   useEffect(() => {
@@ -97,7 +107,9 @@ export default function DonorDashboardPage() {
     }
     fetchData();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [token, donorProfileId]);
 
   const loading = campaignsLoading || donationsLoading || dashboardLoading;
@@ -142,7 +154,7 @@ export default function DonorDashboardPage() {
 
   return (
     <div className="h-full" style={{ background: "var(--background)" }}>
-      <div className="pt-24 pb-16 px-4">
+      <div className="pb-16 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-start justify-between mb-8">
             <div>
@@ -221,8 +233,7 @@ export default function DonorDashboardPage() {
                     Unable to load campaigns
                   </h3>
                   <p className="text-gray-500 text-sm mb-4">
-                    {campaignsErrorMsg ||
-                      "Please try refreshing the page"}
+                    {campaignsErrorMsg || "Please try refreshing the page"}
                   </p>
                   <button
                     onClick={() => window.location.reload()}
