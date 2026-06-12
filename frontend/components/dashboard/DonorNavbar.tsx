@@ -80,7 +80,7 @@ export default function DonorNavbar() {
         <Link href="/dashboard/donor" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl overflow-hidden bg-gray-100">
             <img
-              src="/assets/joyfund-logo-half-removebg-preview.png"
+              src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund"
               className="w-full h-full object-contain"
             />
