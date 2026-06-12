@@ -104,7 +104,7 @@ export default function DashboardShell({
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
             <img
-              src="/assets/joyfund-logo-half-removebg-preview.png"
+              src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
               className="w-full h-full object-contain"
             />
