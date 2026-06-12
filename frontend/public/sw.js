@@ -7,12 +7,7 @@
 
 const STATIC_CACHE_NAME = "joyfund-static-v3";
 const DYNAMIC_CACHE_NAME = "joyfund-dynamic-v3";
-const APP_SHELL_ASSETS = [
-  "/",
-  "/manifest.json",
-  "/web-app-manifest-192x192.png",
-  "/web-app-manifest-512x512.png",
-];
+const APP_SHELL_ASSETS = [];
 
 // Cache strategies
 const CACHE_STRATEGIES = {
@@ -98,50 +93,18 @@ self.addEventListener("message", (event) => {
 });
 
 // ── Fetch Event Handler ─────────────────────────────────────────────────
-// Route different types of requests to appropriate cache strategy
+// Caching disabled: All requests go directly to the network
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests
-  if (request.method !== "GET") return;
-
-  // Skip external origins (except APIs)
-  if (url.origin !== self.location.origin && !url.hostname.includes("api")) {
-    return;
-  }
-
-  // API calls: network-first with fallback
-  if (url.pathname.includes("/api/")) {
-    return event.respondWith(CACHE_STRATEGIES.networkFirst(request));
-  }
-
-  // Assets: cache-first
-  if (url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|gif|webp|woff|woff2)$/)) {
-    return event.respondWith(CACHE_STRATEGIES.cacheFirst(request));
-  }
-
-  // HTML documents: stale-while-revalidate
-  if (request.mode === "navigate" || url.pathname.endsWith("/")) {
-    return event.respondWith(CACHE_STRATEGIES.staleWhileRevalidate(request));
-  }
-
-  // Default: network-first
-  event.respondWith(CACHE_STRATEGIES.networkFirst(request));
+  return;
 });
 
 // ── Periodic Background Sync ───────────────────────────────────────────
-// Sync campaigns when offline user goes back online
+// Sync campaigns when offline user goes back online (Caching disabled)
 self.addEventListener("sync", (event) => {
   if (event.tag === "sync-campaigns") {
     event.waitUntil(
-      caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
-        return fetch("/api/campaigns/").then((response) => {
-          if (response.ok) {
-            cache.put("/api/campaigns/", response.clone());
-          }
-          return response;
-        });
+      fetch("/api/campaigns/").then((response) => {
+        return response;
       }),
     );
   }
