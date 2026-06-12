@@ -16,6 +16,7 @@ import {
   ArrowLeftRight,
   Receipt,
   Shield,
+  Bell,
 } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -95,6 +96,11 @@ const NAV: NavItem[] = [
     label: "Security",
     href: "/dashboard/system-admin/devices",
     icon: <Shield size={16} />,
+  },
+  {
+    label: "Push Notifications",
+    href: "/dashboard/system-admin/push-notifications",
+    icon: <Bell size={16} />,
   },
   {
     label: "Profile",
