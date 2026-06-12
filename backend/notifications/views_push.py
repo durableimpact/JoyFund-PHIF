@@ -1,8 +1,8 @@
-from rest_framework import status, permissions
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from notifications.models import PushSubscription
 from notifications.serializers import (
@@ -18,7 +18,7 @@ _TAG = ["Push Notifications"]
     tags=_TAG,
     operation_description="""
         Register a push subscription for web push notifications.
-        
+
         Works for both authenticated and anonymous users. If the user is
         authenticated, the subscription is linked to their account so targeted
         notifications can be sent. Anonymous subscriptions still receive global
@@ -32,6 +32,7 @@ _TAG = ["Push Notifications"]
     },
 )
 @api_view(["POST"])
+@permission_classes([permissions.AllowAny])
 def register_push_subscription(request):
     serializer = PushSubscriptionRegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -71,7 +72,7 @@ unregister_request = openapi.Schema(
     tags=_TAG,
     operation_description="""
         Unregister a push subscription by endpoint.
-        
+
         If the user is authenticated, only their own subscriptions are removed.
         Anonymous users can also unregister by providing the endpoint.
     """,
@@ -93,6 +94,7 @@ unregister_request = openapi.Schema(
     },
 )
 @api_view(["POST"])
+@permission_classes([permissions.AllowAny])
 def unregister_push_subscription(request):
     endpoint = request.data.get("endpoint")
     if not endpoint:
