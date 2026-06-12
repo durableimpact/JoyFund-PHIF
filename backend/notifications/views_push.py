@@ -1,3 +1,8 @@
+import json
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import permissions, status
@@ -8,7 +13,17 @@ from notifications.models import PushSubscription
 from notifications.serializers import (
     PushSubscriptionRegisterSerializer,
     PushSubscriptionSerializer,
+    TestPushSerializer,
 )
+from pywebpush import WebPushException, webpush
+
+from notifications.webpush import (
+    send_push_notification,
+    send_push_notification_to_user,
+    send_push_notification_to_all_users,
+)
+
+User = get_user_model()
 
 _TAG = ["Push Notifications"]
 
@@ -48,6 +63,12 @@ def register_push_subscription(request):
             "user": request.user if request.user.is_authenticated else None,
         },
     )
+
+    if request.user.is_authenticated and data.get("user_agent"):
+        PushSubscription.objects.filter(
+            user=request.user,
+            user_agent=data["user_agent"],
+        ).exclude(pk=sub.pk).delete()
 
     return Response(
         PushSubscriptionSerializer(sub).data,
@@ -129,3 +150,110 @@ def list_push_subscriptions(request):
     subs = PushSubscription.objects.filter(user=request.user)
     serializer = PushSubscriptionSerializer(subs, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema(
+    method="post",
+    tags=_TAG,
+    operation_description="""
+        Send a test web push notification.
+
+        - If `broadcast` is true, sends to all subscribed users.
+        - If `user_ids` is provided, sends to those specific users.
+        - If neither is set, sends to the requesting user (including anonymous subscriptions if none are linked).
+
+        Useful for testing push notifications via Swagger without creating a Notification in the database.
+    """,
+    request_body=TestPushSerializer,
+    responses={
+        200: openapi.Response(
+            description="Send result",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "sent": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "failed": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "total_subscriptions": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "vapid_configured": openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                },
+            ),
+        ),
+        400: "Bad request",
+    },
+)
+@api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
+def test_send_push(request):
+    serializer = TestPushSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    data = serializer.validated_data
+    title = data["title"]
+    body = data["body"]
+    url = data.get("url", "")
+    broadcast = data.get("broadcast", False)
+    user_ids = data.get("user_ids", [])
+
+    sent = 0
+    failed = 0
+    subs = []
+
+    if broadcast:
+        subs = list(PushSubscription.objects.all())
+    elif user_ids:
+        users = User.objects.filter(id__in=user_ids)
+        for user in users:
+            try:
+                sent += send_push_notification_to_user(user, title=title, body=body, url=url, tag="test")
+            except Exception:
+                failed += 1
+        return Response({
+            "sent": sent,
+            "failed": failed,
+            "total_subscriptions": PushSubscription.objects.count(),
+            "vapid_configured": bool(settings.VAPID_PRIVATE_KEY and settings.VAPID_PUBLIC_KEY),
+        })
+    else:
+        subs = list(request.user.push_subscriptions.all())
+        if not subs:
+            subs = list(PushSubscription.objects.filter(user__isnull=True))
+
+    errors = []
+
+    for sub in subs:
+        try:
+            webpush(
+                subscription_info={
+                    "endpoint": sub.endpoint,
+                    "keys": {"p256dh": sub.p256dh_key, "auth": sub.auth_key},
+                },
+                data=json.dumps({
+                    "title": title,
+                    "body": body,
+                    "url": url or "",
+                }).encode("utf-8"),
+                vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                vapid_claims=settings.VAPID_CLAIMS,
+            )
+            sent += 1
+        except WebPushException as e:
+            failed += 1
+            resp = e.response
+            if resp:
+                errors.append(f"Sub {sub.id}: HTTP {resp.status_code} {resp.reason} — {resp.text[:200]}")
+                if resp.status_code == 410:
+                    sub.delete()
+            else:
+                errors.append(f"Sub {sub.id}: WebPushException (no response)")
+        except Exception as e:
+            failed += 1
+            import traceback
+            errors.append(f"Sub {sub.id}: {type(e).__name__}: {traceback.format_exc()[:300]}")
+
+    return Response({
+        "sent": sent,
+        "failed": failed,
+        "errors": errors,
+        "total_subscriptions": PushSubscription.objects.count(),
+        "vapid_configured": bool(settings.VAPID_PRIVATE_KEY and settings.VAPID_PUBLIC_KEY),
+    })

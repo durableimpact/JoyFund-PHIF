@@ -39,11 +39,21 @@ export default function PushSubscriptionManager() {
 
     async function subscribe() {
       try {
-        console.log("[Push] Registering service worker...");
-        const registration = await navigator.serviceWorker.register("/sw.js", {
-          scope: "/",
-        });
-        console.log("[Push] Service worker registered");
+        let registration = await navigator.serviceWorker.getRegistration("/");
+        if (!registration) {
+          console.log("[Push] No existing SW registration, waiting...");
+          // ServiceWorkerRegister handles registration after 1s — wait for it
+          await new Promise((r) => setTimeout(r, 2000));
+          registration = await navigator.serviceWorker.getRegistration("/");
+          if (!registration) {
+            console.log("[Push] Still no registration, registering...");
+            registration = await navigator.serviceWorker.register("/sw.js", {
+              scope: "/",
+            });
+          }
+        } else {
+          console.log("[Push] Found existing SW registration");
+        }
 
         await navigator.serviceWorker.ready;
 
