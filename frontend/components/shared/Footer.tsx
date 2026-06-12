@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,9 +12,11 @@ export default function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
-                <img
+                <Image
                   src="/assets/joyfund-logo-half-removebg-preview.webp"
                   alt="JoyFund logo"
+                  width={32}
+                  height={32}
                   className="w-full h-full object-contain"
                 />
               </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -103,9 +104,11 @@ export default function DashboardShell({
       <div className="px-5 py-5 border-b border-white/10">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
-            <img
+            <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
+              width={32}
+              height={32}
               className="w-full h-full object-contain"
             />
           </div>

@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
 import {
   ArrowLeft,
   Calendar,
@@ -247,7 +248,7 @@ export default function AdminBeneficiaryDetailPage() {
                     <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                       <button onClick={() => setPreviewDoc(doc)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
                         {isImage ? (
-                          <img src={fullUrl} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                          <Image src={fullUrl} alt="" width={40} height={40} className="rounded-lg object-cover shrink-0" />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
                             <FileText size={18} className="text-gray-400" />
@@ -512,7 +513,9 @@ function DocPreview({ doc }: { doc: BeneficiaryDocument }) {
   return (
     <div className="space-y-3">
       {isImage ? (
-        <img src={fullUrl} alt={doc.description || 'Document'} className="w-full rounded-xl object-contain max-h-[60vh]" />
+        <div className="relative w-full max-h-[60vh] min-h-[300px] rounded-xl overflow-hidden">
+          <Image src={fullUrl} alt={doc.description || 'Document'} fill className="object-contain" />
+        </div>
       ) : (
         <div className="flex flex-col items-center gap-3 py-8">
           <FileText size={48} className="text-gray-300" />

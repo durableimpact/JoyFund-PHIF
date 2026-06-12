@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -79,9 +80,11 @@ export default function DonorNavbar() {
         {/* Logo */}
         <Link href="/dashboard/donor" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl overflow-hidden bg-gray-100">
-            <img
+            <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund"
+              width={32}
+              height={32}
               className="w-full h-full object-contain"
             />
           </div>

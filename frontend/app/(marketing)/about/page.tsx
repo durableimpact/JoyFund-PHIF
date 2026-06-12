@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/shared/Navbar";
 import {
@@ -87,12 +88,11 @@ export default function AboutPage() {
           ════════════════════════════════════════════════════════════════ */}
       <section className="relative pt-32 pb-16 overflow-hidden">
         {/* Background image */}
-        <img
-          // src="https://images.unsplash.com/photo-1576765608866-5b51046452be?w=1920&h=900&fit=crop"
-          // src="https://plus.unsplash.com/premium_photo-1733353246419-07b62e12d28b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZWxkZXJseSUyMGhlYWx0aCUyMGJsYWNrc3xlbnwwfHwwfHx8MA%3D%3D"
+        <Image
           src="/assets/images/elderly-hospital-image-gemini.webp"
           alt="Elderly patient receiving care from a doctor"
-          className="absolute inset-0 w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
         {/* Overlay for readability */}
         <div
@@ -173,12 +173,12 @@ export default function AboutPage() {
                 beneficiaries.
               </p>
             </div>
-            <div className="rounded-3xl overflow-hidden h-72 sm:h-80">
-              <img
-                // src="https://images.unsplash.com/photo-1591129841117-3adfd313e34f?w=900&h=700&fit=crop"
-                src="https://images.unsplash.com/photo-1676281050264-178eff38874a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGVsZGVybHklMjBoZWFsdGglMjBibGFja3N8ZW58MHx8MHx8fDA%3D"
+            <div className="relative rounded-3xl overflow-hidden h-72 sm:h-80">
+              <Image
+                src="https://images.unsplash.com/photo-1676281050264-178eff38874a?w=1200&auto=format&fit=crop"
                 alt="Mother and newborn receiving care"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           </div>
@@ -247,11 +247,12 @@ export default function AboutPage() {
             ways to make that milestone matter to someone else.
           </p>
  
-          <div className="rounded-3xl overflow-hidden my-10 h-64 sm:h-80">
-            <img
+          <div className="relative rounded-3xl overflow-hidden my-10 h-64 sm:h-80">
+            <Image
               src="/assets/images/joyfund-hero-image.webp"
               alt="Community health workers and volunteers"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </div>
  
@@ -355,11 +356,12 @@ export default function AboutPage() {
             that solidarity into healthcare access.
           </p>
 
-          <div className="rounded-3xl overflow-hidden my-10 h-64 sm:h-80">
-            <img
-              src="https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1200&h=700&fit=crop"
+          <div className="relative rounded-3xl overflow-hidden my-10 h-64 sm:h-80">
+            <Image
+              src="https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1200&auto=format&fit=crop"
               alt="Community health workers and volunteers"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </div>
 
@@ -420,11 +422,11 @@ export default function AboutPage() {
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto grid sm:grid-cols-2 gap-6">
           <div className="relative rounded-3xl overflow-hidden h-48 sm:h-56 flex items-center">
-            <img
-              // src="https://images.unsplash.com/photo-1576765608866-5b51046452be?w=900&h=500&fit=crop"
+            <Image
               src="/assets/images/elderly-hospital-image-gemini.webp"
               alt="Donors supporting a JoyFund campaign"
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-black/40" />
             <div className="relative z-10 px-8">
@@ -444,10 +446,11 @@ export default function AboutPage() {
           </div>
 
           <div className="relative rounded-3xl overflow-hidden h-48 sm:h-56 flex items-center">
-            <img
-              src="https://images.unsplash.com/photo-1584515933487-779824d29309?w=900&h=500&fit=crop"
+            <Image
+              src="https://images.unsplash.com/photo-1584515933487-779824d29309?w=1200&auto=format&fit=crop"
               alt="Person celebrating a milestone"
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-black/40" />
             <div className="relative z-10 px-8">
@@ -479,9 +482,11 @@ export default function AboutPage() {
           <div className="flex flex-wrap items-center justify-center gap-10">
   {partners.map((p) => (
     <div key={p.name} className="flex flex-col items-center gap-3">
-      <img
+      <Image
         src={p.img}
         alt={p.name}
+        width={128}
+        height={64}
         className="h-16 w-32 object-contain"
       />
 

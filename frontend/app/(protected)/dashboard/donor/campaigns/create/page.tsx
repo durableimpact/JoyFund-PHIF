@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useMutation } from '@tanstack/react-query';
 import { Check, ArrowLeft, ArrowRight, Share2, Heart, GraduationCap, Star, Briefcase, Gift, Calendar, Loader2, ImagePlus, X } from 'lucide-react';
+import Image from 'next/image';
 import Navbar from '@/components/shared/Navbar';
 import { formatXAF } from '@/lib/utils';
 import { createCampaign } from '@/actions/campaigns';
@@ -213,10 +214,11 @@ function CreateCampaignContent() {
                 <div className="relative">
                   {coverImagePreview ? (
                     <div className="relative rounded-2xl overflow-hidden border-2 border-gray-200 h-40 bg-gray-100">
-                      <img
+                      <Image
                         src={coverImagePreview}
                         alt="Campaign cover"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"

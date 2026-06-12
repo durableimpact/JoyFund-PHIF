@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   Loader2,
@@ -195,11 +196,12 @@ export default function AdminCampaignDetailPage() {
           {/* Main Info Card */}
           <div className="card overflow-hidden">
             {campaign.cover_image && (
-              <div className="h-48 w-full overflow-hidden">
-                <img
+              <div className="relative h-48 w-full overflow-hidden">
+                <Image
                   src={campaign.cover_image}
                   alt="Campaign cover"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
             )}
@@ -219,10 +221,12 @@ export default function AdminCampaignDetailPage() {
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                   <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-[#471DDB] shadow-sm">
                     {donor.profile_picture ? (
-                      <img
+                      <Image
                         src={donor.profile_picture}
                         alt="Donor"
-                        className="w-full h-full object-cover rounded-lg"
+                        width={40}
+                        height={40}
+                        className="rounded-lg object-cover"
                       />
                     ) : (
                       <UserIcon size={20} />

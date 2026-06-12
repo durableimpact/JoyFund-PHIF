@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Loader2, ImagePlus, X } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import { formatXAF } from "@/lib/utils";
@@ -169,10 +170,11 @@ export default function EditCampaignPage() {
                 <div className="relative">
                   {coverImagePreview ? (
                     <div className="relative rounded-2xl overflow-hidden border-2 border-gray-200 h-40 bg-gray-100">
-                      <img
+                      <Image
                         src={coverImagePreview}
                         alt="Campaign cover"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"

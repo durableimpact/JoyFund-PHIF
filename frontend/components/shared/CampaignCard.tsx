@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Users } from 'lucide-react';
 
 export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
@@ -13,11 +14,14 @@ export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
     <Link href={`/campaign/${campaign.id}`} className="card block hover:shadow-md transition-shadow duration-200 overflow-hidden group">
       {/* Cover Image or Color Bar */}
       {coverImage ? (
-        <img
-          src={coverImage}
-          alt="Campaign cover"
-          className="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-200"
-        />
+        <div className="relative h-32 w-full overflow-hidden">
+          <Image
+            src={coverImage}
+            alt="Campaign cover"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-200"
+          />
+        </div>
       ) : (
         <div className="h-2 w-full" style={{ backgroundColor: '#1DB1DB' }} />
       )}
