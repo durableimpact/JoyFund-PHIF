@@ -5,6 +5,7 @@ from notifications.views_push import (
     register_push_subscription,
     unregister_push_subscription,
     list_push_subscriptions,
+    test_send_push,
 )
 
 app_name = 'notifications'
@@ -16,4 +17,5 @@ urlpatterns = router.urls + [
     path("push/register/", register_push_subscription, name="push-register"),
     path("push/unregister/", unregister_push_subscription, name="push-unregister"),
     path("push/subscriptions/", list_push_subscriptions, name="push-subscriptions"),
+    path("push/test-send/", test_send_push, name="push-test-send"),
 ]
