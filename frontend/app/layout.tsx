@@ -12,6 +12,7 @@ import AppHelmetProvider from "@/provider/helmet-provider";
 import WebSocketProvider from "@/provider/websocket-provider";
 import { Toaster } from "@/components/ui/sonner";
 import PushSubscriptionManager from "@/components/pwa/PushSubscriptionManager";
+import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const montserrat = localFont({
@@ -206,6 +207,7 @@ export default function RootLayout({
           </noscript>
         )}
 
+        <ServiceWorkerRegister />
         <SessionProvider>
           <ReactQueryProvider>
             <AuthCacheSyncProvider>
