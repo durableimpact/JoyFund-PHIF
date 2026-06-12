@@ -33,3 +33,22 @@ declare interface NotificationsByType {
 declare interface UnreadCountResponse {
   count: number;
 }
+
+// ── Push Notifications ──
+
+declare interface TestPushPayload {
+  title: string;
+  body: string;
+  url?: string;
+  broadcast?: boolean;
+  user_ids?: string[];
+  roles?: USER_ROLE[];
+}
+
+declare interface TestPushResponse {
+  sent: number;
+  failed: number;
+  errors?: string[];
+  total_subscriptions: number;
+  vapid_configured: boolean;
+}
