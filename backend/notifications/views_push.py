@@ -159,6 +159,7 @@ def list_push_subscriptions(request):
         Send a test web push notification.
 
         - If `broadcast` is true, sends to all subscribed users.
+        - If `roles` is provided, sends to all users with those roles.
         - If `user_ids` is provided, sends to those specific users.
         - If neither is set, sends to the requesting user (including anonymous subscriptions if none are linked).
 
@@ -193,6 +194,7 @@ def test_send_push(request):
     url = data.get("url", "")
     broadcast = data.get("broadcast", False)
     user_ids = data.get("user_ids", [])
+    roles = data.get("roles", [])
 
     sent = 0
     failed = 0
@@ -200,6 +202,19 @@ def test_send_push(request):
 
     if broadcast:
         subs = list(PushSubscription.objects.all())
+    elif roles:
+        users = User.objects.filter(role__in=roles)
+        for user in users:
+            try:
+                sent += send_push_notification_to_user(user, title=title, body=body, url=url, tag="test")
+            except Exception:
+                failed += 1
+        return Response({
+            "sent": sent,
+            "failed": failed,
+            "total_subscriptions": PushSubscription.objects.count(),
+            "vapid_configured": bool(settings.VAPID_PRIVATE_KEY and settings.VAPID_PUBLIC_KEY),
+        })
     elif user_ids:
         users = User.objects.filter(id__in=user_ids)
         for user in users:
