@@ -117,6 +117,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "accounts.middleware.DeviceTrackingMiddleware",
     # "axes.middleware.AxesMiddleware",  # temporarily disabled
     "django.contrib.messages.middleware.MessageMiddleware",
