@@ -16,10 +16,6 @@ export default function PushSubscriptionManager() {
   const [status, setStatus] = useState("idle");
 
   useEffect(() => {
-    if (!token) {
-      console.log("[Push] No token yet, waiting for session...");
-      return;
-    }
     if (!VAPID_PUBLIC_KEY) {
       console.warn("[Push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set");
       setStatus("missing VAPID key");
@@ -67,7 +63,8 @@ export default function PushSubscriptionManager() {
         if (cancelled) return;
 
         console.log("[Push] Saving subscription to backend...");
-        await registerPushSubscription(token!, subscription);
+        // Token may be undefined for anonymous users — backend handles both cases
+        await registerPushSubscription(subscription, token ?? undefined);
         registeredRef.current = true;
         setStatus("subscribed");
         console.log("[Push] Subscription saved to backend successfully!");
@@ -82,7 +79,7 @@ export default function PushSubscriptionManager() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, VAPID_PUBLIC_KEY]);
 
   return null;
 }
