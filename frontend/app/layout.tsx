@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Space_Grotesk, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
@@ -15,14 +15,22 @@ import PushSubscriptionManager from "@/components/pwa/PushSubscriptionManager";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const montserrat = localFont({
-  src: "../public/font/Montserrat-VariableFont_wght.ttf",
+const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const jsonLd = {
@@ -118,7 +126,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       suppressContentEditableWarning
-      className={cn("h-full", montserrat.variable)}
+      className={cn("h-full", plusJakartaSans.variable, spaceGrotesk.variable)}
     >
       <head>
         <meta
@@ -144,39 +152,7 @@ export default function RootLayout({
           rel="icon"
           href="/assets/favicon_io/joyfund-android-chrome-192x192.png"
         />
-
-        {/* Google Analytics - Only in production */}
-        {process.env.NODE_ENV === "production" && (
-          <>
-            {/* Google tag (gtag.js) - GA4 */}
-            <script
-              async
-              src="https://www.googletagmanager.com/gtag/js?id=G-XYBNHE5J4B"
-            ></script>
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', 'G-XYBNHE5J4B');
-                `,
-              }}
-            />
-
-            {/* Google Tag Manager */}
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-                })(window,document,'script','dataLayer','GTM-PDSWHHB9');`,
-              }}
-            />
-          </>
-        )}
-
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1DB1DB" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -205,6 +181,29 @@ export default function RootLayout({
               style={{ display: "none", visibility: "hidden" }}
             />
           </noscript>
+        )}
+
+        {/* Third-party scripts loaded lazily */}
+        {process.env.NODE_ENV === "production" && (
+          <>
+            <Script
+              src="https://www.googletagmanager.com/gtag/js?id=G-XYBNHE5J4B"
+              strategy="lazyOnload"
+            />
+            <Script id="gtag-init" strategy="lazyOnload">
+              {`window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-XYBNHE5J4B');`}
+            </Script>
+            <Script id="gtm-init" strategy="lazyOnload">
+              {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','GTM-PDSWHHB9');`}
+            </Script>
+          </>
         )}
 
         <ServiceWorkerRegister />
