@@ -51,4 +51,5 @@ class Notification(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.title} - {self.user.email}"
+        email = self.user.email if self.user_id else "(no user)"
+        return f"{self.title} - {email}"
