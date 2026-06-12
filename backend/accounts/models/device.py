@@ -53,6 +53,12 @@ class UserDevice(models.Model):
         default=False,
         help_text=_("Device has been blocked by user or admin"),
     )
+    access_token = models.ForeignKey(
+        "oauth2_provider.AccessToken",
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        help_text=_("The access token associated with this device session"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
