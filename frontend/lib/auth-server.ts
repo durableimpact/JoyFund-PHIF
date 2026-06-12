@@ -55,9 +55,10 @@ import { redirect } from "next/navigation"
 export async function requireAuth() {
   const session = await auth()
 
-  console.log("Session : ",session)
-
-  if (!session) {
+  if (!session || (session as any).error) {
+    if ((session as any)?.error === "RefreshAccessTokenError") {
+      redirect("/login?reason=session_expired")
+    }
     redirect("/login")
   }
 
@@ -99,7 +100,10 @@ export async function requireAuth() {
 export async function requireRole(allowedRoles: string | string[]) {
   const session = await auth()
 
-  if (!session) {
+  if (!session || (session as any).error) {
+    if ((session as any)?.error === "RefreshAccessTokenError") {
+      redirect("/login?reason=session_expired")
+    }
     redirect("/login")
   }
 
