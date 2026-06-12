@@ -84,8 +84,8 @@ const features: FeatureItem[] = [
   },
   {
     icon: HandHeart,
-    title: "Digital Njangi",
-    desc: "Built on Cameroon's culture of mutual aid - Njangi and alumni giving, reimagined for healthcare.",
+    title: "Community Health Pooling",
+    desc: "Built on Cameroon's culture of mutual aid - community pooled giving and alumni support, reimagined for healthcare.",
   },
   {
     icon: Globe2,
@@ -127,7 +127,7 @@ type FaqItem = { q: string; a: string };
 const faqs: FaqItem[] = [
   {
     q: "What is JoyFund?",
-    a: "JoyFund is a digital Njangi - a platform that turns everyday celebrations like birthdays, weddings, graduations and promotions into a pooled fund that pays for safe deliveries and emergency care for vulnerable pregnant women and elderly people across Cameroon.",
+    a: "JoyFund is a community-powered pooled-giving platform—a system that turns everyday celebrations like birthdays, weddings, graduations and promotions into a shared fund that pays for safe deliveries and emergency care for vulnerable pregnant women and elderly people across Cameroon.",
   },
   {
     q: "How do donations reach beneficiaries?",
@@ -198,13 +198,13 @@ export default function HomePage() {
         <title>JoyFund</title>
         <meta
           name="description"
-          content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare."
+          content="Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare."
         />
         <link rel="canonical" href="https://joy-fund.com" />
         <meta property="og:title" content="JoyFund" />
         <meta
           property="og:description"
-          content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare."
+          content="Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare."
         />
         <meta property="og:url" content="https://joy-fund.com" />
         <meta property="og:type" content="website" />
@@ -213,7 +213,7 @@ export default function HomePage() {
         <meta name="twitter:title" content="JoyFund" />
         <meta
           name="twitter:description"
-          content="Turn your birthday or wedding into a digital Njangi. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare."
+          content="Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare."
         />
         <meta
           name="twitter:image"
@@ -292,7 +292,7 @@ export default function HomePage() {
 
           {/* Subtext */}
           <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
-            JoyFund digitalises Cameroon&apos;s Njangi solidarity - redirecting
+            JoyFund digitalises Cameroon&apos;s tradition of community solidarity - redirecting
             birthday gifts and wedding contributions into a transparent
             People&apos;s Health Insurance Fund for vulnerable pregnant women.
           </p>
@@ -486,7 +486,7 @@ export default function HomePage() {
             </h2>
             <p className="text-gray-500 text-sm leading-relaxed mb-4">
               Cameroonians have always pooled resources for one another through
-              Njangi groups and alumni giving. JoyFund brings that same spirit
+              community pooling groups and alumni giving. JoyFund brings that same spirit
               online - channelling everyday celebratory contributions from
               friends, family, and the diaspora into a shared fund that pays
               hospital bills directly.

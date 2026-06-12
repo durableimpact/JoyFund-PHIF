@@ -32,7 +32,7 @@ const pressQuotes = [
 const differentiators = [
   {
     icon: HandHeart,
-    title: "Rooted in Njangi culture",
+    title: "Rooted in Community Solidarity",
     desc: "Cameroonians have always pooled resources for each other. JoyFund digitalises this culture of mutual aid into a structured, sustainable People's Health Fund.",
   },
   {
@@ -76,7 +76,7 @@ export default function AboutPage() {
         <title>About JoyFund</title>
         <meta
           name="description"
-          content="JoyFund turns Cameroon's culture of celebration and Njangi solidarity into a transparent People's Health Fund for vulnerable mothers and elderly people."
+          content="JoyFund turns Cameroon's culture of celebration and community mutual aid into a transparent People's Health Fund for vulnerable mothers and elderly people."
         />
         <link rel="canonical" href="https://joy-fund.com/about" />
       </Helmet>
@@ -109,7 +109,7 @@ export default function AboutPage() {
           </h1>
           <p className="text-gray-700 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
             JoyFund turns everyday celebrations - birthdays, weddings,
-            graduations, promotions - into a digital Njangi that funds safe
+            graduations, promotions - into a community health pooling platform that funds safe
             deliveries and emergency care for vulnerable mothers and elderly
             people across Cameroon. A project of{" "}
             <span className="font-semibold text-[#1A1A2E]">Durable Impact</span>
@@ -162,7 +162,7 @@ export default function AboutPage() {
               </p>
               <p className="text-gray-500 text-sm leading-relaxed mb-4">
                 At the same time, Cameroonians have strong traditions of mutual
-                aid - Njangi groups, alumni giving, diaspora support - and
+                aid - community pooling groups, alumni giving, diaspora support - and
                 widespread access to mobile money. JoyFund channels that
                 existing generosity into a structured People&apos;s Health Fund.
               </p>
@@ -257,10 +257,10 @@ export default function AboutPage() {
           </div>
  
           <h3 className="font-bold text-[#1A1A2E] mb-3">
-            Turning Njangi solidarity into a national health fund.
+            Turning community solidarity into a national health fund.
           </h3>
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            That&apos;s when JoyFund was born - a digital Njangi linked
+            That&apos;s when JoyFund was born - a digital pooled-giving platform linked
             directly to MTN Mobile Money and Orange Money, designed so that
             every donation becomes a care voucher a verified beneficiary can
             redeem at a partner hospital.
@@ -351,7 +351,7 @@ export default function AboutPage() {
             That&apos;s how we approach every problem at Durable Impact: find
             the resource that already exists, and the gap that already exists,
             and build the bridge between them. In this case, the resource was
-            Cameroon&apos;s deep culture of solidarity - Njangi groups, alumni
+            Cameroon&apos;s deep culture of solidarity - community pooling groups, alumni
             giving, diaspora support - and the gap was a structured way to turn
             that solidarity into healthcare access.
           </p>
@@ -366,10 +366,10 @@ export default function AboutPage() {
           </div>
 
           <h3 className="font-bold text-[#1A1A2E] mb-3">
-            Turning Njangi solidarity into a national health fund.
+            Turning community solidarity into a national health fund.
           </h3>
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            That&apos;s when JoyFund was born - a digital Njangi linked directly
+            That&apos;s when JoyFund was born - a digital pooled-giving platform linked directly
             to MTN Mobile Money and Orange Money, designed so that every
             donation becomes a care voucher a verified beneficiary can redeem at
             a partner hospital.
