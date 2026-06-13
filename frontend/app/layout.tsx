@@ -13,6 +13,7 @@ import WebSocketProvider from "@/provider/websocket-provider";
 import { Toaster } from "@/components/ui/sonner";
 import PushSubscriptionManager from "@/components/pwa/PushSubscriptionManager";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
+import InstallPWA from "@/components/pwa/InstallPWA";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -162,6 +163,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js',{scope:'/'})})}",
+          }}
+        />
       </head>
       <body
         suppressHydrationWarning
@@ -207,6 +214,7 @@ export default function RootLayout({
         )}
 
         <ServiceWorkerRegister />
+        <InstallPWA />
         <SessionProvider>
           <ReactQueryProvider>
             <AuthCacheSyncProvider>
