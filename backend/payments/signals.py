@@ -64,11 +64,18 @@ def create_transactions_on_successful_donation(sender, instance: Donation, **kwa
     if not policy:
         return
 
-    gross = instance.amount
+    payment = instance.payment
+    gross = payment.app_amount if payment and payment.app_amount else instance.amount
     escrow_amount = (policy.escrow_fee_percentage / Decimal('100')) * gross
     platform_amount = (policy.platform_fee_percentage / Decimal('100')) * gross
 
-    payment = instance.payment
+    # Ensure donation totals reflect the actual received amount from the payment gateway
+    if instance.net_amount != gross or instance.platform_fee_amount != platform_amount:
+        Donation.objects.filter(pk=instance.pk).update(
+            net_amount=gross,
+            platform_fee_amount=platform_amount,
+        )
+
     escrow = EscrowAccount.get_instance()
     fee_account = FeeAccount.get_instance()
 

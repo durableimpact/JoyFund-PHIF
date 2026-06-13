@@ -106,7 +106,7 @@ class PaymentAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "Payment Details",
-            {"fields": ("payment_id", "payment_method", "phone_number", "amount")},
+            {"fields": ("payment_id", "payment_method", "phone_number", "amount","app_amount","aggregator_fee")},
         ),
         ("Status & Reference", {"fields": ("payment_status", "payment_reference")}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
@@ -148,6 +148,8 @@ class DonationAdmin(admin.ModelAdmin):
                     "donor",
                     "donor_name",
                     "amount",
+                    "platform_fee_amount",
+                    "net_amount",
                     "is_anonymous",
                 )
             },

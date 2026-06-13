@@ -37,14 +37,14 @@ class Donation(models.Model):
         decimal_places=2,
         default=0,
         editable=False,
-        help_text="5% platform management fee (immutable once SUCCESS)",
+        help_text="5% platform management fee calculated from the received app_amount",
     )
     net_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0,
         editable=False,
-        help_text="95% that enters the People's Health Insurance Fund",
+        help_text="Amount received from the payment gateway after aggregator charges",
     )
 
     is_anonymous = models.BooleanField(default=False)
@@ -80,7 +80,7 @@ class Donation(models.Model):
             )
 
             self.platform_fee_amount = fee
-            self.net_amount = received_amount - fee
+            self.net_amount = received_amount
 
         super().save(*args, **kwargs)
 
