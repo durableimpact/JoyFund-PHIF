@@ -86,17 +86,22 @@ def send_push_notification(subscription, title, body, icon=None, url=None, tag=N
             data=payload,
             vapid_private_key=settings.VAPID_PRIVATE_KEY,
             vapid_claims=settings.VAPID_CLAIMS,
+            timeout=30,  # Add explicit timeout
         )
         return True
     except WebPushException as e:
-        if e.response and e.response.status_code == 410:
-            logger.info(f"Push subscription expired, deleting: {subscription.endpoint}")
-            subscription.delete()
+        if e.response is not None:
+            if e.response.status_code == 410:
+                logger.info(f"Push subscription expired/gone (410), deleting: {subscription.endpoint}")
+                subscription.delete()
+            else:
+                logger.error(f"WebPush failed with status {e.response.status_code}: {e.response.text}")
         else:
-            logger.error(f"WebPush failed: {str(e)}")
+            # The "(no response)" case
+            logger.error(f"WebPush failed (no response) for endpoint: {subscription.endpoint}. Check server outbound connectivity/firewall.")
         return False
     except Exception as e:
-        logger.error(f"Unexpected error sending push: {str(e)}")
+        logger.error(f"Unexpected error sending push to {subscription.endpoint}: {str(e)}")
         return False
 
 
