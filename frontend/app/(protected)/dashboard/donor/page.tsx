@@ -114,7 +114,9 @@ export default function DonorDashboardPage() {
 
   const loading = campaignsLoading || donationsLoading || dashboardLoading;
 
-  const name = session?.user?.name || "Donor";
+  const firstName = session?.user?.first_name || 
+    (session?.user?.name?.split(" ")[0]) || 
+    "User";
 
   const totalRaised =
     dashboardData?.total_raised ??
@@ -160,7 +162,7 @@ export default function DonorDashboardPage() {
             <div>
               <p className="text-sm text-gray-500 mb-1">Welcome back</p>
               <h1 className="text-2xl font-black text-[#1A1A2E]">
-                {name}
+                {firstName}
               </h1>
             </div>
             <Link
