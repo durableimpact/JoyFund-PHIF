@@ -1082,7 +1082,7 @@ export default function CampaignPage() {
               campaignTitle={campaign.title}
             />
 
-            {/* ── Impact Reference ── */}
+            {/* ── Impact Reference ──
             <div className="bg-gray-50 border border-gray-200 rounded-3xl p-5 space-y-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 bg-[#1DB1DB]/10 rounded-full flex items-center justify-center">
@@ -1122,6 +1122,7 @@ export default function CampaignPage() {
                 * Based on average costs at partner facilities
               </p>
             </div>
+            */}
 
             {/* ── Trust Badges ── */}
             <div className="flex items-center justify-center gap-6 py-2">
