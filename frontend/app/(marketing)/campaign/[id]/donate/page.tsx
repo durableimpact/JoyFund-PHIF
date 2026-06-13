@@ -30,7 +30,7 @@ const AMOUNTS = [5000, 10000, 25000, 50000, 100000];
 const donateSchema = z
   .object({
     donorName: z.string().optional(),
-    isAnonymous: z.boolean().default(false),
+    isAnonymous: z.boolean(),
     amount: z.number().min(25, "Minimum donation is 25 XAF"),
     message: z.string().optional(),
     paymentMethod: z.enum(["MTN", "ORANGE"] as const),
