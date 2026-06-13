@@ -5,7 +5,7 @@ export default function Loading() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-5">
-        <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl bg-white shadow-sm ring-1 ring-black/5">
+        <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl">
           <Image
             src="/assets/joyfund-logo-half-removebg-preview.webp"
             alt="JoyFund logo"

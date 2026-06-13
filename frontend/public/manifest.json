@@ -1,13 +1,13 @@
 {
-  "name": "JoyFund - Maternal Healthcare Crowdfunding",
+  "name": "JoyFund",
   "short_name": "JoyFund",
-  "description": "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
+  "description": "JoyFund is a transparent crowdfunding platform funding maternal healthcare and safe deliveries across Cameroon.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
-  "theme_color": "#1DB1DB",
+  "theme_color": "#ffffff",
   "id": "https://joy-fund.com",
   "categories": ["healthcare", "finance", "social"],
   "screenshots": [
