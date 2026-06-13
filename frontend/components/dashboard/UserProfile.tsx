@@ -212,7 +212,17 @@ export default function UserProfile() {
             ) : (
               attributeRow("Phone", phoneNumber)
             )}
-            {attributeRow("Verified", verified)}
+            <div className="flex justify-between items-center gap-4 py-3 border-b border-gray-200">
+              <span className="text-sm text-gray-500">Verified</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-gray-900">{verified}</span>
+                {!info.is_verified && (
+                  <button className="px-3 py-1.5 rounded-lg border-2 border-dotted border-green-500 text-green-600 font-semibold text-xs hover:bg-green-50 transition">
+                    Verify Now
+                  </button>
+                )}
+              </div>
+            </div>
             {attributeRow("Member since", joined)}
             {attributeRow("Profile ID", profileId)}
             {hospitalName ? attributeRow("Hospital", hospitalName) : null}
