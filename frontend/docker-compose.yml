@@ -31,6 +31,62 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  app-2:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        NEXT_PUBLIC_DJANGO_API_URL: ${NEXT_PUBLIC_DJANGO_API_URL}
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+        NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID: ${NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID}
+        NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET: ${NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+    container_name: joyfund_frontend_2
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    expose:
+      - "3000"
+    networks:
+      - joyfund_network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend-lb:
+    image: nginx:alpine
+    container_name: joyfund_frontend_lb
+    restart: unless-stopped
+    volumes:
+      - ./nginx-lb.conf:/etc/nginx/nginx.conf:ro
+    expose:
+      - "80"
+    networks:
+      - joyfund_network
+    depends_on:
+      - app
+      - app-2
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   joyfund_network:
     external: true
