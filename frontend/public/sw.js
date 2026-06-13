@@ -130,10 +130,19 @@ self.addEventListener("push", (event) => {
     icon: data.icon || "/web-app-manifest-192x192.png",
     badge: data.badge || "/web-app-manifest-192x192.png",
     data: { url: targetUrl },
-    tag: data.tag || "default",
     requireInteraction: true,
+    silent: false,
     vibrate: [200, 100, 200],
+    timestamp: Date.now(),
   };
+
+  // Only set tag if the backend explicitly sent one.
+  // Without a tag, each notification is shown as a separate entry
+  // so the user never has to "scroll to find" collapsed groups.
+  if (data.tag) {
+    options.tag = data.tag;
+    options.renotify = true; // Force sound/vibration when replacing a previous notification of the same type
+  }
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
@@ -150,9 +159,9 @@ self.addEventListener("notificationclick", (event) => {
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
-        // Try to find a window that's already open to this URL (normalized)
+        // Focus an existing tab whose URL starts with the target (handles query params / trailing slashes)
         for (const client of clientList) {
-          if (client.url === targetUrl && "focus" in client) {
+          if (client.url.startsWith(targetUrl) && "focus" in client) {
             return client.focus();
           }
         }
