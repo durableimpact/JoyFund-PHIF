@@ -155,11 +155,15 @@ export const getCampaignLeaderboard = async (
 export const donateToCampaign = async (
   campaignId: string,
   data: DonationCreatePayload,
+  access_token?: string,
 ) => {
   try {
     const { data: donation } = await api.post<{ payment_link: string }>(
       `/api/campaigns/${campaignId}/donate/`,
       data,
+      access_token
+        ? { headers: { Authorization: `Bearer ${access_token}` } }
+        : {},
     );
     return donation;
   } catch (e) {

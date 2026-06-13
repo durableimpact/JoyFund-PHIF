@@ -2,6 +2,7 @@
 import { useState, Suspense, useRef, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { ArrowLeft, Heart, Loader2 } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { Helmet } from 'react-helmet-async';
@@ -45,6 +46,13 @@ function DonatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const confettiRef = useRef<any>(null);
+  const { data: session } = useSession();
+  const isDonor = !!(
+    session &&
+    (session.user as any)?.role === 'DONOR' &&
+    (session as any)?.accessToken
+  );
+  const accessToken = isDonor ? (session as any).accessToken : undefined;
 
   // Check payment status from URL
   const paymentStatus = searchParams.get('status');
@@ -102,7 +110,7 @@ function DonatePage() {
   // Use mutation for donation
   const donateMutation = useMutation({
     mutationFn: async (payload: DonationCreatePayload) => {
-      return await donateToCampaign(id as string, payload);
+      return await donateToCampaign(id as string, payload, accessToken);
     },
     onSuccess: (response) => {
       if (response?.payment_link) {
