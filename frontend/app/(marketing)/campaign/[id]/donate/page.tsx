@@ -47,12 +47,16 @@ function DonatePage() {
   const searchParams = useSearchParams();
   const confettiRef = useRef<any>(null);
   const { data: session } = useSession();
+  const sessionAny = session as any;
   const isDonor = !!(
     session &&
-    (session.user as any)?.role === 'DONOR' &&
-    (session as any)?.accessToken
+    !sessionAny?.error &&
+    sessionAny?.user?.role === 'DONOR' &&
+    sessionAny?.accessToken &&
+    sessionAny?.expiresAt &&
+    Date.now() < sessionAny.expiresAt
   );
-  const accessToken = isDonor ? (session as any).accessToken : undefined;
+  const accessToken = isDonor ? sessionAny.accessToken : undefined;
 
   // Check payment status from URL
   const paymentStatus = searchParams.get('status');
