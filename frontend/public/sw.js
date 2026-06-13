@@ -121,12 +121,15 @@ self.addEventListener("push", (event) => {
     data = { title: "JoyFund", body: event.data.text() };
   }
 
+  // Extract URL from various possible locations in the data
+  const targetUrl = data.url || data.data?.url || "/";
+
   const title = data.title || "JoyFund";
   const options = {
     body: data.body || "",
     icon: data.icon || "/web-app-manifest-192x192.png",
     badge: data.badge || "/web-app-manifest-192x192.png",
-    data: data.data || { url: "/" },
+    data: { url: targetUrl },
     tag: data.tag || "default",
     requireInteraction: true,
     vibrate: [200, 100, 200],
@@ -139,19 +142,23 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const url = event.notification.data?.url || "/";
+  // Get the URL from notification data and normalize it to an absolute URL
+  const urlPath = event.notification.data?.url || "/";
+  const targetUrl = new URL(urlPath, self.location.origin).href;
 
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
+        // Try to find a window that's already open to this URL (normalized)
         for (const client of clientList) {
-          if (client.url === url && "focus" in client) {
+          if (client.url === targetUrl && "focus" in client) {
             return client.focus();
           }
         }
+        // If no matching window is found, open a new one with the absolute URL
         if (self.clients.openWindow) {
-          return self.clients.openWindow(url);
+          return self.clients.openWindow(targetUrl);
         }
       }),
   );
