@@ -47,7 +47,7 @@ _TAG = ["Push Notifications"]
     },
 )
 @api_view(["POST"])
-@permission_classes([permissions.AllowAny])
+@permission_classes([permissions.IsAuthenticated])
 def register_push_subscription(request):
     serializer = PushSubscriptionRegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -60,11 +60,11 @@ def register_push_subscription(request):
             "p256dh_key": data["p256dh_key"],
             "auth_key": data["auth_key"],
             "user_agent": data.get("user_agent", ""),
-            "user": request.user if request.user.is_authenticated else None,
+            "user": request.user,
         },
     )
 
-    if request.user.is_authenticated and data.get("user_agent"):
+    if data.get("user_agent"):
         PushSubscription.objects.filter(
             user=request.user,
             user_agent=data["user_agent"],
@@ -249,6 +249,7 @@ def test_send_push(request):
                 }).encode("utf-8"),
                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
                 vapid_claims=settings.VAPID_CLAIMS,
+                ttl=86400,
             )
             sent += 1
         except WebPushException as e:

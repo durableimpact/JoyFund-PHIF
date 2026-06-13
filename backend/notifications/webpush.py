@@ -86,7 +86,8 @@ def send_push_notification(subscription, title, body, icon=None, url=None, tag=N
             data=payload,
             vapid_private_key=settings.VAPID_PRIVATE_KEY,
             vapid_claims=settings.VAPID_CLAIMS,
-            timeout=30,  # Add explicit timeout
+            timeout=30,
+            ttl=86400,  # Store for 24h so offline users receive when back online
         )
         return True
     except WebPushException as e:

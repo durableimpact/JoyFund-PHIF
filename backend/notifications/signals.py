@@ -112,27 +112,30 @@ def link_anonymous_push_subscriptions(sender, request, user, **kwargs):
     This is important for targeting: a user who subscribed anonymously will now receive
     notifications specifically for their account after they log in.
 
-    The current strategy is conservative: we check if this user was the likely source
-    of any unlinked subscriptions by looking at the browser session/device context.
+    Links ALL anonymous subscriptions that aren't already linked to this user.
+    On each login, any remaining anonymous subs are likely from this user's devices
+    that subscribed before the auth token was available.
     """
     if not user.is_authenticated:
         return
 
     # Get all push subscriptions already linked to this user
-    user_subs = PushSubscription.objects.filter(user=user)
-    user_endpoints = set(user_subs.values_list("endpoint", flat=True))
+    user_endpoints = set(
+        PushSubscription.objects.filter(user=user).values_list("endpoint", flat=True)
+    )
 
-    # Find anonymous subscriptions (user=None)
-    anonymous_subs = PushSubscription.objects.filter(user__isnull=True)
+    # Find anonymous subscriptions (user=None) not already linked to this user
+    anonymous_subs = PushSubscription.objects.filter(user__isnull=True).exclude(
+        endpoint__in=user_endpoints
+    )
 
-    # Link any anonymous subscriptions that aren't already linked to this user
-    # We use a conservative approach: if there's exactly one unlinked subscription,
-    # it's likely from this user's current device/browser session.
-    if anonymous_subs.count() == 1:
-        sub = anonymous_subs.first()
-        if sub.endpoint not in user_endpoints:
-            sub.user = user
-            sub.save()
-            logger.info(
-                f"Linked anonymous push subscription (endpoint={sub.endpoint[:50]}...) to user {user.id}"
-            )
+    linked = 0
+    for sub in anonymous_subs:
+        sub.user = user
+        sub.save(update_fields=["user"])
+        linked += 1
+
+    if linked:
+        logger.info(
+            f"Linked {linked} anonymous push subscription(s) to user {user.id}"
+        )
