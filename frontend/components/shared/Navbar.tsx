@@ -61,6 +61,10 @@ export default function Navbar({
     }
   };
 
+  const handleLogoClick = () => {
+    router.push("/");
+  };
+
   return (
     <nav
       className={`${
@@ -71,11 +75,11 @@ export default function Navbar({
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <Link
-          href="/"
-          className={`flex items-center gap-2 font-black text-xl tracking-tight ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
+        <button
+          onClick={handleLogoClick}
+          className={`flex items-center gap-1.5 md:gap-2 font-black text-sm md:text-xl tracking-tight shrink-0 ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
         >
-          <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
+          <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl overflow-hidden bg-white/10 shrink-0">
             <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
@@ -84,8 +88,8 @@ export default function Navbar({
               className="w-full h-full object-contain"
             />
           </div>
-          JoyFund
-        </Link>
+          <span>JoyFund</span>
+        </button>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
