@@ -160,8 +160,12 @@ export const proxy: NextProxy = async (request, event) => {
 
     if (!adminRoles.includes(userRole)) {
       console.warn(
-        `[proxy] Unauthorized admin access attempt. User: ${session.user?.email}, Role: ${userRole}, Path: ${pathname}`,
+        `[proxy] Unauthorized admin access attempt. User: ${session.user?.email}, Role: ${userRole}, Path: ${pathname}. Redirecting to correct dashboard.`,
       );
+      const correctDashboard = roleRedirectMap[userRole as USER_ROLE];
+      if (correctDashboard) {
+        return redirect(correctDashboard);
+      }
       return redirect("/unauthorized");
     }
   }
