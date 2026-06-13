@@ -93,9 +93,9 @@ self.addEventListener("message", (event) => {
 });
 
 // ── Fetch Event Handler ─────────────────────────────────────────────────
-// Caching disabled: All requests go directly to the network
+// Required for PWA installability: pass all requests through to network.
 self.addEventListener("fetch", (event) => {
-  return;
+  event.respondWith(fetch(event.request));
 });
 
 // ── Periodic Background Sync ───────────────────────────────────────────
