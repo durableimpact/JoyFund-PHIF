@@ -3,11 +3,12 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useMutation } from '@tanstack/react-query';
-import { Check, ArrowLeft, ArrowRight, Share2, Heart, GraduationCap, Star, Briefcase, Gift, Calendar, Loader2, ImagePlus, X } from 'lucide-react';
+import { Check, ArrowLeft, ArrowRight, Share2, Heart, GraduationCap, Star, Briefcase, Gift, Calendar, Loader2, ImagePlus, X, Phone } from 'lucide-react';
 import Image from 'next/image';
 import Navbar from '@/components/shared/Navbar';
 import { formatXAF } from '@/lib/utils';
-import { createCampaign } from '@/actions/campaigns';
+import { createCampaign, donateToCampaign } from '@/actions/campaigns';
+import { useForm } from 'react-hook-form';
 
 // Exact choices from Campaign.EventType model
 const EVENT_TYPES = [
@@ -40,13 +41,20 @@ function CreateCampaignContent() {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [publishedCampaign, setPublishedCampaign] = useState<any>(null);
+  
+  // Donation state
+  const [donationAmount, setDonationAmount] = useState(() => Math.round(120000 * 0.1));
+  const [paymentMethod, setPaymentMethod] = useState('MTN');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [donationMessage, setDonationMessage] = useState('');
+  const [campaignCreatedForDonation, setCampaignCreatedForDonation] = useState<any>(null);
 
   const eventLabel = EVENT_TYPES.find(e => e.id === eventType)?.label || 'Celebration';
   const userName = session?.user?.name || 'Donor';
   const userInitials = userName.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
 
-  // Mutation for creating campaign
-  const createMutation = useMutation({
+  // Mutation for creating campaign (used at step 5 before donation)
+  const createCampaignForDonationMutation = useMutation({
     mutationFn: async () => {
       const token = (session as any)?.accessToken || session?.user?.accessToken;
       if (!token) throw new Error('No access token');
@@ -67,8 +75,7 @@ function CreateCampaignContent() {
       return await createCampaign(token, formData);
     },
     onSuccess: (data) => {
-      setPublishedCampaign(data);
-      setStep(5);
+      setCampaignCreatedForDonation(data);
     },
     onError: (error: any) => {
       try {
@@ -79,6 +86,70 @@ function CreateCampaignContent() {
       }
     },
   });
+
+  // Mutation for initial donation to the created campaign
+  const donateMutation = useMutation({
+    mutationFn: async () => {
+      if (!campaignCreatedForDonation?.id) {
+        throw new Error('Campaign not created yet');
+      }
+      
+      const payload = {
+        donor_name: userName,
+        amount: donationAmount,
+        message: donationMessage || undefined,
+        is_anonymous: false,
+        payment_method: paymentMethod,
+        phone_number: phoneNumber.replace(/\s/g, ''),
+        success_url: `${window.location.origin}/dashboard/donor/campaigns/create?donate_success=1&campaign=${campaignCreatedForDonation.id}`,
+        failure_url: `${window.location.origin}/dashboard/donor/campaigns/create?donate_failed=1`,
+      };
+      
+      return await donateToCampaign(campaignCreatedForDonation.id, payload);
+    },
+    onSuccess: (response) => {
+      if (response?.payment_link) {
+        // Store campaign info in localStorage before redirecting
+        localStorage.setItem('campaign_donation_info', JSON.stringify({
+          campaignId: campaignCreatedForDonation.id,
+          campaignData: campaignCreatedForDonation
+        }));
+        // Redirect to payment
+        window.location.href = response.payment_link;
+      }
+    },
+    onError: (error: any) => {
+      try {
+        const errorData = JSON.parse(error);
+        alert(errorData?.error || 'Failed to initiate payment');
+      } catch {
+        alert(error?.message || 'Failed to initiate payment');
+      }
+    },
+  });
+
+  // Mutation for final campaign publication (after payment)
+  const publishCampaignMutation = useMutation({
+    mutationFn: async () => {
+      if (!campaignCreatedForDonation?.id) {
+        throw new Error('Campaign not found');
+      }
+      // The campaign is already published when created
+      // This is just to trigger success screen
+      setPublishedCampaign(campaignCreatedForDonation);
+      return campaignCreatedForDonation;
+    },
+    onSuccess: (data) => {
+      setPublishedCampaign(data);
+      setStep(6);
+    },
+  });
+
+  // Update donation amount when goal amount changes
+  useEffect(() => {
+    const minDonation = Math.round(goalAmount * 0.1);
+    setDonationAmount(minDonation);
+  }, [goalAmount]);
 
   // Auto-generate title when event type or user name changes
   useEffect(() => {
@@ -105,6 +176,39 @@ function CreateCampaignContent() {
       setStep(4);
     } catch {}
   }, [searchParams, session?.user]);
+
+  // Handle payment success - show success screen
+  useEffect(() => {
+    if (searchParams?.get('donate_success') !== '1') return;
+    try {
+      const raw = localStorage.getItem('campaign_donation_info');
+      if (!raw) {
+        // Campaign already in state
+        if (campaignCreatedForDonation) {
+          setPublishedCampaign(campaignCreatedForDonation);
+          setStep(6);
+        }
+        return;
+      }
+      const data = JSON.parse(raw);
+      setPublishedCampaign(data.campaignData);
+      localStorage.removeItem('campaign_donation_info');
+      setStep(6);
+    } catch (err) {
+      console.error('Error handling payment success:', err);
+      if (campaignCreatedForDonation) {
+        setPublishedCampaign(campaignCreatedForDonation);
+        setStep(6);
+      }
+    }
+  }, [searchParams, campaignCreatedForDonation]);
+
+  // Auto-create campaign when entering step 5 (donation step)
+  useEffect(() => {
+    if (step === 5 && !campaignCreatedForDonation && !createCampaignForDonationMutation.isPending) {
+      createCampaignForDonationMutation.mutate();
+    }
+  }, [step, campaignCreatedForDonation]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,10 +240,10 @@ function CreateCampaignContent() {
       alert('Please fill all required fields');
       return;
     }
-    createMutation.mutate();
+    setStep(5);
   };
 
-  const steps = ['Event Type', 'Details', 'Goal', 'Preview'];
+  const steps = ['Event Type', 'Details', 'Goal', 'Preview', 'Donate'];
 
   return (
     <div className="h-full" style={{ background: 'var(--background)' }}>
@@ -358,23 +462,131 @@ function CreateCampaignContent() {
                 <button
                   className="btn-primary flex-1 flex items-center justify-center gap-2"
                   onClick={handlePublish}
-                  disabled={createMutation.isPending}
                 >
-                  {createMutation.isPending ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      Publishing…
-                    </>
-                  ) : (
-                    'Publish JoyFund'
-                  )}
+                  Continue to Donate
+                  <ArrowRight size={16} />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 5 — Success */}
-          {step === 5 && publishedCampaign && (
+          {/* Step 5 — Donate */}
+          {step === 5 && !publishedCampaign && (
+            <div className="card p-6 space-y-5">
+              {!campaignCreatedForDonation ? (
+                // Loading state - creating campaign
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <Loader2 size={32} className="animate-spin" style={{ color: 'var(--primary)' }} />
+                  <h2 className="font-bold text-xl text-[#1A1A2E]">Creating Your JoyFund...</h2>
+                  <p className="text-gray-500 text-sm">Setting up your campaign</p>
+                </div>
+              ) : (
+                // Donation form
+                <>
+                  <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">Make Your Initial Donation</h2>
+                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                    <p className="text-sm text-blue-900">
+                      <strong>Kindly donate at least 10% of your campaign goal.</strong> This shows your commitment to the cause and helps build trust with contributors.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Donation Amount (XAF) *</label>
+                    <div className="text-xs text-gray-400 mb-2">Minimum: {formatXAF(Math.round(goalAmount * 0.1))} (10% of goal)</div>
+                    <input 
+                      className="input-field font-mono text-lg" 
+                      type="number" 
+                      min={Math.round(goalAmount * 0.1)} 
+                      step={1000}
+                      placeholder={formatXAF(donationAmount)} 
+                      value={donationAmount} 
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const minAmount = Math.round(goalAmount * 0.1);
+                        if (val >= minAmount) {
+                          setDonationAmount(val);
+                        }
+                      }} 
+                    />
+                    <p className="text-xs text-emerald-600 font-medium mt-1">
+                      ≈ {Math.round(donationAmount / 60000 * 10) / 10} safe {Math.round(donationAmount / 60000) === 1 ? 'delivery' : 'deliveries'} funded
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-2 block">Payment Method *</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { id: 'MTN', label: 'MTN Mobile Money', color: '#FFC107' },
+                        { id: 'ORANGE', label: 'Orange Money', color: '#FF5A00' }
+                      ].map(pm => (
+                        <button 
+                          key={pm.id} 
+                          type="button"
+                          onClick={() => setPaymentMethod(pm.id)}
+                          className={`p-3 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? 'text-white' : 'border-gray-200 bg-white'}`}
+                          style={paymentMethod === pm.id ? { background: pm.color, borderColor: pm.color } : {}}>
+                          <div className={`font-bold text-sm ${paymentMethod === pm.id ? 'text-white' : 'text-gray-900'}`}>{pm.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Mobile Money Number *</label>
+                    <div className="relative">
+                      <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input 
+                        className="input-field pl-9" 
+                        type="tel"
+                        placeholder={paymentMethod === 'MTN' ? '67X XXX XXX (MTN)' : '69X XXX XXX (Orange)'}
+                        value={phoneNumber} 
+                        onChange={e => setPhoneNumber(e.target.value)} 
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">You will receive a payment prompt on this number.</p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Message (Optional)</label>
+                    <textarea 
+                      className="input-field min-h-20 resize-none" 
+                      rows={3}
+                      placeholder="Share why you're supporting this campaign..."
+                      value={donationMessage} 
+                      onChange={e => setDonationMessage(e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="btn-outline flex-1 flex items-center justify-center gap-2" onClick={() => setStep(4)}>
+                      <ArrowLeft size={16} /> Back
+                    </button>
+                    <button
+                      className="btn-primary flex-1 flex items-center justify-center gap-2"
+                      onClick={() => donateMutation.mutate()}
+                      disabled={donateMutation.isPending || !phoneNumber || !donationAmount}
+                    >
+                      {donateMutation.isPending ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Initiating Payment…
+                        </>
+                      ) : (
+                        <>
+                          Donate {formatXAF(donationAmount)}
+                          <ArrowRight size={16} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Step 6 — Success */}
+          {step === 6 && publishedCampaign && (
             <div className="card p-6 text-center">
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white"
