@@ -53,3 +53,33 @@ export async function changePassword(data: {
 
   return res.json();
 }
+
+// ── Email Verification ──
+
+export async function sendVerificationCode(email: string) {
+  const res = await authenticatedFetch("/api/accounts/resend-verification/", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(JSON.stringify(err));
+  }
+
+  return res.json();
+}
+
+export async function verifyEmailCode(email: string, code: string) {
+  const res = await authenticatedFetch("/api/accounts/verify-email/", {
+    method: "POST",
+    body: JSON.stringify({ email, code }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(JSON.stringify(err));
+  }
+
+  return res.json();
+}

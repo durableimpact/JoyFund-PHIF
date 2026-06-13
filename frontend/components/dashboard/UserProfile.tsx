@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, Pencil, X, Check, Eye, EyeOff, KeyRound } from "lucide-react";
+import { Loader2, Pencil, X, Check, Eye, EyeOff, KeyRound, Mail, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { updateProfile, changePassword } from "@/actions/profile";
+import { updateProfile, changePassword, sendVerificationCode, verifyEmailCode } from "@/actions/profile";
 
 function attributeRow(label: string, value: React.ReactNode) {
   return (
@@ -34,6 +34,13 @@ export default function UserProfile() {
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Email verification state
+  const [verificationStep, setVerificationStep] = useState<"closed" | "confirm" | "code">("closed");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
+  const [isVerified, setIsVerified] = useState(userInfo?.is_verified || false);
 
   if (status === "loading") {
     return (
@@ -130,6 +137,71 @@ export default function UserProfile() {
     }
   }
 
+  // ── Email Verification Handlers ──
+
+  async function handleSendVerificationCode() {
+    setVerificationError("");
+    setVerificationLoading(true);
+
+    try {
+      await sendVerificationCode(email);
+      setVerificationStep("code");
+      toast.success("Verification code sent to your email");
+    } catch (e) {
+      const errorData = typeof e === "string" ? JSON.parse(e) : e;
+      const errorMessage =
+        errorData?.detail ||
+        errorData?.error ||
+        "Failed to send verification code. Please try again.";
+      setVerificationError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setVerificationLoading(false);
+    }
+  }
+
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    setVerificationError("");
+
+    if (verificationCode.length !== 6) {
+      setVerificationError("Please enter a 6-digit code");
+      toast.error("Please enter a 6-digit code");
+      return;
+    }
+
+    setVerificationLoading(true);
+
+    try {
+      await verifyEmailCode(email, verificationCode);
+      setIsVerified(true);
+      toast.success("Email verified successfully!");
+      
+      // Reset verification state
+      setVerificationStep("closed");
+      setVerificationCode("");
+      
+      // Update session
+      await update();
+      
+      // Auto-close after success
+      setTimeout(() => {
+        setVerificationStep("closed");
+      }, 2000);
+    } catch (e) {
+      const errorData = typeof e === "string" ? JSON.parse(e) : e;
+      const errorMessage =
+        errorData?.detail ||
+        errorData?.error ||
+        "Invalid verification code. Please try again.";
+      setVerificationError(errorMessage);
+      toast.error(errorMessage);
+      setVerificationCode("");
+    } finally {
+      setVerificationLoading(false);
+    }
+  }
+
   return (
     <div className="max-w-3xl space-y-6">
       {/* Header */}
@@ -215,11 +287,22 @@ export default function UserProfile() {
             <div className="flex justify-between items-center gap-4 py-3 border-b border-gray-200">
               <span className="text-sm text-gray-500">Verified</span>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-gray-900">{verified}</span>
-                {!info.is_verified && (
-                  <button className="px-3 py-1.5 rounded-lg border-2 border-dotted border-green-500 text-green-600 font-semibold text-xs hover:bg-green-50 transition">
-                    Verify Now
-                  </button>
+                {isVerified ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-green-600 flex items-center gap-1">
+                      <CheckCircle2 size={16} /> Verified
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-gray-900">Unverified</span>
+                    <button
+                      onClick={() => setVerificationStep("confirm")}
+                      className="px-3 py-1.5 rounded-lg border-2 border-dotted border-green-500 text-green-600 font-semibold text-xs hover:bg-green-50 transition"
+                    >
+                      Verify Now
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -345,6 +428,132 @@ export default function UserProfile() {
           </div>
         </div>
       </div>
+
+      {/* Email Verification Modal */}
+      {verificationStep !== "closed" && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl">
+            {/* Confirmation Step */}
+            {verificationStep === "confirm" && (
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Verify Your Email</h3>
+                  <button
+                    onClick={() => {
+                      setVerificationStep("closed");
+                      setVerificationError("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-xl text-center">
+                  <p className="text-sm text-gray-700">
+                    A verification code will be sent to:
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 mt-2 break-all">{email}</p>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={handleSendVerificationCode}
+                    disabled={verificationLoading}
+                    className="w-full py-2.5 rounded-lg bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {verificationLoading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" /> Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Mail size={16} /> Proceed
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setVerificationStep("closed");
+                      setVerificationError("");
+                    }}
+                    className="w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 font-semibold text-sm hover:bg-gray-200 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Code Input Step */}
+            {verificationStep === "code" && (
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Enter Verification Code</h3>
+                  <button
+                    onClick={() => {
+                      setVerificationStep("closed");
+                      setVerificationCode("");
+                      setVerificationError("");
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <p className="text-sm text-gray-600">
+                  We've sent a 6-digit code to <span className="font-semibold">{email}</span>
+                </p>
+
+                {verificationError && (
+                  <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg px-3 py-2 flex gap-2">
+                    <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                    <span>{verificationError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleVerifyCode} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Verification Code
+                    </label>
+                    <input
+                      type="text"
+                      value={verificationCode}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                        setVerificationCode(value);
+                        setVerificationError("");
+                      }}
+                      placeholder="000000"
+                      maxLength={6}
+                      required
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 text-center text-2xl font-semibold tracking-widest focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={verificationLoading || verificationCode.length !== 6}
+                    className="w-full py-2.5 rounded-lg bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {verificationLoading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" /> Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 size={16} /> Verify Email
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
