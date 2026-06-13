@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import { roleRedirectMap } from "@/lib/role-redirect"
 
 /**
  * CRITICAL SECURITY NOTE:
@@ -111,6 +112,10 @@ export async function requireRole(allowedRoles: string | string[]) {
   const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]
 
   if (!roles.includes(userRole)) {
+    const correctDashboard = roleRedirectMap[userRole as USER_ROLE]
+    if (correctDashboard) {
+      redirect(correctDashboard)
+    }
     redirect("/unauthorized")
   }
 

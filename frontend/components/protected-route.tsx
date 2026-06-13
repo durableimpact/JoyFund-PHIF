@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { ReactNode, useEffect } from "react"
+import { roleRedirectMap } from "@/lib/role-redirect"
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -50,10 +51,15 @@ export function ProtectedRoute({
         : [requiredRole]
 
       if (!allowedRoles.includes(userRole)) {
-        console.error(
-          `[ProtectedRoute] User role ${userRole} not allowed. Required: ${allowedRoles.join(", ")}`
+        console.warn(
+          `[ProtectedRoute] User role ${userRole} not allowed. Required: ${allowedRoles.join(", ")}. Redirecting to correct dashboard.`
         )
-        router.push("/unauthorized")
+        const correctDashboard = roleRedirectMap[userRole as USER_ROLE]
+        if (correctDashboard) {
+          router.push(correctDashboard)
+        } else {
+          router.push("/unauthorized")
+        }
         return
       }
     }
