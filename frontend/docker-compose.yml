@@ -63,30 +63,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  frontend-lb:
-    image: nginx:alpine
-    container_name: joyfund_frontend_lb
-    restart: unless-stopped
-    volumes:
-      - ./nginx-lb.conf:/etc/nginx/nginx.conf:ro
-    expose:
-      - "80"
-    networks:
-      - joyfund_network
-    depends_on:
-      - app
-      - app-2
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 128M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
 networks:
   joyfund_network:
     external: true
