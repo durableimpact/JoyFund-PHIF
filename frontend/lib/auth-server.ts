@@ -56,10 +56,10 @@ export async function requireAuth() {
   const session = await auth()
 
   if (!session || (session as any).error) {
-    if ((session as any)?.error === "RefreshAccessTokenError") {
-      redirect("/login?reason=session_expired")
-    }
-    redirect("/login")
+    const loginUrl = (session as any)?.error === "RefreshAccessTokenError" 
+      ? "/login?reason=session_expired" 
+      : "/login";
+    redirect(loginUrl)
   }
 
   return session
@@ -101,10 +101,10 @@ export async function requireRole(allowedRoles: string | string[]) {
   const session = await auth()
 
   if (!session || (session as any).error) {
-    if ((session as any)?.error === "RefreshAccessTokenError") {
-      redirect("/login?reason=session_expired")
-    }
-    redirect("/login")
+    const loginUrl = (session as any)?.error === "RefreshAccessTokenError" 
+      ? "/login?reason=session_expired" 
+      : "/login";
+    redirect(loginUrl)
   }
 
   const userRole = (session.user as any)?.role

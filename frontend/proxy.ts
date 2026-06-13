@@ -54,17 +54,24 @@ export const proxy: NextProxy = async (request, event) => {
   // ============================================================================
   // 0. CHECK FOR REFRESH TOKEN ERRORS
   // ============================================================================
-  // If token refresh failed, force user to login again
-  // Skip this check if already on login page to avoid redirect loops
+  // If token refresh failed, force user to login again ONLY if they are on a protected route
+  // Skip this check for public routes (like /) to avoid aggressive redirects
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route)) || 
+                          adminRoutes.some((route) => pathname.startsWith(route));
+
   if (
     session &&
     (session as any).error === "RefreshAccessTokenError" &&
+    isProtectedRoute &&
     !pathname.startsWith("/login")
   ) {
-    console.error("[proxy] Token refresh failed - forcing logout");
+    console.warn("[proxy] Token refresh failed on protected route - forcing login");
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("reason", "session_expired");
+    // Preserve original path so they can return after login
+    const original = pathname + request.nextUrl.search;
+    loginUrl.searchParams.set("redirect", original);
     return NextResponse.redirect(loginUrl);
   }
 

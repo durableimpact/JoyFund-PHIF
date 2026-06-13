@@ -64,8 +64,11 @@ export default function TokenRefreshProvider({ children }: { children: React.Rea
           } catch (clearError) {
             console.error("[TokenRefreshProvider] Failed to clear React Query cache:", clearError);
           }
+          // Don't force a redirect here; let the proxy/server-side auth handle it 
+          // when the user attempts a protected action. This prevents kicking users
+          // to login while they are on public pages.
           hasLoggedOutRef.current = true;
-          await signOut({ redirect: true, callbackUrl: "/login" });
+          // await signOut({ redirect: false }); // Optional: clear session locally
         } finally {
           isRefreshingRef.current = false;
         }
