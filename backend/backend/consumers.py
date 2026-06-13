@@ -146,7 +146,7 @@ class NotificationAuthenticator(DjangoAuthenticator):
         """Authenticate user from OAuth2 access token (drf-social-oauth2)."""
         from backend.auth import extract_token_from_scope, get_user_from_oauth2_token
         
-        token = await extract_token_from_scope(self.scope)
+        token = await extract_token_from_scope(scope)
         if not token:
             return False
         
