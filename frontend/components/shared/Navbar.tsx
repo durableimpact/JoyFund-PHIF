@@ -62,7 +62,9 @@ export default function Navbar({
   };
 
   const handleLogoClick = () => {
-    router.push("/");
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
   };
 
   return (
@@ -77,9 +79,9 @@ export default function Navbar({
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className={`flex items-center gap-1.5 md:gap-2 font-black text-sm md:text-xl tracking-tight shrink-0 ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
+          className={`flex items-center gap-1 md:gap-2 font-black text-xs sm:text-sm md:text-lg lg:text-xl tracking-tight shrink-0 whitespace-nowrap ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
         >
-          <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl overflow-hidden bg-white/10 shrink-0">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl overflow-hidden bg-white/10 shrink-0">
             <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
