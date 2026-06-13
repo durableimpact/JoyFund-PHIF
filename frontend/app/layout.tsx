@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import PushSubscriptionManager from "@/components/pwa/PushSubscriptionManager";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import InstallPWA from "@/components/pwa/InstallPWA";
+import { AuthErrorHandler } from "@/components/auth/AuthErrorHandler";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -216,6 +217,7 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <InstallPWA />
         <SessionProvider>
+          <AuthErrorHandler />
           <ReactQueryProvider>
             <AuthCacheSyncProvider>
               <TokenRefreshProvider>

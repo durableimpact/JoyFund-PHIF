@@ -19,7 +19,10 @@ export default async function AuthLayout({
 }) {
   const session = await getSession();
 
-  if (session) {
+  // Only redirect authenticated users who have a VALID session.
+  // Sessions with RefreshAccessTokenError must stay on the login page to re-authenticate,
+  // otherwise we create an infinite redirect loop with the proxy.
+  if (session && !(session as any).error) {
     redirect("/dashboard");
   }
 

@@ -246,6 +246,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return token;
       }
 
+      // Early bailout: if refresh already failed but token hasn't expired yet,
+      // don't keep retrying — keep the current accessToken until it's truly expired
+      if (
+        token.error === "RefreshAccessTokenError" ||
+        token.error === "NoRefreshToken"
+      ) {
+        const expiresAt = (token.expiresAt as number) || 0;
+        if (Date.now() < expiresAt) {
+          // Token still valid — transient failure, clear error and continue
+          delete token.error;
+          return token;
+        }
+        // Token genuinely expired, keep the error so proxy redirects to login
+        return token;
+      }
+
       // Check if token needs refresh
       const now = Date.now();
       const expiresAt = (token.expiresAt as number) || 0;

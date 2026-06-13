@@ -4,15 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowLeft,
-  Loader2,
-  Heart,
-  Share2,
-  Edit,
-  Gift,
-} from "lucide-react";
-import Navbar from "@/components/shared/Navbar";
+import { ArrowLeft, Loader2, Heart, Share2, Edit, Gift } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
 import { getCampaign, listCampaignDonations } from "@/actions/campaigns";
 
@@ -47,7 +39,9 @@ export default function CampaignDetailPage() {
     }
     fetchData();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [token, id]);
 
   useEffect(() => {
@@ -60,8 +54,12 @@ export default function CampaignDetailPage() {
         if (!cancelled) {
           setDonations(
             (data as any)?.json?.results ||
-            (data as any)?.results ||
-            (Array.isArray((data as any)?.json) ? (data as any).json : (data as any)?.json ? [(data as any).json] : [])
+              (data as any)?.results ||
+              (Array.isArray((data as any)?.json)
+                ? (data as any).json
+                : (data as any)?.json
+                  ? [(data as any).json]
+                  : []),
           );
         }
       } catch {
@@ -70,13 +68,14 @@ export default function CampaignDetailPage() {
     }
     fetchDonations();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [token, id]);
 
   if (isLoading) {
     return (
       <div className="h-full" style={{ background: "var(--background)" }}>
-        <Navbar />
         <div className="pt-32 flex items-center justify-center">
           <Loader2 size={28} className="animate-spin text-[#1DB1DB]" />
         </div>
@@ -105,7 +104,7 @@ export default function CampaignDetailPage() {
 
   return (
     <div className="h-full" style={{ background: "var(--background)" }}>
-      <div className="pt-24 pb-16 px-4">
+      <div className=" pb-16 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
             <button
