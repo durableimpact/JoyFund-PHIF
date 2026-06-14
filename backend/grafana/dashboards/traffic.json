@@ -1,0 +1,91 @@
+{
+  "title": "Traffic & Errors",
+  "uid": "traffic",
+  "tags": ["joyfund"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "title": "Requests / sec",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(django_http_requests_total{job=~\"django-web-.*\"}[1m]))",
+          "legendFormat": "All"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate (5xx)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(django_http_responses_total{job=~\"django-web-.*\",status=~\"5..\"}[1m]))",
+          "legendFormat": "5xx"
+        }
+      ]
+    },
+    {
+      "title": "Response Time (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(django_http_requests_latency_seconds_bucket[1m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "title": "Requests by Status (NPM)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum by (status) (rate({app=\"joyfund_npm\"} | regex \"^(?P<remote_addr>\\\\S+) \\\\S+ \\\\S+ \\\\[(?P<time_local>[^\\\\]]+)\\\\] \\\"(?P<method>\\\\S+) (?P<path>\\\\S+) (?P<protocol>\\\\S+)\\\" (?P<status>\\\\d+)\" | unwrap duration [$__interval]))",
+          "legendFormat": "{{status}}",
+          "datasource": "Loki"
+        }
+      ]
+    },
+    {
+      "title": "Top Paths",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (path) (count_over_time({app=\"joyfund_npm\"} [$__range])))",
+          "format": "table",
+          "datasource": "Loki"
+        }
+      ]
+    },
+    {
+      "title": "Active WebSocket Connections",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum(django_http_requests_total{method=\"WEBSOCKET\",job=~\"django-web-.*\"})",
+          "legendFormat": "WebSocket"
+        }
+      ]
+    },
+    {
+      "title": "Requests by View",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 4, "y": 16 },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (view) (rate(django_http_requests_total{job=~\"django-web-.*\"}[5m])))",
+          "format": "table"
+        }
+      ]
+    }
+  ]
+}
