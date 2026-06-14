@@ -30,7 +30,11 @@ jobs:
 
             # Deploy frontend using docker-compose
 
-            docker compose --env-file .env up -d --build
+            echo "🏗️   Rebuilding frontend..."
+            docker compose --env-file .env build
+            echo "🚀  Restarting frontend (2 replicas)..."
+            docker compose --env-file .env up -d --scale app=2
+
 
             # Optional: Clean up unused images to save space
             docker image prune -f
