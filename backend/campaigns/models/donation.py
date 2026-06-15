@@ -80,7 +80,7 @@ class Donation(models.Model):
             )
 
             self.platform_fee_amount = fee
-            self.net_amount = received_amount
+            self.net_amount = received_amount - fee
 
         super().save(*args, **kwargs)
 
