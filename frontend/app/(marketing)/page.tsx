@@ -319,7 +319,7 @@ export default function HomePage() {
           </h1>
 
           {/* Subtext */}
-          <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
+          <p className="text-white/80 text-base sm:text-lg max-w-4xl mx-auto mb-10 leading-relaxed drop-shadow">
              Turn your birthdays, weddings,
             graduations, and anniversaries into opportunities to raise funds
             that help pay hospital bills for vulnerable mothers, support elderly
@@ -328,9 +328,9 @@ export default function HomePage() {
             medical emergencies.
           </p>
 
-          <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
+          {/* <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
              No one should be denied healthcare because they cannot afford it
-          </p>
+          </p> */}
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
