@@ -320,8 +320,12 @@ class CampaignFactory:
         amount: Decimal = Decimal(50000),
     ) -> tuple[Donation, bool]:
         """Create or get a donation."""
-        platform_fee = amount * Decimal('0.05')
-        net_amount = amount * Decimal('0.95')
+        from payments.models import FeePolicy
+        policy = FeePolicy.objects.filter(is_active=True).first()
+        platform_pct = policy.platform_fee_percentage if policy else Decimal('5.00')
+        escrow_pct = policy.escrow_fee_percentage if policy else Decimal('95.00')
+        platform_fee = (amount * platform_pct / Decimal('100')).quantize(Decimal('0.01'))
+        net_amount = (amount * escrow_pct / Decimal('100')).quantize(Decimal('0.01'))
 
         donation, created = Donation.objects.get_or_create(
             campaign=campaign,

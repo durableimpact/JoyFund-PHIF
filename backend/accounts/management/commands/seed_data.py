@@ -484,12 +484,17 @@ class Command(BaseCommand):
                     donation_donor = random.choice(donors)
                     donation_amount = Decimal(random.randint(10000, 100000))
                     
+                    from payments.models import FeePolicy
+                    policy = FeePolicy.objects.filter(is_active=True).first()
+                    platform_pct = policy.platform_fee_percentage if policy else Decimal('5.00')
+                    platform_fee = (donation_amount * platform_pct / Decimal('100')).quantize(Decimal('0.01'))
+
                     # Create payment first
                     payment = Payment.objects.create(
                         payment_method=random.choice(['MTN', 'ORANGE']),
                         amount=donation_amount,
-                        app_amount=donation_amount * Decimal('0.95'),  # After aggregator fee
-                        aggregator_fee=donation_amount * Decimal('0.05'),
+                        app_amount=donation_amount,  # No aggregator in seed
+                        aggregator_fee=Decimal('0'),
                         payment_status='SUCCESS',
                         phone_number=f'+237{random.randint(100000000, 999999999)}',
                     )
@@ -501,8 +506,8 @@ class Command(BaseCommand):
                         payment=payment,
                         amount=donation_amount,
                         status='SUCCESS',
-                        platform_fee_amount=donation_amount * Decimal('0.05'),
-                        net_amount=donation_amount * Decimal('0.95'),
+                        platform_fee_amount=platform_fee,
+                        net_amount=donation_amount - platform_fee,
                     )
 
                     # Refresh campaign from DB to get updated current_amount from signals
