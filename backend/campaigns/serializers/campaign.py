@@ -22,7 +22,7 @@ class CampaignListSerializer(serializers.ModelSerializer):
     goal = serializers.DecimalField(
         source="goal_amount", max_digits=12, decimal_places=2, read_only=True
     )
-    certificate_generated = serializers.BooleanField(read_only=True)
+    certificate_generated = serializers.SerializerMethodField()
     certificate_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -41,8 +41,20 @@ class CampaignListSerializer(serializers.ModelSerializer):
             "certificate_url",
         ]
 
+    def _is_owner(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        try:
+            return request.user.donor.id == obj.donor_id
+        except Exception:
+            return False
+
+    def get_certificate_generated(self, obj):
+        return self._is_owner(obj) and obj.certificate_generated
+
     def get_certificate_url(self, obj):
-        if obj.certificate_file:
+        if self._is_owner(obj) and obj.certificate_file:
             return obj.certificate_file.url
         return None
 
@@ -69,7 +81,7 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
     events = CampaignEventSerializer(many=True, read_only=True)
     transactions = CampaignTransactionSerializer(many=True, read_only=True)
     voucher_fundings = VoucherFundingDetailSerializer(many=True, read_only=True)
-    certificate_generated = serializers.BooleanField(read_only=True)
+    certificate_generated = serializers.SerializerMethodField()
     certificate_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -99,8 +111,20 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "voucher_fundings",
         ]
 
+    def _is_owner(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        try:
+            return request.user.donor.id == obj.donor_id
+        except Exception:
+            return False
+
+    def get_certificate_generated(self, obj):
+        return self._is_owner(obj) and obj.certificate_generated
+
     def get_certificate_url(self, obj):
-        if obj.certificate_file:
+        if self._is_owner(obj) and obj.certificate_file:
             return obj.certificate_file.url
         return None
 
@@ -149,4 +173,4 @@ class CampaignCreateUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        return CampaignDetailSerializer(instance).data
+        return CampaignDetailSerializer(instance, context=self.context).data
