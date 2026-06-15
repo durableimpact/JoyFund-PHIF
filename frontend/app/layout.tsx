@@ -67,7 +67,7 @@ const jsonLd = {
 export const metadata: Metadata = {
   title: {
     default: "JoyFund",
-    template: "%s | JoyFund",
+    template: "%s",
   },
   description:
     "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
