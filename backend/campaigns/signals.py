@@ -157,3 +157,27 @@ def invalidate_donation_caches_on_success(sender, instance, created, **kwargs):
         cache.delete(f'donation_list_campaign_{instance.campaign_id}')
         # Invalidate the donation detail cache
         cache.delete(f'donation_detail_{instance.id}')
+
+
+@receiver(post_save, sender=Campaign, dispatch_uid="notify_certificate_generated")
+def notify_certificate_generated(sender, instance, created, **kwargs):
+    """Send notification + push when certificate_generated changes from False to True."""
+    if created:
+        return
+    if not instance.certificate_generated:
+        return
+    if instance.certificate_generated == instance._initial_certificate_generated:
+        return
+
+    donor_user = instance.donor.user if instance.donor else None
+    if not donor_user:
+        return
+
+    Notification.objects.create(
+        user=donor_user,
+        title="Impact Certificate Ready!",
+        message=f"Your impact certificate for '{instance.title}' is now available.",
+        description="Your campaign reached its goal and the impact certificate has been generated.",
+        notification_type=NotificationType.CAMPAIGN_UPDATE,
+        action_url=f"/campaigns/{instance.id}/",
+    )
