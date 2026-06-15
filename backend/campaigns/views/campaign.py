@@ -100,7 +100,7 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             queryset = self.filter_queryset(self.get_queryset()).annotate(
                 total_net_raised_calc=Coalesce(
                     Sum(
-                        F("donations__net_amount") - F("donations__platform_fee_amount"),
+                        "donations__net_amount",
                         filter=Q(donations__status="SUCCESS"),
                     ),
                     Value(
@@ -209,7 +209,7 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             .annotate(
                 total_net_raised_calc=Coalesce(
                     Sum(
-                        F("donations__net_amount") - F("donations__platform_fee_amount"),
+                        "donations__net_amount",
                         filter=Q(donations__status="SUCCESS"),
                     ),
                     Value(
@@ -320,7 +320,7 @@ class CampaignAvailableBalanceListView(ListAPIView):
                 available_balance=ExpressionWrapper(
                     Coalesce(
                         Sum(
-                            F("donations__net_amount") - F("donations__platform_fee_amount"),
+                            "donations__net_amount",
                             filter=Q(donations__status="SUCCESS"),
                         ),
                         Value(0),
