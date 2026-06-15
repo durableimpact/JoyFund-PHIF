@@ -112,13 +112,14 @@ export default function CampayPage() {
           <h1 className="text-2xl font-black text-gray-900">CamPay</h1>
           <p className="text-gray-500 text-sm">Mobile Money wallet balance and disbursements</p>
         </div>
-        <button
+        {/* Disburse button hidden — Campay API withdrawals currently unauthorized */}
+        {/* <button
           onClick={() => { resetForm(); setShowDisburseForm(true); }}
           className="btn-admin text-sm flex items-center gap-2"
           style={{ background: '#471DDB' }}
         >
           <Phone size={16} /> Disburse via CamPay
-        </button>
+        </button> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
