@@ -174,6 +174,15 @@ export const rejectHealthIssue = async (id: string, token: string, reason: strin
   } catch (e) { handleError(e); }
 };
 
+export const verifyBeneficiary = async (id: string, token: string) => {
+  try {
+    const { data } = await api.post<Beneficiary>(`/api/beneficiaries/${id}/verify/`, {}, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return data;
+  } catch (e) { handleError(e); }
+};
+
 export const actionHealthIssue = async (id: string, token: string, actionPayload: Record<string, any>) => {
   try {
     const { data } = await api.post<HealthIssue>(`/api/beneficiaries/health-issues/${id}/action/`, actionPayload, {
