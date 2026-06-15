@@ -18,6 +18,7 @@ import {
   Shield,
   Bell,
   HandHeart,
+  Phone,
 } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -32,6 +33,11 @@ const NAV: NavItem[] = [
     label: "Accounts",
     href: "/dashboard/system-admin/accounts",
     icon: <Wallet size={16} />,
+  },
+  {
+    label: "CamPay",
+    href: "/dashboard/system-admin/campay",
+    icon: <Phone size={16} />,
   },
   {
     label: "Transactions",
