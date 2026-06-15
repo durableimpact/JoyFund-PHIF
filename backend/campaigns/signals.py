@@ -1,10 +1,14 @@
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 from django.db.models import F
 
+from accounts.models import Role
 from campaigns.models import Campaign, Donation, CampaignTransaction
 from notifications.models import Notification, NotificationType
+
+User = get_user_model()
 
 
 @receiver(post_save, sender=Campaign, dispatch_uid="broadcast_campaign_created_push")
@@ -144,7 +148,20 @@ def create_donation_notification_and_broadcast(sender, instance, created, **kwar
         action_url=f"/campaigns/{campaign.id}/",
     )
     
-    # 2. Trigger real-time WebSocket broadcast via Celery task (within 30 seconds)
+    # 2. Notify all system admins about the donation
+    admin_title = f"Donation Received: {instance.amount} XAF"
+    admin_message = f"{instance.donor_name} donated {instance.amount} XAF to '{campaign.title}' by {donor_user.get_full_name() or donor_user.email}"
+    for admin_user in User.objects.filter(role=Role.SYSTEM_ADMIN).iterator():
+        Notification.objects.create(
+            user=admin_user,
+            title=admin_title,
+            message=admin_message,
+            description=notification_description,
+            notification_type=NotificationType.DONATION_RECEIVED,
+            action_url=f"/campaigns/{campaign.id}/",
+        )
+
+    # 3. Trigger real-time WebSocket broadcast via Celery task (within 30 seconds)
     from campaigns.tasks import broadcast_donation_notification
     broadcast_donation_notification.apply_async(
         args=[
