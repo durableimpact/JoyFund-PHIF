@@ -3,20 +3,13 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: "django-web-1"
+  - job_name: "django-web"
     metrics_path: "/metrics"
     static_configs:
-      - targets: ["joyfund_web_1:8000"]
-
-  - job_name: "django-web-2"
-    metrics_path: "/metrics"
-    static_configs:
-      - targets: ["joyfund_web_2:8000"]
-
-  - job_name: "django-web-3"
-    metrics_path: "/metrics"
-    static_configs:
-      - targets: ["joyfund_web_3:8000"]
+      - targets:
+          - "web-worker-1:8000"
+          - "web-worker-2:8000"
+          - "web-worker-3:8000"
 
   - job_name: "prometheus"
     static_configs:
