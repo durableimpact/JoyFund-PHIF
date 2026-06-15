@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views.account import AccountListView, EscrowAccountDetailView, FeeAccountDetailView
-from .views.campay import CampayBalanceView, CampayDisburseView
+from .views.campay import CampayBalanceView, CampayDisburseView, CampayTransactionStatusView
 from .views.fee_policy import FeePolicyViewSet
 from .views.gateway import PaymentGatewayViewSet
 from .views.transaction import TransactionViewSet, FeeSplitViewSet
@@ -31,6 +31,7 @@ urlpatterns = [
     # Campay API endpoints (system-admin only)
     path('campay/balance/', CampayBalanceView.as_view(), name='campay-balance'),
     path('campay/disburse/', CampayDisburseView.as_view(), name='campay-disburse'),
+    path('campay/transaction-status/', CampayTransactionStatusView.as_view(), name='campay-transaction-status'),
 
     # Router-registered ViewSets
     path('', include(router.urls)),

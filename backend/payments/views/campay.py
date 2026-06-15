@@ -18,6 +18,8 @@ from ..serializers.campay import (
     CampayBalanceSerializer,
     CampayDisburseSerializer,
     CampayDisburseResponseSerializer,
+    CampayTransactionStatusSerializer,
+    CampayTransactionStatusRequestSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -206,3 +208,56 @@ class CampayDisburseView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class CampayTransactionStatusView(APIView):
+    """
+    Look up the status of a CamPay transaction by its reference.
+    Only accessible by System Admins.
+    """
+    permission_classes = [IsAuthenticated, IsSystemAdmin]
+
+    @swagger_auto_schema(
+        tags=['Payments — Campay'],
+        operation_summary="Check CamPay Transaction Status",
+        operation_description=(
+            "Looks up the current status of a CamPay transaction "
+            "using the transaction reference returned by a previous "
+            "collect or disburse call.\n\n"
+            "**Permissions:** System Admin only"
+        ),
+        query_serializer=CampayTransactionStatusRequestSerializer,
+        responses={200: CampayTransactionStatusSerializer()},
+    )
+    def get(self, request):
+        ref_serializer = CampayTransactionStatusRequestSerializer(data=request.query_params)
+        ref_serializer.is_valid(raise_exception=True)
+        reference = ref_serializer.validated_data["reference"]
+
+        campay = CamPayManager(
+            app_username=settings.CAMPAY_APP_USERNAME,
+            app_password=settings.CAMPAY_APP_PASSWORD,
+            environment=settings.CAMPAY_ENVIRONMENT,
+        )
+
+        try:
+            status_data = campay.check_transaction_status(reference)
+        except Exception as e:
+            logger.error(f"Failed to check Campay transaction status: {e}")
+            return Response(
+                {"error": f"Failed to check transaction status: {str(e)}"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        serializer = CampayTransactionStatusSerializer(data={
+            "reference": status_data.get("reference", reference),
+            "external_reference": status_data.get("external_reference", ""),
+            "status": status_data.get("status", "UNKNOWN"),
+            "amount": status_data.get("amount", ""),
+            "currency": status_data.get("currency", ""),
+            "operator": status_data.get("operator", ""),
+            "code": status_data.get("code", ""),
+            "operator_reference": status_data.get("operator_reference", ""),
+        })
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
