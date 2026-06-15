@@ -17,6 +17,7 @@ import {
   Receipt,
   Shield,
   Bell,
+  HandHeart,
 } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -56,6 +57,11 @@ const NAV: NavItem[] = [
     label: "Campaigns",
     href: "/dashboard/system-admin/campaigns",
     icon: <Megaphone size={16} />,
+  },
+  {
+    label: "Donations",
+    href: "/dashboard/system-admin/donations",
+    icon: <HandHeart size={16} />,
   },
   {
     label: "Hospitals",
