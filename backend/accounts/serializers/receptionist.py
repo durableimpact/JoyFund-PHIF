@@ -1,7 +1,10 @@
+from django.conf import settings
 from django.db import transaction
+from django.template.loader import render_to_string
 from rest_framework import serializers
 
 from accounts.models import HospitalAdmin, Receptionist, Role, User
+from accounts.tasks.send_mail import send_async_email
 from .user import UserReadSerializer
 
 
@@ -65,6 +68,22 @@ class ReceptionistCreateSerializer(serializers.Serializer):
             enrolled_by=enrolled_by,
             **validated_data,
         )
+
+        # Send welcome email with credentials
+        context = {
+            'first_name': user.first_name,
+            'email': user.email,
+            'password': password,
+            'app_name': 'JoyFund',
+            'login_url': getattr(settings, 'FRONTEND_URL', 'https://joy-fund.com'),
+        }
+        html_message = render_to_string('emails/welcome_credentials.html', context)
+        send_async_email.delay(
+            subject='Welcome to JoyFund – Your Account Credentials',
+            recipient_email=user.email,
+            html_message=html_message,
+        )
+
         return receptionist
 
     def to_representation(self, instance):

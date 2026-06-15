@@ -67,6 +67,10 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
             from accounts.utils.verification import send_verification_email
             send_verification_email(instance)
             logger.info(f"Verification email queued for donor user {instance.id} ({instance.email})")
+        elif user_role in ('SOCIAL_WORKER', 'RECEPTIONIST', 'HOSPITAL_ADMIN'):
+            # Credentials email is sent directly from the serializer's create() method
+            # where the plaintext password is still available
+            logger.info(f"Credentials email handled by serializer for {instance.id} ({instance.email}) with role {user_role}")
         else:
             # Render HTML email template
             html_message = render_to_string('emails/welcome.html', context)
