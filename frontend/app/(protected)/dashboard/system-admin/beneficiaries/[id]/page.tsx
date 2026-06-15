@@ -22,7 +22,7 @@ import {
   User,
   X
 } from 'lucide-react';
-import { getBeneficiary, listHealthIssues, listBeneficiaryDocuments, createHealthIssue, createBeneficiaryDocument, updateBeneficiary } from '@/actions/beneficiaries';
+import { getBeneficiary, listHealthIssues, listBeneficiaryDocuments, createHealthIssue, createBeneficiaryDocument, updateBeneficiary, verifyBeneficiary, verifyHealthIssue, rejectHealthIssue } from '@/actions/beneficiaries';
 import { listVouchers } from '@/actions/vouchers';
 import { formatDate, formatDateTime, statusColor } from '@/lib/utils';
 
@@ -41,6 +41,8 @@ export default function AdminBeneficiaryDetailPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [showDocUpload, setShowDocUpload] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<BeneficiaryDocument | null>(null);
+  const [rejectHiId, setRejectHiId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const [hiCategory, setHiCategory] = useState('');
   const [hiSeverity, setHiSeverity] = useState('');
@@ -123,6 +125,28 @@ export default function AdminBeneficiaryDetailPage() {
     },
   });
 
+  const verifyMutation = useMutation({
+    mutationFn: () => verifyBeneficiary(id, token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiary', id] });
+    },
+  });
+
+  const verifyHiMutation = useMutation({
+    mutationFn: (hiId: number) => verifyHealthIssue(hiId, token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-health-issues', id] });
+    },
+  });
+
+  const rejectHiMutation = useMutation({
+    mutationFn: (hiId: number) => rejectHealthIssue(hiId, token, rejectReason),
+    onSuccess: () => {
+      setRejectHiId(null); setRejectReason('');
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-health-issues', id] });
+    },
+  });
+
   if (isLoading) {
     return (<><div className="space-y-4"><div className="h-8 bg-gray-100 rounded w-48 animate-pulse" /><div className="h-64 bg-gray-50 rounded-xl animate-pulse" /></div></>);
   }
@@ -146,9 +170,17 @@ export default function AdminBeneficiaryDetailPage() {
             </span>
           </p>
         </div>
-        <button onClick={() => setShowEdit(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
-          <Pencil size={16} /> Edit
-        </button>
+        <div className="flex items-center gap-2">
+          {!beneficiary.is_verified && (
+            <button onClick={() => verifyMutation.mutate()} disabled={verifyMutation.isPending}
+              className="btn-admin text-sm flex items-center gap-2" style={{ background: '#059669' }}>
+              {verifyMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : null} Verify
+            </button>
+          )}
+          <button onClick={() => setShowEdit(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
+            <Pencil size={16} /> Edit
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -220,6 +252,18 @@ export default function AdminBeneficiaryDetailPage() {
                       <span>Severity: {hi.severity}</span>
                       {hi.created_at && <span>{formatDate(hi.created_at)}</span>}
                     </div>
+                    {hi.status === 'REPORTED' && (
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
+                        <button onClick={() => verifyHiMutation.mutate(hi.id)} disabled={verifyHiMutation.isPending}
+                          className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors flex items-center gap-1">
+                          {verifyHiMutation.isPending ? <Loader2 size={10} className="animate-spin" /> : null} Validate
+                        </button>
+                        <button onClick={() => { setRejectHiId(hi.id); setRejectReason(''); }}
+                          className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
+                          Reject
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -380,6 +424,24 @@ export default function AdminBeneficiaryDetailPage() {
       </Modal>}
 
       {showEdit && <EditBeneficiaryModal beneficiary={beneficiary} onClose={() => setShowEdit(false)} onSave={(fd) => editMutation.mutate(fd)} saving={editMutation.isPending} />}
+
+      {rejectHiId !== null && (
+        <Modal title="Reject Health Issue" onClose={() => { setRejectHiId(null); setRejectReason(''); }}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Rejection Reason *</label>
+              <textarea className="input-field min-h-[100px]" value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Explain why this health issue is being rejected..." required />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => { setRejectHiId(null); setRejectReason(''); }} className="btn-outline flex-1">Cancel</button>
+              <button onClick={() => rejectHiMutation.mutate(rejectHiId)} disabled={rejectHiMutation.isPending || !rejectReason.trim()}
+                className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#DC2626' }}>
+                {rejectHiMutation.isPending && <Loader2 size={16} className="animate-spin" />} Reject
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }
