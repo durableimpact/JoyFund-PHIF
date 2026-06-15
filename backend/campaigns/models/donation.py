@@ -73,9 +73,13 @@ class Donation(models.Model):
         # Calculate fee ONLY when status becomes SUCCESS and hasn't been calculated yet
         if self.status == "SUCCESS" and self.payment and self.platform_fee_amount == 0:
 
-            received_amount = self.payment.app_amount
+            from payments.models import FeePolicy
 
-            fee = (received_amount * Decimal("0.05")).quantize(
+            received_amount = self.payment.app_amount
+            policy = FeePolicy.objects.filter(is_active=True).first()
+            fee_pct = policy.platform_fee_percentage if policy else Decimal("5.00")
+
+            fee = (received_amount * fee_pct / Decimal("100")).quantize(
                 Decimal("0.01"), rounding=ROUND_HALF_UP
             )
 
