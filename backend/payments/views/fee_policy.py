@@ -3,6 +3,8 @@ from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from accounts.utils.permissions import IsSystemAdmin
@@ -77,3 +79,15 @@ class FeePolicyViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(self._build_response(serializer))
+
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    @swagger_auto_schema(
+        tags=_tag, operation_summary="Get Current Fee Policy",
+        operation_description="Returns the most recent active fee policy (public, no auth required). Used by the frontend to display the platform fee to donors."
+    )
+    def current(self, request):
+        policy = FeePolicy.objects.filter(is_active=True).order_by('-created_at').first()
+        if not policy:
+            return Response({'detail': 'No active fee policy found.'}, status=404)
+        serializer = self.get_serializer(policy)
+        return Response(serializer.data)
