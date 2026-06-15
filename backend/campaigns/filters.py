@@ -1,4 +1,5 @@
 import django_filters
+from django.db.models import F
 
 from campaigns.models import Campaign, Donation
 
@@ -15,6 +16,9 @@ class CampaignFilter(django_filters.FilterSet):
     max_goal_amount = django_filters.NumberFilter(
         field_name="goal_amount", lookup_expr="lte"
     )
+    min_progress_percentage = django_filters.NumberFilter(
+        method="filter_min_progress_percentage"
+    )
     created_after = django_filters.DateTimeFilter(
         field_name="created_at", lookup_expr="gte"
     )
@@ -27,6 +31,13 @@ class CampaignFilter(django_filters.FilterSet):
     class Meta:
         model = Campaign
         fields = ["status", "event_type", "is_public", "is_active"]
+
+    def filter_min_progress_percentage(self, queryset, name, value):
+        if value is not None:
+            return queryset.filter(
+                current_amount__gte=F("goal_amount") * value / 100
+            )
+        return queryset
 
 
 class DonationFilter(django_filters.FilterSet):
