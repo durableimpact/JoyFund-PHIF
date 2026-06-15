@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Tag, Calendar, Settings } from "lucide-react";
+import { Tag, Calendar, Settings, Award } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
 
 export default function CampaignDashboardCard({ campaign }: { campaign: any }) {
@@ -26,6 +26,11 @@ export default function CampaignDashboardCard({ campaign }: { campaign: any }) {
             {campaign.status}
           </span>
           <div className="flex items-center gap-1.5 text-gray-400">
+            {campaign.certificate_generated && (
+              <span className="flex items-center gap-1 text-emerald-600 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 mr-1">
+                <Award size={10} /> Certificate
+              </span>
+            )}
             <Tag size={12} />
             <span className="text-[11px] font-medium">
               {campaign.event_type}
