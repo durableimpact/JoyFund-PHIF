@@ -122,7 +122,6 @@ export default function DonorDashboardPage() {
     campaigns.reduce((s, c) => s + (c.total_net_raised || 0), 0);
   const totalContributors = dashboardData?.my_campaigns ?? campaigns.length;
   const totalDonated =
-    dashboardData?.contributors ??
     donations.reduce((s, d) => s + Number(d.amount ?? 0), 0);
   const livesImpacted = dashboardData?.lives_impacted ?? 0;
 
