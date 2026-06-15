@@ -129,12 +129,19 @@ self.addEventListener("push", (event) => {
     body: data.body || "",
     icon: data.icon || "/web-app-manifest-192x192.png",
     badge: data.badge || "/web-app-manifest-192x192.png",
-    data: { url: targetUrl },
+    image: data.image || undefined,
+    sound: "/notification-sound.wav",
+    data: { url: targetUrl, actions: data.data?.actions || undefined },
     requireInteraction: true,
     silent: false,
     vibrate: [200, 100, 200],
     timestamp: Date.now(),
   };
+
+  // Attach action buttons when the backend provides them
+  if (data.data?.actions) {
+    options.actions = data.data.actions;
+  }
 
   // Only set tag if the backend explicitly sent one.
   // Without a tag, each notification is shown as a separate entry
@@ -151,21 +158,25 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  // Get the URL from notification data and normalize it to an absolute URL
+  const action = event.action;
   const urlPath = event.notification.data?.url || "/";
-  const targetUrl = new URL(urlPath, self.location.origin).href;
+
+  let targetUrl;
+  if (action === "donate") {
+    targetUrl = new URL(urlPath + "?donate=1", self.location.origin).href;
+  } else {
+    targetUrl = new URL(urlPath, self.location.origin).href;
+  }
 
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
-        // Focus an existing tab whose URL starts with the target (handles query params / trailing slashes)
         for (const client of clientList) {
           if (client.url.startsWith(targetUrl) && "focus" in client) {
             return client.focus();
           }
         }
-        // If no matching window is found, open a new one with the absolute URL
         if (self.clients.openWindow) {
           return self.clients.openWindow(targetUrl);
         }
