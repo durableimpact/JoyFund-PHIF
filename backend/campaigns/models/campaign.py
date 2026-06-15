@@ -153,6 +153,7 @@ class Campaign(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._initial_status = self.status
+        self._initial_certificate_generated = self.certificate_generated
 
     def save(self, *args, **kwargs):
         # Generate slug on creation if not provided
