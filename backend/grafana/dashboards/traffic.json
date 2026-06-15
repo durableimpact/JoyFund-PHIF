@@ -3,8 +3,8 @@
   "uid": "traffic",
   "tags": ["joyfund"],
   "timezone": "browser",
-  "schemaVersion": 36,
-  "version": 1,
+  "schemaVersion": 39,
+  "version": 2,
   "refresh": "10s",
   "time": { "from": "now-1h", "to": "now" },
   "panels": [
@@ -14,8 +14,9 @@
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "sum(rate(django_http_requests_total{job=~\"django-web-.*\"}[1m]))",
-          "legendFormat": "All"
+          "expr": "sum(rate(django_http_requests_total{job=~\"django-web\"}[1m]))",
+          "legendFormat": "All",
+          "datasource": "Prometheus"
         }
       ]
     },
@@ -25,8 +26,9 @@
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
       "targets": [
         {
-          "expr": "sum(rate(django_http_responses_total{job=~\"django-web-.*\",status=~\"5..\"}[1m]))",
-          "legendFormat": "5xx"
+          "expr": "sum(rate(django_http_responses_total{job=~\"django-web\",status=~\"5..\"}[1m]))",
+          "legendFormat": "5xx",
+          "datasource": "Prometheus"
         }
       ]
     },
@@ -37,7 +39,8 @@
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum(rate(django_http_requests_latency_seconds_bucket[1m])) by (le))",
-          "legendFormat": "p95"
+          "legendFormat": "p95",
+          "datasource": "Prometheus"
         }
       ]
     },
@@ -47,7 +50,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "sum by (status) (rate({app=\"joyfund_npm\"} | regex \"^(?P<remote_addr>\\\\S+) \\\\S+ \\\\S+ \\\\[(?P<time_local>[^\\\\]]+)\\\\] \\\"(?P<method>\\\\S+) (?P<path>\\\\S+) (?P<protocol>\\\\S+)\\\" (?P<status>\\\\d+)\" | unwrap duration [$__interval]))",
+          "expr": "sum by (status) (rate({app=\"joyfund_npm\"} [$__interval]))",
           "legendFormat": "{{status}}",
           "datasource": "Loki"
         }
@@ -71,8 +74,9 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 16 },
       "targets": [
         {
-          "expr": "sum(django_http_requests_total{method=\"WEBSOCKET\",job=~\"django-web-.*\"})",
-          "legendFormat": "WebSocket"
+          "expr": "sum(django_http_requests_total{method=\"WEBSOCKET\",job=~\"django-web\"})",
+          "legendFormat": "WebSocket",
+          "datasource": "Prometheus"
         }
       ]
     },
@@ -82,8 +86,9 @@
       "gridPos": { "h": 8, "w": 12, "x": 4, "y": 16 },
       "targets": [
         {
-          "expr": "topk(10, sum by (view) (rate(django_http_requests_total{job=~\"django-web-.*\"}[5m])))",
-          "format": "table"
+          "expr": "topk(10, sum by (view) (rate(django_http_requests_total{job=~\"django-web\"}[5m])))",
+          "format": "table",
+          "datasource": "Prometheus"
         }
       ]
     }
