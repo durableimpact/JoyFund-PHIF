@@ -546,6 +546,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "payments.tasks.process_payment.check_pending_donations",
         "schedule": 300.0,  # 300 seconds = 5 minutes
     },
+    "generate-impact-certificates": {
+        "task": "campaigns.tasks.generate_impact_certificates",
+        "schedule": 180.0,  # 180 seconds = 3 minutes
+    },
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
