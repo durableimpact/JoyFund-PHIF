@@ -40,6 +40,13 @@ export const getFeeAccount = async (access_token: string) => {
 
 // ── Fee Policies ──
 
+export const getCurrentFeePolicy = async () => {
+  try {
+    const { data } = await api.get<FeePolicy>("/api/payments/fee-policies/current/");
+    return data;
+  } catch { return null; }
+};
+
 export const listFeePolicies = async (access_token: string, params?: {
   is_active?: boolean;
   page?: number;

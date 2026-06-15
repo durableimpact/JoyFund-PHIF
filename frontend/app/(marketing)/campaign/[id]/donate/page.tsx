@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import { Confetti } from "@/components/ui/confetti";
 import { formatXAF } from "@/lib/utils";
 import { getCampaign, donateToCampaign } from "@/actions/campaigns";
+import { getCurrentFeePolicy } from "@/actions/payments";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -119,8 +120,14 @@ function DonatePage() {
     enabled: !!id,
   });
 
+  const { data: feePolicy } = useQuery({
+    queryKey: ["fee-policy-current"],
+    queryFn: getCurrentFeePolicy,
+  });
+
+  const platformFeePct = Number(feePolicy?.platform_fee_percentage ?? 5);
   const paymentAggregatorFee = Math.round(amount * 0.02);
-  const operationsFee = Math.round(amount * 0.05);
+  const operationsFee = Math.round(amount * platformFeePct / 100);
   const totalFees = paymentAggregatorFee + operationsFee;
   const netContribution = Math.max(amount - totalFees, 0);
 
@@ -437,7 +444,7 @@ function DonatePage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-600">
-                          Operation management (5%)
+                          Operation management ({platformFeePct}%)
                         </span>
                         <span className="font-semibold text-slate-900">
                           {formatXAF(operationsFee)}
@@ -585,7 +592,7 @@ function DonatePage() {
             </button>
 
             <p className="text-center text-xs text-gray-400 leading-relaxed">
-              3% covers the payment aggregator, 5% supports operations, and 92%
+              2% covers the payment aggregator, {platformFeePct}% supports operations, and {100 - 2 - platformFeePct}%
               goes to healthcare.
             </p>
           </form>
