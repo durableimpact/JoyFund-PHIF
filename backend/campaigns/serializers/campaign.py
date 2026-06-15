@@ -22,6 +22,8 @@ class CampaignListSerializer(serializers.ModelSerializer):
     goal = serializers.DecimalField(
         source="goal_amount", max_digits=12, decimal_places=2, read_only=True
     )
+    certificate_generated = serializers.BooleanField(read_only=True)
+    certificate_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Campaign
@@ -35,7 +37,14 @@ class CampaignListSerializer(serializers.ModelSerializer):
             "total_net_raised",
             "progress_percentage",
             "total_number_of_successfull_donations",
+            "certificate_generated",
+            "certificate_url",
         ]
+
+    def get_certificate_url(self, obj):
+        if obj.certificate_file:
+            return obj.certificate_file.url
+        return None
 
     def get_total_net_raised(self, obj):
         return getattr(obj, "total_net_raised_calc", obj.total_net_raised)
@@ -60,6 +69,8 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
     events = CampaignEventSerializer(many=True, read_only=True)
     transactions = CampaignTransactionSerializer(many=True, read_only=True)
     voucher_fundings = VoucherFundingDetailSerializer(many=True, read_only=True)
+    certificate_generated = serializers.BooleanField(read_only=True)
+    certificate_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Campaign
@@ -81,10 +92,17 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "is_active",
             "created_at",
             "progress_percentage",
+            "certificate_generated",
+            "certificate_url",
             "events",
             "transactions",
             "voucher_fundings",
         ]
+
+    def get_certificate_url(self, obj):
+        if obj.certificate_file:
+            return obj.certificate_file.url
+        return None
 
     def get_total_net_raised(self, obj):
         # Use annotated value if available for performance, else fallback to property
