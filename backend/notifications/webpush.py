@@ -1,3 +1,4 @@
+import json
 import logging
 from urllib.parse import urljoin
 
@@ -83,7 +84,7 @@ def send_push_notification(subscription, title, body, icon=None, url=None, tag=N
     try:
         webpush(
             subscription_info=sub_info,
-            data=payload,
+            data=json.dumps(payload).encode("utf-8"),
             vapid_private_key=settings.VAPID_PRIVATE_KEY,
             vapid_claims=settings.VAPID_CLAIMS,
             timeout=30,
