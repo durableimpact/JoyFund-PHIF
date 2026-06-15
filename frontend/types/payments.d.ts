@@ -288,6 +288,30 @@ declare interface DisbursementVoucher {
   medical_claim: MedicalClaimDetail | null;
 }
 
+// ── Campay ──
+
+declare interface CampayBalance {
+  total_balance: number;
+  mtn_balance: number;
+  orange_balance: number;
+  currency: string;
+}
+
+declare interface CampayDisbursePayload {
+  amount: number;
+  phone: string;
+  description: string;
+  hospital?: string;
+}
+
+declare interface CampayDisburseResponse {
+  status: string;
+  message: string;
+  disbursement_id: string;
+  transaction_id: string;
+  campay_reference: string;
+}
+
 declare interface DisbursementDetail {
   id: string; // UUID
   hospital: string; // Hospital UUID
