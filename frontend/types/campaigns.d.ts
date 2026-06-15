@@ -25,6 +25,8 @@ declare interface CampaignList {
   total_net_raised: number;
   progress_percentage: number;
   total_number_of_successfull_donations: number;
+  certificate_generated: boolean;
+  certificate_url: string | null;
 }
 
 declare interface Campaign {
@@ -46,6 +48,8 @@ declare interface Campaign {
   created_at: string;
   updated_at: string;
   progress_percentage: number;
+  certificate_generated: boolean;
+  certificate_url: string | null;
   events?: CampaignEvent[];
   transactions?: CampaignTransaction[];
   voucher_fundings?: VoucherFundingDetail[];
@@ -78,6 +82,8 @@ declare interface CampaignDetail {
   created_at: string;
   updated_at: string;
   progress_percentage: number;
+  certificate_generated: boolean;
+  certificate_url: string | null;
   events?: CampaignEvent[];
   transactions?: CampaignTransaction[];
   voucher_fundings?: VoucherFundingDetail[];

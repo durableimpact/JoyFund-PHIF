@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Loader2, Heart, Share2, Edit, Gift } from "lucide-react";
+import { ArrowLeft, Loader2, Heart, Share2, Edit, Gift, Award } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
 import { getCampaign, listCampaignDonations } from "@/actions/campaigns";
 
@@ -306,6 +306,14 @@ export default function CampaignDetailPage() {
                 >
                   <Heart size={16} /> View Campaign
                 </Link>
+                {campaign.certificate_generated && (
+                  <a
+                    href={`/api/campaigns/${campaign.id}/certificate/`}
+                    className="btn-secondary w-full text-sm flex items-center justify-center gap-2 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                  >
+                    <Award size={16} /> Download Certificate
+                  </a>
+                )}
               </div>
 
               {/* Stats */}

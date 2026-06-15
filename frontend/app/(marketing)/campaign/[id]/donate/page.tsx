@@ -429,7 +429,7 @@ function DonatePage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-600">
-                          Payment aggregator fee (3%)
+                          Payment aggregator fee (2%)
                         </span>
                         <span className="font-semibold text-slate-900">
                           {formatXAF(paymentAggregatorFee)}

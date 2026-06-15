@@ -136,7 +136,7 @@ class DonationAdmin(admin.ModelAdmin):
         "donor__user__email",
         "message",
     )
-    readonly_fields = ("id", "created_at", "updated_at")
+    readonly_fields = ("id", "created_at", "updated_at", "platform_fee_amount", "net_amount")
 
     fieldsets = (
         (

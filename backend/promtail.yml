@@ -34,6 +34,26 @@ scrape_configs:
       - target_label: app
         replacement: joyfund_django
 
+  # ── NPM (Nginx Proxy Manager) access logs ──────────
+  - job_name: joyfund_npm
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        filters:
+          - name: name
+            values: ["joyfund_npm"]
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        target_label: container
+      - target_label: app
+        replacement: joyfund_npm
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>\S+) \S+ \S+ \[(?P<time_local>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<body_bytes>\d+) "(?P<referer>[^"]*)" "(?P<user_agent>[^"]*)"'
+      - labels:
+          method:
+          status:
+          path:
+
   # ── Celery workers specifically ─────────────────────
   - job_name: joyfund_celery
     docker_sd_configs:

@@ -60,6 +60,10 @@ else:
             + [
                 "joyfund_web_1",
                 "joyfund_web_2",
+                "joyfund_web_3",
+                "web-worker-1",
+                "web-worker-2",
+                "web-worker-3",
                 "localhost",
                 "127.0.0.1",
             ]

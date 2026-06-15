@@ -32,12 +32,11 @@ export default function PushSubscriptionManager() {
   });
 
   const pushSubRef = useRef<PushSubscription | null>(null);
-  const prevTokenRef = useRef<string | undefined>(undefined);
   const subscribedTokenRef = useRef<string | undefined>(undefined);
+  const prevSessionRef = useRef<boolean>(isAuthenticated);
 
-  // Get or create the browser push subscription (runs once when authenticated)
+  // Get or create the browser push subscription (runs once for all users)
   useEffect(() => {
-    if (!isAuthenticated) return;
     if (state.stage !== "idle") return;
 
     let cancelled = false;
@@ -71,11 +70,11 @@ export default function PushSubscriptionManager() {
         if (cancelled) return;
 
         pushSubRef.current = subscription;
-        prevTokenRef.current = token;
+        prevSessionRef.current = isAuthenticated;
 
         console.log("[Push] Saving subscription to backend...");
-        await registerPushSubscription(subscription, token!);
-        subscribedTokenRef.current = token;
+        await registerPushSubscription(subscription, token || undefined);
+        subscribedTokenRef.current = token || undefined;
         setState({ stage: "subscribed" });
         console.log("[Push] Subscription saved to backend successfully!");
       } catch (err) {
@@ -99,22 +98,38 @@ export default function PushSubscriptionManager() {
     return () => {
       cancelled = true;
     };
-    // Run only once when authenticated; state changes inside are guarded
+    // Run once on mount regardless of auth status
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, []);
 
-  // Re-save subscription when token changes (e.g. session refreshed)
+  // Re-save subscription when user logs in (links anonymous sub to user)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (prevSessionRef.current === isAuthenticated) return;
+    prevSessionRef.current = isAuthenticated;
+
+    const subscription = pushSubRef.current;
+    if (!subscription) return;
+
+    registerPushSubscription(subscription, token!)
+      .then(() => {
+        subscribedTokenRef.current = token;
+        console.log("[Push] Subscription linked to authenticated user");
+      })
+      .catch((err) => console.warn("[Push] Link to user failed:", err));
+  }, [isAuthenticated, token]);
+
+  // Re-save subscription when token refreshes (already authenticated)
   useEffect(() => {
     const subscription = pushSubRef.current;
     if (!subscription) return;
     if (!token) return;
     if (token === subscribedTokenRef.current) return;
 
-    prevTokenRef.current = token;
+    subscribedTokenRef.current = token;
 
     registerPushSubscription(subscription, token)
       .then(() => {
-        subscribedTokenRef.current = token;
         console.log("[Push] Subscription re-saved with updated token");
       })
       .catch((err) => console.warn("[Push] Re-save failed:", err));

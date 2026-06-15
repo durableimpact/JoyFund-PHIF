@@ -1,10 +1,14 @@
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 from django.db.models import F
 
+from accounts.models import Role
 from campaigns.models import Campaign, Donation, CampaignTransaction
 from notifications.models import Notification, NotificationType
+
+User = get_user_model()
 
 
 @receiver(post_save, sender=Campaign, dispatch_uid="broadcast_campaign_created_push")
@@ -19,11 +23,23 @@ def broadcast_campaign_created_push(sender, instance, created, **kwargs):
         except Exception:
             pass
 
+        cover_image = None
+        try:
+            if instance.cover_image:
+                cover_image = instance.cover_image.url
+        except Exception:
+            pass
+
         send_push_notification_to_all_users(
             title=f"New Campaign: {instance.title}",
             body=f"{donor_name} started a new campaign! Help them reach their goal of {instance.goal_amount} XAF." if donor_name else f"A new campaign '{instance.title}' has started! Help reach the goal of {instance.goal_amount} XAF.",
+            image=cover_image,
             url=f"/campaign/{instance.id}/",
             tag="new_campaign",
+            actions=[
+                {"action": "view", "title": "View More"},
+                {"action": "donate", "title": "Donate Now"},
+            ],
         )
 
 
@@ -132,7 +148,20 @@ def create_donation_notification_and_broadcast(sender, instance, created, **kwar
         action_url=f"/campaigns/{campaign.id}/",
     )
     
-    # 2. Trigger real-time WebSocket broadcast via Celery task (within 30 seconds)
+    # 2. Notify all system admins about the donation
+    admin_title = f"Donation Received: {instance.amount} XAF"
+    admin_message = f"{instance.donor_name} donated {instance.amount} XAF to '{campaign.title}' by {donor_user.get_full_name() or donor_user.email}"
+    for admin_user in User.objects.filter(role=Role.SYSTEM_ADMIN).iterator():
+        Notification.objects.create(
+            user=admin_user,
+            title=admin_title,
+            message=admin_message,
+            description=notification_description,
+            notification_type=NotificationType.DONATION_RECEIVED,
+            action_url=f"/campaigns/{campaign.id}/",
+        )
+
+    # 3. Trigger real-time WebSocket broadcast via Celery task (within 30 seconds)
     from campaigns.tasks import broadcast_donation_notification
     broadcast_donation_notification.apply_async(
         args=[
@@ -157,3 +186,27 @@ def invalidate_donation_caches_on_success(sender, instance, created, **kwargs):
         cache.delete(f'donation_list_campaign_{instance.campaign_id}')
         # Invalidate the donation detail cache
         cache.delete(f'donation_detail_{instance.id}')
+
+
+@receiver(post_save, sender=Campaign, dispatch_uid="notify_certificate_generated")
+def notify_certificate_generated(sender, instance, created, **kwargs):
+    """Send notification + push when certificate_generated changes from False to True."""
+    if created:
+        return
+    if not instance.certificate_generated:
+        return
+    if instance.certificate_generated == instance._initial_certificate_generated:
+        return
+
+    donor_user = instance.donor.user if instance.donor else None
+    if not donor_user:
+        return
+
+    Notification.objects.create(
+        user=donor_user,
+        title="Impact Certificate Ready!",
+        message=f"Your impact certificate for '{instance.title}' is now available.",
+        description="Your campaign reached its goal and the impact certificate has been generated.",
+        notification_type=NotificationType.CAMPAIGN_UPDATE,
+        action_url=f"/campaigns/{instance.id}/",
+    )

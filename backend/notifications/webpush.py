@@ -1,3 +1,4 @@
+import json
 import logging
 from urllib.parse import urljoin
 
@@ -37,7 +38,7 @@ def _get_absolute_url(relative_url):
     return urljoin(frontend_url, relative_url)
 
 
-def send_push_notification(subscription, title, body, icon=None, url=None, tag=None):
+def send_push_notification(subscription, title, body, icon=None, image=None, url=None, tag=None, actions=None):
     """
     Send a web push notification to a subscription.
 
@@ -46,8 +47,10 @@ def send_push_notification(subscription, title, body, icon=None, url=None, tag=N
         title (str): Notification title
         body (str): Notification body text
         icon (str, optional): Icon URL (will be converted to absolute URL)
+        image (str, optional): Image URL displayed in the notification body
         url (str, optional): URL to open when notification is clicked
         tag (str, optional): Notification tag (for grouping)
+        actions (list, optional): List of {action, title} dicts for action buttons
 
     Returns:
         bool: True if sent successfully, False otherwise
@@ -67,8 +70,17 @@ def send_push_notification(subscription, title, body, icon=None, url=None, tag=N
         "badge": default_badge,
     }
 
+    if image:
+        payload["image"] = _get_absolute_url(image)
+
+    data = {}
     if url:
-        payload["data"] = {"url": url}
+        data["url"] = url
+    if actions:
+        data["actions"] = actions
+    if data:
+        payload["data"] = data
+
     if tag:
         payload["tag"] = tag
 
@@ -83,7 +95,7 @@ def send_push_notification(subscription, title, body, icon=None, url=None, tag=N
     try:
         webpush(
             subscription_info=sub_info,
-            data=payload,
+            data=json.dumps(payload).encode("utf-8"),
             vapid_private_key=settings.VAPID_PRIVATE_KEY,
             vapid_claims=settings.VAPID_CLAIMS,
             timeout=30,
@@ -106,7 +118,7 @@ def send_push_notification(subscription, title, body, icon=None, url=None, tag=N
         return False
 
 
-def send_push_notification_to_user(user, title, body, icon=None, url=None, tag=None):
+def send_push_notification_to_user(user, title, body, icon=None, image=None, url=None, tag=None, actions=None):
     """
     Send a push notification to all subscriptions of a user.
 
@@ -115,8 +127,10 @@ def send_push_notification_to_user(user, title, body, icon=None, url=None, tag=N
         title (str): Notification title
         body (str): Notification body text
         icon (str, optional): Icon URL
+        image (str, optional): Image URL displayed in the notification body
         url (str, optional): URL to open when clicked
         tag (str, optional): Notification tag
+        actions (list, optional): List of {action, title} dicts for action buttons
 
     Returns:
         int: Number of notifications sent successfully
@@ -128,12 +142,12 @@ def send_push_notification_to_user(user, title, body, icon=None, url=None, tag=N
 
     sent = 0
     for sub in subscriptions:
-        if send_push_notification(sub, title, body, icon, url, tag):
+        if send_push_notification(sub, title, body, icon, image, url, tag, actions):
             sent += 1
     return sent
 
 
-def send_push_notification_to_all_users(title, body, icon=None, url=None, tag=None):
+def send_push_notification_to_all_users(title, body, icon=None, image=None, url=None, tag=None, actions=None):
     """
     Send a broadcast push notification to all users with subscriptions.
 
@@ -141,8 +155,10 @@ def send_push_notification_to_all_users(title, body, icon=None, url=None, tag=No
         title (str): Notification title
         body (str): Notification body text
         icon (str, optional): Icon URL
+        image (str, optional): Image URL displayed in the notification body
         url (str, optional): URL to open when clicked
         tag (str, optional): Notification tag
+        actions (list, optional): List of {action, title} dicts for action buttons
 
     Returns:
         int: Number of notifications sent successfully
@@ -156,6 +172,6 @@ def send_push_notification_to_all_users(title, body, icon=None, url=None, tag=No
 
     sent = 0
     for sub in subscriptions:
-        if send_push_notification(sub, title, body, icon, url, tag):
+        if send_push_notification(sub, title, body, icon, image, url, tag, actions):
             sent += 1
     return sent

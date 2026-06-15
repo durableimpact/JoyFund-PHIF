@@ -378,10 +378,12 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                 )
 
             # Create payment record
+            # app_amount set equal to amount as placeholder; webhook will update it with the actual net amount
             payment = Payment.objects.create(
                 payment_method=payment_method,
                 phone_number=normalized_phone,
                 amount=amount,
+                app_amount=amount,
             )
 
             # Determine donor name for donation records

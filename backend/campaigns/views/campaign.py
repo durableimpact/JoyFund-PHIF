@@ -258,6 +258,32 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             )
 
 
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="certificate",
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        operation_description="Download the impact certificate PDF for this campaign.",
+    )
+    def download_certificate(self, request, pk=None):
+        """Download the impact certificate PDF for the campaign owner."""
+        campaign = self.get_object()
+        if not campaign.certificate_file:
+            return Response(
+                {"detail": "No certificate available for this campaign."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        from django.http import FileResponse
+        return FileResponse(
+            campaign.certificate_file.open("rb"),
+            as_attachment=True,
+            filename=f"{campaign.slug}_impact_certificate.pdf",
+            content_type="application/pdf",
+        )
+
+
 class CampaignAvailableBalanceListView(ListAPIView):
     """
     List active campaigns with their calculated available balances.

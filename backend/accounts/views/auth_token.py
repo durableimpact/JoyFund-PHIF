@@ -110,7 +110,7 @@ def refresh_token_handler(request):
             )
 
         # Check if refresh token is expired
-        if refresh_token.is_expired():
+        if hasattr(refresh_token, "expires") and refresh_token.expires < timezone.now():
             logger.warning(f"Expired refresh token for user {refresh_token.user.email}")
             refresh_token.delete()
             return JsonResponse(

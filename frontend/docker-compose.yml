@@ -9,7 +9,6 @@ services:
         NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID: ${NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_ID}
         NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET: ${NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET}
         NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
-    container_name: joyfund_frontend
     restart: unless-stopped
     env_file:
       - ./.env
@@ -20,11 +19,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: 512M
+          cpus: "2.0"
+          memory: 1G
         reservations:
-          cpus: "0.25"
-          memory: 128M
+          cpus: "0.5"
+          memory: 256M
     logging:
       driver: "json-file"
       options:
