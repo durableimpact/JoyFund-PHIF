@@ -21,3 +21,18 @@ class CampayDisburseResponseSerializer(serializers.Serializer):
     disbursement_id = serializers.UUIDField()
     transaction_id = serializers.UUIDField()
     campay_reference = serializers.CharField()
+
+
+class CampayTransactionStatusRequestSerializer(serializers.Serializer):
+    reference = serializers.CharField(help_text="Campay transaction reference to look up.")
+
+
+class CampayTransactionStatusSerializer(serializers.Serializer):
+    reference = serializers.CharField()
+    external_reference = serializers.CharField(required=False, allow_blank=True)
+    status = serializers.CharField()
+    amount = serializers.CharField(required=False, allow_blank=True)
+    currency = serializers.CharField(required=False, allow_blank=True)
+    operator = serializers.CharField(required=False, allow_blank=True)
+    code = serializers.CharField(required=False, allow_blank=True)
+    operator_reference = serializers.CharField(required=False, allow_blank=True)
