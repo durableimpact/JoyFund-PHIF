@@ -130,7 +130,7 @@ self.addEventListener("push", (event) => {
     icon: data.icon || "/web-app-manifest-192x192.png",
     badge: data.badge || "/web-app-manifest-192x192.png",
     image: data.image || undefined,
-    sound: "/notification-sound.wav",
+    sound: "/notification-sound.mp3",
     data: { url: targetUrl, actions: data.data?.actions || undefined },
     requireInteraction: true,
     silent: false,
