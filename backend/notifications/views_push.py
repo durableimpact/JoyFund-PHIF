@@ -47,12 +47,13 @@ _TAG = ["Push Notifications"]
     },
 )
 @api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def register_push_subscription(request):
     serializer = PushSubscriptionRegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     data = serializer.validated_data
+    user = request.user if request.user.is_authenticated else None
 
     sub, created = PushSubscription.objects.update_or_create(
         endpoint=data["endpoint"],
@@ -60,13 +61,13 @@ def register_push_subscription(request):
             "p256dh_key": data["p256dh_key"],
             "auth_key": data["auth_key"],
             "user_agent": data.get("user_agent", ""),
-            "user": request.user,
+            "user": user,
         },
     )
 
-    if data.get("user_agent"):
+    if user and data.get("user_agent"):
         PushSubscription.objects.filter(
-            user=request.user,
+            user=user,
             user_agent=data["user_agent"],
         ).exclude(pk=sub.pk).delete()
 
