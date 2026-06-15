@@ -19,6 +19,7 @@ type CampaignFilter = {
   donor_id: string;
   min_goal_amount: string;
   max_goal_amount: string;
+  min_progress_percentage: number;
   created_after: string;
   created_before: string;
   end_after: string;
