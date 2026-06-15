@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
@@ -9,6 +10,8 @@ from django.core.asgi import get_asgi_application
 from asgiref.sync import async_to_sync
 from django.utils.text import slugify
 from django.db import models
+from django.db.models import DecimalField, Q, Sum, Value
+from django.db.models.functions import Coalesce
 
 logger = logging.getLogger(__name__)
 
@@ -124,12 +127,16 @@ def generate_impact_certificates():
     their impact certificate generated yet.
     """
     # Find campaigns that reached their goal but certificate not yet generated
-    # Check campaigns where current_amount >= goal_amount
-    campaigns = Campaign.objects.filter(
-        current_amount__gte=models.F('goal_amount'),
+    # Uses total_net_raised (from successful donations) to match the goal_reached property
+    campaigns = Campaign.objects.annotate(
+        total_net_raised_calc=Coalesce(
+            Sum("donations__net_amount", filter=Q(donations__status="SUCCESS")),
+            Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
+        )
+    ).filter(
+        total_net_raised_calc__gte=models.F('goal_amount'),
         certificate_generated=False
     ).exclude(
-        # Exclude campaigns still in draft/inactive state
         status__in=['DRAFT', 'INACTIVE']
     )
     
