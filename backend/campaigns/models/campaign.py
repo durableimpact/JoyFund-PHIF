@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import F, Sum
 import uuid
 from utils.models import BaseEvent
 from decimal import Decimal
@@ -99,10 +98,9 @@ class Campaign(models.Model):
 
     @property
     def total_net_raised(self):
-        result = self.donations.filter(status='SUCCESS').aggregate(
-            total=Sum(F('net_amount') - F('platform_fee_amount'))
-        )['total']
-        return result or Decimal('0')
+        return self.donations.filter(status='SUCCESS').aggregate(
+            total=models.Sum('net_amount')
+        )['total'] or Decimal('0')
 
     @property
     def available_balance(self):
