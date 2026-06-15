@@ -9,6 +9,8 @@ class HealthIssueCategoryChoices(models.TextChoices):
     ELDERLY = "ELDERLY", "Elderly Health Issue"
     EMERGENCY = "EMERGENCY", "Emergency Health Issue"
     CHRONIC = "CHRONIC", "Chronic Health Issue"
+    MENTAL_HEALTH = "MENTAL_HEALTH", "Mental Health Issue"
+    INFECTIOUS = "INFECTIOUS", "Infectious Disease"
     OTHER = "OTHER", "Other Health Issue"
 
 
