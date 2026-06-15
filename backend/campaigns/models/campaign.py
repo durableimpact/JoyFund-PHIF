@@ -181,6 +181,9 @@ class Campaign(models.Model):
             )
             self._initial_status = self.status
 
+        if self.certificate_generated != self._initial_certificate_generated:
+            self._initial_certificate_generated = self.certificate_generated
+
     def __str__(self):
         return self.title
 
