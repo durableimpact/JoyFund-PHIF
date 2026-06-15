@@ -19,11 +19,23 @@ def broadcast_campaign_created_push(sender, instance, created, **kwargs):
         except Exception:
             pass
 
+        cover_image = None
+        try:
+            if instance.cover_image:
+                cover_image = instance.cover_image.url
+        except Exception:
+            pass
+
         send_push_notification_to_all_users(
             title=f"New Campaign: {instance.title}",
             body=f"{donor_name} started a new campaign! Help them reach their goal of {instance.goal_amount} XAF." if donor_name else f"A new campaign '{instance.title}' has started! Help reach the goal of {instance.goal_amount} XAF.",
+            image=cover_image,
             url=f"/campaign/{instance.id}/",
             tag="new_campaign",
+            actions=[
+                {"action": "view", "title": "View More"},
+                {"action": "donate", "title": "Donate Now"},
+            ],
         )
 
 
