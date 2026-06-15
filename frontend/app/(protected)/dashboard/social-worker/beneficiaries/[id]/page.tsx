@@ -294,7 +294,7 @@ export default function BeneficiaryDetailPage() {
       {showHiForm && <Modal title="Add Health Issue" onClose={() => setShowHiForm(false)}>
         <div className="space-y-4">
           <SelectField label="Category *" value={hiCategory} onChange={setHiCategory} options={[
-            { value: '', label: '— Select —' }, { value: 'PREGNANCY', label: 'Pregnancy' }, { value: 'EMERGENCY', label: 'Emergency' },
+            { value: '', label: '— Select —' }, { value: 'MATERNAL', label: 'Pregnancy / Maternal' }, { value: 'EMERGENCY', label: 'Emergency' },
             { value: 'CHRONIC', label: 'Chronic' }, { value: 'MENTAL_HEALTH', label: 'Mental Health' },
             { value: 'INFECTIOUS', label: 'Infectious' }, { value: 'ELDERLY', label: 'Elderly' }, { value: 'OTHER', label: 'Other' },
           ]} />
