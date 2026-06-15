@@ -26,3 +26,13 @@ export const campayDisburse = async (access_token: string, payload: CampayDisbur
     return data;
   } catch (e) { handleError(e); }
 };
+
+export const getCampayTransactionStatus = async (access_token: string, reference: string) => {
+  try {
+    const { data } = await api.get<CampayTransactionStatus>("/api/payments/campay/transaction-status/", {
+      headers: { Authorization: `Bearer ${access_token}` },
+      params: { reference },
+    });
+    return data;
+  } catch (e) { handleError(e); }
+};

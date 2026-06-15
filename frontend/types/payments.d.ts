@@ -304,6 +304,17 @@ declare interface CampayDisbursePayload {
   hospital?: string;
 }
 
+declare interface CampayTransactionStatus {
+  reference: string;
+  external_reference: string;
+  status: string;
+  amount: string;
+  currency: string;
+  operator: string;
+  code: string;
+  operator_reference: string;
+}
+
 declare interface CampayDisburseResponse {
   status: string;
   message: string;
