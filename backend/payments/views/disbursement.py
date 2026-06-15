@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.db import transaction
 
 from accounts.utils.permissions import IsSystemAdmin,IsSystemAdminOrHospitalAdmin
-from ..models import Disbursement, Transaction
+from ..models import Disbursement, EscrowAccount, Transaction
 from ..serializers.disbursement import (
     DisbursementSerializer,
     DisbursementCreateSerializer,
@@ -113,6 +113,8 @@ class DisbursementViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             if response.status_code == status.HTTP_201_CREATED:
                 disbursement = Disbursement.objects.get(id=response.data['id'])
                 
+                escrow = EscrowAccount.get_instance()
+
                 # Create linked transaction
                 tx = Transaction.objects.create(
                     type='DISBURSEMENT',
@@ -121,6 +123,7 @@ class DisbursementViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                     currency=disbursement.currency,
                     gateway_transaction_id=disbursement.gateway_transaction_id or None,
                     status='SUCCESSFUL',  # Defaults to SUCCESSFUL since this records payments already made
+                    source=escrow,
                     metadata={
                         'disbursement_id': str(disbursement.id),
                         'hospital_id': str(disbursement.hospital.id),
@@ -133,6 +136,10 @@ class DisbursementViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                 # Link transaction to disbursement
                 disbursement.transaction = tx
                 disbursement.save(update_fields=['transaction', 'updated_at'])
+
+                # Deduct from EscrowAccount
+                escrow.balance -= disbursement.amount
+                escrow.save(update_fields=['balance'])
                 
                 # Update response with transaction info
                 response.data['transaction_id'] = str(tx.id)
