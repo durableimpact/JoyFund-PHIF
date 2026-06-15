@@ -11,7 +11,7 @@ import {
   Smartphone,
   Wallet,
 } from 'lucide-react';
-import { getCampayBalance, campayDisburse } from '@/actions/campay';
+import { getCampayBalance, campayDisburse, getCampayTransactionStatus } from '@/actions/campay';
 import { listHospitals } from '@/actions/hospital';
 
 export default function CampayPage() {
@@ -26,6 +26,12 @@ export default function CampayPage() {
   const [selectedHospital, setSelectedHospital] = useState('');
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+
+  // Transaction status lookup
+  const [txRef, setTxRef] = useState('');
+  const [txStatus, setTxStatus] = useState<CampayTransactionStatus | null>(null);
+  const [txLookupError, setTxLookupError] = useState('');
+  const [txLoading, setTxLoading] = useState(false);
 
   const { data: balance, isLoading: loadingBalance } = useQuery<CampayBalance>({
     queryKey: ['campayBalance', token],
@@ -73,7 +79,25 @@ export default function CampayPage() {
     });
   }
 
+  async function handleLookup(e: React.FormEvent) {
+    e.preventDefault(); setTxLookupError(''); setTxStatus(null);
+    if (!txRef.trim()) return setTxLookupError('Enter a transaction reference');
+    setTxLoading(true);
+    try {
+      const result = await getCampayTransactionStatus(token, txRef.trim());
+      setTxStatus(result);
+    } catch (err: any) {
+      try { const parsed = JSON.parse(err); setTxLookupError(parsed.error || parsed.message || 'Lookup failed'); }
+      catch { setTxLookupError('Lookup failed'); }
+    } finally { setTxLoading(false); }
+  }
+
   const fmtXAF = (v?: number) => v != null ? `${v.toLocaleString()} XAF` : '0 XAF';
+  const statusColor = (st: string) =>
+    st === 'SUCCESSFUL' ? 'bg-emerald-100 text-emerald-700' :
+    st === 'FAILED' ? 'bg-red-100 text-red-700' :
+    st === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+    'bg-gray-100 text-gray-700';
 
   return (
     <>
@@ -125,6 +149,59 @@ export default function CampayPage() {
           </div>
           <div className="p-3 rounded-xl bg-orange-50 text-orange-600"><Smartphone size={20} /></div>
         </div>
+      </div>
+
+      <div className="card p-5 mb-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-3">Transaction Status Lookup</h2>
+        <form onSubmit={handleLookup} className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+          <div className="flex-1 w-full">
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Campay Reference</label>
+            <input
+              type="text" className="input-field text-sm font-mono w-full"
+              placeholder="e.g. bcedde9b-62a7-..."
+              value={txRef} onChange={e => setTxRef(e.target.value)}
+            />
+          </div>
+          <button
+            type="submit" disabled={txLoading}
+            className="btn-admin text-sm px-5 py-2.5 text-white rounded-xl font-semibold hover:opacity-90 flex items-center gap-2 shrink-0"
+            style={{ background: '#471DDB' }}
+          >
+            {txLoading && <Loader2 size={14} className="animate-spin" />}
+            Look Up
+          </button>
+        </form>
+
+        {txLookupError && (
+          <div className="mt-3 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold flex items-center gap-2">
+            <AlertCircle size={14} /> {txLookupError}
+          </div>
+        )}
+
+        {txStatus && (
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-gray-50 rounded-xl p-3">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Status</p>
+              <span className={`badge text-xs ${statusColor(txStatus.status)}`}>{txStatus.status}</span>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Amount</p>
+              <p className="text-sm font-bold text-gray-900">{txStatus.amount} {txStatus.currency}</p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Operator</p>
+              <p className="text-sm font-semibold text-gray-900">{txStatus.operator || '—'}</p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Code</p>
+              <p className="text-sm font-mono text-gray-900">{txStatus.code || '—'}</p>
+            </div>
+            <div className="col-span-2 sm:col-span-4 bg-gray-50 rounded-xl p-3">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Operator Reference</p>
+              <p className="text-sm font-mono text-gray-900">{txStatus.operator_reference || '—'}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {showDisburseForm && (
