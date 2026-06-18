@@ -204,7 +204,8 @@ else:
             "HOST": env("DB_HOST", default="localhost"),
             "PORT": env("DB_PORT", default="5432"),
             # Connection pooling for production
-            "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
+            "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=60),
+            "CONN_HEALTH_CHECKS": True,
             "OPTIONS": {
                 "connect_timeout": 10,
                 "options": "-c statement_timeout=30000 -c idle_in_transaction_session_timeout=60000",
