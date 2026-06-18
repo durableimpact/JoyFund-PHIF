@@ -1,0 +1,515 @@
+name: joyfund
+
+services:
+  # ──── Postgres (Database) ──────────────────────────
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: joyfund_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    command:
+      - "postgres"
+      - "-c statement_timeout=30000"
+      - "-c idle_in_transaction_session_timeout=60000"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── PgBouncer (Connection Pooler) ──────────────────
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    container_name: joyfund_pgbouncer
+    restart: unless-stopped
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_USERNAME: ${DB_USER}
+      POSTGRESQL_PASSWORD: ${DB_PASSWORD}
+      POSTGRESQL_DATABASE: ${DB_NAME}
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_DEFAULT_POOL_SIZE: "25"
+      PGBOUNCER_MAX_CLIENT_CONN: "200"
+      PGBOUNCER_MIN_POOL_SIZE: "10"
+      PGBOUNCER_RESERVE_POOL_SIZE: "5"
+      PGBOUNCER_RESERVE_POOL_TIMEOUT: "3"
+      PGBOUNCER_SERVER_IDLE_TIMEOUT: "600"
+      PGBOUNCER_QUERY_TIMEOUT: "30"
+    expose:
+      - "6432"
+    networks:
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Database Backup ────────────────────────────────
+  db-backup:
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
+    container_name: joyfund_backup
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    environment:
+      DB_HOST: joyfund_postgres
+    volumes:
+      - ./backup_data:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: joyfund_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    expose:
+      - "80"
+    networks:
+      - joyfund_network
+      - backend
+    depends_on:
+      - postgres
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── RabbitMQ (Message Broker) ─────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: joyfund_rabbitmq
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    networks:
+      - backend
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "rabbitmqctl await_startup 2>/dev/null && echo OK || exit 1",
+        ]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 15m
+        max-file: "5"
+
+  # ─── Redis (Cache + Celery Broker) ─────────────────
+  redis:
+    image: redis:7.4
+    container_name: joyfund_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Django Web Workers ─────────────────────────────
+  web-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joyfund_web_1
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    environment:
+      RUN_MIGRATIONS: "true"
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8000"
+    networks:
+      - joyfund_network
+      - backend
+    command: >
+      gunicorn
+      --bind 0.0.0.0:8000
+      --workers 6
+      --worker-class uvicorn.workers.UvicornWorker
+      --max-requests 3000
+      --max-requests-jitter 300
+      --timeout 30
+      --keep-alive 65
+      --access-logfile -
+      --error-logfile -
+      backend.asgi:application
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  web-worker-2:
+    extends: web-worker-1
+    container_name: joyfund_web_2
+    environment:
+      RUN_MIGRATIONS: "false"
+    networks:
+      - joyfund_network
+      - backend
+
+  web-worker-3:
+    extends: web-worker-1
+    container_name: joyfund_web_3
+    environment:
+      RUN_MIGRATIONS: "false"
+    networks:
+      - joyfund_network
+      - backend
+
+  # ─── Celery Workers (Async Tasks) ──────────────────
+  celery-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joyfund_celery_1
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      celery -A backend worker
+      -n worker1@%h
+      --loglevel=info
+      --concurrency=4
+      --max-tasks-per-child=1000
+      --time-limit=3600
+      --soft-time-limit=3300
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 750M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  celery-worker-2:
+    extends: celery-worker-1
+    container_name: joyfund_celery_2
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    command: >
+      celery -A backend worker
+      -n worker2@%h
+      --loglevel=info
+      --concurrency=4
+      --max-tasks-per-child=1000
+      --time-limit=3600
+      --soft-time-limit=3300
+    networks:
+      - backend
+
+  # ─── Celery Beat (Scheduled Tasks) ─────────────────
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joyfund_celery_beat
+    restart: unless-stopped
+    env_file:
+      - ./envs/prod/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      celery -A backend beat
+      --loglevel=info
+      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Prometheus (Metrics Collection) ───────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: joyfund_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    expose:
+      - "9090"
+    networks:
+      - joyfund_network
+      - backend
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.enable-lifecycle
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Grafana (Metrics + Logs Dashboard) ────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: joyfund_grafana
+    restart: unless-stopped
+    expose:
+      - "3001"
+    environment:
+      GF_SERVER_HTTP_PORT: "3001"
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - joyfund_network
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Loki (Log Storage) ────────────────────────────
+  loki:
+    image: grafana/loki:latest
+    container_name: joyfund_loki
+    restart: unless-stopped
+    expose:
+      - "3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - joyfund_network
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Promtail (Log Collector) ───────────────────────
+  promtail:
+    image: grafana/promtail:latest
+    container_name: joyfund_promtail
+    restart: unless-stopped
+    volumes:
+      - ./promtail.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  postgres_data:
+  pgadmin_data:
+  static_volume:
+    name: joyfund_static_volume
+    external: true
+  media_volume:
+    name: joyfund_media_volume
+    external: true
+
+networks:
+  joyfund_network:
+    external: true
+  backend:
+    driver: bridge
