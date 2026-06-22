@@ -30,6 +30,8 @@ export default function ExplorePage() {
         event_type: filter === "All" ? undefined : (filter as any),
         status: statusFilter === "all" ? undefined : statusFilter,
         min_progress_percentage: 10,
+        is_public: true,
+        is_active: true,
       }),
   });
 

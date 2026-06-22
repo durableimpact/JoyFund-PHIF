@@ -28,7 +28,12 @@ import CampaignCard from "@/components/shared/CampaignCard";
 import { listCampaigns, getPlatformStats } from "@/actions/campaigns";
 import { useEffect, useState } from "react";
 
-type StepItem = { icon: LucideIcon; step: string; title: string; points: [string, string] };
+type StepItem = {
+  icon: LucideIcon;
+  step: string;
+  title: string;
+  points: [string, string];
+};
 const steps: StepItem[] = [
   {
     icon: Cake,
@@ -203,7 +208,12 @@ export default function HomePage() {
   // Fetch campaigns with React Query
   const { data: campaignsResponse, isLoading: campaignsLoading } = useQuery({
     queryKey: ["campaigns"],
-    queryFn: async () => await listCampaigns({ status: "ACTIVE" }),
+    queryFn: async () =>
+      await listCampaigns({
+        status: "ACTIVE",
+        is_public: true,
+        is_active: true,
+      }),
   });
 
   // Fetch platform stats with React Query
@@ -315,17 +325,15 @@ export default function HomePage() {
             style={{ letterSpacing: "-1px" }}
           >
             Your <span style={{ color: "#7de8c0" }}>Joy</span> Saves Lives
-            
           </h1>
 
           {/* Subtext */}
           <p className="text-white/80 text-base sm:text-lg max-w-4xl mx-auto mb-10 leading-relaxed drop-shadow">
-             Turn your birthdays, weddings,
-            graduations, and anniversaries into opportunities to raise funds
-            that help pay hospital bills for vulnerable mothers, support elderly
-            people detained in hospitals because they cannot afford care, and
-            provide life-saving assistance to individuals facing critical
-            medical emergencies.
+            Turn your birthdays, weddings, graduations, and anniversaries into
+            opportunities to raise funds that help pay hospital bills for
+            vulnerable mothers, support elderly people detained in hospitals
+            because they cannot afford care, and provide life-saving assistance
+            to individuals facing critical medical emergencies.
           </p>
 
           {/* <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
@@ -395,32 +403,32 @@ export default function HomePage() {
       </section>
 
       {/* ── Launch a JoyFund ── */}
-<section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
-  <div className="max-w-5xl mx-auto">
-    <div className="text-center mb-14">
-      <h2
-        className="text-3xl font-bold uppercase tracking-widest mb-2"
-        style={{ color: "var(--primary)" }}
-      >
-        Launch a JoyFund to Save Lives
-      </h2>
-    </div>
-    <div className="grid md:grid-cols-3 gap-6">
-      {steps.map((s) => (
-        <div key={s.title} className="flex flex-col gap-4">
-          {s.points.map((point, i) => (
-            <div
-              key={i}
-              className="card p-5 text-sm text-gray-600 leading-relaxed"
+      <section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2
+              className="text-3xl font-bold uppercase tracking-widest mb-2"
+              style={{ color: "var(--primary)" }}
             >
-              {point}
-            </div>
-          ))}
+              Launch a JoyFund to Save Lives
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {steps.map((s) => (
+              <div key={s.title} className="flex flex-col gap-4">
+                {s.points.map((point, i) => (
+                  <div
+                    key={i}
+                    className="card p-5 text-sm text-gray-600 leading-relaxed"
+                  >
+                    {point}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
-  </div>
-</section>
+      </section>
 
       {/* ── How It Works ── */}
       {/* <section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
@@ -432,7 +440,7 @@ export default function HomePage() {
             >
               Launch a JoyFund to Save Lives
             </h2>
-          
+
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((s) => (
