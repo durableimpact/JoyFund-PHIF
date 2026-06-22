@@ -34,6 +34,16 @@ class PaymentInline(admin.TabularInline):
     can_delete = False
 
 
+@admin.action(description="Mark selected campaigns as private")
+def mark_as_private(modeladmin, request, queryset):
+    queryset.update(is_public=False)
+
+
+@admin.action(description="Mark selected campaigns as public")
+def mark_as_public(modeladmin, request, queryset):
+    queryset.update(is_public=True)
+
+
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
     list_display = (
@@ -44,6 +54,7 @@ class CampaignAdmin(admin.ModelAdmin):
         "progress_percentage",
         "status",
         "is_active",
+        "is_public",
         "created_at",
     )
     list_filter = ("status", "is_active", "is_public", "event_type", "created_at")
@@ -55,6 +66,7 @@ class CampaignAdmin(admin.ModelAdmin):
         "start_date",
         "created_at",
     )
+    actions = [mark_as_private, mark_as_public]
 
     fieldsets = (
         (
