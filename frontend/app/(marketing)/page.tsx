@@ -628,49 +628,51 @@ export default function HomePage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="py-20 px-4 bg-[#F9FAFB]">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-black text-[#1A1A2E]">
-              Voices from the Community
-            </h2>
-            <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">
-              Real celebrations, real impact, real stories from donors and
-              partners across the JoyFund community.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.name} className="card p-6 bg-white">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-                <p className="text-gray-600 text-sm italic leading-relaxed mb-5">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ background: "var(--primary)" }}
-                  >
-                    {t.avatar}
+      {/*
+        <section className="py-20 px-4 bg-[#F9FAFB]">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-black text-[#1A1A2E]">
+                Voices from the Community
+              </h2>
+              <p className="text-gray-500 mt-3 max-w-md mx-auto text-sm">
+                Real celebrations, real impact, real stories from donors and
+                partners across the JoyFund community.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {testimonials.map((t) => (
+                <div key={t.name} className="card p-6 bg-white">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={14}
+                        className="fill-yellow-400 text-yellow-400"
+                      />
+                    ))}
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#1A1A2E]">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.role}</p>
+                  <p className="text-gray-600 text-sm italic leading-relaxed mb-5">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                      style={{ background: "var(--primary)" }}
+                    >
+                      {t.avatar}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#1A1A2E]">{t.name}</p>
+                      <p className="text-xs text-gray-500">{t.role}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        */}
 
       {/* ── FAQ ── */}
       <section className="py-20 px-4 bg-white">
