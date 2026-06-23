@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from oauth2_provider.models import AccessToken, RefreshToken
+from oauthlib.common import generate_token
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +139,7 @@ def refresh_token_handler(request):
         # Generate new access token
         new_access_token = AccessToken.objects.create(
             user=refresh_token.user,
-            token=AccessToken.generate_token(),
+            token=generate_token(),
             application=app,
             expires=timezone.now() + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS),
             scope="read write openid",
@@ -147,7 +148,7 @@ def refresh_token_handler(request):
         # Generate new refresh token
         new_refresh_token = RefreshToken.objects.create(
             user=refresh_token.user,
-            token=RefreshToken.generate_token(),
+            token=generate_token(),
             access_token=new_access_token,
             application=app,
             expires=timezone.now() + timedelta(days=30),  # 30 days
