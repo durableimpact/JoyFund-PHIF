@@ -6,3 +6,4 @@ data/
 letsencrypt/
 .env
 xfrontend/
+otherfrontend/
