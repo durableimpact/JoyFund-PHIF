@@ -298,13 +298,13 @@ export default function HomePage() {
           }}
         /> */}
 
-       <div
-  className="absolute inset-0"
-  style={{
-    background:
-      "linear-gradient(to bottom, rgba(10,20,60,0.25) 0%, rgba(10,20,60,0.12) 35%, rgba(255,255,255,0.08) 65%, rgba(249,250,251,0.55) 90%, #F9FAFB 100%)",
-  }}
-/>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(10,20,60,0.25) 0%, rgba(10,20,60,0.12) 35%, rgba(255,255,255,0.08) 65%, rgba(249,250,251,0.55) 90%, #F9FAFB 100%)",
+          }}
+        />
 
         {/* Navbar sits on top of everything */}
         <Navbar transparent />
