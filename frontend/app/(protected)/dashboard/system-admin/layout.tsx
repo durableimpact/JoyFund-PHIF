@@ -19,6 +19,7 @@ import {
   Bell,
   HandHeart,
   Phone,
+  Heart,
 } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -83,6 +84,11 @@ const NAV: NavItem[] = [
     label: "Beneficiaries",
     href: "/dashboard/system-admin/beneficiaries",
     icon: <Users size={16} />,
+  },
+  {
+    label: "Health Issues",
+    href: "/dashboard/system-admin/health-issues",
+    icon: <Heart size={16} />,
   },
   {
     label: "Analytics",
