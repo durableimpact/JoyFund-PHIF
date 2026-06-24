@@ -5,8 +5,13 @@ import { AxiosError } from "axios";
 
 function handleError(e: unknown): never {
   const err = e as AxiosError;
-  if (err.response?.data) throw JSON.stringify(err.response.data);
-  throw JSON.stringify({ message: "An unexpected error occurred" });
+  const data = err.response?.data;
+  if (data) {
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    const msg = parsed.detail || parsed.error || parsed.message || Object.values(parsed).flat().join(", ") || "An unexpected error occurred";
+    throw new Error(msg);
+  }
+  throw new Error("An unexpected error occurred");
 }
 
 export const listVouchers = async (token: string, params?: Record<string, string>) => {
