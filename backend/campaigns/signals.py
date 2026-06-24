@@ -150,7 +150,7 @@ def create_donation_notification_and_broadcast(sender, instance, created, **kwar
     
     # 2. Notify all system admins about the donation
     admin_title = f"Donation Received: {instance.amount} XAF"
-    admin_message = f"{instance.donor_name} donated {instance.amount} XAF to '{campaign.title}' by {donor_user.get_full_name() or donor_user.email}"
+    admin_message = f"{instance.donor_name} donated {instance.amount} XAF to '{campaign.title}' by {donor_user.get_full_name or donor_user.email}"
     for admin_user in User.objects.filter(role=Role.SYSTEM_ADMIN).iterator():
         Notification.objects.create(
             user=admin_user,
