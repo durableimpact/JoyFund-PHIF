@@ -20,11 +20,14 @@ import {
   Ticket,
   Upload,
   User,
-  X
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import { getBeneficiary, listHealthIssues, listBeneficiaryDocuments, createHealthIssue, createBeneficiaryDocument, updateBeneficiary, verifyBeneficiary, verifyHealthIssue, rejectHealthIssue } from '@/actions/beneficiaries';
-import { listVouchers } from '@/actions/vouchers';
-import { formatDate, formatDateTime, statusColor } from '@/lib/utils';
+import { listVouchers, createVouchersFromCampaigns } from '@/actions/vouchers';
+import { listHospitals } from '@/actions/hospital';
+import { listCampaigns } from '@/actions/campaigns';
+import { formatXAF, formatDate, formatDateTime, statusColor } from '@/lib/utils';
 
 const SUB_PAGE_SIZE = 5;
 
@@ -49,6 +52,15 @@ export default function AdminBeneficiaryDetailPage() {
   const [hiDescription, setHiDescription] = useState('');
   const [docDescription, setDocDescription] = useState('');
   const [docFile, setDocFile] = useState<File | null>(null);
+
+  // Voucher creation state
+  const [showVoucherCreate, setShowVoucherCreate] = useState(false);
+  const [voucherStep, setVoucherStep] = useState(1);
+  const [voucherHealthIssueId, setVoucherHealthIssueId] = useState('');
+  const [voucherHospitalId, setVoucherHospitalId] = useState('');
+  const [voucherAmount, setVoucherAmount] = useState('');
+  const [voucherAllocations, setVoucherAllocations] = useState<{ campaign_id: string; mode: 'amount' | 'percentage'; value: string }[]>([]);
+  const [voucherError, setVoucherError] = useState('');
 
   const { data: beneficiary, isLoading } = useQuery({
     queryKey: ['beneficiary', id, token],
@@ -95,6 +107,65 @@ export default function AdminBeneficiaryDetailPage() {
 
   const vouchers: VoucherList[] = vouchersData?.results || [];
   const voucherCount = vouchersData?.count || 0;
+
+  // Voucher creation queries
+  const { data: hospitalsData } = useQuery({
+    queryKey: ['hospitals-picker', token],
+    queryFn: async () => await listHospitals(token!, { page_size: '1000' }),
+    enabled: !!token && showVoucherCreate,
+  });
+  const hospitals: Hospital[] = hospitalsData?.results || [];
+
+  const { data: campaignsData } = useQuery({
+    queryKey: ['campaigns-picker', token],
+    queryFn: async () => await listCampaigns({ page_size: 1000 }),
+    enabled: !!token && showVoucherCreate,
+  });
+  const campaigns: CampaignList[] = campaignsData?.results || [];
+
+  const createVoucherMutation = useMutation({
+    mutationFn: () => {
+      const total = Number(voucherAmount);
+      const valid = voucherAllocations.filter(a => a.campaign_id && Number(a.value) > 0);
+      return createVouchersFromCampaigns(token!, {
+        health_issue_id: voucherHealthIssueId,
+        hospital_id: voucherHospitalId,
+        total_amount: total,
+        campaign_allocations: valid.map(a =>
+          a.mode === 'percentage'
+            ? { campaign_id: a.campaign_id, percentage: Number(a.value) }
+            : { campaign_id: a.campaign_id, amount: Number(a.value) }
+        ),
+      });
+    },
+    onSuccess: () => {
+      setShowVoucherCreate(false);
+      setVoucherStep(1);
+      setVoucherHealthIssueId('');
+      setVoucherHospitalId('');
+      setVoucherAmount('');
+      setVoucherAllocations([]);
+      setVoucherError('');
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-vouchers', id] });
+      queryClient.invalidateQueries({ queryKey: ['vouchers'] });
+    },
+  });
+
+  const numericVoucherAmount = Number(voucherAmount) || 0;
+  const validatedHiForVoucher = healthIssues.filter(hi => hi.status === 'VALIDATED');
+  const totalAllocated = voucherAllocations.reduce((sum, a) => {
+    const v = Number(a.value) || 0;
+    return sum + (a.mode === 'percentage' ? (numericVoucherAmount * v) / 100 : v);
+  }, 0);
+  const totalPercentage = voucherAllocations.reduce((sum, a) => a.mode === 'percentage' ? sum + (Number(a.value) || 0) : sum, 0);
+  const selectedVoucherCampaignIds = new Set(voucherAllocations.map(a => a.campaign_id));
+
+  const openVoucherCreate = (preselectedHiId?: string) => {
+    setShowVoucherCreate(true);
+    setVoucherStep(1);
+    setVoucherError('');
+    if (preselectedHiId) setVoucherHealthIssueId(String(preselectedHiId));
+  };
 
   const createHiMutation = useMutation({
     mutationFn: () => createHealthIssue(token, { beneficiary_id: id, category: hiCategory, severity: hiSeverity, description: hiDescription }),
@@ -185,7 +256,7 @@ export default function AdminBeneficiaryDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
-          <div className="card">
+          <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
               <User size={14} /> Personal Information
             </h2>
@@ -201,7 +272,7 @@ export default function AdminBeneficiaryDetailPage() {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
               <MapPin size={14} /> Location
             </h2>
@@ -212,7 +283,7 @@ export default function AdminBeneficiaryDetailPage() {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
               <Phone size={14} /> Emergency Contact
             </h2>
@@ -223,7 +294,7 @@ export default function AdminBeneficiaryDetailPage() {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
                 <Heart size={14} /> Health Issues ({hiCount})
@@ -264,6 +335,14 @@ export default function AdminBeneficiaryDetailPage() {
                         </button>
                       </div>
                     )}
+                    {hi.status === 'VALIDATED' && (
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
+                        <button onClick={() => openVoucherCreate(String(hi.id))}
+                          className="text-[10px] font-bold px-2.5 py-1 rounded-lg text-white hover:opacity-90 transition-colors flex items-center gap-1" style={{ background: '#471DDB' }}>
+                          <Ticket size={10} /> Create Voucher
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -271,7 +350,7 @@ export default function AdminBeneficiaryDetailPage() {
             </>)}
           </div>
 
-          <div className="card">
+          <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
                 <FileText size={14} /> Documents ({docCount})
@@ -316,10 +395,15 @@ export default function AdminBeneficiaryDetailPage() {
             </>)}
           </div>
 
-          <div className="card">
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Ticket size={14} /> Vouchers ({voucherCount})
-            </h2>
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
+                <Ticket size={14} /> Vouchers ({voucherCount})
+              </h2>
+              <button onClick={() => openVoucherCreate()} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#471DDB' }}>
+                <Plus size={14} /> Create Voucher
+              </button>
+            </div>
             {vouchers.length === 0 ? (
               <p className="text-xs text-gray-400 py-4">No vouchers issued to this beneficiary.</p>
             ) : (
@@ -342,7 +426,7 @@ export default function AdminBeneficiaryDetailPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="card">
+          <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
               <Calendar size={14} /> Enrollment Info
             </h2>
@@ -353,7 +437,7 @@ export default function AdminBeneficiaryDetailPage() {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Summary</h2>
             <div className="space-y-3">
               {[
@@ -441,6 +525,143 @@ export default function AdminBeneficiaryDetailPage() {
             </div>
           </div>
         </Modal>
+      )}
+
+      {showVoucherCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 my-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-black text-gray-900">Create Voucher for {beneficiary.full_name}</h2>
+              <button onClick={() => setShowVoucherCreate(false)}><X size={20} className="text-gray-400" /></button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {[{ id: 1, label: 'Voucher Details' }, { id: 2, label: 'Find Campaigns' }, { id: 3, label: 'Allocate & Create' }].map(step => (
+                <div key={step.id} className={`rounded-xl border px-3 py-2 text-center text-xs font-semibold ${voucherStep >= step.id ? 'text-white border-transparent' : 'text-gray-500 border-gray-200 bg-gray-50'}`}
+                  style={voucherStep >= step.id ? { background: '#471DDB' } : {}}>
+                  Step {step.id}: {step.label}
+                </div>
+              ))}
+            </div>
+
+            {validatedHiForVoucher.length === 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-xs text-amber-700">
+                No VALIDATED health issues found. Validate a health issue before creating a voucher.
+              </div>
+            )}
+
+            {voucherStep === 1 && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Health Issue (VALIDATED) *</label>
+                  <select className="input-field" value={voucherHealthIssueId} onChange={e => setVoucherHealthIssueId(e.target.value)}>
+                    <option value="">— Select health issue —</option>
+                    {validatedHiForVoucher.map(h => (
+                      <option key={h.id} value={h.id}>{h.category} — {h.description}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Hospital *</label>
+                  <select className="input-field" value={voucherHospitalId} onChange={e => setVoucherHospitalId(e.target.value)}>
+                    <option value="">— Select hospital —</option>
+                    {hospitals.map(h => <option key={h.id} value={h.id}>{h.name} · {h.city}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Voucher Amount (XAF) *</label>
+                  <input className="input-field" type="number" min={1} placeholder="e.g. 60000" value={voucherAmount} onChange={e => setVoucherAmount(e.target.value)} />
+                </div>
+                <div className="flex gap-3 mt-2">
+                  <button className="btn-outline flex-1" onClick={() => setShowVoucherCreate(false)}>Cancel</button>
+                  <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
+                    disabled={!voucherHealthIssueId || !voucherHospitalId || numericVoucherAmount <= 0}
+                    onClick={() => setVoucherStep(2)}>Continue</button>
+                </div>
+              </div>
+            )}
+
+            {voucherStep === 2 && (
+              <div className="space-y-3">
+                <div className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-800">
+                  Target voucher amount: <span className="font-bold">{formatXAF(numericVoucherAmount)}</span>
+                </div>
+                <div className="max-h-64 overflow-y-auto border border-gray-100 rounded-xl p-2 space-y-2">
+                  {campaigns.length === 0 ? (
+                    <div className="text-xs text-gray-500 p-3">No campaigns available.</div>
+                  ) : campaigns.map(campaign => (
+                    <button key={campaign.id} type="button"
+                      className={`w-full text-left border rounded-xl px-3 py-2 transition ${selectedVoucherCampaignIds.has(campaign.id) ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                      onClick={() => {
+                        setVoucherAllocations(prev => {
+                          const exists = prev.some(a => a.campaign_id === campaign.id);
+                          if (exists) return prev.filter(a => a.campaign_id !== campaign.id);
+                          return [...prev, { campaign_id: campaign.id, mode: 'amount' as const, value: '' }];
+                        });
+                      }}>
+                      <div className="text-sm font-semibold text-gray-900">{campaign.title}</div>
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-3 mt-2">
+                  <button className="btn-outline flex-1" onClick={() => setVoucherStep(1)}>Back</button>
+                  <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
+                    disabled={voucherAllocations.length === 0}
+                    onClick={() => setVoucherStep(3)}>Continue</button>
+                </div>
+              </div>
+            )}
+
+            {voucherStep === 3 && (
+              <div className="space-y-3">
+                <div className="rounded-xl bg-gray-50 p-3 text-xs text-gray-700">
+                  Allocate funds from selected campaigns. Use fixed amount or percentage per campaign.
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {voucherAllocations.map(allocation => {
+                    const campaign = campaigns.find(c => c.id === allocation.campaign_id);
+                    return (
+                      <div key={allocation.campaign_id} className="border border-gray-200 rounded-xl p-3">
+                        <div className="text-sm font-semibold text-gray-900">{campaign?.title}</div>
+                        <div className="flex gap-2">
+                          <select className="input-field w-40" value={allocation.mode}
+                            onChange={e => setVoucherAllocations(prev => prev.map(a => a.campaign_id === allocation.campaign_id ? { ...a, mode: e.target.value as 'amount' | 'percentage', value: '' } : a))}>
+                            <option value="amount">Amount (XAF)</option>
+                            <option value="percentage">Percentage (%)</option>
+                          </select>
+                          <input className="input-field flex-1" type="number" min={1} max={allocation.mode === 'percentage' ? 100 : undefined}
+                            placeholder={allocation.mode === 'percentage' ? 'e.g. 35' : 'e.g. 20000'}
+                            value={allocation.value}
+                            onChange={e => setVoucherAllocations(prev => prev.map(a => a.campaign_id === allocation.campaign_id ? { ...a, value: e.target.value } : a))} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="rounded-xl border border-gray-200 p-3 text-xs space-y-1">
+                  <div>Requested: <span className="font-bold">{formatXAF(numericVoucherAmount)}</span></div>
+                  <div>Allocated: <span className="font-bold">{formatXAF(Math.floor(totalAllocated))}</span></div>
+                  <div>Percentage: <span className="font-bold">{totalPercentage.toFixed(2)}%</span></div>
+                </div>
+                {voucherError && <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700">{voucherError}</div>}
+                <div className="flex gap-3 mt-2">
+                  <button className="btn-outline flex-1" onClick={() => setVoucherStep(2)}>Back</button>
+                  <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
+                    onClick={() => {
+                      setVoucherError('');
+                      if (voucherAllocations.length === 0) { setVoucherError('Select at least one campaign.'); return; }
+                      if (voucherAllocations.some(a => Number(a.value) <= 0)) { setVoucherError('Every campaign needs a valid amount.'); return; }
+                      if (totalPercentage > 100) { setVoucherError('Total percentage cannot exceed 100%.'); return; }
+                      createVoucherMutation.mutate();
+                    }}
+                    disabled={createVoucherMutation.isPending}>
+                    {createVoucherMutation.isPending ? 'Creating...' : 'Create Voucher'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </>
   );
