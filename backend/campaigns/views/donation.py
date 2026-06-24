@@ -1,8 +1,10 @@
 from datetime import timedelta
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Q, Sum, Count, F
+from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -133,6 +135,144 @@ class NestedDonationViewSet(
         if response.status_code == 200:
             cache.set(cache_key, response.data, CACHE_TIMEOUT)
         return response
+
+    @action(detail=False, methods=['get'], url_path='chart')
+    @swagger_auto_schema(
+        tags=_TAG,
+        manual_parameters=[
+            openapi.Parameter(
+                'period',
+                openapi.IN_QUERY,
+                description='Time period: 7d, 30d, 90d, 1y, all',
+                type=openapi.TYPE_STRING,
+                enum=['7d', '30d', '90d', '1y', 'all'],
+                default='30d',
+            ),
+        ],
+        operation_description='Donation chart data for a campaign, grouped by day/week/month.',
+    )
+    def chart(self, request, *args, **kwargs):
+        from datetime import datetime, date
+        from collections import OrderedDict
+
+        campaign_id = self.kwargs.get('campaign_pk')
+        period = request.query_params.get('period', '30d')
+
+        now = timezone.now()
+        period_map = {
+            '7d': timedelta(days=7),
+            '30d': timedelta(days=30),
+            '90d': timedelta(days=90),
+            '1y': timedelta(days=365),
+        }
+
+        cache_key = f'donation_chart_{campaign_id}_{period}'
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached, status=status.HTTP_200_OK)
+
+        donations = Donation.objects.filter(
+            campaign_id=campaign_id,
+            status='SUCCESS',
+        )
+
+        # Determine date range and truncation
+        if period == '1y':
+            trunc_fn = TruncWeek
+            if period in period_map:
+                start_date = (now - period_map[period]).date()
+            else:
+                start_date = donations.order_by('created_at').values_list('created_at', flat=True).first()
+                start_date = start_date.date() if start_date else now.date()
+            end_date = now.date()
+            # Build all weeks
+            full_range = OrderedDict()
+            cursor = start_date
+            while cursor <= end_date:
+                key = cursor.strftime('%Y-W%W')
+                full_range[key] = {'date': cursor, 'total_amount': Decimal('0'), 'count': 0}
+                cursor += timedelta(weeks=1)
+        elif period == 'all':
+            trunc_fn = TruncMonth
+            first = donations.order_by('created_at').values_list('created_at', flat=True).first()
+            start_date = first.date() if first else now.date()
+            end_date = now.date()
+            full_range = OrderedDict()
+            cursor = start_date.replace(day=1)
+            while cursor <= end_date:
+                key = cursor.strftime('%Y-%m')
+                full_range[key] = {'date': cursor, 'total_amount': Decimal('0'), 'count': 0}
+                # Move to next month
+                if cursor.month == 12:
+                    cursor = cursor.replace(year=cursor.year + 1, month=1)
+                else:
+                    cursor = cursor.replace(month=cursor.month + 1)
+        else:
+            trunc_fn = TruncDate
+            if period in period_map:
+                start_date = (now - period_map[period]).date()
+            else:
+                start_date = now.date() - timedelta(days=30)
+            end_date = now.date()
+            full_range = OrderedDict()
+            cursor = start_date
+            while cursor <= end_date:
+                key = cursor.strftime('%Y-%m-%d')
+                full_range[key] = {'date': cursor, 'total_amount': Decimal('0'), 'count': 0}
+                cursor += timedelta(days=1)
+
+        if period in period_map:
+            donations = donations.filter(created_at__gte=now - period_map[period])
+
+        daily = (
+            donations
+            .annotate(date=trunc_fn('created_at'))
+            .values('date')
+            .annotate(
+                total_amount=Sum('amount'),
+                count=Count('id'),
+            )
+            .order_by('date')
+        )
+
+        # Merge DB results into the full range
+        for entry in daily:
+            dt = entry['date']
+            if period == '1y':
+                key = dt.strftime('%Y-W%W')
+            elif period == 'all':
+                key = dt.strftime('%Y-%m')
+            else:
+                key = dt.strftime('%Y-%m-%d')
+            if key in full_range:
+                full_range[key]['total_amount'] = entry['total_amount'] or Decimal('0')
+                full_range[key]['count'] = entry['count']
+
+        series = [
+            {
+                'date': v['date'].strftime('%Y-%m-%d'),
+                'total_amount': str(v['total_amount']),
+                'count': v['count'],
+            }
+            for v in full_range.values()
+        ]
+
+        totals = donations.aggregate(
+            total_amount=Sum('amount'),
+            total_count=Count('id'),
+        )
+
+        result = {
+            'period': period,
+            'series': series,
+            'totals': {
+                'amount': str(totals['total_amount'] or Decimal('0')),
+                'count': totals['total_count'],
+            },
+        }
+
+        cache.set(cache_key, result, CACHE_TIMEOUT)
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class DonationViewSet(
