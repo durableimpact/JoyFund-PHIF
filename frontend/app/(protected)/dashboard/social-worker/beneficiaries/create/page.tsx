@@ -167,7 +167,8 @@ export default function CreateBeneficiaryPage() {
     },
     onSuccess: (result: any) => router.push(`/dashboard/social-worker/beneficiaries/${result.id}`),
     onError: (err: any) => {
-      try { setApiError(JSON.parse(err)); } catch { setApiError('Failed to create beneficiary'); }
+      const msg = err?.message || 'Failed to create beneficiary';
+      try { setApiError(JSON.parse(err)); } catch { setApiError(msg); }
     },
   });
 
