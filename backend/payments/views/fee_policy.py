@@ -58,9 +58,11 @@ class FeePolicyViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     ordering_fields = ['name', 'platform_fee_percentage', 'escrow_fee_percentage', 'created_at']
     ordering = ['-created_at']
 
-    def _build_response(self, serializer):
+    def _pop_deactivation_warning(self, serializer):
+        return serializer.validated_data.pop('_deactivates', None)
+
+    def _build_response(self, serializer, deactivated=None):
         data = serializer.data
-        deactivated = getattr(serializer, 'validated_data', {}).get('_deactivates', None)
         if deactivated:
             data = dict(data)
             data['warning'] = f"Fee policy '{deactivated}' has been deactivated."
@@ -69,16 +71,18 @@ class FeePolicyViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        deactivated = self._pop_deactivation_warning(serializer)
         self.perform_create(serializer)
-        return Response(self._build_response(serializer), status=201)
+        return Response(self._build_response(serializer, deactivated), status=201)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
+        deactivated = self._pop_deactivation_warning(serializer)
         self.perform_update(serializer)
-        return Response(self._build_response(serializer))
+        return Response(self._build_response(serializer, deactivated))
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     @swagger_auto_schema(
