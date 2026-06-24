@@ -283,7 +283,7 @@ export default function HomePage() {
         {/* Background photo */}
         {/* "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1600&auto=format&fit=crop')", */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-transparent bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/assets/images/joyfund-hero-image.webp')",
           }}
@@ -302,7 +302,7 @@ export default function HomePage() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(10,20,60,0.55) 0%, rgba(15,30,90,0.30) 45%, rgba(249,250,251,0.25) 70%, rgba(249,250,251,0.75) 90%, #F9FAFB 100%)",
+              "linear-gradient(to bottom, rgba(10,20,60,0.25) 0%, rgba(10,20,60,0.12) 35%, rgba(255,255,255,0.08) 65%, rgba(249,250,251,0.55) 90%, #F9FAFB 100%)",
           }}
         />
 
