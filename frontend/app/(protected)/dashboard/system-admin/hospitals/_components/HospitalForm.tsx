@@ -1,7 +1,22 @@
 "use client";
+import { useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import dynamic from "next/dynamic";
-import { AlertCircle, MapPin, ArrowLeft, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  MapPin,
+  Navigation,
+  Building2,
+  FileCheck,
+  Phone,
+  CreditCard,
+} from "lucide-react";
 import Link from "next/link";
 
 const LocationPickerMap = dynamic(
@@ -38,29 +53,101 @@ const PARTNERSHIP_STATUSES = [
   "REJECTED",
 ] as const;
 
-export interface HospitalFormData {
-  name: string;
-  accreditation_number: string;
-  licence_number: string;
-  region: string;
-  city: string;
-  address: string;
-  phone_number: string;
-  email: string;
-  website?: string;
-  partnership_status?: "PENDING" | "ACTIVE" | "INACTIVE" | "REJECTED";
-  is_active?: boolean;
-  momo_number?: string;
-  momo_name?: string;
-  orange_number?: string;
-  orange_name?: string;
-  bank_account_number?: string;
-  bank_account_name?: string;
-  bank_name?: string;
-  bank_branch?: string;
-  lat?: number | null;
-  lng?: number | null;
-}
+const hospitalSchema = z.object({
+  name: z.string().min(2, "Hospital name is required"),
+  region: z.string().min(1, "Region is required"),
+  city: z.string().min(1, "City is required"),
+  address: z.string().min(1, "Address is required"),
+  accreditation_number: z.string().min(1, "Accreditation number is required"),
+  licence_number: z.string().min(1, "Licence number is required"),
+  phone_number: z
+    .string()
+    .min(6, "Phone number is required")
+    .regex(
+      /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/,
+      "Invalid phone number",
+    ),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Invalid email address"),
+  website: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/.test(v),
+      "Invalid website URL",
+    ),
+  momo_number: z.string().optional(),
+  momo_name: z.string().optional(),
+  orange_number: z.string().optional(),
+  orange_name: z.string().optional(),
+  bank_account_number: z.string().optional(),
+  bank_account_name: z.string().optional(),
+  bank_name: z.string().optional(),
+  bank_branch: z.string().optional(),
+  partnership_status: z.enum(["PENDING", "ACTIVE", "INACTIVE", "REJECTED"]).optional(),
+  is_active: z.boolean().optional(),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
+});
+
+export type HospitalFormData = z.infer<typeof hospitalSchema>;
+
+const basicFields = ["name", "region", "city", "address"] as const;
+const locationFields = ["lat", "lng"] as const;
+const licensingFields = ["accreditation_number", "licence_number"] as const;
+const contactFields = ["phone_number", "email", "website"] as const;
+const paymentFields = [
+  "momo_number",
+  "momo_name",
+  "orange_number",
+  "orange_name",
+  "bank_account_number",
+  "bank_account_name",
+  "bank_name",
+  "bank_branch",
+] as const;
+
+const STEPS = [
+  {
+    key: "basic",
+    label: "Basic Info",
+    num: 1,
+    icon: Building2,
+    fields: basicFields,
+  },
+  {
+    key: "location",
+    label: "Location",
+    num: 2,
+    icon: MapPin,
+    fields: locationFields,
+  },
+  {
+    key: "licensing",
+    label: "Licensing",
+    num: 3,
+    icon: FileCheck,
+    fields: licensingFields,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    num: 4,
+    icon: Phone,
+    fields: contactFields,
+  },
+  {
+    key: "payment",
+    label: "Payment",
+    num: 5,
+    icon: CreditCard,
+    fields: paymentFields,
+  },
+] as const;
+
+type Step = (typeof STEPS)[number];
 
 interface HospitalFormProps {
   initialData?: HospitalFormData & { id?: string };
@@ -77,14 +164,12 @@ export default function HospitalForm({
   error,
   isEditMode = false,
 }: HospitalFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    control,
-    watch,
-    setValue,
-  } = useForm<HospitalFormData>({
+  const [stepIdx, setStepIdx] = useState(0);
+  const [geoLoading, setGeoLoading] = useState(false);
+
+  const form = useForm<HospitalFormData>({
+    resolver: zodResolver(hospitalSchema),
+    mode: "onChange",
     defaultValues: initialData || {
       name: "",
       accreditation_number: "",
@@ -110,478 +195,612 @@ export default function HospitalForm({
     },
   });
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    trigger,
+    formState: { errors },
+  } = form;
+
   const lat = watch("lat");
   const lng = watch("lng");
   const selectedCoords: [number, number] | null =
-    lat !== null && lng !== null ? [lat, lng] : null;
+    lat != null && lng != null ? [lat, lng] : null;
 
-  const handleGeolocation = () => {
-    if (!navigator.geolocation) {
+  const currentStep = STEPS[stepIdx];
+
+  const handleGeolocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setValue("lat", pos.coords.latitude, { shouldValidate: true });
+        setValue("lng", pos.coords.longitude, { shouldValidate: true });
+        setGeoLoading(false);
+      },
+      () => setGeoLoading(false),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }, [setValue]);
+
+  const validateCurrentStep = async (): Promise<boolean> => {
+    const fieldNames = currentStep.fields as readonly string[];
+    if (fieldNames.length === 0) return true;
+    const valid = await trigger(fieldNames as any);
+    return valid;
+  };
+
+  const next = async () => {
+    const ok = await validateCurrentStep();
+    if (!ok) return;
+    setStepIdx((prev) => Math.min(prev + 1, STEPS.length - 1));
+  };
+
+  const prev = () => setStepIdx((prev) => Math.max(prev - 1, 0));
+
+  const goToStep = async (target: number) => {
+    if (target < stepIdx) {
+      setStepIdx(target);
       return;
     }
-    navigator.geolocation.getCurrentPosition((position) => {
-      setValue("lat", position.coords.latitude);
-      setValue("lng", position.coords.longitude);
-    });
+    for (let i = stepIdx; i < target; i++) {
+      const s = STEPS[i];
+      const fieldNames = s.fields as readonly string[];
+      if (fieldNames.length > 0) {
+        const ok = await trigger(fieldNames as any);
+        if (!ok) return;
+      }
+    }
+    setStepIdx(target);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link
-          href="/dashboard/system-admin/hospitals"
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft size={20} className="text-gray-600" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-black text-gray-900">
-            {isEditMode ? "Edit Hospital" : "Add New Hospital"}
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Fill in the hospital details below
-          </p>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
-          <AlertCircle size={18} className="text-red-500 mt-0.5 shrink-0" />
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
-      )}
-
-      <div className="card space-y-6">
-        {/* Basic Information */}
-        <div>
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-            Basic Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Name *
-              </label>
-              <input
-                {...register("name", {
-                  required: "Hospital name is required",
-                  minLength: {
-                    value: 2,
-                    message: "Name must be at least 2 characters",
-                  },
-                })}
-                placeholder="e.g. Central Hospital"
-                className={`input-field ${errors.name ? "border-red-300 focus:ring-red-200" : ""}`}
-              />
-              {errors.name && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Region *
-              </label>
-              <select
-                {...register("region", { required: "Region is required" })}
-                className={`input-field ${errors.region ? "border-red-300 focus:ring-red-200" : ""}`}
-              >
-                <option value="">— Select Region —</option>
-                {CAMEROON_REGIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
-              {errors.region && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.region.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                City *
-              </label>
-              <input
-                {...register("city", { required: "City is required" })}
-                placeholder="e.g. Yaoundé"
-                className={`input-field ${errors.city ? "border-red-300 focus:ring-red-200" : ""}`}
-              />
-              {errors.city && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.city.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Address *
-              </label>
-              <input
-                {...register("address", { required: "Address is required" })}
-                placeholder="Street address"
-                className={`input-field ${errors.address ? "border-red-300 focus:ring-red-200" : ""}`}
-              />
-              {errors.address && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.address.message}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Location Information */}
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-            Location
-          </h2>
+    <div className="min-h-screen bg-gray-50/50">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <Link
+            href="/dashboard/system-admin/hospitals"
+            className="p-2.5 hover:bg-white rounded-xl transition-colors border border-gray-200 bg-white/50 backdrop-blur-sm"
+          >
+            <ArrowLeft size={18} className="text-gray-600" />
+          </Link>
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-gray-700">
-                Pick location on map or use GPS
-              </label>
-              <button
-                type="button"
-                onClick={handleGeolocation}
-                className="text-xs text-blue-600 hover:underline font-medium"
+            <h1 className="text-2xl font-black text-gray-900">
+              {isEditMode ? "Edit Hospital" : "Add New Hospital"}
+            </h1>
+            <p className="text-gray-500 text-sm mt-0.5">
+              Step {stepIdx + 1} of {STEPS.length} &mdash; {currentStep.label}
+            </p>
+          </div>
+        </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex gap-3 items-start">
+            <div className="p-1 bg-red-100 rounded-lg">
+              <svg
+                className="w-4 h-4 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                Use current location
-              </button>
-            </div>
-            <Controller
-              name="lat"
-              control={control}
-              render={({ field: latField }) => (
-                <Controller
-                  name="lng"
-                  control={control}
-                  render={({ field: lngField }) => (
-                    <LocationPickerMap
-                      value={selectedCoords}
-                      onChange={(newLat, newLng) => {
-                        latField.onChange(newLat);
-                        lngField.onChange(newLng);
-                      }}
-                    />
-                  )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
                 />
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                  Latitude
-                </label>
-                <input
-                  {...register("lat")}
-                  type="number"
-                  step="any"
-                  placeholder="e.g. 3.848"
-                  className="input-field text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                  Longitude
-                </label>
-                <input
-                  {...register("lng")}
-                  type="number"
-                  step="any"
-                  placeholder="e.g. 11.502"
-                  className="input-field text-sm"
-                />
-              </div>
+              </svg>
             </div>
-          </div>
-        </div>
-
-        {/* Licensing & Compliance */}
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-            Licensing & Compliance
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Accreditation # *
-              </label>
-              <input
-                {...register("accreditation_number", {
-                  required: "Accreditation number is required",
-                })}
-                placeholder="e.g. ACC-2024-001"
-                className={`input-field ${errors.accreditation_number ? "border-red-300 focus:ring-red-200" : ""}`}
-              />
-              {errors.accreditation_number && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.accreditation_number.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Licence # *
-              </label>
-              <input
-                {...register("licence_number", {
-                  required: "Licence number is required",
-                })}
-                placeholder="e.g. LIC-2024-001"
-                className={`input-field ${errors.licence_number ? "border-red-300 focus:ring-red-200" : ""}`}
-              />
-              {errors.licence_number && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.licence_number.message}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Information */}
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-            Contact Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Phone *
-              </label>
-              <input
-                {...register("phone_number", {
-                  required: "Phone number is required",
-                  pattern: {
-                    value:
-                      /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/,
-                    message: "Invalid phone number",
-                  },
-                })}
-                placeholder="+237 6XX XXX XXX"
-                className={`input-field ${errors.phone_number ? "border-red-300 focus:ring-red-200" : ""}`}
-              />
-              {errors.phone_number && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.phone_number.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Email *
-              </label>
-              <input
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Invalid email address",
-                  },
-                })}
-                type="email"
-                placeholder="hospital@example.com"
-                className={`input-field ${errors.email ? "border-red-300 focus:ring-red-200" : ""}`}
-              />
-              {errors.email && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-              Website
-            </label>
-            <input
-              {...register("website", {
-                pattern: {
-                  value:
-                    /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
-                  message: "Invalid website URL",
-                },
-              })}
-              placeholder="https://hospital.com"
-              className={`input-field ${errors.website ? "border-red-300 focus:ring-red-200" : ""}`}
-            />
-            {errors.website && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.website.message}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Payment Details */}
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-            Payment Details (Optional)
-          </h2>
-
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                  MoMo Number
-                </label>
-                <input
-                  {...register("momo_number")}
-                  placeholder="+237 6XX XXX XXX"
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                  MoMo Name
-                </label>
-                <input
-                  {...register("momo_name")}
-                  placeholder="Account holder"
-                  className="input-field"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                  Orange Money Number
-                </label>
-                <input
-                  {...register("orange_number")}
-                  placeholder="+237 6XX XXX XXX"
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                  Orange Money Name
-                </label>
-                <input
-                  {...register("orange_name")}
-                  placeholder="Account holder"
-                  className="input-field"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Bank Account Number
-              </label>
-              <input
-                {...register("bank_account_number")}
-                placeholder="Account number"
-                className="input-field"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                  Bank Account Name
-                </label>
-                <input
-                  {...register("bank_account_name")}
-                  placeholder="Account holder"
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                  Bank Name
-                </label>
-                <input
-                  {...register("bank_name")}
-                  placeholder="e.g. Afriland"
-                  className="input-field"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                Bank Branch
-              </label>
-              <input
-                {...register("bank_branch")}
-                placeholder="Branch location"
-                className="input-field"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Status (Edit Mode Only) */}
-        {isEditMode && (
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-              Status
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
-                  Partnership Status
-                </label>
-                <select
-                  {...register("partnership_status")}
-                  className="input-field"
-                >
-                  {PARTNERSHIP_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
-                  <input
-                    {...register("is_active")}
-                    type="checkbox"
-                    className="rounded"
-                  />
-                  Active Hospital
-                </label>
-              </div>
-            </div>
+            <p className="text-sm text-red-700 font-medium">{error}</p>
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="border-t border-gray-200 pt-6 flex gap-3 justify-end">
-          <Link
-            href="/dashboard/system-admin/hospitals"
-            className="btn-outline px-6"
-          >
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="py-2.5 px-6 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center gap-2 transition-colors"
-            style={{ background: "#471DDB" }}
-          >
-            {isLoading && <Loader2 size={16} className="animate-spin" />}
-            {isEditMode ? "Update Hospital" : "Create Hospital"}
-          </button>
+        {/* Stepper */}
+        <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+          <div className="flex items-center gap-1">
+            {STEPS.map((s, i) => {
+              const done = i < stepIdx;
+              const active = i === stepIdx;
+              const Icon = s.icon;
+              return (
+                <div key={s.key} className="flex items-center gap-1 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => goToStep(i)}
+                    className={`flex items-center justify-center gap-2 flex-1 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                      done
+                        ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-150"
+                        : active
+                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
+                          : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                    }`}
+                  >
+                    {done ? (
+                      <Check size={14} strokeWidth={2.5} />
+                    ) : (
+                      <Icon size={14} strokeWidth={active ? 2.5 : 2} />
+                    )}
+                    <span className="hidden sm:inline">{s.label}</span>
+                  </button>
+                  {i < STEPS.length - 1 && (
+                    <div
+                      className={`w-3 h-px shrink-0 ${
+                        i < stepIdx ? "bg-indigo-300" : "bg-gray-200"
+                      }`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Form Card */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="p-6 sm:p-8">
+              {/* Step 1: Basic Info */}
+              {stepIdx === 0 && (
+                <section className="space-y-5">
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900">
+                      Hospital Information
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Enter the basic details of the hospital
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="sm:col-span-2">
+                      <Field
+                        label="Hospital Name *"
+                        error={errors.name?.message}
+                      >
+                        <input
+                          {...register("name")}
+                          placeholder="e.g. Central Hospital Yaoundé"
+                          className="input-field"
+                        />
+                      </Field>
+                    </div>
+                    <Field label="Region *" error={errors.region?.message}>
+                      <Controller
+                        name="region"
+                        control={control}
+                        render={({ field }) => (
+                          <select
+                            className="input-field"
+                            value={field.value || ""}
+                            onChange={(e) =>
+                              field.onChange(e.target.value || undefined)
+                            }
+                          >
+                            <option value="">— Select Region —</option>
+                            {CAMEROON_REGIONS.map((r) => (
+                              <option key={r} value={r}>
+                                {r}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                    </Field>
+                    <Field label="City *" error={errors.city?.message}>
+                      <input
+                        {...register("city")}
+                        placeholder="e.g. Yaoundé"
+                        className="input-field"
+                      />
+                    </Field>
+                    <div className="sm:col-span-2">
+                      <Field
+                        label="Address *"
+                        error={errors.address?.message}
+                      >
+                        <input
+                          {...register("address")}
+                          placeholder="Street address, quarter..."
+                          className="input-field"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* Step 2: Location */}
+              {stepIdx === 1 && (
+                <section className="space-y-5">
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                      <MapPin size={18} className="text-indigo-500" />
+                      Pick Location
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Click on the map to place a pin or use your current
+                      location
+                    </p>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                        Map
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleGeolocation}
+                        disabled={geoLoading}
+                        className="text-xs font-semibold flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 transition-colors"
+                      >
+                        <Navigation
+                          size={13}
+                          className={geoLoading ? "animate-pulse" : ""}
+                        />
+                        {geoLoading ? "Locating..." : "Use my location"}
+                      </button>
+                    </div>
+                    <Controller
+                      name="lat"
+                      control={control}
+                      render={({ field: latField }) => (
+                        <Controller
+                          name="lng"
+                          control={control}
+                          render={({ field: lngField }) => (
+                            <LocationPickerMap
+                              value={selectedCoords}
+                              onChange={(newLat, newLng) => {
+                                latField.onChange(newLat);
+                                lngField.onChange(newLng);
+                              }}
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      <Field label="Latitude">
+                        <input
+                          {...register("lat", { valueAsNumber: true })}
+                          type="number"
+                          step="any"
+                          placeholder="e.g. 3.848"
+                          className="input-field text-sm"
+                        />
+                      </Field>
+                      <Field label="Longitude">
+                        <input
+                          {...register("lng", { valueAsNumber: true })}
+                          type="number"
+                          step="any"
+                          placeholder="e.g. 11.502"
+                          className="input-field text-sm"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* Step 3: Licensing */}
+              {stepIdx === 2 && (
+                <section className="space-y-5">
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                      <FileCheck size={18} className="text-indigo-500" />
+                      Licensing & Compliance
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Official accreditation and licence details
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <Field
+                      label="Accreditation Number *"
+                      error={errors.accreditation_number?.message}
+                    >
+                      <input
+                        {...register("accreditation_number")}
+                        placeholder="e.g. ACC-2024-001"
+                        className="input-field"
+                      />
+                    </Field>
+                    <Field
+                      label="Licence Number *"
+                      error={errors.licence_number?.message}
+                    >
+                      <input
+                        {...register("licence_number")}
+                        placeholder="e.g. LIC-2024-001"
+                        className="input-field"
+                      />
+                    </Field>
+                  </div>
+                </section>
+              )}
+
+              {/* Step 4: Contact */}
+              {stepIdx === 3 && (
+                <section className="space-y-5">
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                      <Phone size={18} className="text-indigo-500" />
+                      Contact Information
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      How to reach the hospital
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <Field
+                      label="Phone Number *"
+                      error={errors.phone_number?.message}
+                    >
+                      <input
+                        {...register("phone_number")}
+                        type="tel"
+                        placeholder="+237 6XX XXX XXX"
+                        className="input-field"
+                      />
+                    </Field>
+                    <Field label="Email *" error={errors.email?.message}>
+                      <input
+                        {...register("email")}
+                        type="email"
+                        placeholder="hospital@example.com"
+                        className="input-field"
+                      />
+                    </Field>
+                    <div className="sm:col-span-2">
+                      <Field
+                        label="Website"
+                        error={errors.website?.message}
+                      >
+                        <input
+                          {...register("website")}
+                          placeholder="https://hospital.com"
+                          className="input-field"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* Step 5: Payment */}
+              {stepIdx === 4 && (
+                <section className="space-y-6">
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                      <CreditCard size={18} className="text-indigo-500" />
+                      Payment Details
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Optional — add payment accounts for the hospital
+                    </p>
+                  </div>
+
+                  {/* Mobile Money */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      Mobile Money
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <Field label="MoMo Number">
+                        <input
+                          {...register("momo_number")}
+                          placeholder="+237 6XX XXX XXX"
+                          className="input-field"
+                        />
+                      </Field>
+                      <Field label="MoMo Name">
+                        <input
+                          {...register("momo_name")}
+                          placeholder="Account holder name"
+                          className="input-field"
+                        />
+                      </Field>
+                      <Field label="Orange Money Number">
+                        <input
+                          {...register("orange_number")}
+                          placeholder="+237 6XX XXX XXX"
+                          className="input-field"
+                        />
+                      </Field>
+                      <Field label="Orange Money Name">
+                        <input
+                          {...register("orange_name")}
+                          placeholder="Account holder name"
+                          className="input-field"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  {/* Bank */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      Bank Account
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div className="sm:col-span-2">
+                        <Field label="Account Number">
+                          <input
+                            {...register("bank_account_number")}
+                            placeholder="Account number"
+                            className="input-field"
+                          />
+                        </Field>
+                      </div>
+                      <Field label="Account Name">
+                        <input
+                          {...register("bank_account_name")}
+                          placeholder="Account holder name"
+                          className="input-field"
+                        />
+                      </Field>
+                      <Field label="Bank Name">
+                        <input
+                          {...register("bank_name")}
+                          placeholder="e.g. Afriland First Bank"
+                          className="input-field"
+                        />
+                      </Field>
+                      <div className="sm:col-span-2">
+                        <Field label="Branch">
+                          <input
+                            {...register("bank_branch")}
+                            placeholder="Branch location"
+                            className="input-field"
+                          />
+                        </Field>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status (Edit Mode) */}
+                  {isEditMode && (
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        Status
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <Field label="Partnership Status">
+                          <Controller
+                            name="partnership_status"
+                            control={control}
+                            render={({ field }) => (
+                              <select
+                                className="input-field"
+                                value={field.value || "PENDING"}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              >
+                                {PARTNERSHIP_STATUSES.map((status) => (
+                                  <option key={status} value={status}>
+                                    {status.charAt(0) +
+                                      status.slice(1).toLowerCase()}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                        </Field>
+                        <Field label="Active Status">
+                          <label className="flex items-center gap-3 cursor-pointer py-2.5">
+                            <Controller
+                              name="is_active"
+                              control={control}
+                              render={({ field }) => (
+                                <button
+                                  type="button"
+                                  role="switch"
+                                  aria-checked={field.value ?? true}
+                                  onClick={() =>
+                                    field.onChange(field.value ?? true ? false : true)
+                                  }
+                                  className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                                    field.value ?? true
+                                      ? "bg-indigo-600"
+                                      : "bg-gray-200"
+                                  }`}
+                                >
+                                  <span
+                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                      (field.value ?? true)
+                                        ? "translate-x-5"
+                                        : "translate-x-0"
+                                    }`}
+                                  />
+                                </button>
+                              )}
+                            />
+                            <span className="text-sm text-gray-700 font-medium">
+                              {watch("is_active") ?? true
+                                ? "Active"
+                                : "Inactive"}
+                            </span>
+                          </label>
+                        </Field>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              )}
+            </div>
+
+            {/* Navigation Footer */}
+            <div className="px-6 sm:px-8 py-5 bg-gray-50/80 border-t border-gray-100 flex gap-3 justify-between items-center">
+              <div>
+                {stepIdx > 0 ? (
+                  <button
+                    type="button"
+                    onClick={prev}
+                    className="btn-outline flex items-center gap-1.5"
+                  >
+                    <ChevronLeft size={14} />
+                    Back
+                  </button>
+                ) : (
+                  <Link
+                    href="/dashboard/system-admin/hospitals"
+                    className="btn-outline flex items-center gap-1.5"
+                  >
+                    <ChevronLeft size={14} />
+                    Cancel
+                  </Link>
+                )}
+              </div>
+
+              {stepIdx < STEPS.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={next}
+                  className="py-2.5 px-6 rounded-xl font-bold text-sm text-white flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
+                >
+                  Continue
+                  <ChevronRight size={14} />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="py-2.5 px-6 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
+                >
+                  {isLoading && <Loader2 size={16} className="animate-spin" />}
+                  {isEditMode ? "Update Hospital" : "Create Hospital"}
+                </button>
+              )}
+            </div>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  error,
+  children,
+  className,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+        {label}
+      </label>
+      {children}
+      {error && <p className="text-[11px] text-red-500 mt-1 font-medium">{error}</p>}
+    </div>
   );
 }
