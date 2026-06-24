@@ -111,11 +111,12 @@ export default function EditHospitalModal({ open, onClose, hospital }: Props) {
       setSaved(true);
     },
     onError: (err: any) => {
+      const msg = err?.message || 'Failed to update hospital';
       try {
         const parsed = JSON.parse(err?.toString?.() || '{}');
-        setError(parsed.detail || parsed.name?.[0] || 'Failed to update hospital');
+        setError(parsed.detail || parsed.name?.[0] || msg);
       } catch {
-        setError('Failed to update hospital');
+        setError(msg);
       }
     },
   });
