@@ -12,8 +12,13 @@ function getAuthHeader(access_token?: string) {
 
 function handleError(error: unknown): never {
   const axiosError = error as AxiosError;
-  if (axiosError.response?.data) throw JSON.stringify(axiosError.response.data);
-  throw JSON.stringify({ message: "An unexpected error occurred" });
+  const data = axiosError.response?.data;
+  if (data) {
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    const msg = parsed.detail || parsed.error || parsed.message || Object.values(parsed).flat().join(", ") || "An unexpected error occurred";
+    throw new Error(msg);
+  }
+  throw new Error("An unexpected error occurred");
 }
 
 // ── Info Endpoints (get authenticated user info after login) ──
