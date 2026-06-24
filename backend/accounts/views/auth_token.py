@@ -12,6 +12,7 @@ import json
 import logging
 from datetime import timedelta
 
+from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -110,21 +111,26 @@ def refresh_token_handler(request):
                 status=401,
             )
 
-        # Check if refresh token is expired
-        if hasattr(refresh_token, "expires") and refresh_token.expires < timezone.now():
-            logger.warning(f"Expired refresh token for user {refresh_token.user.email}")
+        # Check if refresh token has been revoked
+        if refresh_token.revoked is not None:
+            logger.warning(f"Revoked refresh token used for user {refresh_token.user.email}")
             refresh_token.delete()
             return JsonResponse(
                 {
                     "error": "invalid_grant",
-                    "error_description": "Refresh token has expired",
+                    "error_description": "Refresh token has been revoked",
                 },
                 status=401,
             )
 
         # Validate OAuth2 application credentials
         app = refresh_token.application
-        if app.client_id != client_id or app.client_secret != client_secret:
+        if app.hash_client_secret:
+            secret_valid = check_password(client_secret, app.client_secret)
+        else:
+            secret_valid = client_secret == app.client_secret
+
+        if app.client_id != client_id or not secret_valid:
             logger.warning(
                 f"Invalid OAuth2 credentials for user {refresh_token.user.email}"
             )
@@ -151,8 +157,10 @@ def refresh_token_handler(request):
             token=generate_token(),
             access_token=new_access_token,
             application=app,
-            expires=timezone.now() + timedelta(days=30),  # 30 days
         )
+
+        # Revoke the old refresh token to prevent reuse
+        refresh_token.revoke()
 
         logger.info(f"Token refreshed successfully for user {refresh_token.user.email}")
 
