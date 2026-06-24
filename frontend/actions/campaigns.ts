@@ -241,6 +241,21 @@ export const getDonation = async (id: string) => {
   }
 };
 
+export const getCampaignDonationChart = async (
+  campaignId: string,
+  period: DonationChartPeriod = "30d",
+) => {
+  try {
+    const { data } = await api.get<DonationChartData>(
+      `/api/campaigns/${campaignId}/donations/chart/`,
+      { params: { period } },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
 // ── Platform Stats ──
 
 export const getPlatformStats = async () => {
