@@ -42,9 +42,11 @@ def custom_exception_handler(exc, context):
         traceback.print_exc()
         print("="*80 + "\n")
         
-        # Return a generic 500 response
+        # Return a generic 500 response with both 'error' and 'detail'
+        # for frontend compatibility (DRF convention uses 'detail')
+        error_msg = str(exc) if str(exc) else 'An unexpected error occurred'
         return Response(
-            {'error': 'An unexpected error occurred'},
+            {'error': error_msg, 'detail': error_msg},
             status=500,
         )
 
