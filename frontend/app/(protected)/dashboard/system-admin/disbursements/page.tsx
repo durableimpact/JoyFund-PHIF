@@ -92,8 +92,9 @@ export default function DisbursementsPage() {
       resetForm();
     },
     onError: (err: any) => {
-      try { const parsed = JSON.parse(err); setFormError(parsed.message || parsed.detail || 'Failed'); }
-      catch { setFormError('Failed to record disbursement'); }
+      const msg = err?.message || 'Failed to record disbursement';
+      try { const parsed = JSON.parse(err); setFormError(parsed.message || parsed.detail || msg); }
+      catch { setFormError(msg); }
     }
   });
 
