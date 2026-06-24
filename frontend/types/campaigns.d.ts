@@ -170,6 +170,25 @@ declare interface CampaignLeaderboardEntry {
   };
 }
 
+// ── Donation Chart ──
+
+declare type DonationChartPeriod = "7d" | "30d" | "90d" | "1y" | "all";
+
+declare interface DonationChartPoint {
+  date: string;
+  total_amount: string;
+  count: number;
+}
+
+declare interface DonationChartData {
+  period: DonationChartPeriod;
+  series: DonationChartPoint[];
+  totals: {
+    amount: string;
+    count: number;
+  };
+}
+
 // ── Donations ──
 
 declare type DonationStatus = "PENDING" | "SUCCESS" | "FAILED";
