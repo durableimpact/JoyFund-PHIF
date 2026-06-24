@@ -93,11 +93,12 @@ export default function CreateHospitalModal({ open, onClose }: Props) {
       onClose();
     },
     onError: (err: any) => {
+      const msg = err?.message || 'Failed to create hospital';
       try {
         const parsed = JSON.parse(err?.toString?.() || '{}');
-        setError(parsed.detail || parsed.name?.[0] || 'Failed to create hospital');
+        setError(parsed.detail || parsed.name?.[0] || msg);
       } catch {
-        setError('Failed to create hospital');
+        setError(msg);
       }
     },
   });
