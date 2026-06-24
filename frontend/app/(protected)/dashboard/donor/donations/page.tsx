@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -23,10 +23,15 @@ import {
   ExternalLink,
   Info,
   History,
+  Share2,
 } from "lucide-react";
+import { toBlob } from "html-to-image";
+import { toast } from "sonner";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Navbar from "@/components/shared/Navbar";
 import { getMyDonations } from "@/actions/campaigns";
+import DonationShareCard from "@/components/dashboard/DonationShareCard";
+import { formatXAF } from "@/lib/utils";
 
 export default function DonationsPage() {
   const router = useRouter();
@@ -36,6 +41,15 @@ export default function DonationsPage() {
   const [expandedDonations, setExpandedDonations] = useState<
     Record<string, boolean>
   >({});
+  const [sharing, setSharing] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const userInfo = session?.user?.userInfo as
+    | { first_name?: string; last_name?: string }
+    | undefined;
+  const donorName = [userInfo?.first_name, userInfo?.last_name]
+    .filter(Boolean)
+    .join(" ") || "A JoyFund Donor";
 
   const toggleExpand = (id: string) => {
     setExpandedDonations((prev) => ({
@@ -90,6 +104,52 @@ export default function DonationsPage() {
     (sum, d) => sum + Number(d.amount ?? 0),
     0,
   );
+
+  const campaignCount = new Set(donations.map((d) => d.campaign_id)).size;
+  const averageDonation =
+    donations.length > 0 ? totalAmount / donations.length : 0;
+
+  async function handleShare() {
+    if (!cardRef.current) return;
+    setSharing(true);
+    try {
+      const el = cardRef.current;
+      const prev = el.style.cssText;
+      el.style.cssText =
+        "position:fixed;top:0;left:0;z-index:99999;opacity:1;visibility:visible;";
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      const blob = await toBlob(el, { pixelRatio: 2, cacheBust: true });
+      el.style.cssText = prev;
+
+      if (!blob) throw new Error("Failed to generate image");
+      const file = new File([blob], "joyfund-card.png", { type: "image/png" });
+
+      if (navigator.share?.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "My JoyFund Impact",
+          text: `I've donated ${formatXAF(totalAmount)} to ${campaignCount} campaign${campaignCount !== 1 ? "s" : ""} on JoyFund! Join me in making a difference.`,
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "joyfund-donation-card.png";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+      toast.success("Share card generated!");
+    } catch (err: any) {
+      if (err?.name !== "AbortError") {
+        toast.error("Failed to generate card");
+      }
+    } finally {
+      setSharing(false);
+    }
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -203,6 +263,36 @@ export default function DonationsPage() {
               </div>
             </div>
           </div>
+
+          {/* Share Card */}
+          {donations.length > 0 && (
+            <div className="mb-8">
+              <button
+                onClick={handleShare}
+                disabled={sharing}
+                className="w-full card p-4 flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {sharing ? (
+                  <Loader2 size={18} className="animate-spin" style={{ color: "var(--primary)" }} />
+                ) : (
+                  <Share2 size={18} style={{ color: "var(--primary)" }} />
+                )}
+                <span className="text-sm font-bold" style={{ color: "var(--primary)" }}>
+                  {sharing ? "Generating..." : "Share Your Impact"}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {/* Off-screen share card */}
+          <DonationShareCard
+            ref={cardRef}
+            donorName={donorName}
+            totalDonations={donations.length}
+            totalAmount={totalAmount}
+            averageDonation={averageDonation}
+            campaignCount={campaignCount}
+          />
 
           {/* Donations List */}
           {isLoading ? (
