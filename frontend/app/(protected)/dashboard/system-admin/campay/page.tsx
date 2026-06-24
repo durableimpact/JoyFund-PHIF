@@ -55,8 +55,9 @@ export default function CampayPage() {
       setTimeout(() => setFormSuccess(''), 6000);
     },
     onError: (err: any) => {
-      try { const parsed = JSON.parse(err); setFormError(parsed.error || parsed.message || parsed.detail || 'Disbursement failed'); }
-      catch { setFormError('Disbursement failed'); }
+      const msg = err?.message || 'Disbursement failed';
+      try { const parsed = JSON.parse(err); setFormError(parsed.error || parsed.message || parsed.detail || msg); }
+      catch { setFormError(msg); }
     }
   });
 
@@ -87,8 +88,9 @@ export default function CampayPage() {
       const result = await getCampayTransactionStatus(token, txRef.trim());
       setTxStatus(result);
     } catch (err: any) {
-      try { const parsed = JSON.parse(err); setTxLookupError(parsed.error || parsed.message || 'Lookup failed'); }
-      catch { setTxLookupError('Lookup failed'); }
+      const msg = err?.message || 'Lookup failed';
+      try { const parsed = JSON.parse(err); setTxLookupError(parsed.error || parsed.message || msg); }
+      catch { setTxLookupError(msg); }
     } finally { setTxLoading(false); }
   }
 
