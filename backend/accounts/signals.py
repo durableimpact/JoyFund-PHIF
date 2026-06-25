@@ -62,11 +62,8 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
         
         user_role = getattr(instance, 'role', None)
         
-        # If user is a donor send the Verification OTP instead of just a standard welcome email
         if user_role == 'DONOR':
-            from accounts.utils.verification import send_verification_email
-            send_verification_email(instance)
-            logger.info(f"Verification email queued for donor user {instance.id} ({instance.email})")
+            logger.info(f"Donor user {instance.id} ({instance.email}) created — verification email deferred to user request")
         elif user_role in ('SOCIAL_WORKER', 'RECEPTIONIST', 'HOSPITAL_ADMIN'):
             # Credentials email is sent directly from the serializer's create() method
             # where the plaintext password is still available
