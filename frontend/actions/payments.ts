@@ -174,10 +174,14 @@ export const getTransaction = async (id: string, access_token: string) => {
 
 // ── Fee Splits ──
 
-export const listFeeSplits = async (access_token: string) => {
+export const listFeeSplits = async (access_token: string, params?: {
+  page?: number;
+  page_size?: number;
+}) => {
   try {
     const { data } = await api.get<PaginationResponse<FeeSplitList>>("/api/payments/fee-splits/", {
       headers: { Authorization: `Bearer ${access_token}` },
+      params,
     });
     return data;
   } catch (e) { handleError(e); }
