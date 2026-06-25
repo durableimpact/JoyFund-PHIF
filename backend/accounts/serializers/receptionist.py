@@ -61,6 +61,7 @@ class ReceptionistCreateSerializer(serializers.Serializer):
 
         user = User(**user_data, role=Role.RECEPTIONIST)
         user.set_password(password)
+        user.is_verified = True
         user.save()
 
         receptionist = Receptionist.objects.create(
