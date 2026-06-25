@@ -11,7 +11,9 @@ import {
   Globe,
   RefreshCw,
 } from "lucide-react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { Badge } from "@/components/ui/badge";
+import Paginator from "@/components/shared/Paginator";
 import {
   Dialog,
   DialogContent,
@@ -39,8 +41,13 @@ const PAGE_SIZE = 15;
 
 export default function AdminLogs() {
   const { data: session } = useSession();
-  const [tab, setTab] = useState<LogTab>("activity");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams(
+    { tab: "activity", page: 1 },
+    { page: Number }
+  );
+  const tab = (params.tab as LogTab) || "activity";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
   const [selectedLog, setSelectedLog] = useState<
     ActivityLog | RequestLog | ErrorLog | null
   >(null);
@@ -49,8 +56,7 @@ export default function AdminLogs() {
     (session?.user as { accessToken?: string })?.accessToken;
 
   const handleTabChange = (newTab: LogTab) => {
-    setTab(newTab);
-    setCurrentPage(1);
+    setParams({ tab: newTab, page: 1 });
   };
 
   const { data: activityData, isLoading: loadingActivity } = useQuery({
@@ -418,71 +424,7 @@ export default function AdminLogs() {
         )}
 
         {totalCount > PAGE_SIZE && (
-          <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50 lg:flex-row lg:items-center lg:justify-between">
-            <div className="text-xs text-gray-600">
-              Showing{" "}
-              <span className="font-semibold">
-                {(currentPage - 1) * PAGE_SIZE + 1}
-              </span>{" "}
-              to{" "}
-              <span className="font-semibold">
-                {Math.min(currentPage * PAGE_SIZE, totalCount)}
-              </span>{" "}
-              of <span className="font-semibold">{totalCount}</span> results
-            </div>
-
-            <div className="flex items-center justify-start lg:justify-end gap-2 flex-wrap max-w-full">
-              <button
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                disabled={!hasPreviousPage}
-                className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Previous page"
-              >
-                <ChevronLeft size={16} className="text-gray-600" />
-              </button>
-
-              <div className="flex items-center gap-1 flex-wrap">
-                {getVisiblePages().map((item, index) => {
-                  if (item === "...") {
-                    return (
-                      <span
-                        key={`ellipsis-${index}`}
-                        className="px-1 text-sm text-gray-400 select-none"
-                      >
-                        ...
-                      </span>
-                    );
-                  }
-
-                  const pageNum = item as number;
-                  const isCurrentPage = pageNum === currentPage;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`h-8 min-w-8 px-2 rounded-md text-sm font-medium transition-colors ${
-                        isCurrentPage
-                          ? "text-white shadow-sm"
-                          : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-                      }`}
-                      style={isCurrentPage ? { background: "#471DDB" } : {}}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                disabled={!hasNextPage}
-                className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Next page"
-              >
-                <ChevronRight size={16} className="text-gray-600" />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
 
