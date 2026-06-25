@@ -24,6 +24,8 @@ from .admin_dashboard import (
     AdminBeneficiaryVoucherView,
     AdminOrganizationView,
     AdminTrendsReportView,
+    AdminComprehensiveAnalyticsView,
+    AdminUserDetailView,
 )
 
 __all__ = [
@@ -55,6 +57,8 @@ __all__ = [
     'AdminBeneficiaryVoucherView',
     'AdminOrganizationView',
     'AdminTrendsReportView',
+    'AdminComprehensiveAnalyticsView',
+    'AdminUserDetailView',
     'UnifiedUserViewSet',
     'list_devices',
     'remove_device',
