@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 class StaffSerializer(serializers.Serializer):
     id = serializers.UUIDField()
+    user_id = serializers.UUIDField()
     name = serializers.CharField()
     email = serializers.EmailField()
     profile_picture = serializers.SerializerMethodField()
