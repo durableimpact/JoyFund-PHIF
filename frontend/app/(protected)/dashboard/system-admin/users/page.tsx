@@ -3,10 +3,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { Loader2, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { formatDate } from "@/lib/utils";
-import { getUsers } from "@/actions/accounts";
+import { getUsers, getAdminUserRoleSummary } from "@/actions/accounts";
+import Paginator from "@/components/shared/Paginator";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { PieChart, Pie, Cell } from "recharts";
 
 const TABS = [
   { key: "all" as const, label: "All Users" },
@@ -19,30 +23,42 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"];
 
+const VALID_TAB_KEYS = TABS.map((t) => t.key) as readonly string[];
+
 export default function UsersPage() {
   const { data: session } = useSession();
   const token =
     session?.accessToken ||
     (session?.user as { accessToken?: string })?.accessToken;
-  const [tab, setTab] = useState<TabKey>("all");
+  const [params, setParams] = useUrlSearchParams(
+    { tab: "all", page: 1 },
+    { tab: VALID_TAB_KEYS, page: Number },
+  );
+  const tab = (params.tab as TabKey) || "all";
+  const page = Number(params.page) || 1;
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page, setPage] = useState(1);
   const pageSize = 10;
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1); // Reset page on search change
+      setParams({ page: 1 }); // Reset page on search change
     }, 300);
     return () => clearTimeout(handler);
   }, [search]);
 
   // Reset page on tab change
   const handleTabChange = (newTab: TabKey) => {
-    setTab(newTab);
-    setPage(1);
+    setParams({ tab: newTab, page: 1 });
   };
+
+  const setPage = (p: number) => {
+    setParams({ page: p });
+  };
+
+  const nextPage = () => setPage(page + 1);
+  const prevPage = () => setPage(Math.max(1, page - 1));
 
   const { data: usersData, isLoading } = useQuery({
     queryKey: ["users", token, tab, debouncedSearch, page],
@@ -62,6 +78,30 @@ export default function UsersPage() {
   const users = usersData?.results || [];
   const totalCount = usersData?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
+
+  const { data: roleSummary } = useQuery({
+    queryKey: ["user-role-summary", token],
+    queryFn: () => getAdminUserRoleSummary(token || ""),
+    enabled: !!token,
+  });
+
+  const chartData = (roleSummary?.roles || [])
+    .filter((r) => r.count > 0)
+    .map((r) => ({
+      name: r.label,
+      value: r.count,
+      fill: r.color,
+    }));
+
+  const chartConfig: ChartConfig = {
+    value: { label: "Users" },
+    ...Object.fromEntries(
+      (roleSummary?.roles || []).map((r) => [
+        r.label.toLowerCase().replace(/\s+/g, "_"),
+        { label: r.label, color: r.color },
+      ])
+    ),
+  };
 
   const getRoleBadgeClass = (role: string) => {
     const baseClass = "badge text-[10px]";
@@ -92,6 +132,54 @@ export default function UsersPage() {
           <Plus size={16} /> Create User
         </Link>
       </div>
+
+      {/* Role Distribution Chart */}
+      {roleSummary && chartData.length > 0 && (
+        <div className="card p-5 mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">User Distribution by Role</h2>
+              <p className="text-2xl font-black text-gray-900">{roleSummary.total_users} <span className="text-sm font-medium text-gray-400">total users</span></p>
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {roleSummary.roles.map((r) => (
+                  <div key={r.role} className="flex items-center gap-1.5 text-xs">
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.color }} />
+                    <span className="text-gray-600">{r.label}</span>
+                    <span className="font-bold text-gray-900">{r.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="w-full sm:w-48 h-48 shrink-0">
+              <ChartContainer config={chartConfig} className="w-full h-full">
+                <PieChart>
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        nameKey="name"
+                        formatter={(value) => `${value} users`}
+                      />
+                    }
+                  />
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={75}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs - Horizontal Scrollable on Mobile */}
       <div className="flex gap-2 mb-5 overflow-x-auto pb-2 sm:pb-0 snap-x snap-mandatory">
@@ -208,31 +296,7 @@ export default function UsersPage() {
 
         {/* Desktop Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
-              Showing {(page - 1) * pageSize + 1} to{" "}
-              {Math.min(page * pageSize, totalCount)} of {totalCount} entries
-            </span>
-            <div className="flex gap-1">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="p-1.5 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-lg border border-gray-100">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                disabled={page === totalPages || users.length === 0}
-                onClick={() => setPage((p) => p + 1)}
-                className="p-1.5 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={page} totalPages={totalPages} totalCount={totalCount} pageSize={pageSize} onPageChange={setPage} />
         )}
       </div>
 
@@ -319,7 +383,7 @@ export default function UsersPage() {
             <div className="flex gap-2 w-full">
               <button
                 disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
+                onClick={prevPage}
                 className="flex-1 p-2 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1"
               >
                 <ChevronLeft size={16} />
@@ -327,7 +391,7 @@ export default function UsersPage() {
               </button>
               <button
                 disabled={page === totalPages || users.length === 0}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={nextPage}
                 className="flex-1 p-2 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1"
               >
                 <span className="text-xs font-medium">Next</span>
