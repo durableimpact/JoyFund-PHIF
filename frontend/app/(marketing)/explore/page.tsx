@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import Navbar from "@/components/shared/Navbar";
 import { Helmet } from "react-helmet-async";
 import CampaignCard from "@/components/shared/CampaignCard";
@@ -18,9 +18,13 @@ const EVENT_TYPE_LABELS = [
 ];
 
 export default function ExplorePage() {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [params, setParams] = useUrlSearchParams(
+    { search: "", filter: "All", statusFilter: "all" },
+    {}
+  );
+  const search = (params.search as string) || "";
+  const filter = (params.filter as string) || "All";
+  const statusFilter = (params.statusFilter as string) || "all";
 
   // Fetch campaigns with React Query
   const { data: campaignsResponse, isLoading } = useQuery({
@@ -95,13 +99,13 @@ export default function ExplorePage() {
                 className="input-field pl-10"
                 placeholder="Search campaigns or donors..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => setParams({ search: e.target.value })}
               />
             </div>
             <select
               className="input-field w-auto min-w-37.5"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => setParams({ statusFilter: e.target.value })}
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -114,7 +118,7 @@ export default function ExplorePage() {
             {EVENT_TYPE_LABELS.map(({ value, label }) => (
               <button
                 key={value}
-                onClick={() => setFilter(value)}
+                onClick={() => setParams({ filter: value })}
                 className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${filter === value ? "text-white shadow-sm" : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"}`}
                 style={filter === value ? { background: "var(--primary)" } : {}}
               >
