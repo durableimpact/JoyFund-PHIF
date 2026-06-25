@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate, statusColor } from '@/lib/utils';
 import { listVouchers } from '@/actions/vouchers';
+import Paginator from '@/components/shared/Paginator';
 
 const STATUS_FILTERS = ['all', 'ACTIVE', 'PENDING_CONFIRMATION', 'USED', 'EXPIRED'];
 const PAGE_SIZE = 10;
@@ -14,20 +15,24 @@ export default function HospitalAdminVouchers() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams({ search: '', filter: 'all', page: 1 }, { page: Number });
+  const search = (params.search as string) || '';
+  const filter = (params.filter as string) || 'all';
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
 
-  const params: Record<string, string> = {
+  const queryParams: Record<string, string> = {
     page: currentPage.toString(),
     page_size: PAGE_SIZE.toString(),
   };
-  if (search) params.search = search;
-  if (filter !== 'all') params.status = filter;
+  if (search) queryParams.search = search;
+  if (filter !== 'all') queryParams.status = filter;
 
   const { data, isLoading } = useQuery({
     queryKey: ['ha-vouchers-list', token, currentPage, search, filter],
-    queryFn: () => listVouchers(token, params),
+    queryFn: () => listVouchers(token, queryParams),
     enabled: !!token,
   });
 
@@ -47,9 +52,9 @@ export default function HospitalAdminVouchers() {
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input className="input-field pl-10" placeholder="Search by code or beneficiary..." value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }} />
+          <input className="input-field pl-10" placeholder="Search by code or beneficiary..." value={search} onChange={e => setParams({ search: e.target.value, page: 1 })} />
         </div>
-        <select className="input-field w-auto" value={filter} onChange={e => { setFilter(e.target.value); setCurrentPage(1); }}>
+        <select className="input-field w-auto" value={filter} onChange={e => setParams({ filter: e.target.value, page: 1 })}>
           {STATUS_FILTERS.map(s => <option key={s} value={s}>{s === 'all' ? 'All Status' : s.replace(/_/g, ' ')}</option>)}
         </select>
       </div>
@@ -89,27 +94,7 @@ export default function HospitalAdminVouchers() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
-              Page {currentPage} of {totalPages} ({totalCount} results)
-            </span>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={!hasPreviousPage}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => setCurrentPage(p => p + 1)}
-                disabled={!hasNextPage}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
     </>
