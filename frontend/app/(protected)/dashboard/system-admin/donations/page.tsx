@@ -1,29 +1,41 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { HandHeart, Loader2, Search, Eye } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { formatXAF, formatDate } from "@/lib/utils";
 import { listAllDonations } from "@/actions/campaigns";
+import Paginator from "@/components/shared/Paginator";
 
 const STATUS_FILTERS = ["all", "SUCCESS", "PENDING", "FAILED"];
 const METHOD_FILTERS = ["all", "MTN", "ORANGE"];
+const PAGE_SIZE = 20;
 
 export default function AdminDonationsPage() {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [methodFilter, setMethodFilter] = useState("all");
+  const [params, setParams] = useUrlSearchParams(
+    { search: "", statusFilter: "all", methodFilter: "all", page: 1 },
+    { page: Number }
+  );
+  const search = (params.search as string) || "";
+  const statusFilter = (params.statusFilter as string) || "all";
+  const methodFilter = (params.methodFilter as string) || "all";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
 
-  const params: Record<string, string> = {};
-  if (search) params.search = search;
-  if (statusFilter !== "all") params.status = statusFilter;
-  if (methodFilter !== "all") params.payment_method = methodFilter;
+  const apiParams: Record<string, string> = { page: currentPage.toString(), page_size: PAGE_SIZE.toString() };
+  if (search) apiParams.search = search;
+  if (statusFilter !== "all") apiParams.status = statusFilter;
+  if (methodFilter !== "all") apiParams.payment_method = methodFilter;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-donations", params],
-    queryFn: async () => await listAllDonations(params),
+    queryKey: ["admin-donations", apiParams],
+    queryFn: async () => await listAllDonations(apiParams),
   });
   const rows = (data as any)?.results ?? [];
+  const totalCount = (data as any)?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <>
@@ -39,18 +51,18 @@ export default function AdminDonationsPage() {
           <Search size={14} className="text-gray-400 shrink-0" />
           <input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => setParams({ search: e.target.value, page: 1 })}
             placeholder="Search donor or campaign..."
             className="text-sm bg-transparent border-none outline-none w-full"
           />
         </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+        <select value={statusFilter} onChange={e => setParams({ statusFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
           {STATUS_FILTERS.map(s => (
             <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>
           ))}
         </select>
-        <select value={methodFilter} onChange={e => setMethodFilter(e.target.value)}
+        <select value={methodFilter} onChange={e => setParams({ methodFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
           {METHOD_FILTERS.map(m => (
             <option key={m} value={m}>{m === "all" ? "All Methods" : m}</option>
@@ -67,17 +79,13 @@ export default function AdminDonationsPage() {
           <>
             <div className="md:hidden space-y-3">
               {rows.map((d: any) => (
-                <div key={d.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
+                <Link key={d.id} href={`/dashboard/system-admin/donations/${d.id}`} className="block border border-gray-100 rounded-xl p-4 space-y-2 hover:border-[#471DDB]/30 transition-colors">
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Campaign</span><span className="font-medium text-gray-900 truncate max-w-[200px]">{d.campaign_title}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Donor</span><span className="text-gray-900">{d.donor_name || "Anonymous"}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Amount</span><span className="font-bold text-gray-900">{formatXAF(d.amount)}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${d.status === "SUCCESS" ? "bg-green-100 text-green-700" : d.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{d.status}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="text-gray-400 text-xs">{formatDate(d.created_at)}</span></div>
-                  <div className="pt-1">
-                    <Link href={`/dashboard/system-admin/donations/${d.id}`}
-                      className="text-xs font-semibold text-[#471DDB] hover:underline">View details →</Link>
-                  </div>
-                </div>
+                </Link>
               ))}
             </div>
 
@@ -85,14 +93,14 @@ export default function AdminDonationsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["Campaign", "Donor", "Amount", "Status", "Date", ""].map(h => (
+                    {["Campaign", "Donor", "Amount", "Status", "Date"].map(h => (
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((d: any) => (
-                    <tr key={d.id} className="border-b border-gray-50">
+                    <tr key={d.id} className="border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => window.location.href = `/dashboard/system-admin/donations/${d.id}`}>
                       <td className="py-3 font-medium text-gray-900 max-w-[200px] truncate">{d.campaign_title}</td>
                       <td className="py-3 text-gray-600">{d.donor_name || "Anonymous"}</td>
                       <td className="py-3 font-bold text-gray-900">{formatXAF(d.amount)}</td>
@@ -106,12 +114,6 @@ export default function AdminDonationsPage() {
                         </span>
                       </td>
                       <td className="py-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(d.created_at)}</td>
-                      <td className="py-3">
-                        <Link href={`/dashboard/system-admin/donations/${d.id}`}
-                          className="p-1.5 hover:bg-[#471DDB]/10 rounded-lg text-gray-400 hover:text-[#471DDB] inline-block">
-                          <Eye size={14} />
-                        </Link>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -120,6 +122,8 @@ export default function AdminDonationsPage() {
           </>
         )}
       </div>
+
+      <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </>
   );
 }
