@@ -69,6 +69,7 @@ class HospitalAdminCreateSerializer(NationalIDInputMixin, serializers.Serializer
 
         user = User(**user_data, role=Role.HOSPITAL_ADMIN)
         user.set_password(password)
+        user.is_verified = True
         user.save()
 
         hospital_admin = HospitalAdmin.objects.create(
