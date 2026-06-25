@@ -91,7 +91,7 @@ export default function VoucherDetailPage() {
         {/* ── Left: Main info ── */}
         <div className="lg:col-span-2 space-y-5">
           {/* Key details card */}
-          <div className="card">
+          <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Voucher Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <Detail label="Voucher Code" value={voucher.voucher_code} mono />
@@ -108,7 +108,7 @@ export default function VoucherDetailPage() {
 
           {/* Beneficiary card */}
           {voucher.beneficiary && (
-            <div className="card">
+            <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
                 <User size={14} /> Beneficiary
               </h2>
@@ -127,7 +127,7 @@ export default function VoucherDetailPage() {
 
           {/* Hospital card */}
           {voucher.hospital && (
-            <div className="card">
+            <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
                 <MapPin size={14} /> Hospital
               </h2>
@@ -142,7 +142,7 @@ export default function VoucherDetailPage() {
 
           {/* Funding records */}
           {fundings.length > 0 && (
-            <div className="card">
+            <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
                 <Banknote size={14} /> Funding Sources ({fundings.length})
               </h2>
@@ -186,7 +186,7 @@ export default function VoucherDetailPage() {
 
         {/* ── Right: Timeline ── */}
         <div className="space-y-4">
-          <div className="card">
+          <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
               <Activity size={14} /> Activity Timeline
             </h2>
@@ -212,8 +212,8 @@ export default function VoucherDetailPage() {
           </div>
 
           {voucher.health_issue && (
-            <div className="card">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Health Issue</h2>
+          <div className="card p-5">
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Health Issue</h2>
               <div className="space-y-2">
                 <Detail label="Category" value={voucher.health_issue.category} />
                 <Detail label="Severity" value={voucher.health_issue.severity} />
