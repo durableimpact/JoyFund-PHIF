@@ -61,6 +61,7 @@ class SocialWorkerCreateSerializer(serializers.Serializer):
 
         user = User(**user_data, role=Role.SOCIAL_WORKER)
         user.set_password(password)
+        user.is_verified = True
         user.save()
 
         social_worker = SocialWorker.objects.create(
