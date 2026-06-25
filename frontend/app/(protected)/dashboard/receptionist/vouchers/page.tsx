@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { listVouchers } from '@/actions/vouchers';
 import { formatDate, statusColor } from '@/lib/utils';
+import Paginator from '@/components/shared/Paginator';
 
 const STATUS_FILTERS = ['all', 'AVAILABLE', 'ACTIVE', 'PENDING_CONFIRMATION', 'USED', 'EXPIRED'];
 const PAGE_SIZE = 10;
@@ -16,21 +17,25 @@ export default function ReceptionistVouchers() {
   const userInfo = (session?.user as any)?.userInfo;
   const hospitalId = userInfo?.hospital?.id || userInfo?.hospital;
 
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams({ search: '', filter: 'all', page: 1 }, { page: Number });
+  const search = (params.search as string) || '';
+  const filter = (params.filter as string) || 'all';
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
 
-  const params: Record<string, string> = {
+  const queryParams: Record<string, string> = {
     page: currentPage.toString(),
     page_size: PAGE_SIZE.toString(),
   };
-  if (hospitalId) params.hospital = hospitalId;
-  if (filter !== 'all') params.status = filter;
-  if (search) params.search = search;
+  if (hospitalId) queryParams.hospital = hospitalId;
+  if (filter !== 'all') queryParams.status = filter;
+  if (search) queryParams.search = search;
 
   const { data, isLoading } = useQuery({
     queryKey: ['rec-vouchers', token, hospitalId, currentPage, search, filter],
-    queryFn: () => listVouchers(token, params),
+    queryFn: () => listVouchers(token, queryParams),
     enabled: !!token && !!hospitalId,
   });
 
@@ -54,10 +59,10 @@ export default function ReceptionistVouchers() {
             className="input-field pl-10"
             placeholder="Search by voucher code or beneficiary..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            onChange={(e) => setParams({ search: e.target.value, page: 1 })}
           />
         </div>
-        <select className="input-field w-auto" value={filter} onChange={(e) => { setFilter(e.target.value); setCurrentPage(1); }}>
+        <select className="input-field w-auto" value={filter} onChange={(e) => setParams({ filter: e.target.value, page: 1 })}>
           {STATUS_FILTERS.map((s) => (
             <option key={s} value={s}>{s === 'all' ? 'All Status' : s.replace(/_/g, ' ')}</option>
           ))}
@@ -99,17 +104,7 @@ export default function ReceptionistVouchers() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">Page {currentPage} of {totalPages} ({totalCount} results)</span>
-            <div className="flex gap-1">
-              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={!hasPreviousPage} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600">
-                <ChevronLeft size={16} />
-              </button>
-              <button onClick={() => setCurrentPage((p) => p + 1)} disabled={!hasNextPage} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600">
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
     </>
