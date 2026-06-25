@@ -13,6 +13,7 @@ import {
   TrendingUp,
   XCircle
 } from 'lucide-react';
+import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 
 
 
@@ -52,8 +53,12 @@ export default function DisbursementsPage() {
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const queryClient = useQueryClient();
 
-  const [search, setSearch] = useState('');
-  const [statusTab, setStatusTab] = useState<'ALL' | 'PENDING' | 'COMPLETED' | 'FAILED'>('ALL');
+  const [urlParams, setUrlParams] = useUrlSearchParams(
+    { search: '', statusTab: 'ALL' },
+    {}
+  );
+  const search = (urlParams.search as string) || '';
+  const statusTab = (urlParams.statusTab as string) as 'ALL' | 'PENDING' | 'COMPLETED' | 'FAILED';
   const [showRecordModal, setShowRecordModal] = useState(false);
 
   const [selectedHospital, setSelectedHospital] = useState('');
@@ -168,7 +173,7 @@ export default function DisbursementsPage() {
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-5">
         <div className="flex gap-2">
           {(['ALL', 'PENDING', 'COMPLETED', 'FAILED'] as const).map(tab => (
-            <button key={tab} onClick={() => setStatusTab(tab)}
+            <button key={tab} onClick={() => setUrlParams({ statusTab: tab })}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${statusTab === tab ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               style={statusTab === tab ? { background: '#471DDB' } : {}}>
               {tab.charAt(0) + tab.slice(1).toLowerCase()}
@@ -177,7 +182,7 @@ export default function DisbursementsPage() {
         </div>
         <div className="relative w-full sm:w-72">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input className="input-field pl-9 text-xs" placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input-field pl-9 text-xs" placeholder="Search…" value={search} onChange={e => setUrlParams({ search: e.target.value })} />
         </div>
       </div>
 
