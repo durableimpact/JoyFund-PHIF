@@ -101,14 +101,14 @@ export default function TransactionsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["ID", "Type", "Direction", "Amount", "Currency", "Status", "Gateway TX ID", "Date", ""].map(h => (
+                    {["ID", "Type", "Direction", "Amount", "Currency", "Status", "Gateway TX ID", "Date"].map(h => (
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((t) => (
-                    <tr key={t.id} className="border-b border-gray-50">
+                    <tr key={t.id} className="border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => window.location.href = `/dashboard/system-admin/transactions/${t.id}`}>
                       <td className="py-3 text-gray-400 font-mono text-xs">{t.id.slice(0, 8)}...</td>
                       <td className="py-3">
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
@@ -133,12 +133,6 @@ export default function TransactionsPage() {
                       </td>
                       <td className="py-3 text-gray-400 font-mono text-xs max-w-[100px] truncate">{t.gateway_transaction_id || "—"}</td>
                       <td className="py-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(t.created_at)}</td>
-                      <td className="py-3">
-                        <Link href={`/dashboard/system-admin/transactions/${t.id}`}
-                          className="p-1.5 hover:bg-[#471DDB]/10 rounded-lg text-gray-400 hover:text-[#471DDB] inline-block">
-                          <Eye size={14} />
-                        </Link>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
