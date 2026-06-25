@@ -6,6 +6,7 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatXAF, formatDate, statusColor } from "@/lib/utils";
 import { listDisbursements } from "@/actions/disbursement";
 import Link from "next/link";
+import Paginator from "@/components/shared/Paginator";
 
 const STATUS_FILTERS = ["all", "PENDING", "COMPLETED", "FAILED", "CANCELLED"];
 const PAGE_SIZE = 10;
@@ -182,27 +183,7 @@ export default function HospitalAdminDisbursements() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
-              Page {currentPage} of {totalPages}
-            </span>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setCurrentPage} />
         )}
       </div>
     </>
