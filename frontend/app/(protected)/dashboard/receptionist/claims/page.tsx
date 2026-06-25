@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { getMedicalClaims } from '@/actions/hospital';
 import { formatXAF, formatDate, statusColor } from '@/lib/utils';
+import Paginator from '@/components/shared/Paginator';
 
 const STATUS_FILTERS = ['all', 'PENDING', 'APPROVED', 'REJECTED'];
 const PAGE_SIZE = 10;
@@ -16,21 +17,25 @@ export default function ReceptionistClaims() {
   const userInfo = (session?.user as any)?.userInfo;
   const hospitalId = userInfo?.hospital;
 
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams({ search: "", filter: "all", page: 1 }, { page: Number });
+  const search = (params.search as string) || "";
+  const filter = (params.filter as string) || "all";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
 
-  const params: Record<string, string> = {
+  const queryParams: Record<string, string> = {
     page: currentPage.toString(),
     page_size: PAGE_SIZE.toString(),
   };
-  if (hospitalId) params.hospital = hospitalId;
-  if (filter !== 'all') params.claim_status = filter;
-  if (search) params.search = search;
+  if (hospitalId) queryParams.hospital = hospitalId;
+  if (filter !== 'all') queryParams.claim_status = filter;
+  if (search) queryParams.search = search;
 
   const { data, isLoading } = useQuery({
     queryKey: ['rec-claims-list', token, hospitalId, currentPage, search, filter],
-    queryFn: () => getMedicalClaims(token, params),
+    queryFn: () => getMedicalClaims(token, queryParams),
     enabled: !!token && !!hospitalId,
   });
 
@@ -50,9 +55,9 @@ export default function ReceptionistClaims() {
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input className="input-field pl-10" placeholder="Search claims..." value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} />
+          <input className="input-field pl-10" placeholder="Search claims..." value={search} onChange={(e) => setParams({ search: e.target.value, page: 1 })} />
         </div>
-        <select className="input-field w-auto" value={filter} onChange={(e) => { setFilter(e.target.value); setCurrentPage(1); }}>
+        <select className="input-field w-auto" value={filter} onChange={(e) => setParams({ filter: e.target.value, page: 1 })}>
           {STATUS_FILTERS.map((s) => <option key={s} value={s}>{s === 'all' ? 'All Status' : s}</option>)}
         </select>
       </div>
@@ -92,17 +97,7 @@ export default function ReceptionistClaims() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">Page {currentPage} of {totalPages} ({totalCount} results)</span>
-            <div className="flex gap-1">
-              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={!hasPreviousPage} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600">
-                <ChevronLeft size={16} />
-              </button>
-              <button onClick={() => setCurrentPage((p) => p + 1)} disabled={!hasNextPage} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600">
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
     </>
