@@ -2,6 +2,7 @@
 import { ChevronLeft, ChevronRight, Plus, Search, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import Link from "next/link";
 
 import { formatXAF, statusColor, formatDate } from "@/lib/utils";
@@ -10,6 +11,7 @@ import { listVouchers, createVouchersFromCampaigns } from "@/actions/vouchers";
 import { listHealthIssues } from "@/actions/beneficiaries";
 import { listHospitals } from "@/actions/hospital";
 import { listCampaigns } from "@/actions/campaigns";
+import Paginator from "@/components/shared/Paginator";
 
 const STATUS_FILTERS = [
   "all",
@@ -34,10 +36,15 @@ export default function AdminVouchers() {
   const token = session?.accessToken || session?.user?.accessToken;
   const queryClient = useQueryClient();
 
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [params, setParams] = useUrlSearchParams({ search: "", filter: "all", page: 1 }, { page: Number });
+  const search = (params.search as string) || "";
+  const filter = (params.filter as string) || "all";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
+
   const [showCreate, setShowCreate] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [createStep, setCreateStep] = useState(1);
 
   const [healthIssueId, setHealthIssueId] = useState("");
@@ -242,8 +249,7 @@ export default function AdminVouchers() {
             placeholder="Search by code or beneficiary..."
             value={search}
             onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
+              setParams({ search: e.target.value, page: 1 });
             }}
           />
         </div>
@@ -251,8 +257,7 @@ export default function AdminVouchers() {
           className="input-field w-auto"
           value={filter}
           onChange={(e) => {
-            setFilter(e.target.value);
-            setCurrentPage(1);
+            setParams({ filter: e.target.value, page: 1 });
           }}
         >
           {STATUS_FILTERS.map((s) => (
@@ -344,60 +349,7 @@ export default function AdminVouchers() {
         </div>
 
         {totalCount > PAGE_SIZE && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
-            <div className="text-xs text-gray-600">
-              Showing{" "}
-              <span className="font-semibold">
-                {(currentPage - 1) * PAGE_SIZE + 1}
-              </span>{" "}
-              to{" "}
-              <span className="font-semibold">
-                {Math.min(currentPage * PAGE_SIZE, totalCount)}
-              </span>{" "}
-              of <span className="font-semibold">{totalCount}</span> results
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                disabled={!hasPreviousPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Previous page"
-              >
-                <ChevronLeft size={16} className="text-gray-600" />
-              </button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => {
-                  const pageNum = i + 1;
-                  const isCurrentPage = pageNum === currentPage;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                        isCurrentPage
-                          ? "text-white"
-                          : "border border-gray-200 text-gray-700 hover:bg-gray-100"
-                      }`}
-                      style={isCurrentPage ? { background: "#471DDB" } : {}}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                disabled={!hasNextPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Next page"
-              >
-                <ChevronRight size={16} className="text-gray-600" />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
 
