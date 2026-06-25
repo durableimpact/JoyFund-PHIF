@@ -243,24 +243,20 @@ export default function AdminDashboard() {
           {/* Donation Trends Chart */}
           <div className="card p-5">
             <h3 className="font-bold text-gray-900 mb-4">
-              Donation Trends (Monthly)
+              Donation Trends ({period === "day" ? "Last 7 Days" : period === "week" ? "Last 7 Days" : period === "year" ? "Last 365 Days" : "Last 30 Days"})
             </h3>
             {loading ? (
               <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
-            ) : !trends?.donations_by_month?.length ? (
-              <p className="text-gray-400 text-sm text-center py-12">
-                No donation data yet
-              </p>
             ) : (
               <ChartContainer
                 config={{
                   amount: { label: "Donations", color: "#471DDB" },
                 }}
-                className="h-64"
+                className="h-64 w-full aspect-auto"
               >
                 <BarChart
-                  data={trends.donations_by_month.map((d) => ({
-                    month: d.date,
+                  data={(trends?.donations_over_time ?? []).map((d) => ({
+                    date: d.date,
                     amount: d.value,
                   }))}
                   margin={{ top: 8, right: 8, left: -16, bottom: 4 }}
@@ -271,8 +267,8 @@ export default function AdminDashboard() {
                     stroke="#e5e7eb"
                   />
                   <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 11 }}
+                    dataKey="date"
+                    tick={{ fontSize: 10 }}
                     tickLine={false}
                     axisLine={false}
                   />
@@ -280,7 +276,7 @@ export default function AdminDashboard() {
                     tick={{ fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                    tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v))}
                   />
                   <ChartTooltip
                     content={
@@ -300,22 +296,20 @@ export default function AdminDashboard() {
           </div>
           {/* User Registrations Chart */}
           <div className="card p-5">
-            <h3 className="font-bold text-gray-900 mb-4">User Registrations</h3>
+            <h3 className="font-bold text-gray-900 mb-4">
+              User Registrations ({period === "day" ? "Last 7 Days" : period === "week" ? "Last 7 Days" : period === "year" ? "Last 365 Days" : "Last 30 Days"})
+            </h3>
             {loading ? (
               <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
-            ) : !userGrowth?.registrations_over_time?.length ? (
-              <p className="text-gray-400 text-sm text-center py-12">
-                No registration data yet
-              </p>
             ) : (
               <ChartContainer
                 config={{
                   users: { label: "New Users", color: "#1DB1DB" },
                 }}
-                className="h-64"
+                className="h-64 w-full aspect-auto"
               >
                 <LineChart
-                  data={userGrowth.registrations_over_time.map((r) => ({
+                  data={(userGrowth?.registrations_over_time ?? []).map((r) => ({
                     date: r.date,
                     users: r.value,
                   }))}
