@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Heart, Search } from 'lucide-react';
 import { listBeneficiaries } from '@/actions/beneficiaries';
 import { formatDate } from '@/lib/utils';
+import Paginator from '@/components/shared/Paginator';
 
 const PAGE_SIZE = 10;
 
@@ -15,8 +16,12 @@ export default function HospitalAdminPatients() {
   const currentUser = (session?.user as any)?.userInfo;
   const hospitalId = currentUser?.hospital?.id;
 
-  const [search, setSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams({ search: "", page: 1 }, { page: Number });
+  const search = (params.search as string) || "";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
 
   const { data, isLoading } = useQuery({
     queryKey: ['ha-patients', token, hospitalId, currentPage, search],
@@ -52,7 +57,7 @@ export default function HospitalAdminPatients() {
           className="input-field pl-10"
           placeholder="Search by name, health ID, city..."
           value={search}
-          onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+          onChange={e => setParams({ search: e.target.value, page: 1 })}
         />
       </div>
 
@@ -108,27 +113,7 @@ export default function HospitalAdminPatients() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
-            <span className="text-xs text-gray-500">
-              Page {currentPage} of {totalPages} ({totalCount} results)
-            </span>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={!hasPreviousPage}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => setCurrentPage(p => p + 1)}
-                disabled={!hasNextPage}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
     </>
