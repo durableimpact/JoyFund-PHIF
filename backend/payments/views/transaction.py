@@ -105,9 +105,8 @@ class FeeSplitViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
     ordering_fields = ['gross_amount', 'escrow_amount', 'platform_amount', 'created_at']
     ordering = ['-created_at']
 
-    @staticmethod
-    def _get_list_cache_key():
-        return 'fee_split_list'
+    def _get_list_cache_key(self):
+        return f'fee_split_list_{self.request.GET.urlencode()}'
 
     @staticmethod
     def _get_detail_cache_key(fee_split_id):

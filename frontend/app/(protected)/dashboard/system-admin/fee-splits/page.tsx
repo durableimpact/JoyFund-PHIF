@@ -2,19 +2,32 @@
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { Percent, Loader2 } from "lucide-react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { formatXAF, formatDate } from "@/lib/utils";
 import { listFeeSplits } from "@/actions/payments";
+import Paginator from "@/components/shared/Paginator";
+
+const PAGE_SIZE = 20;
 
 export default function FeeSplitsPage() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
+  const [params, setParams] = useUrlSearchParams(
+    { page: 1 },
+    { page: Number }
+  );
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+
   const { data: splitsRes, isLoading } = useQuery({
-    queryKey: ["fee-splits", token],
-    queryFn: async () => await listFeeSplits(token),
+    queryKey: ["fee-splits", token, currentPage],
+    queryFn: async () => await listFeeSplits(token, { page: currentPage, page_size: PAGE_SIZE }),
     enabled: !!token,
   });
   const splits = splitsRes?.results ?? [];
+  const totalCount = splitsRes?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <>
@@ -69,6 +82,8 @@ export default function FeeSplitsPage() {
           </div>
         </>)}
       </div>
+
+      <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </>
   );
 }

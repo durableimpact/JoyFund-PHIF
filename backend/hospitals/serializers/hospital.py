@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from hospitals.models import Hospital
+from hospitals.serializers.service import ServiceDetailSerializer
 
 
 class HospitalManagerSerializer(serializers.Serializer):
@@ -35,6 +36,7 @@ class MinimalHospitalSerializer(serializers.ModelSerializer):
 
 class HospitalDetailSerializer(serializers.ModelSerializer):
     admins = serializers.SerializerMethodField()
+    services = ServiceDetailSerializer(many=True, read_only=True)
 
     class Meta:
         model = Hospital
@@ -63,6 +65,7 @@ class HospitalDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'admins',
+            'services',
         ]
 
     def get_admins(self, obj):

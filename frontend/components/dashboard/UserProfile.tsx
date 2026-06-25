@@ -230,7 +230,7 @@ export default function UserProfile() {
             <p className="mt-1 text-sm text-gray-400">A summary of your account and profile details.</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="rounded-xl bg-gray-900 px-4 py-2.5 text-right text-white shadow-sm">
+            <div className="rounded-xl bg-primary px-4 py-2.5 text-right text-white shadow-sm">
               <p className="text-[10px] uppercase tracking-[0.18em] text-white/70">Role</p>
               <p className="text-xs font-semibold">{role}</p>
             </div>
@@ -307,7 +307,7 @@ export default function UserProfile() {
               </div>
             </div>
             {attributeRow("Member since", joined)}
-            {attributeRow("Profile ID", profileId)}
+            {/*{attributeRow("Profile ID", profileId)}*/}
             {hospitalName ? attributeRow("Hospital", hospitalName) : null}
             {socialWorkerProfile ? (
               <>
@@ -329,10 +329,12 @@ export default function UserProfile() {
                 <p className="text-xs text-gray-400">Your current role</p>
                 <p className="mt-1 text-sm font-semibold text-gray-900">{role}</p>
               </div>
+              {/*}
               <div className="rounded-xl bg-gray-50 p-4">
                 <p className="text-xs text-gray-400">Profile identifier</p>
                 <p className="mt-1 text-sm font-semibold text-gray-900 font-mono">{profileId.slice(0, 8)}…</p>
               </div>
+              */}
             </div>
           </div>
 

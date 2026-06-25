@@ -639,6 +639,52 @@ export const getAdminTrendsReport = async (
   }
 };
 
+export const getAdminUserRoleSummary = async (access_token: string) => {
+  try {
+    const { data } = await api.get<UserRoleSummary>(
+      "/api/accounts/system-admins/dashboard/user-role-summary/",
+      { headers: getAuthHeader(access_token) },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
+export const getAdminComprehensiveAnalytics = async (
+  access_token: string,
+  params?: {
+    period: string;
+    start_date: string;
+    end_date: string;
+  },
+) => {
+  try {
+    const { data } = await api.get<ComprehensiveAnalytics>(
+      "/api/accounts/system-admins/dashboard/comprehensive-analytics/",
+      { headers: getAuthHeader(access_token), params },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
+export const getAdminUserDetail = async (
+  user_id: string,
+  access_token: string,
+) => {
+  try {
+    const { data } = await api.get<AdminUserDetail>(
+      `/api/accounts/system-admins/dashboard/user-detail/${user_id}/`,
+      { headers: getAuthHeader(access_token) },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
 // ── Password Management ──
 
 export const requestPasswordReset = async (email: string) => {

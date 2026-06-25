@@ -161,3 +161,168 @@ class TrendsReportSerializer(serializers.Serializer):
     daily_breakdown = serializers.ListField(
         child=serializers.DictField(),
     )
+
+
+# ---------------------------------------------------------------------------
+# User Role Summary (for users page chart)
+# ---------------------------------------------------------------------------
+
+class UserRoleCountSerializer(serializers.Serializer):
+    role = serializers.CharField()
+    label = serializers.CharField()
+    count = serializers.IntegerField()
+    color = serializers.CharField()
+
+
+class UserRoleSummarySerializer(serializers.Serializer):
+    total_users = serializers.IntegerField()
+    roles = UserRoleCountSerializer(many=True)
+
+
+# ---------------------------------------------------------------------------
+# Comprehensive Analytics Dashboard
+# ---------------------------------------------------------------------------
+
+class CampaignPerformanceSerializer(serializers.Serializer):
+    total_campaigns = serializers.IntegerField()
+    active_campaigns = serializers.IntegerField()
+    funded_campaigns = serializers.IntegerField()
+    closed_campaigns = serializers.IntegerField()
+    total_raised = serializers.FloatField()
+    avg_donation = serializers.FloatField()
+    completion_rate = serializers.FloatField()
+    campaigns_over_time = TrendEntrySerializer(many=True)
+
+
+class VoucherAnalyticsSerializer(serializers.Serializer):
+    total_generated = GrowthIndicatorSerializer()
+    total_redeemed = GrowthIndicatorSerializer()
+    redemption_rate = serializers.FloatField()
+    vouchers_over_time = TrendEntrySerializer(many=True)
+    by_hospital = serializers.ListField(child=serializers.DictField())
+
+
+class HospitalNetworkSerializer(serializers.Serializer):
+    total_hospitals = GrowthIndicatorSerializer()
+    hospitals_by_status = serializers.ListField(child=serializers.DictField())
+    top_hospitals = HospitalSummarySerializer(many=True)
+    hospitals_over_time = TrendEntrySerializer(many=True)
+
+
+class ComprehensiveAnalyticsSerializer(serializers.Serializer):
+    executive_summary = OverviewKpiSerializer()
+    user_growth = UserGrowthSerializer()
+    donation_analytics = DonationTrendsSerializer()
+    campaign_performance = CampaignPerformanceSerializer()
+    voucher_analytics = VoucherAnalyticsSerializer()
+    financial_overview = FinancialDashboardSerializer()
+    hospital_network = HospitalNetworkSerializer()
+    daily_activity = TrendsReportSerializer()
+
+
+# ---------------------------------------------------------------------------
+# Admin User Detail (comprehensive single-user view)
+# ---------------------------------------------------------------------------
+
+class AdminUserDeviceSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    device_name = serializers.CharField(allow_blank=True)
+    device_type = serializers.CharField(allow_blank=True)
+    browser = serializers.CharField(allow_blank=True)
+    os = serializers.CharField(allow_blank=True)
+    ip_address = serializers.CharField(allow_blank=True)
+    last_active = serializers.DateTimeField(allow_null=True)
+    is_trusted = serializers.BooleanField()
+    is_blocked = serializers.BooleanField()
+    created_at = serializers.DateTimeField()
+
+
+class AdminUserCampaignSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    title = serializers.CharField()
+    status = serializers.CharField()
+    goal_amount = serializers.FloatField()
+    current_amount = serializers.FloatField()
+    progress_percentage = serializers.FloatField()
+    created_at = serializers.DateTimeField()
+
+
+class AdminUserDonationSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    campaign_title = serializers.CharField()
+    amount = serializers.FloatField()
+    net_amount = serializers.FloatField()
+    status = serializers.CharField()
+    donor_name = serializers.CharField()
+    created_at = serializers.DateTimeField()
+
+
+class AdminUserBeneficiarySerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    full_name = serializers.CharField()
+    digital_health_id = serializers.CharField()
+    gender = serializers.CharField()
+    category = serializers.CharField()
+    region = serializers.CharField()
+    city = serializers.CharField()
+    is_verified = serializers.BooleanField()
+    is_active = serializers.BooleanField()
+    created_at = serializers.DateTimeField()
+
+
+class AdminUserHealthIssueSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    category = serializers.CharField()
+    severity = serializers.CharField()
+    status = serializers.CharField()
+    description = serializers.CharField()
+    beneficiary_name = serializers.CharField()
+    created_at = serializers.DateField()
+
+
+class AdminUserClaimSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    voucher_code = serializers.CharField()
+    total_cost = serializers.FloatField()
+    claim_status = serializers.CharField()
+    service_description = serializers.CharField(allow_blank=True)
+    hospital_name = serializers.CharField(allow_blank=True)
+    submitted_at = serializers.DateTimeField()
+
+
+class AdminUserReceptionistSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    email = serializers.CharField()
+    is_active = serializers.BooleanField()
+    hospital_name = serializers.CharField(allow_blank=True)
+
+
+class AdminUserDetailSerializer(serializers.Serializer):
+    # Common
+    user = serializers.DictField()
+    profile = serializers.DictField(allow_null=True)
+    devices = AdminUserDeviceSerializer(many=True)
+
+    # Donor
+    donor_stats = serializers.DictField(allow_null=True)
+    campaigns = AdminUserCampaignSerializer(many=True)
+    recent_donations = AdminUserDonationSerializer(many=True)
+
+    # Hospital Admin
+    hospital_stats = serializers.DictField(allow_null=True)
+    hospital_info = serializers.DictField(allow_null=True)
+    hospital_receptionists = AdminUserReceptionistSerializer(many=True)
+
+    # Social Worker
+    social_worker_stats = serializers.DictField(allow_null=True)
+    beneficiaries = AdminUserBeneficiarySerializer(many=True)
+    health_issues = AdminUserHealthIssueSerializer(many=True)
+
+    # Receptionist
+    receptionist_stats = serializers.DictField(allow_null=True)
+    submitted_claims = AdminUserClaimSerializer(many=True)
+
+    # System Admin
+    system_admin_stats = serializers.DictField(allow_null=True)

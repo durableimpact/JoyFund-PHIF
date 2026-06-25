@@ -153,19 +153,7 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             except Exception:
                 return Campaign.objects.none()
 
-        queryset = Campaign.objects.select_related("donor__user").all()
-        if (
-            self.request.user.is_authenticated
-            and getattr(self.request.user, "role", None) == Role.DONOR
-        ):
-            try:
-                donor = self.request.user.donor
-                return queryset.filter(
-                    Q(is_public=True, is_active=True) | Q(donor=donor)
-                )
-            except Exception:
-                pass
-        return queryset.filter(is_public=True, is_active=True)
+        return Campaign.objects.select_related("donor__user").all()
 
     @swagger_auto_schema(
         tags=_TAG,

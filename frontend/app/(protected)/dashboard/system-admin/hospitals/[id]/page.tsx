@@ -1,5 +1,5 @@
 "use client";
-import { ArrowLeft, CreditCard, Pencil, Users } from "lucide-react";
+import { ArrowLeft, CreditCard, Pencil, Users, Stethoscope } from "lucide-react";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -10,7 +10,7 @@ import {
   getHospitalStaff,
   getHospitalReceptionists,
 } from "@/actions/hospital";
-import { statusColor, formatDate } from "@/lib/utils";
+import { statusColor, formatDate, formatXAF } from "@/lib/utils";
 
 type StaffTab = "admins" | "receptionists" | "all";
 
@@ -76,7 +76,7 @@ export default function HospitalDetailPage() {
           );
 
   return (
-    <>
+    <div className="pb-12">
       <button
         onClick={() => router.back()}
         className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold"
@@ -110,7 +110,7 @@ export default function HospitalDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: Hospital info */}
         <div className="lg:col-span-2 space-y-5">
-          <div className="card">
+          <div className="card p-6">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
               Hospital Information
             </h2>
@@ -154,7 +154,7 @@ export default function HospitalDetailPage() {
           </div>
 
           {/* Payment Details */}
-          <div className="card">
+          <div className="card p-6">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
               <CreditCard size={14} /> Payment Details
             </h2>
@@ -210,17 +210,68 @@ export default function HospitalDetailPage() {
             </div>
           </div>
 
+          {/* Services */}
+          {hospital.services && hospital.services.length > 0 && (
+            <div className="card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
+                  <Stethoscope size={14} /> Services ({hospital.services.length})
+                </h2>
+              </div>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      {["Name", "Category", "Price", "Status"].map(h => (
+                        <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {hospital.services.map((svc) => (
+                      <tr key={svc.id} className="border-b border-gray-50">
+                        <td className="py-3 font-semibold text-gray-900">{svc.name}</td>
+                        <td className="py-3">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">
+                            {svc.category}
+                          </span>
+                        </td>
+                        <td className="py-3 font-semibold text-gray-900">{formatXAF(svc.price)}</td>
+                        <td className="py-3">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${svc.is_available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {svc.is_available ? "Available" : "Unavailable"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="md:hidden space-y-3">
+                {hospital.services.map((svc) => (
+                  <div key={svc.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Name</span><span className="font-semibold text-gray-900">{svc.name}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Category</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">{svc.category}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Price</span><span className="font-semibold text-gray-900">{formatXAF(svc.price)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${svc.is_available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{svc.is_available ? "Available" : "Unavailable"}</span></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Admins */}
           {hospital.admins && hospital.admins.length > 0 && (
-            <div className="card">
+            <div className="card p-6">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
                 Hospital Administrators
               </h2>
               <div className="space-y-2">
                 {hospital.admins.map((admin: HospitalManager) => (
-                  <div
+                  <Link
                     key={admin.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+                    href={`/dashboard/system-admin/users/${admin.user_id}`}
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                   >
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
@@ -241,7 +292,7 @@ export default function HospitalDetailPage() {
                     <span className="text-[10px] text-gray-400">
                       {(admin as HospitalManager).phone_number}
                     </span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -250,7 +301,7 @@ export default function HospitalDetailPage() {
 
         {/* Right: Staff */}
         <div className="space-y-4">
-          <div className="card">
+          <div className="card p-6">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
               <Users size={14} /> Staff ({staff.length})
             </h2>
@@ -293,9 +344,10 @@ export default function HospitalDetailPage() {
             ) : (
               <div className="space-y-2">
                 {displayStaff.map((s) => (
-                  <div
+                  <Link
                     key={s.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+                    href={`/dashboard/system-admin/users/${s.user_id}`}
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                   >
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-[10px] shrink-0"
@@ -325,14 +377,14 @@ export default function HospitalDetailPage() {
                           : "Receptionist"}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

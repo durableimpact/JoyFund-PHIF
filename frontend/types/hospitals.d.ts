@@ -29,6 +29,19 @@ declare interface Hospital {
   created_at: string;
   updated_at: string;
   admins?: HospitalManager[];
+  services?: HospitalService[];
+}
+
+declare interface HospitalService {
+  id: string;
+  hospital_id: string;
+  name: string;
+  category: string;
+  price: number;
+  is_available: boolean;
+  description: string;
+  created_at: string;
+  updated_at: string;
 }
 
 declare interface HospitalManager {
@@ -86,6 +99,7 @@ declare interface RedeemedVouchersTotalResponse {
 
 declare interface StaffMember {
   id: string;
+  user_id: string;
   name: string;
   email: string;
   profile_picture?: string | null;

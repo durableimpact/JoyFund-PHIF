@@ -8,6 +8,9 @@ from accounts.views.admin_dashboard import (
     AdminBeneficiaryVoucherView,
     AdminOrganizationView,
     AdminTrendsReportView,
+    AdminUserRoleSummaryView,
+    AdminComprehensiveAnalyticsView,
+    AdminUserDetailView,
 )
 
 app_name = "admin_dashboard"
@@ -20,4 +23,7 @@ urlpatterns = [
     path("beneficiaries-vouchers/", AdminBeneficiaryVoucherView.as_view(), name="admin-beneficiary-voucher"),
     path("organization/", AdminOrganizationView.as_view(), name="admin-organization"),
     path("trends-reports/", AdminTrendsReportView.as_view(), name="admin-trends-reports"),
+    path("user-role-summary/", AdminUserRoleSummaryView.as_view(), name="admin-user-role-summary"),
+    path("comprehensive-analytics/", AdminComprehensiveAnalyticsView.as_view(), name="admin-comprehensive-analytics"),
+    path("user-detail/<uuid:user_id>/", AdminUserDetailView.as_view(), name="admin-user-detail"),
 ]
