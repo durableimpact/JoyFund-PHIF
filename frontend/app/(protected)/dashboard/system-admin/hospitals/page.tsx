@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { statusColor } from "@/lib/utils";
 import { listHospitals } from "@/actions/hospital";
+import Paginator from "@/components/shared/Paginator";
 
 const PAGE_SIZE = 10;
 
@@ -25,8 +26,12 @@ export default function AdminHospitals() {
   const token =
     session?.accessToken ||
     (session?.user as { accessToken?: string })?.accessToken;
-  const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams({ search: "", page: 1 }, { page: Number });
+  const search = (params.search as string) || "";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
 
   const { data, isLoading } = useQuery({
     queryKey: ["hospitals", token, currentPage, search],
@@ -72,10 +77,7 @@ export default function AdminHospitals() {
           className="input-field pl-10"
           placeholder="Search by name, city, region, or email…"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setParams({ search: e.target.value, page: 1 })}
         />
       </div>
 
@@ -187,60 +189,7 @@ export default function AdminHospitals() {
         </div>
 
         {totalCount > PAGE_SIZE && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
-            <div className="text-xs text-gray-600">
-              Showing{" "}
-              <span className="font-semibold">
-                {(currentPage - 1) * PAGE_SIZE + 1}
-              </span>{" "}
-              to{" "}
-              <span className="font-semibold">
-                {Math.min(currentPage * PAGE_SIZE, totalCount)}
-              </span>{" "}
-              of <span className="font-semibold">{totalCount}</span> results
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                disabled={!hasPreviousPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Previous page"
-              >
-                <ChevronLeft size={16} className="text-gray-600" />
-              </button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => {
-                  const pageNum = i + 1;
-                  const isCurrentPage = pageNum === currentPage;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                        isCurrentPage
-                          ? "text-white"
-                          : "border border-gray-200 text-gray-700 hover:bg-gray-100"
-                      }`}
-                      style={isCurrentPage ? { background: "#471DDB" } : {}}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                disabled={!hasNextPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Next page"
-              >
-                <ChevronRight size={16} className="text-gray-600" />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
     </>
