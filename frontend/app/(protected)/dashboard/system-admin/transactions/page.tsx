@@ -2,32 +2,44 @@
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeftRight, Loader2, Search, Eye } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { formatXAF, formatDate } from "@/lib/utils";
 import { listTransactions } from "@/actions/payments";
+import Paginator from "@/components/shared/Paginator";
 
 const STATUS_FILTERS = ["all", "SUCCESSFUL", "PENDING", "FAILED"];
 const TYPE_FILTERS = ["all", "DONATION", "PLATFORM_FEE", "DISBURSEMENT", "REFUND"];
+const PAGE_SIZE = 20;
 
 export default function TransactionsPage() {
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [params, setParams] = useUrlSearchParams(
+    { search: "", typeFilter: "all", statusFilter: "all", page: 1 },
+    { page: Number }
+  );
+  const search = (params.search as string) || "";
+  const typeFilter = (params.typeFilter as string) || "all";
+  const statusFilter = (params.statusFilter as string) || "all";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
 
-  const params: Record<string, string> = {};
-  if (typeFilter !== "all") params.type = typeFilter;
-  if (statusFilter !== "all") params.status = statusFilter;
-  if (search) params.search = search;
+  const apiParams: Record<string, string> = { page: currentPage.toString(), page_size: PAGE_SIZE.toString() };
+  if (typeFilter !== "all") apiParams.type = typeFilter;
+  if (statusFilter !== "all") apiParams.status = statusFilter;
+  if (search) apiParams.search = search;
 
   const { data: txns, isLoading } = useQuery({
-    queryKey: ["transactions", token, params],
-    queryFn: async () => await listTransactions(token, params),
+    queryKey: ["transactions", token, apiParams],
+    queryFn: async () => await listTransactions(token, apiParams),
     enabled: !!token,
   });
   const rows = txns?.results ?? [];
+  const totalCount = txns?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <>
@@ -44,18 +56,18 @@ export default function TransactionsPage() {
           <Search size={14} className="text-gray-400 shrink-0" />
           <input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => setParams({ search: e.target.value, page: 1 })}
             placeholder="Search transactions..."
             className="text-sm bg-transparent border-none outline-none w-full"
           />
         </div>
-        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
+        <select value={typeFilter} onChange={e => setParams({ typeFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
           {TYPE_FILTERS.map(t => (
             <option key={t} value={t}>{t === "all" ? "All Types" : t.replace(/_/g, " ")}</option>
           ))}
         </select>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+        <select value={statusFilter} onChange={e => setParams({ statusFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
           {STATUS_FILTERS.map(s => (
             <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>
@@ -73,7 +85,7 @@ export default function TransactionsPage() {
             {/* Mobile: card layout */}
             <div className="md:hidden space-y-3">
               {rows.map((t) => (
-                <div key={t.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
+                <Link key={t.id} href={`/dashboard/system-admin/transactions/${t.id}`} className="block border border-gray-100 rounded-xl p-4 space-y-2 hover:border-[#471DDB]/30 transition-colors">
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Type</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{t.type_display}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Direction</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.direction === "IN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{t.direction_display}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Amount</span><span className="font-bold text-gray-900">{formatXAF(t.amount)}</span></div>
@@ -81,11 +93,7 @@ export default function TransactionsPage() {
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" : t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{t.status_display}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Gateway TX</span><span className="text-gray-400 font-mono text-xs truncate max-w-[140px]">{t.gateway_transaction_id || "—"}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="text-gray-400 text-xs">{formatDate(t.created_at)}</span></div>
-                  <div className="pt-1">
-                    <Link href={`/dashboard/system-admin/transactions/${t.id}`}
-                      className="text-xs font-semibold text-[#471DDB] hover:underline">View details →</Link>
-                  </div>
-                </div>
+                </Link>
               ))}
             </div>
             {/* Desktop: table */}
@@ -139,6 +147,8 @@ export default function TransactionsPage() {
           </>
         )}
       </div>
+
+      <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </>
   );
 }
