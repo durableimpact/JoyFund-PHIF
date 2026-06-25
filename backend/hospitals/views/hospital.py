@@ -253,6 +253,7 @@ class HospitalViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
         for admin in admins:
             staff_list.append({
                 "id": admin.id,
+                "user_id": admin.user.id,
                 "name": admin.user.get_full_name or admin.user.email,
                 "email": admin.user.email,
                 "profile_picture": admin.user.profile_picture.url if admin.user.profile_picture else None,
@@ -263,6 +264,7 @@ class HospitalViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
         for receptionist in receptionists:
             staff_list.append({
                 "id": receptionist.id,
+                "user_id": receptionist.user.id,
                 "name": receptionist.user.get_full_name or receptionist.user.email,
                 "email": receptionist.user.email,
                 "profile_picture": receptionist.user.profile_picture.url if receptionist.user.profile_picture else None,
