@@ -19,6 +19,7 @@ function deserializeValue(raw: string | null, type: any, defaultVal: any): any {
 }
 
 function readParams(initial: Params, types: Types): Params {
+  if (typeof window === "undefined") return { ...initial };
   const search = new URLSearchParams(window.location.search);
   const result: Params = { ...initial };
   for (const key of Object.keys(initial)) {
