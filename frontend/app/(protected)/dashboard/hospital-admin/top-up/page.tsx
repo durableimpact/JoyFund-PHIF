@@ -3,7 +3,9 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { formatXAF, formatDate, statusColor } from "@/lib/utils";
+import Paginator from "@/components/shared/Paginator";
 import {
   listVoucherTopUpRequests,
   getVoucherTopUpRequest,
@@ -19,8 +21,13 @@ export default function HospitalAdminTopUpRequests() {
   const currentUser = (session?.user as any)?.userInfo;
   const hospitalId = currentUser?.hospital?.id;
 
-  const [filter, setFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams(
+    { filter: "all", page: 1 },
+    { page: Number }
+  );
+  const filter = (params.filter as string) || "all";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
   const [selectedRequest, setSelectedRequest] =
     useState<VoucherTopUpRequest | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -64,8 +71,7 @@ export default function HospitalAdminTopUpRequests() {
           className="input-field w-auto"
           value={filter}
           onChange={(e) => {
-            setFilter(e.target.value);
-            setCurrentPage(1);
+            setParams({ filter: e.target.value, page: 1 });
           }}
         >
           {STATUS_FILTERS.map((s) => (
@@ -158,27 +164,7 @@ export default function HospitalAdminTopUpRequests() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
-              Page {currentPage} of {totalPages}
-            </span>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 text-gray-600"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
 
