@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
@@ -22,6 +23,7 @@ import { listHospitals } from '@/actions/hospital';
 import { listCampaigns } from '@/actions/campaigns';
 import { createVouchersFromCampaigns } from '@/actions/vouchers';
 import { formatDate, formatXAF, statusColor } from '@/lib/utils';
+import Paginator from '@/components/shared/Paginator';
 
 const STATUS_FILTERS = ['all', 'REPORTED', 'VALIDATED', 'REJECTED', 'RESOLVED'];
 const PAGE_SIZE = 15;
@@ -33,9 +35,13 @@ export default function HealthIssuesPage() {
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const queryClient = useQueryClient();
 
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [params, setParams] = useUrlSearchParams({ search: "", filter: "all", page: 1 }, { page: Number });
+  const search = (params.search as string) || "";
+  const filter = (params.filter as string) || "all";
+  const currentPage = Number(params.page) || 1;
+  const setPage = (p: number) => setParams({ page: p });
+  const nextPage = () => setPage(currentPage + 1);
+  const prevPage = () => setPage(Math.max(1, currentPage - 1));
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
 
@@ -187,13 +193,13 @@ export default function HealthIssuesPage() {
             className="input-field pl-10"
             placeholder="Search by description or beneficiary..."
             value={search}
-            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+            onChange={e => { setParams({ search: e.target.value, page: 1 }); }}
           />
         </div>
         <select
           className="input-field w-auto"
           value={filter}
-          onChange={e => { setFilter(e.target.value); setCurrentPage(1); }}
+          onChange={e => { setParams({ filter: e.target.value, page: 1 }); }}
         >
           {STATUS_FILTERS.map(s => (
             <option key={s} value={s}>{s === 'all' ? 'All Status' : s}</option>
@@ -288,36 +294,7 @@ export default function HealthIssuesPage() {
         </div>
 
         {totalCount > PAGE_SIZE && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
-            <div className="text-xs text-gray-600">
-              Showing <span className="font-semibold">{(currentPage - 1) * PAGE_SIZE + 1}</span> to{' '}
-              <span className="font-semibold">{Math.min(currentPage * PAGE_SIZE, totalCount)}</span> of{' '}
-              <span className="font-semibold">{totalCount}</span> results
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setCurrentPage(p => p - 1)} disabled={!hasPrevPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 transition-colors">
-                <ChevronLeft size={16} className="text-gray-600" />
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => {
-                  const pageNum = i + 1;
-                  const isCurrent = pageNum === currentPage;
-                  return (
-                    <button key={pageNum} onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${isCurrent ? 'text-white' : 'border border-gray-200 text-gray-700 hover:bg-gray-100'}`}
-                      style={isCurrent ? { background: '#471DDB' } : {}}>
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-              <button onClick={() => setCurrentPage(p => p + 1)} disabled={!hasNextPage}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-50 transition-colors">
-                <ChevronRight size={16} className="text-gray-600" />
-              </button>
-            </div>
-          </div>
+          <Paginator currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} pageSize={PAGE_SIZE} onPageChange={setPage} />
         )}
       </div>
 
