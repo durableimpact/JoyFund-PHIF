@@ -11,15 +11,15 @@ echo "🏗️   Rebuilding backend..."
 docker compose -f backend/prod.yml build
 
 echo "🏗️   Rebuilding frontend..."
-docker compose -f frontend/docker-compose.yml build
+docker compose --env-file .env -f frontend/docker-compose.yml build
 
 echo "🚀  Restarting backend..."
-docker compose -f backend/prod.yml up -d
+docker compose -f backend/prod.yml --env-file ./backend/envs/prod/.env up \
+              --build \
+              -d
 
 echo "🚀  Restarting frontend (2 replicas)..."
-docker compose -f frontend/docker-compose.yml up -d --scale app=2
+docker compose --env-file .env -f frontend/docker-compose.yml up -d --scale app=2
 
-echo "📊  Restarting monitoring stack..."
-docker compose -f backend/prod.yml up -d promtail prometheus grafana
 
 echo "✅  Deploy complete."
