@@ -2,24 +2,23 @@
 set -e
 
 echo "🔄  Pulling latest code..."
-git pull origin main
+git fetch origin main
+git reset --hard origin/main
 
-echo "🧹  Cleaning up old containers..."
-docker compose -f frontend/docker-compose.yml down
-
-echo "🏗️   Rebuilding backend..."
-docker compose -f backend/prod.yml build
-
+# ── Frontend ──
 echo "🏗️   Rebuilding frontend..."
-docker compose --env-file .env -f frontend/docker-compose.yml build
+docker compose --env-file frontend/.env -f frontend/docker-compose.yml build
+echo "🚀  Restarting frontend (2 replicas)..."
+docker compose --env-file frontend/.env -f frontend/docker-compose.yml up -d --scale app=2
 
-echo "🚀  Restarting backend..."
+# ── Backend ──
+echo "🏗️   Rebuilding backend..."
 docker compose -f backend/prod.yml --env-file ./backend/envs/prod/.env up \
               --build \
               -d
 
-echo "🚀  Restarting frontend (2 replicas)..."
-docker compose --env-file .env -f frontend/docker-compose.yml up -d --scale app=2
-
+# ── Cleanup ──
+echo "🧹  Pruning unused images..."
+docker image prune -f
 
 echo "✅  Deploy complete."
