@@ -46,7 +46,7 @@ type RoleValue = (typeof ROLES)[number]['value'];
 const userSchema = z.object({
   role: z.string().min(1, 'Role is required'),
   firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().optional(),
+  lastName: z.string().min(1, 'Last name is required'),
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
   phone: z.string().min(6, 'Phone number is required'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -402,8 +402,9 @@ export default function AdminCreateUser() {
                     {errors.firstName && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.firstName.message}</p>}
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Last Name</label>
-                    <input {...register('lastName')} className="input-field" placeholder="Mbarga" />
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Last Name *</label>
+                    <input {...register('lastName')} className={`input-field ${errors.lastName ? 'border-red-300 focus-visible:border-red-500 focus-visible:ring-red-500/20' : ''}`} placeholder="Mbarga" />
+                    {errors.lastName && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.lastName.message}</p>}
                   </div>
                 </div>
                 <div>

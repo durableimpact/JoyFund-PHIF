@@ -1,10 +1,12 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, X, Upload, FileText } from 'lucide-react';
-import { listReceptionists, createReceptionistAccount } from '@/actions/accounts';
+import { UserPlus, X, Eye, EyeOff } from 'lucide-react';
+import { createReceptionistAccount } from '@/actions/accounts';
 import { getHospitalStaff } from '@/actions/hospital';
+import { InputPhone } from '@/components/ui/input-phone';
+import { FileUpload } from '@/components/ui/file-upload';
 
 const roleColors: Record<string, string> = {
   receptionist: 'bg-blue-100 text-blue-700',
@@ -27,8 +29,8 @@ export default function HospitalStaff() {
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const frontRef = useRef<HTMLInputElement>(null);
-  const backRef = useRef<HTMLInputElement>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
 
   const { data: staffData, isLoading } = useQuery({
     queryKey: ['ha-staff', hospitalId, token],
@@ -45,6 +47,8 @@ export default function HospitalStaff() {
     setForm({ first_name: '', last_name: '', email: '', phone_number: '', password: '', password2: '', national_id_number: '' });
     setFrontFile(null);
     setBackFile(null);
+    setShowPassword(false);
+    setShowPassword2(false);
   };
 
   const createMutation = useMutation({
@@ -68,7 +72,7 @@ export default function HospitalStaff() {
   });
 
   const handleAdd = () => {
-    if (!form.first_name || !form.email || !form.password) return;
+    if (!form.first_name || !form.last_name || !form.email || !form.password) return;
     if (form.password !== form.password2) return;
     setSubmitting(true);
     createMutation.mutate(undefined, {
@@ -150,7 +154,7 @@ export default function HospitalStaff() {
                   <input className="input-field" placeholder="First name" value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Last Name</label>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Last Name *</label>
                   <input className="input-field" placeholder="Last name" value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))} />
                 </div>
               </div>
@@ -160,16 +164,31 @@ export default function HospitalStaff() {
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-500 mb-1 block">Phone</label>
-                <input className="input-field" type="tel" value={form.phone_number} onChange={e => setForm(p => ({ ...p, phone_number: e.target.value }))} />
+                <InputPhone
+                  value={form.phone_number}
+                  onChange={(value) => setForm(p => ({ ...p, phone_number: value || '' }))}
+                  defaultCountry="CM"
+                  placeholder="+237 6XX XXX XXX"
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-gray-500 mb-1 block">Password *</label>
-                  <input className="input-field" type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} />
+                  <div className="relative">
+                    <input className="input-field pr-10" type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} />
+                    <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-500 mb-1 block">Confirm *</label>
-                  <input className="input-field" type="password" value={form.password2} onChange={e => setForm(p => ({ ...p, password2: e.target.value }))} />
+                  <div className="relative">
+                    <input className="input-field pr-10" type={showPassword2 ? 'text' : 'password'} value={form.password2} onChange={e => setForm(p => ({ ...p, password2: e.target.value }))} />
+                    <button type="button" onClick={() => setShowPassword2(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showPassword2 ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -180,36 +199,8 @@ export default function HospitalStaff() {
                   <input className="input-field" placeholder="e.g. 123456789" value={form.national_id_number} onChange={e => setForm(p => ({ ...p, national_id_number: e.target.value }))} />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Front ID Image</label>
-                    <input ref={frontRef} type="file" accept="image/*" className="hidden" onChange={e => setFrontFile(e.target.files?.[0] || null)} />
-                    <button type="button" onClick={() => frontRef.current?.click()} className="w-full border-2 border-dashed border-gray-200 rounded-xl p-3 text-center hover:border-[#1D75DB] transition-colors">
-                      {frontFile ? (
-                        <div className="flex items-center gap-2 justify-center text-xs text-gray-700">
-                          <FileText size={14} /> {frontFile.name}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 justify-center text-xs text-gray-400">
-                          <Upload size={14} /> Upload front
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Back ID Image</label>
-                    <input ref={backRef} type="file" accept="image/*" className="hidden" onChange={e => setBackFile(e.target.files?.[0] || null)} />
-                    <button type="button" onClick={() => backRef.current?.click()} className="w-full border-2 border-dashed border-gray-200 rounded-xl p-3 text-center hover:border-[#1D75DB] transition-colors">
-                      {backFile ? (
-                        <div className="flex items-center gap-2 justify-center text-xs text-gray-700">
-                          <FileText size={14} /> {backFile.name}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 justify-center text-xs text-gray-400">
-                          <Upload size={14} /> Upload back
-                        </div>
-                      )}
-                    </button>
-                  </div>
+                  <FileUpload value={frontFile} onChange={setFrontFile} accept="image/*" label="Front ID Image" />
+                  <FileUpload value={backFile} onChange={setBackFile} accept="image/*" label="Back ID Image" />
                 </div>
               </div>
             </div>
