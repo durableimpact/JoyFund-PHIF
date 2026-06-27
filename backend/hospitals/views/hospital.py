@@ -40,7 +40,6 @@ class IsSystemOrHospitalAdmin(BasePermission):
 
 @method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
-@method_decorator(name='create', decorator=swagger_auto_schema(tags=_TAG))
 @method_decorator(name='update', decorator=swagger_auto_schema(tags=_TAG))
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(tags=_TAG))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=_TAG))
