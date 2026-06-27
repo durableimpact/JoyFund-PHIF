@@ -47,6 +47,13 @@ export default function LocationPickerMap({ value, onChange }: LocationPickerMap
     [onChange]
   );
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !value) return;
+
+    map.flyTo({ center: [value[1], value[0]], zoom: 15, duration: 1000 });
+  }, [value]);
+
   const handleMapLoad = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
