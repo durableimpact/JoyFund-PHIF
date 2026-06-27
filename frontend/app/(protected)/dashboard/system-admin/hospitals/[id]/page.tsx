@@ -3,16 +3,20 @@ import { ArrowLeft, CreditCard, Pencil, Users, Stethoscope } from "lucide-react"
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import Link from "next/link";
 import {
   getHospital,
   getHospitalStaff,
   getHospitalReceptionists,
+  updateHospital,
 } from "@/actions/hospital";
 import { statusColor, formatDate, formatXAF } from "@/lib/utils";
 
 type StaffTab = "admins" | "receptionists" | "all";
+
+const PARTNERSHIP_STATUSES = ["PENDING", "ACTIVE", "INACTIVE", "REJECTED"] as const;
 
 export default function HospitalDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +26,8 @@ export default function HospitalDetailPage() {
     session?.accessToken ||
     (session?.user as { accessToken?: string })?.accessToken;
   const [staffTab, setStaffTab] = useState<StaffTab>("all");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: hospital, isLoading } = useQuery<Hospital>({
     queryKey: ["hospital", id, token],
@@ -62,6 +68,37 @@ export default function HospitalDetailPage() {
     );
   }
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === hospital.partnership_status || !token) return;
+    setUpdatingStatus(true);
+    try {
+      await updateHospital(hospital.id, token, { partnership_status: newStatus as any });
+      queryClient.invalidateQueries({ queryKey: ["hospital", id] });
+      queryClient.invalidateQueries({ queryKey: ["hospitals"] });
+      toast.success(`Status changed to ${newStatus.replace(/_/g, " ").toLowerCase()}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update status");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleActiveToggle = async () => {
+    if (!token) return;
+    const newActive = !hospital.is_active;
+    setUpdatingStatus(true);
+    try {
+      await updateHospital(hospital.id, token, { is_active: newActive });
+      queryClient.invalidateQueries({ queryKey: ["hospital", id] });
+      queryClient.invalidateQueries({ queryKey: ["hospitals"] });
+      toast.success(`Hospital ${newActive ? "activated" : "deactivated"}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update status");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   const displayStaff =
     staffTab === "all"
       ? staff
@@ -88,23 +125,65 @@ export default function HospitalDetailPage() {
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
             {hospital.name}
-            <span
-              className={`badge text-xs ${statusColor(hospital.partnership_status)}`}
-            >
-              {hospital.partnership_status?.replace(/_/g, " ")}
-            </span>
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             {hospital.city}, {hospital.region}
           </p>
         </div>
-        <Link
-          href={`/dashboard/system-admin/hospitals/${id}/edit`}
-          className="btn-admin text-sm flex items-center gap-2"
-          style={{ background: "#471DDB" }}
-        >
-          <Pencil size={16} /> Edit Hospital
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/dashboard/system-admin/hospitals/${id}/edit`}
+            className="btn-admin text-sm flex items-center gap-2"
+            style={{ background: "#471DDB" }}
+          >
+            <Pencil size={16} /> Edit Hospital
+          </Link>
+        </div>
+      </div>
+
+      {/* Status Management Bar */}
+      <div className="card p-4 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Partnership</span>
+          <select
+            value={hospital.partnership_status || "PENDING"}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            disabled={updatingStatus}
+            className="text-xs font-bold px-3 py-2 rounded-xl border cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-50"
+            style={{
+              background: hospital.partnership_status === "ACTIVE" ? "#dcfce7" : hospital.partnership_status === "PENDING" ? "#fef9c3" : hospital.partnership_status === "REJECTED" ? "#fee2e2" : "#f3f4f6",
+              color: hospital.partnership_status === "ACTIVE" ? "#166534" : hospital.partnership_status === "PENDING" ? "#854d0e" : hospital.partnership_status === "REJECTED" ? "#991b1b" : "#6b7280",
+              borderColor: hospital.partnership_status === "ACTIVE" ? "#bbf7d0" : hospital.partnership_status === "PENDING" ? "#fef08a" : hospital.partnership_status === "REJECTED" ? "#fecaca" : "#e5e7eb",
+            }}
+          >
+            {PARTNERSHIP_STATUSES.map((s) => (
+              <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+            ))}
+          </select>
+        </div>
+        <div className="h-4 w-px bg-gray-200 hidden sm:block" />
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Active</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={hospital.is_active}
+            onClick={handleActiveToggle}
+            disabled={updatingStatus}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 ${
+              hospital.is_active ? "bg-green-500" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                hospital.is_active ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+          <span className="text-xs font-semibold text-gray-600">
+            {hospital.is_active ? "Active" : "Inactive"}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
