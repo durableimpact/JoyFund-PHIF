@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 import { createHospital } from "@/actions/hospital";
 import HospitalForm, { HospitalFormData } from "../_components/HospitalForm";
 
@@ -14,12 +15,10 @@ export default function CreateHospitalPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleSubmit = async (data: HospitalFormData): Promise<void> => {
     try {
       setIsLoading(true);
-      setError("");
 
       await createHospital(token as string, {
         name: data.name,
@@ -39,29 +38,18 @@ export default function CreateHospitalPage() {
         bank_account_name: data.bank_account_name || undefined,
         bank_name: data.bank_name || undefined,
         bank_branch: data.bank_branch || undefined,
-        lat: data.lat || undefined,
-        lng: data.lng || undefined,
+        lat: data.lat ? Math.round(data.lat * 1e6) / 1e6 : undefined,
+        lng: data.lng ? Math.round(data.lng * 1e6) / 1e6 : undefined,
         partnership_status: "PENDING",
         is_active: true,
       });
 
-      // Invalidate hospitals query to refresh the list
+      toast.success("Hospital created successfully");
       queryClient.invalidateQueries({ queryKey: ["hospitals"] });
-
-      // Redirect back to hospitals list
       router.push("/dashboard/system-admin/hospitals");
     } catch (err) {
-      try {
-        const errorString = err instanceof Error ? err.message : String(err);
-        const parsed = JSON.parse(errorString || "{}");
-        setError(
-          (parsed?.detail as string) ||
-            (parsed?.name?.[0] as string) ||
-            "Failed to create hospital",
-        );
-      } catch {
-        setError("Failed to create hospital. Please try again.");
-      }
+      const msg = err instanceof Error ? err.message : "Failed to create hospital";
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +59,6 @@ export default function CreateHospitalPage() {
     <HospitalForm
       onSubmit={handleSubmit}
       isLoading={isLoading}
-      error={error}
       isEditMode={false}
     />
   );

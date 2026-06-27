@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { getHospital, updateHospital } from "@/actions/hospital";
 import HospitalForm, { HospitalFormData } from "../../_components/HospitalForm";
 
@@ -17,9 +18,7 @@ export default function EditHospitalPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  // Fetch hospital data
   const { data: hospital, isLoading: isLoadingHospital } = useQuery<Hospital>({
     queryKey: ["hospital", id, token],
     queryFn: () => getHospital(id, token),
@@ -31,7 +30,6 @@ export default function EditHospitalPage() {
 
     try {
       setIsLoading(true);
-      setError("");
 
       await updateHospital(hospital.id, token, {
         name: data.name,
@@ -53,28 +51,17 @@ export default function EditHospitalPage() {
         bank_account_name: data.bank_account_name || undefined,
         bank_name: data.bank_name || undefined,
         bank_branch: data.bank_branch || undefined,
-        lat: data.lat || undefined,
-        lng: data.lng || undefined,
+        lat: data.lat ? Math.round(data.lat * 1e6) / 1e6 : undefined,
+        lng: data.lng ? Math.round(data.lng * 1e6) / 1e6 : undefined,
       });
 
-      // Invalidate hospitals queries to refresh
+      toast.success("Hospital updated successfully");
       queryClient.invalidateQueries({ queryKey: ["hospitals"] });
       queryClient.invalidateQueries({ queryKey: ["hospital", id] });
-
-      // Redirect back to hospital detail page
       router.push(`/dashboard/system-admin/hospitals/${id}`);
     } catch (err) {
-      try {
-        const errorString = err instanceof Error ? err.message : String(err);
-        const parsed = JSON.parse(errorString || "{}");
-        setError(
-          (parsed?.detail as string) ||
-            (parsed?.name?.[0] as string) ||
-            "Failed to update hospital",
-        );
-      } catch {
-        setError("Failed to update hospital. Please try again.");
-      }
+      const msg = err instanceof Error ? err.message : "Failed to update hospital";
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +118,6 @@ export default function EditHospitalPage() {
       initialData={initialData}
       onSubmit={handleSubmit}
       isLoading={isLoading}
-      error={error}
       isEditMode={true}
     />
   );

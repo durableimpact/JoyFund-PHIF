@@ -153,7 +153,6 @@ interface HospitalFormProps {
   initialData?: HospitalFormData & { id?: string };
   onSubmit: (data: HospitalFormData) => Promise<void>;
   isLoading?: boolean;
-  error?: string;
   isEditMode?: boolean;
 }
 
@@ -161,7 +160,6 @@ export default function HospitalForm({
   initialData,
   onSubmit,
   isLoading = false,
-  error,
   isEditMode = false,
 }: HospitalFormProps) {
   const [stepIdx, setStepIdx] = useState(0);
@@ -217,8 +215,10 @@ export default function HospitalForm({
     setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setValue("lat", pos.coords.latitude, { shouldValidate: true });
-        setValue("lng", pos.coords.longitude, { shouldValidate: true });
+        const lat = Math.round(pos.coords.latitude * 1e6) / 1e6;
+        const lng = Math.round(pos.coords.longitude * 1e6) / 1e6;
+        setValue("lat", lat, { shouldValidate: true });
+        setValue("lng", lng, { shouldValidate: true });
         setGeoLoading(false);
       },
       () => setGeoLoading(false),
@@ -277,28 +277,6 @@ export default function HospitalForm({
             </p>
           </div>
         </div>
-
-        {/* Error Banner */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex gap-3 items-start">
-            <div className="p-1 bg-red-100 rounded-lg">
-              <svg
-                className="w-4 h-4 text-red-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-red-700 font-medium">{error}</p>
-          </div>
-        )}
 
         {/* Stepper */}
         <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
@@ -471,6 +449,10 @@ export default function HospitalForm({
                           step="any"
                           placeholder="e.g. 3.848"
                           className="input-field text-sm"
+                          onBlur={(e) => {
+                            const v = parseFloat(e.target.value);
+                            if (!isNaN(v)) setValue("lat", Math.round(v * 1e6) / 1e6, { shouldValidate: true });
+                          }}
                         />
                       </Field>
                       <Field label="Longitude">
@@ -480,6 +462,10 @@ export default function HospitalForm({
                           step="any"
                           placeholder="e.g. 11.502"
                           className="input-field text-sm"
+                          onBlur={(e) => {
+                            const v = parseFloat(e.target.value);
+                            if (!isNaN(v)) setValue("lng", Math.round(v * 1e6) / 1e6, { shouldValidate: true });
+                          }}
                         />
                       </Field>
                     </div>
