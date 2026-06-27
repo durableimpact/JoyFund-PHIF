@@ -5,7 +5,7 @@ echo "🔄  Pulling latest code..."
 git pull origin main
 
 echo "🧹  Cleaning up old containers..."
-docker compose -f frontend/docker-compose.yml down --remove-orphans
+docker compose -f frontend/docker-compose.yml down
 
 echo "🏗️   Rebuilding backend..."
 docker compose -f backend/prod.yml build
@@ -23,5 +23,3 @@ echo "📊  Restarting monitoring stack..."
 docker compose -f backend/prod.yml up -d promtail prometheus grafana
 
 echo "✅  Deploy complete."
-echo "⚠️   If NPM was pointing to 'joyfund_frontend:3000', update it to 'app:3000' in NPM admin."
-echo "📊  Grafana: https://grafana.joyfund.cm (or your domain)"
