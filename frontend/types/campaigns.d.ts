@@ -84,6 +84,10 @@ declare interface CampaignDetail {
   progress_percentage: number;
   certificate_generated: boolean;
   certificate_url: string | null;
+  location?: string;
+  organizer_name?: string;
+  donor_name?: string;
+  donor_count?: number;
   events?: CampaignEvent[];
   transactions?: CampaignTransaction[];
   voucher_fundings?: VoucherFundingDetail[];
@@ -127,6 +131,20 @@ declare interface VoucherFundingDetail {
   voucher_id: string;
   amount: number;
   created_at: string;
+  beneficiary_name?: string;
+  hospital_name?: string;
+  voucher_code?: string;
+  status?: string;
+  voucher?: {
+    voucher_code?: string;
+    status?: string;
+    beneficiary?: {
+      full_name?: string;
+    };
+    hospital?: {
+      name?: string;
+    };
+  };
 }
 
 declare interface CampaignCreatePayload {
@@ -170,6 +188,22 @@ declare interface CampaignLeaderboardEntry {
   };
 }
 
+// ── Timeline ──
+
+declare type TimelineItemType =
+  | "donation"
+  | "voucher-allocated"
+  | "hospital-settled";
+
+declare interface TimelineItem {
+  id: string;
+  type: TimelineItemType;
+  amount: number;
+  label: string;
+  description: string | null;
+  date: string;
+}
+
 // ── Donation Chart ──
 
 declare type DonationChartPeriod = "7d" | "30d" | "90d" | "1y" | "all";
@@ -201,6 +235,8 @@ declare interface Donation {
   donor_id?: string | null;
   donor_name: string;
   amount: number;
+  platform_fee_amount: number;
+  net_amount: number;
   status: DonationStatus;
   message?: string;
   is_anonymous: boolean;
