@@ -17,6 +17,7 @@ class NotificationType(models.TextChoices):
     BENEFICIARY_UPDATE = 'BENEFICIARY_UPDATE', 'Beneficiary Update'
     PAYMENT_NOTIFICATION = 'PAYMENT_NOTIFICATION', 'Payment Notification'
     VERIFICATION_STATUS = 'VERIFICATION_STATUS', 'Verification Status'
+    SUPPORT_TICKET = 'SUPPORT_TICKET', 'Support Ticket'
 
 
 class Notification(models.Model):
