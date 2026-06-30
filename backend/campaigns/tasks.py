@@ -280,10 +280,18 @@ def send_campaign_donation_reminder(self, campaign_id, reminder_type):
 
     # 2. Send push notification
     try:
+        cover_image = None
+        try:
+            if campaign.cover_image:
+                cover_image = campaign.cover_image.url
+        except Exception:
+            pass
+
         send_push_notification_to_user(
             user=donor_user,
             title=title,
             body=message,
+            image=cover_image,
             url=action_url,
             tag=f"campaign_reminder_{campaign.id}",
             actions=[
