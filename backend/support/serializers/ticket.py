@@ -46,10 +46,6 @@ class TicketMessageCreateSerializer(serializers.ModelSerializer):
         model = TicketMessage
         fields = ["message"]
 
-    def create(self, validated_data):
-        validated_data["sender"] = self.context["request"].user
-        return super().create(validated_data)
-
 
 class SupportTicketListSerializer(serializers.ModelSerializer):
     created_by_email = serializers.EmailField(source="created_by.email", read_only=True)
