@@ -41,7 +41,7 @@ class Campaign(models.Model):
     current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()
-    is_public = models.BooleanField(default=True)
+    is_public = models.BooleanField(default=False)
 
     status = models.CharField(
         max_length=20,
@@ -115,6 +115,16 @@ class Campaign(models.Model):
         return 0
     
     @property
+    def has_successful_donation(self):
+        """Check if campaign has at least one successful donation."""
+        return self.donations.filter(status='SUCCESS').exists()
+
+    @property
+    def can_be_deleted(self):
+        """Campaigns with at least 1 successful donation cannot be deleted."""
+        return not self.has_successful_donation
+
+    @property
     def goal_reached(self):
         """Check if campaign has reached its goal amount."""
         if not self.goal_amount:
@@ -153,6 +163,7 @@ class Campaign(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._initial_status = self.status
+        self._initial_is_public = self.is_public
         self._initial_certificate_generated = self.certificate_generated
 
     def save(self, *args, **kwargs):
