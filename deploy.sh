@@ -12,10 +12,25 @@ echo "🚀  Restarting frontend (2 replicas)..."
 docker compose --env-file frontend/.env -f frontend/docker-compose.yml up -d --scale app=2
 
 # ── Backend ──
-echo "🏗️   Rebuilding backend..."
-docker compose -f backend/prod.yml --env-file ./backend/envs/prod/.env up \
-              --build \
-              -d
+echo "🏗️   Rebuilding backend image..."
+docker compose -f backend/prod.yml --env-file ./backend/envs/prod/.env build
+
+echo "🔄  Rolling restart of backend services..."
+
+# Restart web workers one at a time so at least 2 of 3 stay serving
+for worker in web-worker-1 web-worker-2 web-worker-3; do
+  echo "  ↻ Restarting $worker..."
+  docker compose -f backend/prod.yml --env-file ./backend/envs/prod/.env up -d --no-deps --wait "$worker"
+  sleep 5
+done
+
+# Restart celery workers
+echo "  ↻ Restarting celery workers..."
+docker compose -f backend/prod.yml --env-file ./backend/envs/prod/.env up -d --no-deps --wait celery-worker-1 celery-worker-2
+
+# Restart celery beat
+echo "  ↻ Restarting celery-beat..."
+docker compose -f backend/prod.yml --env-file ./backend/envs/prod/.env up -d --no-deps celery-beat
 
 # ── Cleanup ──
 echo "🧹  Pruning unused images..."
