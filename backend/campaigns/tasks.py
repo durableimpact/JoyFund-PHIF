@@ -10,10 +10,19 @@ from django.core.asgi import get_asgi_application
 from asgiref.sync import async_to_sync
 from django.utils.text import slugify
 from django.db import models
-from django.db.models import DecimalField, Q, Sum, Value
+from django.db.models import Case, DecimalField, IntegerField, Q, Sum, Value
 from django.db.models.functions import Coalesce
 
 logger = logging.getLogger(__name__)
+
+REMINDER_INTERVALS = {
+    "15min": 15 * 60,
+    "1hr": 60 * 60,
+    "2hr": 2 * 60 * 60,
+    "3hr": 3 * 60 * 60,
+    "4hr": 4 * 60 * 60,
+    "6hr": 6 * 60 * 60,
+}
 
 @shared_task
 def broadcast_donation_notification(donation_id, campaign_id, campaign_name, donor_name, amount, progress_percentage, donor_user_id):
@@ -190,3 +199,159 @@ def generate_missing_campaign_slugs():
     
     logger.info(f"Generated {count} missing campaign slugs")
     return f"Generated {count} campaign slugs."
+
+
+REMINDER_MESSAGES = {
+    "15min": {
+        "title": "Start your campaign strong!",
+        "message": "Your campaign '{title}' is live but hasn't received any donations yet. Be the first to contribute and encourage others!",
+    },
+    "1hr": {
+        "title": "Your campaign needs a boost",
+        "message": "It's been 1 hour since you created '{title}'. A first donation can spark momentum — consider contributing now!",
+    },
+    "2hr": {
+        "title": "Don't let your campaign stall",
+        "message": "2 hours in and '{title}' still has no donations. Share the link or make the first contribution to get things started!",
+    },
+    "3hr": {
+        "title": "Your campaign is waiting",
+        "message": "3 hours have passed since '{title}' was created. Early donations build trust — make the first move!",
+    },
+    "4hr": {
+        "title": "Time is running out to get noticed",
+        "message": "Your campaign '{title}' has been live for 4 hours without donations. Don't let it fade — contribute or share now!",
+    },
+    "6hr": {
+        "title": "Final reminder before your campaign expires",
+        "message": "It's been 6 hours since '{title}' was created with zero donations. Campaigns without donations are automatically removed after 8 hours. Act now!",
+    },
+}
+
+
+@shared_task(bind=True, max_retries=2)
+def send_campaign_donation_reminder(self, campaign_id, reminder_type):
+    """
+    Send a donation reminder to the campaign creator.
+
+    Checks that:
+      1. The campaign still exists and has no successful donations.
+      2. The campaign hasn't already received a donation (race condition guard).
+    If conditions are met, creates a Notification DB record and sends a push notification.
+    """
+    from notifications.models import Notification, NotificationType
+    from notifications.webpush import send_push_notification_to_user
+
+    try:
+        campaign = Campaign.objects.select_related("donor__user").get(id=campaign_id)
+    except Campaign.DoesNotExist:
+        logger.warning(f"Campaign {campaign_id} not found, skipping reminder")
+        return
+
+    # Skip if the campaign has received any successful donation
+    if campaign.has_successful_donation:
+        logger.info(f"Campaign {campaign_id} already has donations, skipping {reminder_type} reminder")
+        return
+
+    # Skip if the campaign was already deleted (8h auto-delete)
+    donor_user = campaign.donor.user if campaign.donor else None
+    if not donor_user:
+        logger.warning(f"Campaign {campaign_id} has no donor user, skipping reminder")
+        return
+
+    msg = REMINDER_MESSAGES.get(reminder_type)
+    if not msg:
+        logger.error(f"Unknown reminder type: {reminder_type}")
+        return
+
+    title = msg["title"]
+    message = msg["message"].format(title=campaign.title)
+    action_url = f"/campaign/{campaign.id}/"
+
+    # 1. Create DB notification
+    Notification.objects.create(
+        user=donor_user,
+        title=title,
+        message=message,
+        description=f"Campaign '{campaign.title}' has not received any donations yet.",
+        notification_type=NotificationType.CAMPAIGN_UPDATE,
+        action_url=action_url,
+    )
+
+    # 2. Send push notification
+    try:
+        send_push_notification_to_user(
+            user=donor_user,
+            title=title,
+            body=message,
+            url=action_url,
+            tag=f"campaign_reminder_{campaign.id}",
+            actions=[
+                {"action": "donate", "title": "Donate Now"},
+                {"action": "view", "title": "View Campaign"},
+            ],
+        )
+    except Exception as e:
+        logger.error(f"Failed to send push reminder for campaign {campaign_id}: {e}")
+
+    logger.info(f"Sent {reminder_type} reminder for campaign {campaign_id} to {donor_user.email}")
+    return f"Sent {reminder_type} reminder for campaign {campaign_id}"
+
+
+@shared_task
+def schedule_campaign_reminders(campaign_id):
+    """
+    Schedule all donation reminder tasks for a newly created campaign.
+    Called from the Campaign post_save signal on creation.
+    Each reminder checks internally if donations have been made before sending.
+    """
+    for reminder_type, delay_seconds in REMINDER_INTERVALS.items():
+        send_campaign_donation_reminder.apply_async(
+            args=[campaign_id, reminder_type],
+            countdown=delay_seconds,
+        )
+        logger.info(
+            f"Scheduled '{reminder_type}' reminder for campaign {campaign_id} "
+            f"in {delay_seconds}s"
+        )
+    return f"Scheduled {len(REMINDER_INTERVALS)} reminders for campaign {campaign_id}"
+
+
+@shared_task
+def auto_delete_empty_campaigns():
+    """
+    Periodic task: delete campaigns older than 8 hours that have zero successful donations.
+    Runs via Celery Beat every 5 minutes.
+    Campaigns with at least 1 successful donation are protected from deletion.
+    """
+    cutoff = timezone.now() - timedelta(hours=8)
+
+    # Find old, private campaigns with no donations
+    empty_campaigns = Campaign.objects.filter(
+        created_at__lt=cutoff,
+        is_public=False,
+    ).annotate(
+        donation_count=Sum(
+            Case(
+                Q(donations__status="SUCCESS"),
+                then=1,
+                default=0,
+                output_field=models.IntegerField(),
+            )
+        )
+    ).filter(donation_count=0)
+
+    count = 0
+    for campaign in empty_campaigns:
+        try:
+            campaign_id = campaign.id
+            campaign_title = campaign.title
+            campaign.delete()
+            logger.info(f"Auto-deleted empty campaign '{campaign_title}' ({campaign_id}) after 8h")
+            count += 1
+        except Exception as e:
+            logger.error(f"Failed to auto-delete campaign {campaign.id}: {e}")
+
+    if count > 0:
+        logger.info(f"Auto-deleted {count} empty campaigns")
+    return f"Auto-deleted {count} empty campaigns"
