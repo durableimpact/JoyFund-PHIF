@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     "beneficiaries",
     "payments",
     "notifications",
+    "support",
 ]
 
 MIDDLEWARE = [
