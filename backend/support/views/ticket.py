@@ -370,6 +370,16 @@ class TicketMessageListCreateView(ListCreateAPIView):
             ticket=ticket, sender=user, is_internal=is_internal
         )
 
+        if user.role == "SYSTEM_ADMIN" and not ticket.assigned_to:
+            ticket.assigned_to = user
+            ticket.save(update_fields=["assigned_to", "updated_at"])
+            TicketEvent.objects.create(
+                ticket=ticket,
+                status=ticket.status,
+                notes=f"Auto-assigned to {user.email} after replying.",
+                changed_by=user,
+            )
+
         if ticket.status == TicketStatus.OPEN and user.role == "SYSTEM_ADMIN":
             ticket.status = TicketStatus.IN_PROGRESS
             ticket.save(update_fields=["status", "updated_at"])
@@ -440,3 +450,14 @@ class TicketCategoriesView(APIView):
             {"value": choice[0], "label": choice[1]}
             for choice in TicketCategory.choices
         ])
+
+
+class SystemAdminListView(APIView):
+    permission_classes = [IsSystemAdmin]
+
+    def get(self, request):
+        from accounts.models import User
+        admins = User.objects.filter(role="SYSTEM_ADMIN", is_active=True).values(
+            "id", "email", "first_name", "last_name"
+        )
+        return Response(list(admins))
