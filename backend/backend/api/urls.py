@@ -22,4 +22,5 @@ urlpatterns = [
     path("vouchers/", include("vouchers.urls")),
     path("notifications/", include("notifications.urls")),
     path("logs/", include("logs.urls")),
+    path("support/", include("support.urls")),
 ] + router.urls
