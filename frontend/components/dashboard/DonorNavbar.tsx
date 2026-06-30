@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   Loader2,
+  HelpCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -42,6 +43,11 @@ const NAV_LINKS = [
     label: "My Donations",
     href: "/dashboard/donor/donations",
     icon: <History size={16} />,
+  },
+  {
+    label: "Support",
+    href: "/dashboard/donor/support",
+    icon: <HelpCircle size={16} />,
   },
 ];
 
