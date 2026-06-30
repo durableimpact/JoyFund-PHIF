@@ -8,6 +8,7 @@ import {
   Ticket,
   User,
   Shield,
+  HelpCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
@@ -38,6 +39,11 @@ const NAV: NavItem[] = [
     label: "Security",
     href: "/dashboard/receptionist/devices",
     icon: <Shield size={16} />,
+  },
+  {
+    label: "Support",
+    href: "/dashboard/receptionist/support",
+    icon: <HelpCircle size={16} />,
   },
   {
     label: "Profile",
