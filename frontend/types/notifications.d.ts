@@ -10,7 +10,8 @@ declare type NotificationType =
   | "DONATION_SENT"
   | "BENEFICIARY_UPDATE"
   | "PAYMENT_NOTIFICATION"
-  | "VERIFICATION_STATUS";
+  | "VERIFICATION_STATUS"
+  | "SUPPORT_TICKET";
 
 declare interface Notification {
   id: string;
