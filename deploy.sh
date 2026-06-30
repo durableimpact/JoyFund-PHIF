@@ -8,8 +8,8 @@ git reset --hard origin/main
 # ── Frontend ──
 echo "🏗️   Rebuilding frontend..."
 docker compose --env-file frontend/.env -f frontend/docker-compose.yml build
-echo "🚀  Restarting frontend (2 replicas)..."
-docker compose --env-file frontend/.env -f frontend/docker-compose.yml up -d --scale app=2
+echo "🚀  Rolling restart of frontend (2 replicas)..."
+docker compose --env-file frontend/.env -f frontend/docker-compose.yml up -d --wait --wait-timeout 60
 
 # ── Backend ──
 echo "🏗️   Rebuilding backend image..."
