@@ -538,6 +538,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "campaigns.tasks.generate_impact_certificates",
         "schedule": 180.0,  # 180 seconds = 3 minutes
     },
+    "auto-delete-empty-campaigns": {
+        "task": "campaigns.tasks.auto_delete_empty_campaigns",
+        "schedule": 300.0,  # 300 seconds = 5 minutes
+    },
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
