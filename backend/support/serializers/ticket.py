@@ -38,7 +38,7 @@ class TicketMessageSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "sender", "sender_email", "sender_full_name", "created_at"]
 
     def get_sender_full_name(self, obj):
-        return obj.sender.get_full_name() or obj.sender.email
+        return obj.sender.get_full_name or obj.sender.email
 
 
 class TicketMessageCreateSerializer(serializers.ModelSerializer):
@@ -83,11 +83,11 @@ class SupportTicketListSerializer(serializers.ModelSerializer):
         ]
 
     def get_created_by_full_name(self, obj):
-        return obj.created_by.get_full_name() or obj.created_by.email
+        return obj.created_by.get_full_name or obj.created_by.email
 
     def get_assigned_to_full_name(self, obj):
         if obj.assigned_to:
-            return obj.assigned_to.get_full_name() or obj.assigned_to.email
+            return obj.assigned_to.get_full_name or obj.assigned_to.email
         return None
 
     def get_message_count(self, obj):
@@ -148,11 +148,11 @@ class SupportTicketDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_created_by_full_name(self, obj):
-        return obj.created_by.get_full_name() or obj.created_by.email
+        return obj.created_by.get_full_name or obj.created_by.email
 
     def get_assigned_to_full_name(self, obj):
         if obj.assigned_to:
-            return obj.assigned_to.get_full_name() or obj.assigned_to.email
+            return obj.assigned_to.get_full_name or obj.assigned_to.email
         return None
 
 
