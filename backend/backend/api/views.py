@@ -1,13 +1,14 @@
-from django.db.models import Count, Q, Sum
-from django.db.models.functions import Coalesce
+from django.db import connection
+from django.db.models import Sum
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from beneficiaries.models import Beneficiary, HealthIssue
+from beneficiaries.models import Beneficiary
 from campaigns.models import Campaign, Donation
 from core.cache import cache_response
 
@@ -98,10 +99,6 @@ class PlatformStatsView(APIView):
                 {"error": f"Failed to retrieve platform statistics: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-
-from django.db import connection
-from rest_framework.decorators import api_view, permission_classes
 
 
 @api_view(["GET"])
