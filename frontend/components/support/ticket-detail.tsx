@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { TicketStatusBadge } from "./ticket-status-badge";
 import { TicketPriorityBadge } from "./ticket-priority-badge";
 import { TicketConversation } from "./ticket-conversation";
-import { assignTicket, changeTicketStatus, closeTicket } from "@/actions/support";
+import { assignTicket, changeTicketStatus, closeTicket, listSystemAdmins } from "@/actions/support";
 import { toast } from "sonner";
 import { Loader2, UserPlus, XCircle, CheckCircle, X } from "lucide-react";
 
@@ -33,6 +33,12 @@ export function TicketDetail({
   const [selectedAdmin, setSelectedAdmin] = useState("");
   const [newStatus, setNewStatus] = useState<TicketStatus>(ticket.status);
   const [resolutionNotes, setResolutionNotes] = useState("");
+
+  const { data: admins = [] } = useQuery({
+    queryKey: ["system-admins", token],
+    queryFn: () => listSystemAdmins(token),
+    enabled: !!token && showAssignDialog,
+  });
 
   const assignMutation = useMutation({
     mutationFn: () => assignTicket(currentTicket.id, token, { assigned_to: selectedAdmin }),
@@ -261,12 +267,20 @@ export function TicketDetail({
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
                   Assign to Admin *
                 </label>
-                <input
+                <select
                   className="input-field w-full"
-                  placeholder="Enter admin user ID"
                   value={selectedAdmin}
                   onChange={(e) => setSelectedAdmin(e.target.value)}
-                />
+                >
+                  <option value="">— Select admin —</option>
+                  {admins.map((admin) => (
+                    <option key={admin.id} value={admin.id}>
+                      {admin.first_name && admin.last_name
+                        ? `${admin.first_name} ${admin.last_name}`
+                        : admin.email}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
