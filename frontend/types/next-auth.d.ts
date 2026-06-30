@@ -24,6 +24,7 @@ declare module "next-auth" {
     refreshToken: string
     role: USER_ROLE
     expiresAt: number
+    error?: "RefreshAccessTokenError" | "NoRefreshToken"
   }
 }
 
@@ -34,6 +35,7 @@ declare module "next-auth/jwt" {
     refreshToken: string
     role: USER_ROLE
     expiresAt: number
+    error?: "RefreshAccessTokenError" | "NoRefreshToken"
     userInfo?:
       | DonorInfo
       | SystemAdminInfo
