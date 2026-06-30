@@ -59,7 +59,7 @@ function DonorListDialog({
   campaignId: string;
   campaignTitle: string;
 }) {
-  const [pages, setPages] = useState<any[]>([]);
+  const [pages, setPages] = useState<PaginationResponse<Donation>[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
@@ -73,7 +73,7 @@ function DonorListDialog({
           status: "SUCCESS",
           page: page.toString(),
         });
-        const pageData = (res as any)?.json || res;
+        const pageData = res as PaginationResponse<Donation>;
         setPages((prev) => [...prev, pageData]);
         setHasNextPage(!!pageData?.next);
       } finally {
@@ -101,11 +101,8 @@ function DonorListDialog({
     }
   }, [open, campaignId, fetchDonations]);
 
-  const allDonations =
-    pages.flatMap((page) => {
-      const results = (page as any)?.results || [];
-      return results;
-    }) || [];
+  const allDonations: Donation[] =
+    pages.flatMap((page) => page.results || []) || [];
 
   const sentinelRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -140,7 +137,7 @@ function DonorListDialog({
         {/* Scrollable donor list */}
         <div className="flex-1 overflow-y-auto min-h-0 px-6 divide-y divide-gray-50">
           {allDonations.length > 0 ? (
-            allDonations.map((donation: any, idx: number) => (
+            allDonations.map((donation: Donation, idx: number) => (
               <div
                 key={donation.id + "-modal-" + idx}
                 className="flex items-start gap-3 py-4 first:pt-0 last:pb-0"
@@ -158,7 +155,7 @@ function DonorListDialog({
                         : donation.donor_name}
                     </p>
                     <span className="text-sm font-bold text-[#1DB1DB] whitespace-nowrap">
-                      {formatXAF(donation.amount)}
+                      {formatXAF(donation.net_amount)}
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mt-0.5">
@@ -231,7 +228,7 @@ function DonorList({
   campaignId,
   campaignTitle,
 }: {
-  donations: any[];
+  donations: Donation[];
   totalDonors: number;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
@@ -254,7 +251,7 @@ function DonorList({
 
         <div className="max-h-90 overflow-y-auto px-6 pb-5 space-y-4 scrollbar-thin">
           {visible.length > 0 ? (
-            visible.map((donation: any, idx: number) => (
+            visible.map((donation: Donation, idx: number) => (
               <div
                 key={donation.id + "-" + idx}
                 className="flex items-start gap-3"
@@ -272,7 +269,7 @@ function DonorList({
                         : donation.donor_name}
                     </p>
                     <span className="text-xs font-bold text-[#1DB1DB] whitespace-nowrap">
-                      {formatXAF(donation.amount)}
+                      {formatXAF(donation.net_amount)}
                     </span>
                   </div>
                   <p className="text-[11px] text-gray-400 mt-0.5">
@@ -350,7 +347,7 @@ function getTimelineColors(type: string) {
   }
 }
 
-function TimelineRow({ item }: { item: any }) {
+function TimelineRow({ item }: { item: TimelineItem }) {
   return (
     <div className="flex gap-4 group">
       <div className="flex flex-col items-center">
@@ -379,7 +376,7 @@ function TimelineRow({ item }: { item: any }) {
         </div>
         {item.description && (
           <p className="text-xs text-gray-500 mt-1 italic line-clamp-2">
-            "{item.description}"
+            {item.description}
           </p>
         )}
         <div className="flex items-center gap-2 mt-1">
@@ -411,7 +408,7 @@ function TransparencyDialog({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  timeline: any[];
+  timeline: TimelineItem[];
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -442,8 +439,8 @@ function TransparencyTimeline({
   donations,
   transactions,
 }: {
-  donations: any[];
-  transactions: any[];
+  donations: Donation[];
+  transactions: CampaignTransaction[];
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>("all");
@@ -459,25 +456,29 @@ function TransparencyTimeline({
   }, [donations.length, transactions]);
 
   const timeline = useMemo(() => {
-    const items = [
-      ...donations.map((d: any) => ({
+    const items: TimelineItem[] = [
+      ...donations.map((d) => ({
         id: `donation-${d.id}`,
         type: "donation" as const,
-        amount: d.amount,
+        amount: d.net_amount,
         label: d.is_anonymous
           ? "Anonymous donation"
           : `${d.donor_name} donated`,
         description: d.message || null,
         date: d.created_at,
       })),
-      ...transactions.map((tx: any) => ({
-        id: `tx-${tx.id}`,
-        type: tx.transaction_type?.toLowerCase().replace(/_/g, "-") as string,
-        amount: tx.amount,
-        label: tx.description || tx.transaction_type?.replace(/_/g, " "),
-        description: null,
-        date: tx.created_at,
-      })),
+      ...transactions
+        .filter((tx) => tx.transaction_type !== "DONATION")
+        .map((tx) => ({
+          id: `tx-${tx.id}`,
+          type: tx.transaction_type
+            ?.toLowerCase()
+            .replace(/_/g, "-") as TimelineItemType,
+          amount: tx.amount,
+          label: tx.description || tx.transaction_type?.replace(/_/g, " "),
+          description: null,
+          date: tx.created_at,
+        })),
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     if (filterType !== "all") {
@@ -550,13 +551,15 @@ function TransparencyTimeline({
   );
 }
 
-export default function CampaignPage() {
+export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
-  const [campaignData, setCampaignData] = useState<any>(null);
+  const [campaignData, setCampaignData] = useState<CampaignDetail | null>(null);
   const [isCampaignLoading, setIsCampaignLoading] = useState(true);
-  const [donationPages, setDonationPages] = useState<any[]>([]);
+  const [donationPages, setDonationPages] = useState<
+    PaginationResponse<Donation>[]
+  >([]);
   const [currentDonationPage, setCurrentDonationPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
@@ -570,9 +573,8 @@ export default function CampaignPage() {
     const fetchCampaign = async () => {
       try {
         setIsCampaignLoading(true);
-        const res = await getCampaign(id as string);
-        const data = (res as any)?.json || res;
-        setCampaignData(data);
+        const data = await getCampaign(id as string);
+        setCampaignData(data as CampaignDetail);
       } finally {
         setIsCampaignLoading(false);
       }
@@ -587,11 +589,10 @@ export default function CampaignPage() {
 
     const fetchDonations = async () => {
       try {
-        const res = await listCampaignDonations(id as string, {
+        const pageData = (await listCampaignDonations(id as string, {
           status: "SUCCESS",
           page: "1",
-        });
-        const pageData = (res as any)?.json || res;
+        })) as PaginationResponse<Donation>;
         setDonationPages([pageData]);
         setHasNextPage(!!pageData?.next);
         setCurrentDonationPage(1);
@@ -607,11 +608,10 @@ export default function CampaignPage() {
     const nextPage = currentDonationPage + 1;
     setIsFetchingNextPage(true);
     try {
-      const res = await listCampaignDonations(id as string, {
+      const pageData = (await listCampaignDonations(id as string, {
         status: "SUCCESS",
         page: nextPage.toString(),
-      });
-      const pageData = (res as any)?.json || res;
+      })) as PaginationResponse<Donation>;
       setDonationPages((prev) => [...prev, pageData]);
       setHasNextPage(!!pageData?.next);
       setCurrentDonationPage(nextPage);
@@ -621,11 +621,8 @@ export default function CampaignPage() {
   }, [id, currentDonationPage]);
 
   const campaign = campaignData;
-  const donations =
-    donationPages.flatMap((page) => {
-      const results = (page as any)?.results || [];
-      return results;
-    }) || [];
+  const donations: Donation[] =
+    donationPages.flatMap((page) => page.results || []) || [];
 
   const fetchNextPage = fetchNextDonationPage;
   const handleCopy = () => {
@@ -881,7 +878,7 @@ export default function CampaignPage() {
 
                   {voucherFundings.length > 0 ? (
                     <div className="space-y-3">
-                      {voucherFundings.map((funding: any) => (
+                      {voucherFundings.map((funding: VoucherFundingDetail) => (
                         <div
                           key={funding.id}
                           className="flex items-center gap-4 bg-gray-50 rounded-2xl p-4 hover:bg-gray-100 transition-colors"
