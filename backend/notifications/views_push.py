@@ -193,6 +193,8 @@ def test_send_push(request):
     title = data["title"]
     body = data["body"]
     url = data.get("url", "")
+    image = data.get("image") or None
+    actions = data.get("actions") or None
     broadcast = data.get("broadcast", False)
     user_ids = data.get("user_ids", [])
     roles = data.get("roles", [])
@@ -207,7 +209,7 @@ def test_send_push(request):
         users = User.objects.filter(role__in=roles)
         for user in users:
             try:
-                sent += send_push_notification_to_user(user, title=title, body=body, url=url, tag="test")
+                sent += send_push_notification_to_user(user, title=title, body=body, url=url, image=image, actions=actions, tag="test")
             except Exception:
                 failed += 1
         return Response({
@@ -220,7 +222,7 @@ def test_send_push(request):
         users = User.objects.filter(id__in=user_ids)
         for user in users:
             try:
-                sent += send_push_notification_to_user(user, title=title, body=body, url=url, tag="test")
+                sent += send_push_notification_to_user(user, title=title, body=body, url=url, image=image, actions=actions, tag="test")
             except Exception:
                 failed += 1
         return Response({
@@ -238,16 +240,24 @@ def test_send_push(request):
 
     for sub in subs:
         try:
+            from notifications.webpush import _get_absolute_url
+
+            payload = {
+                "title": title,
+                "body": body,
+                "url": url or "",
+            }
+            if image:
+                payload["image"] = _get_absolute_url(image)
+            if actions:
+                payload["actions"] = actions
+
             webpush(
                 subscription_info={
                     "endpoint": sub.endpoint,
                     "keys": {"p256dh": sub.p256dh_key, "auth": sub.auth_key},
                 },
-                data=json.dumps({
-                    "title": title,
-                    "body": body,
-                    "url": url or "",
-                }).encode("utf-8"),
+                data=json.dumps(payload).encode("utf-8"),
                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
                 vapid_claims=settings.VAPID_CLAIMS,
                 ttl=86400,
