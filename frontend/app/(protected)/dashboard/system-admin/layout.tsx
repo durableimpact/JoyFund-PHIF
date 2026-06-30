@@ -20,6 +20,7 @@ import {
   HandHeart,
   Phone,
   Heart,
+  HelpCircle,
 } from "lucide-react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -89,6 +90,11 @@ const NAV: NavItem[] = [
     label: "Health Issues",
     href: "/dashboard/system-admin/health-issues",
     icon: <Heart size={16} />,
+  },
+  {
+    label: "Support",
+    href: "/dashboard/system-admin/support",
+    icon: <HelpCircle size={16} />,
   },
   {
     label: "Analytics",
