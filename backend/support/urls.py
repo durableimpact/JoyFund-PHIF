@@ -12,6 +12,7 @@ from support.views import (
     TicketMessageListCreateView,
     TicketStatsView,
     TicketCategoriesView,
+    SystemAdminListView,
 )
 
 urlpatterns = [
@@ -20,6 +21,7 @@ urlpatterns = [
     path("my-tickets/", MyTicketsListView.as_view(), name="my-tickets"),
     path("stats/", TicketStatsView.as_view(), name="ticket-stats"),
     path("categories/", TicketCategoriesView.as_view(), name="ticket-categories"),
+    path("admins/", SystemAdminListView.as_view(), name="system-admin-list"),
     path("tickets/<uuid:pk>/", SupportTicketDetailView.as_view(), name="ticket-detail"),
     path("tickets/<uuid:pk>/update/", SupportTicketUpdateView.as_view(), name="ticket-update"),
     path("tickets/<uuid:pk>/assign/", SupportTicketAssignView.as_view(), name="ticket-assign"),
