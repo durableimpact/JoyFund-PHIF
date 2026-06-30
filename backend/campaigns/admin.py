@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Campaign, Payment, Donation, CampaignTransaction
+
+from .models import Campaign, CampaignTransaction, Donation, Payment
 
 
 class DonationInline(admin.TabularInline):
@@ -31,6 +32,20 @@ class PaymentInline(admin.TabularInline):
         "created_at",
     )
     readonly_fields = ("payment_id", "created_at")
+    can_delete = False
+
+
+class CampaignTransactionInline(admin.TabularInline):
+    model = CampaignTransaction
+    extra = 0
+    fields = (
+        "transaction_type",
+        "voucher_funding",
+        "amount",
+        "description",
+        "created_at",
+    )
+    readonly_fields = ("id", "created_at")
     can_delete = False
 
 
@@ -118,7 +133,16 @@ class PaymentAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "Payment Details",
-            {"fields": ("payment_id", "payment_method", "phone_number", "amount","app_amount","aggregator_fee")},
+            {
+                "fields": (
+                    "payment_id",
+                    "payment_method",
+                    "phone_number",
+                    "amount",
+                    "app_amount",
+                    "aggregator_fee",
+                )
+            },
         ),
         ("Status & Reference", {"fields": ("payment_status", "payment_reference")}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
@@ -148,7 +172,13 @@ class DonationAdmin(admin.ModelAdmin):
         "donor__user__email",
         "message",
     )
-    readonly_fields = ("id", "created_at", "updated_at", "platform_fee_amount", "net_amount")
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+        "platform_fee_amount",
+        "net_amount",
+    )
 
     fieldsets = (
         (
