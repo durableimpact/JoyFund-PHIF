@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, pre_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 from django.db.models import F
+from django.core.exceptions import PermissionDenied
 
 from accounts.models import Role
 from campaigns.models import Campaign, Donation, CampaignTransaction
@@ -13,34 +14,59 @@ User = get_user_model()
 
 @receiver(post_save, sender=Campaign, dispatch_uid="broadcast_campaign_created_push")
 def broadcast_campaign_created_push(sender, instance, created, **kwargs):
-    """Send web push notification to all users when a campaign is created."""
-    if created and instance.status != Campaign.CampaignStatus.DRAFT:
-        from notifications.webpush import send_push_notification_to_all_users
+    """Send web push notification to all users when a campaign becomes public."""
+    if not instance.is_public:
+        return
 
-        donor_name = ""
-        try:
-            donor_name = instance.donor.user.first_name
-        except Exception:
-            pass
+    # On creation: skip if private (default)
+    if created and not instance.is_public:
+        return
 
-        cover_image = None
-        try:
-            if instance.cover_image:
-                cover_image = instance.cover_image.url
-        except Exception:
-            pass
+    # On update: only broadcast if is_public transitioned from False -> True
+    if not created:
+        was_public = getattr(instance, '_initial_is_public', True)
+        if was_public:
+            return  # Was already public, don't re-broadcast
 
-        send_push_notification_to_all_users(
-            title=f"New Campaign: {instance.title}",
-            body=f"{donor_name} started a new campaign! Help them reach their goal of {instance.goal_amount} XAF." if donor_name else f"A new campaign '{instance.title}' has started! Help reach the goal of {instance.goal_amount} XAF.",
-            image=cover_image,
-            url=f"/campaign/{instance.id}/",
-            tag="new_campaign",
-            actions=[
-                {"action": "view", "title": "View More"},
-                {"action": "donate", "title": "Donate Now"},
-            ],
-        )
+    from notifications.webpush import send_push_notification_to_all_users
+
+    donor_name = ""
+    try:
+        donor_name = instance.donor.user.first_name
+    except Exception:
+        pass
+
+    cover_image = None
+    try:
+        if instance.cover_image:
+            cover_image = instance.cover_image.url
+    except Exception:
+        pass
+
+    send_push_notification_to_all_users(
+        title=f"New Campaign: {instance.title}",
+        body=f"{donor_name} started a new campaign! Help them reach their goal of {instance.goal_amount} XAF." if donor_name else f"A new campaign '{instance.title}' has started! Help reach the goal of {instance.goal_amount} XAF.",
+        image=cover_image,
+        url=f"/campaign/{instance.id}/",
+        tag="new_campaign",
+        actions=[
+            {"action": "view", "title": "View More"},
+            {"action": "donate", "title": "Donate Now"},
+        ],
+    )
+
+
+@receiver(post_save, sender=Campaign, dispatch_uid="schedule_campaign_donation_reminders")
+def schedule_campaign_donation_reminders(sender, instance, created, **kwargs):
+    """Schedule donation reminder tasks when a new campaign is created."""
+    if not created:
+        return
+
+    from campaigns.tasks import schedule_campaign_reminders
+    schedule_campaign_reminders.apply_async(
+        args=[str(instance.id)],
+        countdown=5,
+    )
 
 
 
@@ -48,13 +74,20 @@ def broadcast_campaign_created_push(sender, instance, created, **kwargs):
 def handle_donation_success(sender, instance: Donation, created, **kwargs):
     """
     When a donation is successful:
-    1. Create a CampaignTransaction record
+    1. Auto-publish the campaign if it was private (first donation makes it public)
+    2. Create a CampaignTransaction record
     (Note: campaign's current_amount is updated in payments/signals.py)
     Only processes once when status is SUCCESS.
     """
     if instance.status != 'SUCCESS':
         return
     
+    # Auto-publish campaign on first successful donation
+    campaign = instance.campaign
+    if not campaign.is_public:
+        Campaign.objects.filter(pk=campaign.pk).update(is_public=True)
+        campaign.is_public = True
+
     # Use a database-level lock or a better guard to prevent double-processing.
     # Since we create a CampaignTransaction with the donation ID in description,
     # we can use that as a guard.
@@ -62,8 +95,6 @@ def handle_donation_success(sender, instance: Donation, created, **kwargs):
     if CampaignTransaction.objects.filter(description=tx_description).exists():
         return
 
-    campaign = instance.campaign
-    
     # Create Transaction record
     CampaignTransaction.objects.create(
         campaign=campaign,
@@ -210,3 +241,12 @@ def notify_certificate_generated(sender, instance, created, **kwargs):
         notification_type=NotificationType.CAMPAIGN_UPDATE,
         action_url=f"/campaigns/{instance.id}/",
     )
+
+
+@receiver(pre_delete, sender=Campaign, dispatch_uid="protect_campaign_from_deletion")
+def protect_campaign_from_deletion(sender, instance, **kwargs):
+    """Prevent deletion of campaigns that have at least one successful donation."""
+    if instance.has_successful_donation:
+        raise PermissionDenied(
+            "Cannot delete a campaign that has received at least one successful donation."
+        )
