@@ -243,3 +243,19 @@ export const getTicketEvents = async (ticketId: string, token: string) => {
     handleError(e);
   }
 };
+
+// ── System Admins ──
+
+export const listSystemAdmins = async (token: string) => {
+  try {
+    const { data } = await api.get<{ id: string; email: string; first_name: string; last_name: string }[]>(
+      "/api/support/admins/",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
