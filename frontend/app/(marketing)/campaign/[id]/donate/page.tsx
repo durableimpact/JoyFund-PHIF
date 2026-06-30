@@ -59,18 +59,17 @@ function DonatePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const confettiRef = useRef<any>(null);
+  const confettiRef = useRef<{ fire: (opts: { particleCount: number; spread: number; origin: { y: number } }) => void } | null>(null);
   const { data: session } = useSession();
-  const sessionAny = session as any;
   const isDonor = !!(
     session &&
-    !sessionAny?.error &&
-    sessionAny?.user?.role === "DONOR" &&
-    sessionAny?.accessToken &&
-    sessionAny?.expiresAt &&
-    Date.now() < sessionAny.expiresAt
+    !session?.error &&
+    session?.user?.role === "DONOR" &&
+    session?.accessToken &&
+    session?.expiresAt &&
+    Date.now() < session.expiresAt
   );
-  const accessToken = isDonor ? sessionAny.accessToken : undefined;
+  const accessToken = isDonor ? session.accessToken : undefined;
 
   // Check payment status from URL
   const paymentStatus = searchParams.get("status");
@@ -143,13 +142,8 @@ function DonatePage() {
         toast.error("Payment link not available");
       }
     },
-    onError: (error: any) => {
-      try {
-        const errorData = JSON.parse(error);
-        toast.error(errorData?.error || "Payment failed. Please try again.");
-      } catch {
-        toast.error(error?.message || "Payment failed. Please try again.");
-      }
+    onError: (error: Error) => {
+      toast.error(error.message || "Payment failed. Please try again.");
     },
   });
 
@@ -383,7 +377,7 @@ function DonatePage() {
                         : {}
                     }
                   >
-                    {a / 1000}k
+                    {formatXAF(a)}
                   </button>
                 ))}
                 <button
