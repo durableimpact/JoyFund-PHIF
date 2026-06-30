@@ -20,7 +20,7 @@ const EVENT_TYPE_LABELS = [
 export default function ExplorePage() {
   const [params, setParams] = useUrlSearchParams(
     { search: "", filter: "All", statusFilter: "all" },
-    {}
+    {},
   );
   const search = (params.search as string) || "";
   const filter = (params.filter as string) || "All";
@@ -33,7 +33,7 @@ export default function ExplorePage() {
       await listCampaigns({
         event_type: filter === "All" ? undefined : (filter as any),
         status: statusFilter === "all" ? undefined : statusFilter,
-        min_progress_percentage: 1,
+        min_progress_percentage: 7,
         is_public: true,
         is_active: true,
       }),

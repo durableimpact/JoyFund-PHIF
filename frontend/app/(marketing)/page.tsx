@@ -213,6 +213,7 @@ export default function HomePage() {
         status: "ACTIVE",
         is_public: true,
         is_active: true,
+        min_progress_percentage: 3,
       }),
   });
 
