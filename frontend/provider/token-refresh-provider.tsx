@@ -70,6 +70,8 @@ export default function TokenRefreshProvider({
 
       // Signal the error to the rest of the app so useAuthError / proxy can
       // redirect the user to login instead of leaving them stranded.
+      // Public pages (e.g. campaign views) stay accessible — only redirect
+      // from protected routes.
       try {
         await update({ error: "RefreshAccessTokenError" } as any);
       } catch {
@@ -79,7 +81,12 @@ export default function TokenRefreshProvider({
         } catch {}
         hasLoggedOutRef.current = true;
         await signOut({ redirect: false });
-        window.location.href = "/login?reason=session_expired";
+        const isProtected = ["/dashboard", "/profile", "/settings"].some(
+          (p) => window.location.pathname.startsWith(p),
+        );
+        if (isProtected) {
+          window.location.href = "/login?reason=session_expired";
+        }
       }
     } finally {
       isRefreshingRef.current = false;
