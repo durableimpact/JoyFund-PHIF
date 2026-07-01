@@ -5,7 +5,6 @@ import Footer from "@/components/shared/Footer";
 import { getSession } from "@/lib/auth-server";
 
 export const metadata: Metadata = {
-  robots: { index: false, follow: false },
   openGraph: {
     type: "website",
     siteName: "JoyFund",
