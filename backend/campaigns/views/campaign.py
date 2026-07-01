@@ -1,11 +1,15 @@
+import hashlib
+
 from accounts.models import Role
 from django.core.cache import cache
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
+from django.utils import timezone
+from datetime import timedelta
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListAPIView
@@ -13,7 +17,7 @@ from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from campaigns.filters import CampaignFilter
-from campaigns.models import Campaign
+from campaigns.models import Campaign, CampaignView
 from campaigns.serializers import (
     CampaignBalanceSerializer,
     CampaignCreateUpdateSerializer,
@@ -81,10 +85,12 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     ordering = ["-created_at"]
 
     def get_permissions(self):
-        if self.action in ["list", "retrieve", "leaderboard"]:
+        if self.action in ["list", "retrieve", "leaderboard", "track_view"]:
             return [AllowAny()]
         elif self.action == "create":
             return [IsAuthenticated(), IsDonor()]
+        elif self.action == "analytics":
+            return [IsAuthenticated()]
         return [IsAuthenticated(), IsDonor(), CampaignOwnerOnly()]
 
     def get_serializer_class(self):
@@ -270,6 +276,124 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             filename=f"{campaign.slug}_impact_certificate.pdf",
             content_type="application/pdf",
         )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[AllowAny],
+        url_path="track-view",
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["source"],
+            properties={
+                "source": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=["push", "social", "google", "email", "direct", "other"],
+                    description="Traffic source",
+                ),
+                "referrer": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Raw HTTP referer (optional)",
+                ),
+            },
+        ),
+        responses={200: "View tracked"},
+        operation_description="Track a campaign page view with source attribution. Idempotent per visitor per 24h.",
+    )
+    def track_view(self, request, pk=None):
+        campaign = self.get_object()
+        source = request.data.get("source", "direct")
+        referrer = request.data.get("referrer", "")
+
+        # Validate source
+        valid_sources = [c[0] for c in CampaignView.Source.choices]
+        if source not in valid_sources:
+            source = "other"
+
+        # Compute visitor hash from IP + user-agent
+        from accounts.middleware import _get_client_ip
+        ip = _get_client_ip(request)
+        ua = request.META.get("HTTP_USER_AGENT", "")
+        visitor_hash = hashlib.sha256(f"{ip}:{ua}".encode()).hexdigest()
+
+        # Always store the view (full history)
+        CampaignView.objects.create(
+            campaign=campaign,
+            source=source,
+            visitor_hash=visitor_hash,
+            referrer=referrer,
+        )
+
+        # Count unique views (distinct visitor_hash in last 24h)
+        one_day_ago = timezone.now() - timedelta(hours=24)
+        qs = CampaignView.objects.filter(
+            campaign=campaign,
+            created_at__gte=one_day_ago,
+        )
+        total_views = qs.count()
+        unique_views = qs.values("visitor_hash").distinct().count()
+
+        return Response({
+            "total_views": total_views,
+            "unique_views": unique_views,
+        })
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="analytics",
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: "Campaign analytics"},
+        operation_description="Get campaign view analytics (owner or system admin only).",
+    )
+    def analytics(self, request, pk=None):
+        campaign = self.get_object()
+
+        # Only owner or system admin can view analytics
+        is_owner = False
+        try:
+            is_owner = campaign.donor_id == request.user.donor.id
+        except Exception:
+            pass
+        is_admin = request.user.role == Role.SYSTEM_ADMIN
+        if not is_owner and not is_admin:
+            return Response(
+                {"detail": "You do not have permission to view analytics."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        one_day_ago = timezone.now() - timedelta(hours=24)
+        qs = CampaignView.objects.filter(
+            campaign=campaign,
+            created_at__gte=one_day_ago,
+        )
+
+        total_views = qs.count()
+        unique_views = qs.values("visitor_hash").distinct().count()
+
+        # Source breakdown (unique per source)
+        source_data = (
+            qs.values("source")
+            .annotate(
+                total=Count("id"),
+                unique=Count("visitor_hash", distinct=True),
+            )
+            .order_by("-unique")
+        )
+
+        sources = {item["source"]: {"total": item["total"], "unique": item["unique"]} for item in source_data}
+
+        return Response({
+            "total_views": total_views,
+            "unique_views": unique_views,
+            "sources": sources,
+        })
 
 
 class CampaignAvailableBalanceListView(ListAPIView):
