@@ -516,25 +516,25 @@ class AdminOrganizationView(APIView):
         start, end = _date_range_from_params(request)
         prev_start, prev_end = _previous_period(start, end)
 
-        hosp_agg = Hospital.objects.filter(created_at__date__lte=current_end).aggregate(
+        hosp_agg = Hospital.objects.filter(created_at__date__lte=end).aggregate(
             curr=Count("id"),
             prev=Count("id", filter=Q(created_at__date__lte=prev_end)),
         )
         hosp_curr, hosp_prev = hosp_agg["curr"], hosp_agg["prev"]
 
-        ha_agg = HospitalAdmin.objects.filter(user__created_at__date__lte=current_end).aggregate(
+        ha_agg = HospitalAdmin.objects.filter(user__created_at__date__lte=end).aggregate(
             curr=Count("id"),
             prev=Count("id", filter=Q(user__created_at__date__lte=prev_end)),
         )
         ha_curr, ha_prev = ha_agg["curr"], ha_agg["prev"]
 
-        sw_agg = SocialWorker.objects.filter(user__created_at__date__lte=current_end).aggregate(
+        sw_agg = SocialWorker.objects.filter(user__created_at__date__lte=end).aggregate(
             curr=Count("id"),
             prev=Count("id", filter=Q(user__created_at__date__lte=prev_end)),
         )
         sw_curr, sw_prev = sw_agg["curr"], sw_agg["prev"]
 
-        rec_agg = Receptionist.objects.filter(user__created_at__date__lte=current_end).aggregate(
+        rec_agg = Receptionist.objects.filter(user__created_at__date__lte=end).aggregate(
             curr=Count("id"),
             prev=Count("id", filter=Q(user__created_at__date__lte=prev_end)),
         )
