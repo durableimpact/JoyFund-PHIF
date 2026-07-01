@@ -37,10 +37,17 @@ declare interface UnreadCountResponse {
 
 // ── Push Notifications ──
 
+declare interface PushAction {
+  action: string;
+  title: string;
+}
+
 declare interface TestPushPayload {
   title: string;
   body: string;
   url?: string;
+  image?: string;
+  actions?: PushAction[];
   broadcast?: boolean;
   user_ids?: string[];
   roles?: USER_ROLE[];
