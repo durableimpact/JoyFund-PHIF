@@ -27,6 +27,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import NotificationsPanel from "@/components/shared/NotificationsPanel";
 
 const NAV_LINKS = [
   {
@@ -125,6 +126,7 @@ export default function DonorNavbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          <NotificationsPanel />
           {/* User dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger
