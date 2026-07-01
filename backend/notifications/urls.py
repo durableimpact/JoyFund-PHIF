@@ -6,6 +6,7 @@ from notifications.views_push import (
     unregister_push_subscription,
     list_push_subscriptions,
     test_send_push,
+    push_task_status,
 )
 
 app_name = 'notifications'
@@ -18,4 +19,5 @@ urlpatterns = router.urls + [
     path("push/unregister/", unregister_push_subscription, name="push-unregister"),
     path("push/subscriptions/", list_push_subscriptions, name="push-subscriptions"),
     path("push/test-send/", test_send_push, name="push-test-send"),
+    path("push/task/<uuid:task_id>/", push_task_status, name="push-task-status"),
 ]
