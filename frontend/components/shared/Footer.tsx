@@ -33,6 +33,8 @@ export default function Footer() {
                 ['Explore Campaigns', '/explore'],
                 ['About JoyFund', '/about'],
                 ['Leaderboard', '/leaderboard'],
+                ['Pricing & Fees', '/pricing'],
+                ['Supported Countries', '/countries'],
                 ['Sign In', '/login'],
               ].map(([l, h]) => (
                 <Link key={h} href={h} className="hover:text-white transition-colors">
