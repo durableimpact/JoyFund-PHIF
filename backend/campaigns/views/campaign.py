@@ -3,7 +3,7 @@ import hashlib
 from accounts.models import Role
 from django.core.cache import cache
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, TruncDate, TruncWeek, TruncMonth
 from django.utils import timezone
 from datetime import timedelta
 from django_filters.rest_framework import DjangoFilterBackend
@@ -349,10 +349,35 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     )
     @swagger_auto_schema(
         tags=_TAG,
+        manual_parameters=[
+            openapi.Parameter(
+                "period", openapi.IN_QUERY,
+                description="Grouping period: day, week, month",
+                type=openapi.TYPE_STRING, enum=["day", "week", "month"],
+            ),
+            openapi.Parameter(
+                "start_date", openapi.IN_QUERY,
+                description="Start date (YYYY-MM-DD). Defaults to campaign creation date.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "end_date", openapi.IN_QUERY,
+                description="End date (YYYY-MM-DD). Defaults to today.",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "source", openapi.IN_QUERY,
+                description="Filter by source: push, social, google, email, direct, other",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
         responses={200: "Campaign analytics"},
-        operation_description="Get campaign view analytics (owner or system admin only).",
+        operation_description="Get campaign view analytics with daily/weekly/monthly breakdown. Owner or system admin only.",
     )
     def analytics(self, request, pk=None):
+        from datetime import datetime, timedelta
+        from collections import OrderedDict
+
         campaign = self.get_object()
 
         # Only owner or system admin can view analytics
@@ -368,17 +393,150 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        one_day_ago = timezone.now() - timedelta(hours=24)
+        # Parse params
+        period = request.query_params.get("period", "day")
+        if period not in ("day", "week", "month"):
+            period = "day"
+
+        source_filter = request.query_params.get("source")
+        valid_sources = [c[0] for c in CampaignView.Source.choices]
+        if source_filter and source_filter not in valid_sources:
+            source_filter = None
+
+        # Date range: default to campaign creation → today
+        today = timezone.now().date()
+        try:
+            start_date = datetime.strptime(
+                request.query_params.get("start_date", ""), "%Y-%m-%d"
+            ).date()
+        except (ValueError, TypeError):
+            start_date = campaign.created_at.date() if campaign.created_at else today
+
+        try:
+            end_date = datetime.strptime(
+                request.query_params.get("end_date", ""), "%Y-%m-%d"
+            ).date()
+        except (ValueError, TypeError):
+            end_date = today
+
+        # Ensure start <= end
+        if start_date > end_date:
+            start_date, end_date = end_date, start_date
+
+        # Build the base queryset
         qs = CampaignView.objects.filter(
             campaign=campaign,
-            created_at__gte=one_day_ago,
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date,
+        )
+        if source_filter:
+            qs = qs.filter(source=source_filter)
+
+        # ── Build period labels (every day/week/month, even if empty) ──
+        period_labels = []
+        if period == "day":
+            current = start_date
+            while current <= end_date:
+                period_labels.append(current.isoformat())
+                current += timedelta(days=1)
+        elif period == "week":
+            # Align to start of week (Monday)
+            current = start_date - timedelta(days=start_date.weekday())
+            end_aligned = end_date + timedelta(days=(6 - end_date.weekday()))
+            while current <= end_aligned:
+                label = f"{current.isoformat()}"
+                period_labels.append(label)
+                current += timedelta(weeks=1)
+        elif period == "month":
+            current = start_date.replace(day=1)
+            while current <= end_date:
+                label = current.strftime("%Y-%m")
+                if label not in period_labels:
+                    period_labels.append(label)
+                if current.month == 12:
+                    current = current.replace(year=current.year + 1, month=1)
+                else:
+                    current = current.replace(month=current.month + 1)
+
+        # ── Truncate created_at to the period bucket ──
+        if period == "day":
+            trunc_expr = TruncDate("created_at")
+        elif period == "week":
+            trunc_expr = TruncWeek("created_at")
+        else:
+            trunc_expr = TruncMonth("created_at")
+
+        # ── Aggregate views per period ──
+        view_data = (
+            qs.annotate(period=trunc_expr)
+            .values("period")
+            .annotate(
+                total=Count("id"),
+                unique=Count("visitor_hash", distinct=True),
+            )
+            .order_by("period")
         )
 
+        # Map DB results into a dict keyed by period label
+        view_map = {}
+        for row in view_data:
+            p = row["period"]
+            if period == "day":
+                key = p.isoformat() if hasattr(p, "isoformat") else str(p)
+            elif period == "week":
+                key = p.isoformat() if hasattr(p, "isoformat") else str(p)
+            else:
+                key = p.strftime("%Y-%m") if hasattr(p, "strftime") else str(p)
+            view_map[key] = {"total": row["total"], "unique": row["unique"]}
+
+        # ── Aggregate per source per period ──
+        source_period_data = (
+            qs.annotate(period=trunc_expr)
+            .values("period", "source")
+            .annotate(
+                total=Count("id"),
+                unique=Count("visitor_hash", distinct=True),
+            )
+            .order_by("period", "source")
+        )
+
+        source_period_map = {}
+        for row in source_period_data:
+            p = row["period"]
+            if period == "day":
+                key = p.isoformat() if hasattr(p, "isoformat") else str(p)
+            elif period == "week":
+                key = p.isoformat() if hasattr(p, "isoformat") else str(p)
+            else:
+                key = p.strftime("%Y-%m") if hasattr(p, "strftime") else str(p)
+
+            src = row["source"]
+            if key not in source_period_map:
+                source_period_map[key] = {}
+            source_period_map[key][src] = {"total": row["total"], "unique": row["unique"]}
+
+        # ── Fill gaps: every period gets 0s where no data exists ──
+        timeline = []
+        for label in period_labels:
+            view_stats = view_map.get(label, {"total": 0, "unique": 0})
+            sources_breakdown = {}
+            for src_key in [c[0] for c in CampaignView.Source.choices]:
+                sources_breakdown[src_key] = source_period_map.get(label, {}).get(
+                    src_key, {"total": 0, "unique": 0}
+                )
+            timeline.append({
+                "period": label,
+                "total": view_stats["total"],
+                "unique": view_stats["unique"],
+                "sources": sources_breakdown,
+            })
+
+        # ── Overall totals ──
         total_views = qs.count()
         unique_views = qs.values("visitor_hash").distinct().count()
 
-        # Source breakdown (unique per source)
-        source_data = (
+        # ── Overall source breakdown ──
+        source_totals = (
             qs.values("source")
             .annotate(
                 total=Count("id"),
@@ -386,13 +544,20 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             )
             .order_by("-unique")
         )
-
-        sources = {item["source"]: {"total": item["total"], "unique": item["unique"]} for item in source_data}
+        sources = {
+            item["source"]: {"total": item["total"], "unique": item["unique"]}
+            for item in source_totals
+        }
 
         return Response({
+            "campaign_id": str(campaign.id),
             "total_views": total_views,
             "unique_views": unique_views,
             "sources": sources,
+            "period": period,
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat(),
+            "timeline": timeline,
         })
 
 
