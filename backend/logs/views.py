@@ -158,7 +158,7 @@ class ErrorLogViewSet(CacheInvalidationMixin, viewsets.ReadOnlyModelViewSet):
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        """Filter by date range."""
+        """Filter by date range and user_id if provided."""
         queryset = super().get_queryset()
 
         if getattr(self, "swagger_fake_view", False):
@@ -181,6 +181,11 @@ class ErrorLogViewSet(CacheInvalidationMixin, viewsets.ReadOnlyModelViewSet):
                 queryset = queryset.filter(created_at__lte=to_date)
             except (ValueError, TypeError):
                 pass
+
+        # Filter by user_id
+        user_id = self.request.query_params.get("user_id")
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
 
         return queryset
 
