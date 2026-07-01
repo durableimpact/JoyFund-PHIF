@@ -53,10 +53,28 @@ declare interface TestPushPayload {
   roles?: USER_ROLE[];
 }
 
-declare interface TestPushResponse {
+declare interface TestPushSyncResponse {
   sent: number;
   failed: number;
-  errors?: string[];
   total_subscriptions: number;
   vapid_configured: boolean;
+}
+
+declare interface TestPushAsyncResponse {
+  task_id: string;
+  status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+}
+
+declare interface PushBroadcastTaskStatus {
+  task_id: string;
+  status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+  total: number;
+  sent: number;
+  failed: number;
+  errors: string[];
+  title: string;
+  body: string;
+  url: string;
+  image: string;
+  actions: PushAction[];
 }
