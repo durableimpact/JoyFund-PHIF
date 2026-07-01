@@ -74,7 +74,7 @@ class PlatformStatsView(APIView):
                 status=Campaign.CampaignStatus.ACTIVE,
                 is_public=True,
                 current_amount__gt=0,
-                donation__status="SUCCESS"  # Filter for campaigns with successful donations
+                donations__status="SUCCESS"  # Filter for campaigns with successful donations
             ).distinct().count()
 
             # Calculate total raised from successful donations
