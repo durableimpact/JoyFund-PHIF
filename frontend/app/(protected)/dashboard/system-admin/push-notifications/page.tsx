@@ -12,6 +12,9 @@ import {
   Bell,
   Users,
   Globe,
+  ImageIcon,
+  Plus,
+  Trash2,
 } from "lucide-react";
 
 import { sendTestPush } from "@/actions/notifications";
@@ -36,6 +39,8 @@ export default function PushNotificationsPage() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [actions, setActions] = useState<PushAction[]>([]);
   const [targetMode, setTargetMode] = useState<TargetMode>("all");
   const [selectedRoles, setSelectedRoles] = useState<USER_ROLE[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -74,6 +79,8 @@ export default function PushNotificationsPage() {
         title,
         body,
         url: url || undefined,
+        image: imageUrl || undefined,
+        actions: actions.length > 0 ? actions : undefined,
         broadcast: false,
       };
 
@@ -162,6 +169,77 @@ export default function PushNotificationsPage() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />
+            </div>
+
+            <div>
+              <label className="label-field">
+                Image URL <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <input
+                className="input-field w-full"
+                placeholder="https://joy-fund.com/campaign-cover.jpg"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
+              {imageUrl && (
+                <div className="mt-2 relative w-full h-32 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="label-field">
+                Action Buttons <span className="text-gray-400 font-normal">(optional, max 2)</span>
+              </label>
+              <div className="space-y-2">
+                {actions.map((action, idx) => (
+                  <div key={idx} className="flex gap-2 items-center">
+                    <input
+                      className="input-field flex-1"
+                      placeholder="Action ID (e.g. open)"
+                      value={action.action}
+                      onChange={(e) => {
+                        const next = [...actions];
+                        next[idx] = { ...next[idx], action: e.target.value };
+                        setActions(next);
+                      }}
+                    />
+                    <input
+                      className="input-field flex-1"
+                      placeholder="Button label (e.g. View Campaign)"
+                      value={action.title}
+                      onChange={(e) => {
+                        const next = [...actions];
+                        next[idx] = { ...next[idx], title: e.target.value };
+                        setActions(next);
+                      }}
+                    />
+                    <button
+                      onClick={() => setActions(actions.filter((_, i) => i !== idx))}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+                {actions.length < 2 && (
+                  <button
+                    onClick={() => setActions([...actions, { action: "", title: "" }])}
+                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#471DDB] transition-colors"
+                  >
+                    <Plus size={12} /> Add action button
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
