@@ -34,6 +34,7 @@ import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 import { formatDate } from '@/lib/utils';
 import { listHospitals } from '@/actions/hospital';
 import {
+import { Skeleton } from "@/components/ui/skeleton";
   listDisbursements,
   getDisbursementStatistics,
   createDisbursement,
@@ -198,7 +199,7 @@ export default function DisbursementsPage() {
             </thead>
             <tbody>
               {loadingList ? (
-                <tr><td colSpan={7} className="text-center py-16"><Loader2 size={24} className="animate-spin mx-auto text-gray-400" /></td></tr>
+                <tr><td colSpan={7} className="text-center py-16"><Skeleton className="h-5 w-5 rounded mx-auto" /></td></tr>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={7} className="text-center py-16 text-gray-400 text-sm">No disbursements found</td></tr>
               ) : filtered.map(d => (
