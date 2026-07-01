@@ -7,6 +7,7 @@ import { TicketDetail } from "@/components/support";
 import { getTicket } from "@/actions/support";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function SocialWorkerTicketDetailPage({
   params,
@@ -24,11 +25,7 @@ export default function SocialWorkerTicketDetailPage({
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!ticket) {
