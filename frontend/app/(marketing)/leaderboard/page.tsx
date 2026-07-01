@@ -342,12 +342,6 @@ export default function LeaderboardPage() {
                   )}
                 </div>
               )}
-
-              {!hasNextPage && leaderboard.length > 0 && (
-                <p className="py-4 text-center text-xs text-gray-300 font-medium border-t border-gray-100">
-                  All campaigns loaded
-                </p>
-              )}
             </div>
           )}
         </div>
