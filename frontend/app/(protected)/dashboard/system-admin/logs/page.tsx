@@ -10,6 +10,7 @@ import {
   FileText,
   Globe,
   RefreshCw,
+  User,
 } from "lucide-react";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { Badge } from "@/components/ui/badge";
@@ -30,11 +31,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   listActivityLogs,
   listRequestLogs,
   listErrorLogs,
   getLogStats,
 } from "@/actions/logs";
+import { getUsers } from "@/actions/accounts";
 
 type LogTab = "activity" | "requests" | "errors";
 const PAGE_SIZE = 15;
@@ -42,12 +51,14 @@ const PAGE_SIZE = 15;
 export default function AdminLogs() {
   const { data: session } = useSession();
   const [params, setParams] = useUrlSearchParams(
-    { tab: "activity", page: 1 },
+    { tab: "activity", page: 1, userId: "" },
     { page: Number }
   );
   const tab = (params.tab as LogTab) || "activity";
   const currentPage = Number(params.page) || 1;
+  const userId = (params.userId as string) || "";
   const setPage = (p: number) => setParams({ page: p });
+  const setUserFilter = (id: string) => setParams({ userId: id || "", page: 1 });
   const [selectedLog, setSelectedLog] = useState<
     ActivityLog | RequestLog | ErrorLog | null
   >(null);
@@ -56,15 +67,25 @@ export default function AdminLogs() {
     (session?.user as { accessToken?: string })?.accessToken;
 
   const handleTabChange = (newTab: LogTab) => {
-    setParams({ tab: newTab, page: 1 });
+    setParams({ tab: newTab, page: 1, userId });
   };
 
+  const { data: usersData } = useQuery({
+    queryKey: ["admin-users-list", token],
+    queryFn: async () => {
+      const res = await getUsers(token!, { page_size: 500 });
+      return res?.results || [];
+    },
+    enabled: !!token,
+  });
+
   const { data: activityData, isLoading: loadingActivity } = useQuery({
-    queryKey: ["logs-activity", token, currentPage],
+    queryKey: ["logs-activity", token, currentPage, userId],
     queryFn: async () => {
       const res = await listActivityLogs(token!, {
         page: currentPage.toString(),
         page_size: PAGE_SIZE.toString(),
+        ...(userId ? { user_id: userId } : {}),
       });
       return res || { results: [], next: null, previous: null, count: 0 };
     },
@@ -72,11 +93,12 @@ export default function AdminLogs() {
   });
 
   const { data: requestData, isLoading: loadingRequests } = useQuery({
-    queryKey: ["logs-requests", token, currentPage],
+    queryKey: ["logs-requests", token, currentPage, userId],
     queryFn: async () => {
       const res = await listRequestLogs(token, {
         page: currentPage.toString(),
         page_size: PAGE_SIZE.toString(),
+        ...(userId ? { user_id: userId } : {}),
       });
       return res || { results: [], next: null, previous: null, count: 0 };
     },
@@ -84,11 +106,12 @@ export default function AdminLogs() {
   });
 
   const { data: errorData, isLoading: loadingErrors } = useQuery({
-    queryKey: ["logs-errors", token, currentPage],
+    queryKey: ["logs-errors", token, currentPage, userId],
     queryFn: async () => {
       const res = await listErrorLogs(token, {
         page: currentPage.toString(),
         page_size: PAGE_SIZE.toString(),
+        ...(userId ? { user_id: userId } : {}),
       });
       return res || { results: [], next: null, previous: null, count: 0 };
     },
@@ -241,6 +264,27 @@ export default function AdminLogs() {
             {t.icon} {t.label}
           </button>
         ))}
+
+        {/* User filter */}
+        <div className="ml-auto flex items-center gap-2">
+          <User size={14} className="text-gray-400" />
+          <Select
+            value={userId || "__all__"}
+            onValueChange={(val) => setUserFilter(val && val !== "__all__" ? val : "")}
+          >
+            <SelectTrigger className="w-[220px]" size="sm">
+              <SelectValue placeholder="All users" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All users</SelectItem>
+              {usersData?.map((u: UnifiedUser) => (
+                <SelectItem key={u.id} value={u.id}>
+                  {u.first_name} {u.last_name} ({u.email})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="card overflow-hidden">
