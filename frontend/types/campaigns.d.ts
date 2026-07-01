@@ -286,3 +286,24 @@ declare interface DonationCreatePayload {
   success_url: string;
   failure_url: string;
 }
+
+// ── Campaign Analytics ──
+
+declare type CampaignViewSource =
+  | "push"
+  | "social"
+  | "google"
+  | "email"
+  | "direct"
+  | "other";
+
+declare interface CampaignSourceStats {
+  total: number;
+  unique: number;
+}
+
+declare interface CampaignAnalytics {
+  total_views: number;
+  unique_views: number;
+  sources: Partial<Record<CampaignViewSource, CampaignSourceStats>>;
+}
