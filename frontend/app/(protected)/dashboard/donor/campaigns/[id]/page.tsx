@@ -357,7 +357,7 @@ export default function CampaignDetailPage() {
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                      tickFormatter={(v: number) => formatXAF(v)}
                       fontSize={11}
                       tickMargin={4}
                     />
@@ -494,29 +494,60 @@ export default function CampaignDetailPage() {
                     </div>
                   )}
 
-                  {/* Mini timeline */}
+                  {/* Views Over Time */}
                   {analytics.timeline && analytics.timeline.length > 0 && (
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                         Views Over Time
                       </p>
-                      <div className="flex items-end gap-px h-16">
-                        {analytics.timeline.map((point, i) => {
-                          const maxVal = Math.max(...analytics.timeline.map((p) => p.unique), 1);
-                          const height = (point.unique / maxVal) * 100;
-                          return (
-                            <div
-                              key={i}
-                              className="flex-1 min-w-0 rounded-t transition-all duration-300"
-                              style={{
-                                height: `${Math.max(height, 2)}%`,
-                                background: point.unique > 0 ? "var(--primary)" : "#e5e7eb",
-                              }}
-                              title={`${point.period}: ${point.unique} unique`}
-                            />
-                          );
-                        })}
-                      </div>
+                      <ChartContainer config={chartConfig} className="h-40 w-full">
+                        <LineChart
+                          data={analytics.timeline}
+                          margin={{ top: 4, right: 8, left: -12, bottom: 0 }}
+                        >
+                          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis
+                            dataKey="period"
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(v: string) => {
+                              const d = new Date(v);
+                              return d.toLocaleDateString("en", { month: "short", day: "numeric" });
+                            }}
+                            fontSize={10}
+                            tickMargin={6}
+                          />
+                          <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            fontSize={10}
+                            tickMargin={4}
+                            allowDecimals={false}
+                          />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                formatter={(value) => [`${value}`, "Unique Views"]}
+                                labelFormatter={(label) =>
+                                  new Date(String(label)).toLocaleDateString("en", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                }
+                              />
+                            }
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="unique"
+                            stroke="var(--primary)"
+                            strokeWidth={2}
+                            dot={false}
+                            activeDot={{ r: 4, strokeWidth: 0 }}
+                          />
+                        </LineChart>
+                      </ChartContainer>
                       <div className="flex justify-between mt-1">
                         <span className="text-[9px] text-gray-400">{analytics.start_date}</span>
                         <span className="text-[9px] text-gray-400">{analytics.end_date}</span>
@@ -662,10 +693,10 @@ export default function CampaignDetailPage() {
                 <Edit size={16} /> Edit Campaign
               </Link>
               <Popover>
-                <PopoverTrigger asChild>
-                  <button className="btn-primary w-full text-sm">
-                    <Share2 size={16} /> Share Campaign
-                  </button>
+                <PopoverTrigger
+                  className="btn-primary w-full text-sm inline-flex items-center justify-center gap-2"
+                >
+                  <Share2 size={16} /> Share Campaign
                 </PopoverTrigger>
                 <PopoverContent align="start" sideOffset={8} className="w-64 p-3">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
