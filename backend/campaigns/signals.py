@@ -47,7 +47,7 @@ def broadcast_campaign_created_push(sender, instance, created, **kwargs):
         title=f"New Campaign: {instance.title}",
         body=f"{donor_name} started a new campaign! Help them reach their goal of {instance.goal_amount} XAF." if donor_name else f"A new campaign '{instance.title}' has started! Help reach the goal of {instance.goal_amount} XAF.",
         image=cover_image,
-        url=f"/campaign/{instance.id}/",
+        url=f"/campaign/{instance.id}/?src=push",
         tag="new_campaign",
         actions=[
             {"action": "view", "title": "View More"},
