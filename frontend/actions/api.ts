@@ -9,6 +9,15 @@ const api = axios.create({
   baseURL: config.apiUrl,
 });
 
+// Attach the real browser User-Agent on every request so the backend
+// can correctly identify the device instead of seeing "Unknown on Unknown".
+api.interceptors.request.use((cfg) => {
+  if (typeof navigator !== "undefined" && navigator.userAgent) {
+    cfg.headers.set("X-Device-User-Agent", navigator.userAgent);
+  }
+  return cfg;
+});
+
 // Request/response logging. Enabled in dev or when `ENABLE_SERVER_LOGS=true`.
 const shouldLog = process.env.NODE_ENV !== "production" || process.env.ENABLE_SERVER_LOGS === "true";
 if (shouldLog) {
