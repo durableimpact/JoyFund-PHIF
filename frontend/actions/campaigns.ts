@@ -270,3 +270,37 @@ export const getPlatformStats = async () => {
     handleError(e);
   }
 };
+
+// ── Campaign Analytics ──
+
+export const trackCampaignView = async (
+  campaignId: string,
+  source: CampaignViewSource,
+  referrer?: string,
+) => {
+  try {
+    const { data } = await api.post<{ total_views: number; unique_views: number }>(
+      `/api/campaigns/${campaignId}/track-view/`,
+      { source, referrer: referrer || "" },
+    );
+    return data;
+  } catch (e) {
+    // Fire-and-forget — never block the page
+    return null;
+  }
+};
+
+export const getCampaignAnalytics = async (
+  campaignId: string,
+  accessToken: string,
+) => {
+  try {
+    const { data } = await api.get<CampaignAnalytics>(
+      `/api/campaigns/${campaignId}/analytics/`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
