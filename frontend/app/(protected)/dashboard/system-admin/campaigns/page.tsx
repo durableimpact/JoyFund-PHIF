@@ -14,6 +14,7 @@ import {
 import { formatXAF } from '@/lib/utils';
 import { listCampaigns } from '@/actions/campaigns';
 import Paginator from '@/components/shared/Paginator';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PAGE_SIZE = 10;
 
@@ -77,7 +78,7 @@ export default function AdminCampaigns() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={3} className="text-center py-16"><Loader2 size={24} className="animate-spin mx-auto text-gray-400" /></td></tr>
+                <tr><td colSpan={3} className="text-center py-16"><Skeleton className="h-5 w-5 rounded mx-auto" /></td></tr>
               ) : campaigns.length === 0 ? (
                 <tr><td colSpan={3} className="text-center py-16 text-gray-400 text-sm">{search ? 'No campaigns matching your search' : 'No campaigns yet'}</td></tr>
               ) : campaigns.map((c: CampaignList) => (
