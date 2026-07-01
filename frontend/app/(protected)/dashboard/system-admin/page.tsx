@@ -47,9 +47,10 @@ export default function AdminDashboard() {
     (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
   const [period, setPeriod] = useState("month");
+  const periodLabel = period === "day" ? "Last 7 days" : period === "week" ? "Last 7 days" : period === "year" ? "Last 365 days" : "Last 30 days";
   const { data: overview, isLoading: oLoading } = useQuery({
-    queryKey: ["admin-overview", token],
-    queryFn: async () => await getAdminOverview(token),
+    queryKey: ["admin-overview", token, period],
+    queryFn: async () => await getAdminOverview(token, { period }),
     enabled: !!token,
   });
   const { data: org, isLoading: orgLoading } = useQuery({
@@ -86,28 +87,28 @@ export default function AdminDashboard() {
       value: formatXAF(overview?.total_donations?.current ?? 0),
       icon: TrendingUp,
       color: "#471DDB",
-      sub: "All time",
+      sub: periodLabel,
     },
     {
       label: "Total Campaigns",
       value: overview?.total_campaigns?.current ?? 0,
       icon: Activity,
       color: "#1DB1DB",
-      sub: "All campaigns",
+      sub: periodLabel,
     },
     {
       label: "Total Beneficiaries",
       value: overview?.total_beneficiaries?.current ?? 0,
       icon: CheckCircle,
       color: "#1CDBC9",
-      sub: "Enrolled",
+      sub: periodLabel,
     },
     {
       label: "Hospitals",
       value: overview?.total_hospitals?.current ?? 0,
       icon: Building2,
       color: "#f59e0b",
-      sub: "Partner hospitals",
+      sub: periodLabel,
     },
   ];
   return (
