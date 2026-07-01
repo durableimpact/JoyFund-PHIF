@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Globe, Loader2, Zap, ExternalLink } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { getGateway, listWebhookEvents } from "@/actions/payments";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function GatewayDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,9 +30,8 @@ export default function GatewayDetailPage() {
   const loading = gLoading || wLoading;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <Loader2 size={28} className="animate-spin text-[#471DDB]" />
+    return <DetailPageSkeleton />;
+  }
       </div>
     );
   }
