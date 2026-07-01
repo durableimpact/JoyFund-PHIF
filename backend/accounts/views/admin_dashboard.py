@@ -190,10 +190,8 @@ class AdminOverviewView(APIView):
         responses={200: OverviewKpiSerializer()},
     )
     def get(self, request):
-        today = date.today()
-        current_start = today.replace(day=1)
-        current_end = today
-        prev_start, prev_end = _previous_period(current_start, current_end)
+        start, end = _date_range_from_params(request)
+        prev_start, prev_end = _previous_period(start, end)
 
         escrow = EscrowAccount.get_instance()
         escrow_current = float(escrow.balance or 0)
@@ -205,43 +203,43 @@ class AdminOverviewView(APIView):
         prev_disbursed = float((prev_escrow_qs["s"] or 0))
 
         donations_agg = Donation.objects.filter(
-            status="SUCCESS", created_at__date__lte=current_end
+            status="SUCCESS", created_at__date__lte=end
         ).aggregate(
-            current=Sum("net_amount", filter=Q(created_at__date__gte=current_start)),
+            current=Sum("net_amount", filter=Q(created_at__date__gte=start)),
             prev=Sum("net_amount", filter=Q(created_at__date__gte=prev_start, created_at__date__lte=prev_end)),
         )
         donations_current = float(donations_agg["current"] or 0)
         donations_prev = float(donations_agg["prev"] or 0)
 
-        ben_agg = Beneficiary.objects.filter(created_at__date__lte=current_end).aggregate(
+        ben_agg = Beneficiary.objects.filter(created_at__date__lte=end).aggregate(
             current=Count("id"),
             prev=Count("id", filter=Q(created_at__date__lte=prev_end)),
         )
         beneficiaries_current = ben_agg["current"]
         beneficiaries_prev = ben_agg["prev"]
 
-        vouch_agg = Voucher.objects.filter(created_at__date__lte=current_end).aggregate(
+        vouch_agg = Voucher.objects.filter(created_at__date__lte=end).aggregate(
             current=Count("id"),
             prev=Count("id", filter=Q(created_at__date__lte=prev_end)),
         )
         vouchers_current = vouch_agg["current"]
         vouchers_prev = vouch_agg["prev"]
 
-        users_agg = User.objects.filter(created_at__date__lte=current_end).aggregate(
+        users_agg = User.objects.filter(created_at__date__lte=end).aggregate(
             current=Count("id"),
             prev=Count("id", filter=Q(created_at__date__lte=prev_end)),
         )
         users_current = users_agg["current"]
         users_prev = users_agg["prev"]
 
-        hosp_agg = Hospital.objects.filter(created_at__date__lte=current_end).aggregate(
+        hosp_agg = Hospital.objects.filter(created_at__date__lte=end).aggregate(
             current=Count("id"),
             prev=Count("id", filter=Q(created_at__date__lte=prev_end)),
         )
         hospitals_current = hosp_agg["current"]
         hospitals_prev = hosp_agg["prev"]
 
-        camp_agg = Campaign.objects.filter(created_at__date__lte=current_end).aggregate(
+        camp_agg = Campaign.objects.filter(created_at__date__lte=end).aggregate(
             current=Count("id"),
             prev=Count("id", filter=Q(created_at__date__lte=prev_end)),
         )
@@ -515,10 +513,8 @@ class AdminOrganizationView(APIView):
         responses={200: OrganizationDashboardSerializer()},
     )
     def get(self, request):
-        today = date.today()
-        current_start = today.replace(day=1)
-        current_end = today
-        prev_start, prev_end = _previous_period(current_start, current_end)
+        start, end = _date_range_from_params(request)
+        prev_start, prev_end = _previous_period(start, end)
 
         hosp_agg = Hospital.objects.filter(created_at__date__lte=current_end).aggregate(
             curr=Count("id"),
