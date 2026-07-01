@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
@@ -17,7 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { sendTestPush } from "@/actions/notifications";
+import { sendTestPush, getPushTaskStatus } from "@/actions/notifications";
 import { getUsers } from "@/actions/accounts";
 
 const ROLE_OPTIONS: { label: string; value: USER_ROLE }[] = [
@@ -48,6 +48,44 @@ export default function PushNotificationsPage() {
   const [debouncedUserSearch, setDebouncedUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
 
+  // Push broadcast task state
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [taskStatus, setTaskStatus] = useState<PushBroadcastTaskStatus | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }, []);
+
+  // Poll task status every 2s while task is PENDING or RUNNING
+  useEffect(() => {
+    if (!taskId || !token) return;
+
+    const isTerminal = (s: string) => s === "COMPLETED" || s === "FAILED";
+
+    if (taskStatus && isTerminal(taskStatus.status)) {
+      stopPolling();
+      return;
+    }
+
+    pollingRef.current = setInterval(async () => {
+      try {
+        const status = await getPushTaskStatus(token, taskId);
+        if (status) {
+          setTaskStatus(status);
+          if (isTerminal(status.status)) stopPolling();
+        }
+      } catch {
+        stopPolling();
+      }
+    }, 2000);
+
+    return stopPolling;
+  }, [taskId, token, taskStatus, stopPolling]);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedUserSearch(userSearch);
@@ -75,6 +113,11 @@ export default function PushNotificationsPage() {
     mutationFn: async () => {
       if (!token) throw new Error("Not authenticated");
 
+      // Reset task state for new send
+      setTaskId(null);
+      setTaskStatus(null);
+      stopPolling();
+
       const payload: TestPushPayload = {
         title,
         body,
@@ -93,7 +136,18 @@ export default function PushNotificationsPage() {
         payload.user_ids = selectedUserIds;
       }
 
-      return sendTestPush(token, payload);
+      const result = await sendTestPush(token, payload);
+      if (!result) throw new Error("No response from server");
+
+      // 202 = async task dispatched
+      if (result.status === 202) {
+        const asyncData = result.data as TestPushAsyncResponse;
+        setTaskId(asyncData.task_id);
+        return { async: true, taskId: asyncData.task_id };
+      }
+
+      // 200 = sync (self-test)
+      return { async: false, result: result.data };
     },
   });
 
@@ -115,8 +169,6 @@ export default function PushNotificationsPage() {
     title.trim() &&
     body.trim() &&
     (targetMode !== "users" || selectedUserIds.length > 0);
-
-  const result = mutation.data;
 
   return (
     <>
@@ -429,73 +481,121 @@ export default function PushNotificationsPage() {
             </div>
           )}
 
-          {result && (
+          {/* Sync result (self-test) */}
+          {mutation.data && !mutation.data.async && (
             <div className="card p-5 space-y-3">
               <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
                 <Check size={16} className="text-emerald-500" /> Result
               </h3>
-
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-emerald-50 rounded-xl p-3 text-center">
                   <div className="text-2xl font-black text-emerald-600">
-                    {result.sent}
+                    {(mutation.data.result as TestPushSyncResponse).sent}
                   </div>
-                  <div className="text-[10px] text-emerald-700 font-medium">
-                    Sent
-                  </div>
+                  <div className="text-[10px] text-emerald-700 font-medium">Sent</div>
                 </div>
-                <div
-                  className={`rounded-xl p-3 text-center ${
-                    result.failed > 0 ? "bg-red-50" : "bg-gray-50"
-                  }`}
-                >
-                  <div
-                    className={`text-2xl font-black ${
-                      result.failed > 0 ? "text-red-600" : "text-gray-400"
-                    }`}
-                  >
-                    {result.failed}
+                <div className={`rounded-xl p-3 text-center ${
+                  (mutation.data.result as TestPushSyncResponse).failed > 0 ? "bg-red-50" : "bg-gray-50"
+                }`}>
+                  <div className={`text-2xl font-black ${
+                    (mutation.data.result as TestPushSyncResponse).failed > 0 ? "text-red-600" : "text-gray-400"
+                  }`}>
+                    {(mutation.data.result as TestPushSyncResponse).failed}
                   </div>
-                  <div
-                    className={`text-[10px] font-medium ${
-                      result.failed > 0 ? "text-red-700" : "text-gray-500"
-                    }`}
-                  >
+                  <div className={`text-[10px] font-medium ${
+                    (mutation.data.result as TestPushSyncResponse).failed > 0 ? "text-red-700" : "text-gray-500"
+                  }`}>Failed</div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-500">
+                  {(mutation.data.result as TestPushSyncResponse).total_subscriptions} total subscriptions
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Async task in progress */}
+          {taskStatus && taskStatus.status !== "COMPLETED" && taskStatus.status !== "FAILED" && (
+            <div className="card p-5 space-y-3">
+              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin text-[#471DDB]" /> Sending...
+              </h3>
+              <div className="w-full bg-gray-100 rounded-full h-2">
+                <div
+                  className="bg-[#471DDB] h-2 rounded-full transition-all duration-500"
+                  style={{
+                    width: taskStatus.total > 0
+                      ? `${Math.round(((taskStatus.sent + taskStatus.failed) / taskStatus.total) * 100)}%`
+                      : "0%",
+                  }}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-gray-50 rounded-xl p-2">
+                  <div className="text-lg font-black text-gray-900">{taskStatus.total}</div>
+                  <div className="text-[10px] text-gray-500">Total</div>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-2">
+                  <div className="text-lg font-black text-emerald-600">{taskStatus.sent}</div>
+                  <div className="text-[10px] text-emerald-700">Sent</div>
+                </div>
+                <div className={`rounded-xl p-2 ${taskStatus.failed > 0 ? "bg-red-50" : "bg-gray-50"}`}>
+                  <div className={`text-lg font-black ${taskStatus.failed > 0 ? "text-red-600" : "text-gray-400"}`}>
+                    {taskStatus.failed}
+                  </div>
+                  <div className={`text-[10px] ${taskStatus.failed > 0 ? "text-red-700" : "text-gray-500"}`}>Failed</div>
+                </div>
+              </div>
+              <div className="text-[10px] text-gray-400 text-center">
+                {taskStatus.total > 0
+                  ? `${taskStatus.sent + taskStatus.failed} / ${taskStatus.total} processed`
+                  : "Preparing..."}
+              </div>
+            </div>
+          )}
+
+          {/* Async task completed */}
+          {taskStatus && (taskStatus.status === "COMPLETED" || taskStatus.status === "FAILED") && (
+            <div className={`card p-5 space-y-3 ${
+              taskStatus.status === "FAILED" ? "border border-red-200" : ""
+            }`}>
+              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                {taskStatus.status === "COMPLETED" ? (
+                  <><Check size={16} className="text-emerald-500" /> Broadcast Complete</>
+                ) : (
+                  <><X size={16} className="text-red-500" /> Broadcast Failed</>
+                )}
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-black text-emerald-600">{taskStatus.sent}</div>
+                  <div className="text-[10px] text-emerald-700 font-medium">Sent</div>
+                </div>
+                <div className={`rounded-xl p-3 text-center ${taskStatus.failed > 0 ? "bg-red-50" : "bg-gray-50"}`}>
+                  <div className={`text-2xl font-black ${taskStatus.failed > 0 ? "text-red-600" : "text-gray-400"}`}>
+                    {taskStatus.failed}
+                  </div>
+                  <div className={`text-[10px] font-medium ${taskStatus.failed > 0 ? "text-red-700" : "text-gray-500"}`}>
                     Failed
                   </div>
                 </div>
               </div>
 
-              <div className="text-center">
-                <div className="text-xs text-gray-500">
-                  {result.total_subscriptions} total subscriptions
-                </div>
-                <div className="text-[10px] text-gray-400">
-                  VAPID: {result.vapid_configured ? "Configured" : "Missing"}
-                </div>
-              </div>
-
-              {result.errors && result.errors.length > 0 && (
+              {taskStatus.errors && taskStatus.errors.length > 0 && (
                 <div className="bg-red-50 rounded-xl p-3 max-h-32 overflow-y-auto">
-                  <div className="text-[10px] font-semibold text-red-700 mb-1">
-                    Errors
-                  </div>
-                  {result.errors.map((err, i) => (
-                    <div key={i} className="text-[10px] text-red-600 mt-0.5">
-                      {err}
-                    </div>
+                  <div className="text-[10px] font-semibold text-red-700 mb-1">Errors</div>
+                  {taskStatus.errors.map((err, i) => (
+                    <div key={i} className="text-[10px] text-red-600 mt-0.5">{err}</div>
                   ))}
                 </div>
               )}
             </div>
           )}
 
-          {!result && !mutation.isError && (
+          {!mutation.data && !taskStatus && !mutation.isError && (
             <div className="card p-5 text-center">
-              <Bell
-                size={32}
-                className="mx-auto text-gray-300 mb-2"
-              />
+              <Bell size={32} className="mx-auto text-gray-300 mb-2" />
               <div className="text-xs text-gray-400">
                 Fill in the message and click Send to deliver a push
                 notification
