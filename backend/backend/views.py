@@ -11,6 +11,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from accounts.middleware import _get_client_ip
 from accounts.tasks.send_mail import send_async_email
 
 
@@ -210,7 +211,7 @@ def oauth2_token_view(request):
                                 django_request.META.get('HTTP_X_DEVICE_USER_AGENT', '')
                                 or django_request.META.get('HTTP_USER_AGENT', '')
                             )
-                            ip = django_request.META.get('REMOTE_ADDR', '')
+                            ip = _get_client_ip(django_request)
                             device_info = parse_user_agent(user_agent_str)
                             
                             device, created = UserDevice.objects.update_or_create(
