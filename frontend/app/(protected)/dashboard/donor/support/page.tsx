@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TicketList } from "@/components/support";
 import { listMyTickets } from "@/actions/support";
 import { Loader2 } from "lucide-react";
+import { SupportPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function DonorSupportPage() {
   const { data: session } = useSession();
@@ -17,11 +18,7 @@ export default function DonorSupportPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-      </div>
-    );
+    return <SupportPageSkeleton />;
   }
 
   const tickets: SupportTicket[] = ticketsData?.results || [];
