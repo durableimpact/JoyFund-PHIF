@@ -9,6 +9,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from accounts.middleware import _get_client_ip
+
 from accounts.models import UserDevice
 from accounts.serializers.device import DeviceSerializer
 from accounts.tasks.send_mail import send_async_email
@@ -38,7 +40,7 @@ def remove_device(request, device_id):
             {"error": "Cannot remove your current device session."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    if not auth and device.ip_address == request.META.get("REMOTE_ADDR", ""):
+    if not auth and device.ip_address == _get_client_ip(request):
         return Response(
             {"error": "Cannot remove your current device session."},
             status=status.HTTP_400_BAD_REQUEST,
@@ -68,7 +70,7 @@ def block_device(request, device_id):
             {"error": "Cannot block your current device session."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    if not auth and device.ip_address == request.META.get("REMOTE_ADDR", ""):
+    if not auth and device.ip_address == _get_client_ip(request):
         return Response(
             {"error": "Cannot block your current device session."},
             status=status.HTTP_400_BAD_REQUEST,
