@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { InputPhone } from "@/components/ui/input-phone";
 import { toast } from "sonner";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 const PAYMENT_METHODS = [
   {
@@ -168,15 +169,16 @@ function DonatePage() {
     campaign?.description?.slice(0, 160) ||
     "Support this campaign and help provide maternal healthcare for vulnerable women in Cameroon.";
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="min-h-screen" style={{ background: "var(--background)" }}>
         <Navbar />
-        <div className="pt-32 flex items-center justify-center">
-          <Loader2 size={28} className="animate-spin text-[#1DB1DB]" />
+        <div className="pt-32">
+          <DetailPageSkeleton />
         </div>
       </div>
     );
+  }
 
   if (!campaign && !isLoading)
     return (
