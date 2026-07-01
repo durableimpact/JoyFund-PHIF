@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
@@ -26,9 +26,10 @@ import {
   CreditCard,
   MessageSquare,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import { formatXAF, formatDateTime } from "@/lib/utils";
-import { getCampaign, listCampaignDonations } from "@/actions/campaigns";
+import { getCampaign, listCampaignDonations, getCampaignAnalytics } from "@/actions/campaigns";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,8 @@ export default function AdminCampaignDetailPage() {
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const [txFilter, setTxFilter] = useState("ALL");
   const [selectedDonation, setSelectedDonation] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
+  const [analyticsPeriod, setAnalyticsPeriod] = useState<CampaignAnalyticsPeriod>("day");
 
   // Fetch campaign
   const { data: response, isLoading, isError, error: queryError } = useQuery({
@@ -62,6 +65,18 @@ export default function AdminCampaignDetailPage() {
 
   const campaign = response ? ((response as any).json || response) : null;
   const donations = (donationsResponse as any)?.results || (Array.isArray(donationsResponse) ? donationsResponse : []);
+
+  // Fetch analytics
+  const { data: analyticsData } = useQuery({
+    queryKey: ["admin-campaign-analytics", id, token, analyticsPeriod],
+    queryFn: async () =>
+      await getCampaignAnalytics(id as string, token, { period: analyticsPeriod }),
+    enabled: !!id && !!token && sessionStatus !== "loading",
+  });
+
+  useEffect(() => {
+    if (analyticsData) setAnalytics(analyticsData as CampaignAnalytics);
+  }, [analyticsData]);
 
   const statusColor = (status: string) => {
     switch (status) {
@@ -821,6 +836,101 @@ export default function AdminCampaignDetailPage() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* View Analytics */}
+          <div className="card p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                <Eye size={18} className="text-[#471DDB]" />
+                View Analytics
+              </h3>
+              <div className="flex gap-0.5 bg-gray-50 p-0.5 rounded-lg border border-gray-100">
+                {(["day", "week", "month"] as CampaignAnalyticsPeriod[]).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setAnalyticsPeriod(p)}
+                    className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
+                      analyticsPeriod === p
+                        ? "bg-[#471DDB] text-white shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {analytics ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#471DDB]/5 rounded-xl p-3 text-center">
+                    <div className="text-xl font-black text-[#471DDB]">{analytics.unique_views}</div>
+                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Unique Views</div>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-3 text-center">
+                    <div className="text-xl font-black text-gray-900">{analytics.total_views}</div>
+                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Total Views</div>
+                  </div>
+                </div>
+
+                {analytics.sources && Object.keys(analytics.sources).length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Sources</p>
+                    <div className="space-y-2">
+                      {Object.entries(analytics.sources)
+                        .sort(([, a], [, b]) => b.unique - a.unique)
+                        .map(([src, stats]) => (
+                          <div key={src} className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-gray-600 w-14 capitalize">{src}</span>
+                            <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                              <div
+                                className="h-1.5 rounded-full transition-all duration-500 bg-[#471DDB]"
+                                style={{
+                                  width: `${analytics.unique_views > 0 ? (stats.unique / analytics.unique_views) * 100 : 0}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="text-[10px] font-bold text-gray-500 w-8 text-right">{stats.unique}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {analytics.timeline && analytics.timeline.length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Timeline</p>
+                    <div className="flex items-end gap-px h-12">
+                      {analytics.timeline.map((point, i) => {
+                        const maxVal = Math.max(...analytics.timeline.map((p) => p.unique), 1);
+                        const height = (point.unique / maxVal) * 100;
+                        return (
+                          <div
+                            key={i}
+                            className="flex-1 min-w-0 rounded-t transition-all duration-300"
+                            style={{
+                              height: `${Math.max(height, 2)}%`,
+                              background: point.unique > 0 ? "#471DDB" : "#e5e7eb",
+                            }}
+                            title={`${point.period}: ${point.unique} unique`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-[8px] text-gray-400">{analytics.start_date}</span>
+                      <span className="text-[8px] text-gray-400">{analytics.end_date}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-24 flex items-center justify-center text-xs text-gray-400">
+                Loading analytics...
+              </div>
+            )}
           </div>
         </div>
       </div>
