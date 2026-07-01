@@ -5,6 +5,7 @@ import { Percent, Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { formatDate } from "@/lib/utils";
 import { listFeePolicies, createFeePolicy, updateFeePolicy, deleteFeePolicy } from "@/actions/payments";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FeePoliciesPage() {
   const { data: session } = useSession();
@@ -101,7 +102,7 @@ export default function FeePoliciesPage() {
 
       <div className="card p-4 md:p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#471DDB] animate-spin" /></div>
+          <div className="flex items-center justify-center py-12"><Skeleton className="h-6 w-6 rounded" /></div>
         ) : !policies.length ? (
           <p className="text-gray-400 text-sm text-center py-12">No fee policies configured yet</p>
         ) : (
