@@ -43,6 +43,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 const analyticsChartConfig = {
   unique: {
@@ -147,11 +148,7 @@ export default function AdminCampaignDetailPage() {
   };
 
   if (isLoading || sessionStatus === "loading") {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <Loader2 size={28} className="animate-spin text-[#471DDB]" />
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (isError || !campaign) {
