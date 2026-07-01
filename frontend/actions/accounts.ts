@@ -531,12 +531,13 @@ export const getSystemAdminDashboard = async (
 
 // ── Admin Dashboard Analytics ──
 
-export const getAdminOverview = async (access_token: string) => {
+export const getAdminOverview = async (access_token: string, params?: Record<string, string>) => {
   try {
     const { data } = await api.get<OverviewKpi>(
       "/api/accounts/system-admins/dashboard/",
       {
         headers: getAuthHeader(access_token),
+        params,
       },
     );
     return data;
