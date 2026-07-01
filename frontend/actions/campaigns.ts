@@ -293,11 +293,20 @@ export const trackCampaignView = async (
 export const getCampaignAnalytics = async (
   campaignId: string,
   accessToken: string,
+  params?: {
+    period?: CampaignAnalyticsPeriod;
+    start_date?: string;
+    end_date?: string;
+    source?: CampaignViewSource;
+  },
 ) => {
   try {
     const { data } = await api.get<CampaignAnalytics>(
       `/api/campaigns/${campaignId}/analytics/`,
-      { headers: { Authorization: `Bearer ${accessToken}` } },
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params,
+      },
     );
     return data;
   } catch (e) {
