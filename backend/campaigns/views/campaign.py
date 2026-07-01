@@ -211,7 +211,7 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                     ),
                 )
             )
-            .filter(is_public=True, is_active=True)
+            .filter(is_public=True, is_active=True, total_net_raised_calc__gt=0)
             .order_by("-total_net_raised_calc")
         )
 
