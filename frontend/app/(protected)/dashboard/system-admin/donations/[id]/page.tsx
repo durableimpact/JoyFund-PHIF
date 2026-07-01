@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, Gift, CreditCard, User, MessageSquare } from "lucide-react";
 import { formatXAF, formatDate, formatDateTime } from "@/lib/utils";
 import { getDonation } from "@/actions/campaigns";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function DonationDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,11 +17,7 @@ export default function DonationDetailPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 text-[#471DDB] animate-spin" />
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!donation) {
