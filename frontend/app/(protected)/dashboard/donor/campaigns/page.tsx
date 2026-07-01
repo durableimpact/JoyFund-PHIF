@@ -7,6 +7,7 @@ import { Plus, Loader2, Heart, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import CampaignDashboardCard from "@/components/dashboard/cards/CampaignDashboardCard";
 import { getMyCampaigns } from "@/actions/campaigns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CampaignsPage() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function CampaignsPage() {
       <div className="h-full" style={{ background: "var(--background)" }}>
         <Navbar />
         <div className="pt-32 flex items-center justify-center">
-          <Loader2 size={28} className="animate-spin text-[#1DB1DB]" />
+          <Skeleton className="h-7 w-7 rounded" />
         </div>
       </div>
     );
