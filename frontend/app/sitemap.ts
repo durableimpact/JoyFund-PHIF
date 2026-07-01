@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-    const res = await fetch(`${apiUrl}/api/campaigns/?page_size=1000`, { 
+    const res = await fetch(`${apiUrl}/api/campaigns/?page_size=1000&is_active=true&is_public=true&min_progress_percentage=1`, { 
       signal: controller.signal,
       next: { revalidate: 3600 } 
     })
