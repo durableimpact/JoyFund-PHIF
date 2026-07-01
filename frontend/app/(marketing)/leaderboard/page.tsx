@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Trophy, TrendingUp, ExternalLink, Loader2, User } from 'lucide-react';
+import { Trophy, TrendingUp, ExternalLink, Loader2, User, ArrowUpDown } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
 import { Helmet } from 'react-helmet-async';
 import { getCampaignLeaderboard } from '@/actions/campaigns';
@@ -11,6 +11,7 @@ import { Table, TableBody, TableHeader, TableHead, TableRow, TableCell } from '@
 
 export default function LeaderboardPage() {
   const router = useRouter();
+  const [ordering, setOrdering] = useState<string>('raised');
 
   const {
     data: leaderboardResponse,
@@ -20,9 +21,9 @@ export default function LeaderboardPage() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['campaign-leaderboard'],
+    queryKey: ['campaign-leaderboard', ordering],
     queryFn: async ({ pageParam = 1 }) => {
-      const res = await getCampaignLeaderboard({ page: pageParam, page_size: 20 });
+      const res = await getCampaignLeaderboard({ page: pageParam, page_size: 20, ordering });
       return res;
     },
     initialPageParam: 1,
@@ -207,6 +208,36 @@ export default function LeaderboardPage() {
               <Trophy size={48} className="mx-auto text-gray-300 mb-4" />
               <p className="text-gray-600 text-lg font-semibold mb-2">No campaigns yet</p>
               <p className="text-gray-500">Be the first to start a JoyFund and make an impact!</p>
+            </div>
+          )}
+
+          {/* Sort Controls */}
+          {!isLoading && !error && leaderboard && leaderboard.length > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              <ArrowUpDown size={14} className="text-gray-400" />
+              <span className="text-xs text-gray-500 font-medium">Sort by:</span>
+              {[
+                { value: 'raised', label: 'Most Raised' },
+                { value: 'goal', label: 'Goal (Low → High)' },
+                { value: '-goal', label: 'Goal (High → Low)' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setOrdering(opt.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    ordering === opt.value
+                      ? 'text-white'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
+                  style={
+                    ordering === opt.value
+                      ? { background: 'var(--primary)' }
+                      : {}
+                  }
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           )}
 
