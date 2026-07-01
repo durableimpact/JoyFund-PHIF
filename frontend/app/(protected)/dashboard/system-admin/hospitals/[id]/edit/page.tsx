@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getHospital, updateHospital } from "@/actions/hospital";
 import HospitalForm, { HospitalFormData } from "../../_components/HospitalForm";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function EditHospitalPage() {
   const { id } = useParams<{ id: string }>();
@@ -68,14 +69,7 @@ export default function EditHospitalPage() {
   };
 
   if (isLoadingHospital) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="space-y-4 text-center">
-          <Loader2 size={32} className="animate-spin mx-auto text-gray-400" />
-          <p className="text-gray-500">Loading hospital details...</p>
-        </div>
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!hospital) {
