@@ -21,8 +21,8 @@ MODEL_CACHE_GROUPS = {
     'accounts.Receptionist': ['receptionists'],
     'accounts.SystemAdmin': ['system_admins'],
     # -- campaigns ----------------------------------------------------------
-    'campaigns.Campaign': ['campaigns', 'platform_stats'],
-    'campaigns.Donation': ['campaigns', 'platform_stats'],
+    'campaigns.Campaign': ['campaigns', 'platform_stats', 'campaign_leaderboard'],
+    'campaigns.Donation': ['campaigns', 'platform_stats', 'campaign_leaderboard'],
     # -- hospitals ----------------------------------------------------------
     'hospitals.Hospital': ['hospitals'],
     'hospitals.Services': ['services'],
