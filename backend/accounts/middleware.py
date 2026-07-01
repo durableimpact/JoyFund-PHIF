@@ -8,6 +8,17 @@ SKIP_PATHS = ("/admin/", "/static/", "/media/", "/health/", "/ws/")
 _UPDATE_INTERVAL = timedelta(minutes=5)
 
 
+def _get_client_ip(request):
+    """Get the real client IP, handling reverse proxies (nginx, NPM, Docker)."""
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        return x_forwarded_for.split(",")[0].strip()
+    x_real_ip = request.META.get("HTTP_X_REAL_IP")
+    if x_real_ip:
+        return x_real_ip.strip()
+    return request.META.get("REMOTE_ADDR", "")
+
+
 class DeviceTrackingMiddleware(MiddlewareMixin):
     def process_request(self, request):
         path = request.path_info
@@ -21,7 +32,7 @@ class DeviceTrackingMiddleware(MiddlewareMixin):
             request.META.get("HTTP_X_DEVICE_USER_AGENT", "")
             or request.META.get("HTTP_USER_AGENT", "")
         )
-        ip = request.META.get("REMOTE_ADDR", "")
+        ip = _get_client_ip(request)
 
         if not user_agent:
             return
