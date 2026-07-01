@@ -17,10 +17,13 @@ import {
   Download,
   Target,
   BarChart3,
+  Copy,
+  Check,
+  ExternalLink,
 } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
 import { getCampaign, listCampaignDonations, getCampaignDonationChart, getCampaignAnalytics } from "@/actions/campaigns";
-import { Copy, Check, ExternalLink } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 const chartConfig = {
   total_amount: {
@@ -50,7 +53,6 @@ export default function CampaignDetailPage() {
   const [chartData, setChartData] = useState<DonationChartData | null>(null);
   const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
   const [analyticsPeriod, setAnalyticsPeriod] = useState<CampaignAnalyticsPeriod>("day");
-  const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -659,21 +661,20 @@ export default function CampaignDetailPage() {
               >
                 <Edit size={16} /> Edit Campaign
               </Link>
-              <button
-                onClick={() => setShareOpen(!shareOpen)}
-                className="btn-primary w-full text-sm"
-              >
-                <Share2 size={16} /> Share Campaign
-              </button>
-              {shareOpen && (
-                <div className="border border-gray-200 rounded-xl p-3 space-y-2 bg-white shadow-sm">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="btn-primary w-full text-sm">
+                    <Share2 size={16} /> Share Campaign
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" sideOffset={8} className="w-64 p-3">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { label: "Facebook", src: "fb", color: "bg-blue-600", url: `https://www.facebook.com/sharer/sharer.php?u=` },
-                      { label: "Twitter / X", src: "tw", color: "bg-black", url: `https://twitter.com/intent/tweet?url=&text=` },
-                      { label: "WhatsApp", src: "whatsapp", color: "bg-green-500", url: `https://wa.me/?text=` },
-                      { label: "LinkedIn", src: "linkedin", color: "bg-blue-700", url: `https://www.linkedin.com/sharing/share-offsite/?url=` },
+                      { label: "Facebook", src: "fb", color: "bg-blue-600", url: "https://www.facebook.com/sharer/sharer.php?u=" },
+                      { label: "Twitter / X", src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?url=&text=" },
+                      { label: "WhatsApp", src: "whatsapp", color: "bg-green-500", url: "https://wa.me/?text=" },
+                      { label: "LinkedIn", src: "linkedin", color: "bg-blue-700", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
                     ].map((s) => (
                       <a
                         key={s.src}
@@ -693,12 +694,12 @@ export default function CampaignDetailPage() {
                       setCopied(true);
                       setTimeout(() => setCopied(false), 2000);
                     }}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition-colors mt-2"
                   >
                     {copied ? <><Check size={12} className="text-green-500" /> Copied!</> : <><Copy size={12} /> Copy Link</>}
                   </button>
-                </div>
-              )}
+                </PopoverContent>
+              </Popover>
               <Link
                 href={`/campaign/${campaign.id}`}
                 className="btn-outline w-full text-sm"
