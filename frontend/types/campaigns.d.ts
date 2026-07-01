@@ -297,13 +297,27 @@ declare type CampaignViewSource =
   | "direct"
   | "other";
 
+declare type CampaignAnalyticsPeriod = "day" | "week" | "month";
+
 declare interface CampaignSourceStats {
   total: number;
   unique: number;
 }
 
+declare interface CampaignTimelinePoint {
+  period: string;
+  total: number;
+  unique: number;
+  sources: Partial<Record<CampaignViewSource, CampaignSourceStats>>;
+}
+
 declare interface CampaignAnalytics {
+  campaign_id: string;
   total_views: number;
   unique_views: number;
   sources: Partial<Record<CampaignViewSource, CampaignSourceStats>>;
+  period: CampaignAnalyticsPeriod;
+  start_date: string;
+  end_date: string;
+  timeline: CampaignTimelinePoint[];
 }
