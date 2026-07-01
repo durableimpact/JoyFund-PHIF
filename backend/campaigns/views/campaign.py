@@ -24,6 +24,7 @@ from campaigns.serializers import (
     CampaignDetailSerializer,
     CampaignListSerializer,
 )
+from core.cache import cache_response
 
 _TAG = ["Campaigns"]
 
@@ -183,6 +184,13 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
             CampaignDetailSerializer(campaign).data, status=status.HTTP_201_CREATED
         )
 
+    LEADERBOARD_ORDERING_MAP = {
+        "raised": "-total_net_raised_calc",
+        "-raised": "total_net_raised_calc",
+        "goal": "goal_amount",
+        "-goal": "-goal_amount",
+    }
+
     @action(
         detail=False,
         methods=["get"],
@@ -193,11 +201,27 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
         tags=_TAG,
         responses={200: CampaignDetailSerializer(many=True)},
         operation_description="Get public campaigns sorted by total net raised (leaderboard).",
+        manual_parameters=[
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                enum=["raised", "-raised", "goal", "-goal"],
+                description="Sort field: raised (default), goal. Prefix with - for descending.",
+            ),
+        ],
     )
+    @cache_response(group="campaign_leaderboard", timeout=5 * 60)
     def leaderboard(self, request, *args, **kwargs):
         """
-        Get campaigns sorted by total net raised.Campaign
+        Get campaigns sorted by total net raised or goal amount.
+        Supports ?ordering=raised|goal|-raised|-goal
         """
+        ordering = request.query_params.get("ordering", "raised")
+
+        # Map frontend ordering value to ORM field
+        orm_ordering = self.LEADERBOARD_ORDERING_MAP.get(ordering, "-total_net_raised_calc")
+
         queryset = (
             Campaign.objects.select_related("donor__user")
             .annotate(
@@ -212,7 +236,7 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
                 )
             )
             .filter(is_public=True, is_active=True, total_net_raised_calc__gt=0)
-            .order_by("-total_net_raised_calc")
+            .order_by(orm_ordering)
         )
 
         page = self.paginate_queryset(queryset)
