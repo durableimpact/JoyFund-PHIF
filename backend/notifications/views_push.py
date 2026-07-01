@@ -1,5 +1,3 @@
-import json
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
@@ -9,18 +7,11 @@ from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from notifications.models import PushSubscription
+from notifications.models import PushBroadcastTask, PushSubscription
 from notifications.serializers import (
     PushSubscriptionRegisterSerializer,
     PushSubscriptionSerializer,
     TestPushSerializer,
-)
-from pywebpush import WebPushException, webpush
-
-from notifications.webpush import (
-    send_push_notification,
-    send_push_notification_to_user,
-    send_push_notification_to_all_users,
 )
 
 User = get_user_model()
@@ -157,19 +148,29 @@ def list_push_subscriptions(request):
     method="post",
     tags=_TAG,
     operation_description="""
-        Send a test web push notification.
+        Send a test web push notification (async).
 
-        - If `broadcast` is true, sends to all subscribed users.
-        - If `roles` is provided, sends to all users with those roles.
-        - If `user_ids` is provided, sends to those specific users.
-        - If neither is set, sends to the requesting user (including anonymous subscriptions if none are linked).
+        - If `broadcast` is true, sends to all subscribed users via Celery task.
+        - If `roles` is provided, sends to all users with those roles via Celery task.
+        - If `user_ids` is provided, sends to those specific users via Celery task.
+        - If neither is set, sends to the requesting user synchronously (self-test).
 
-        Useful for testing push notifications via Swagger without creating a Notification in the database.
+        Returns 202 with a task_id for async targets. Poll GET /push/task/{task_id}/ for status.
     """,
     request_body=TestPushSerializer,
     responses={
+        202: openapi.Response(
+            description="Task dispatched",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "task_id": openapi.Schema(type=openapi.TYPE_STRING, format="uuid"),
+                    "status": openapi.Schema(type=openapi.TYPE_STRING),
+                },
+            ),
+        ),
         200: openapi.Response(
-            description="Send result",
+            description="Self-test result (synchronous)",
             schema=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={
@@ -193,94 +194,146 @@ def test_send_push(request):
     title = data["title"]
     body = data["body"]
     url = data.get("url", "")
-    image = data.get("image") or None
-    actions = data.get("actions") or None
+    image = data.get("image") or ""
+    actions = data.get("actions") or []
     broadcast = data.get("broadcast", False)
     user_ids = data.get("user_ids", [])
     roles = data.get("roles", [])
 
-    sent = 0
-    failed = 0
-    subs = []
-
+    # Determine target
     if broadcast:
-        subs = list(PushSubscription.objects.all())
+        target = "all"
+        target_value = []
     elif roles:
-        users = User.objects.filter(role__in=roles)
-        for user in users:
-            try:
-                sent += send_push_notification_to_user(user, title=title, body=body, url=url, image=image, actions=actions, tag="test")
-            except Exception:
-                failed += 1
-        return Response({
-            "sent": sent,
-            "failed": failed,
-            "total_subscriptions": PushSubscription.objects.count(),
-            "vapid_configured": bool(settings.VAPID_PRIVATE_KEY and settings.VAPID_PUBLIC_KEY),
-        })
+        target = "roles"
+        target_value = list(roles)
     elif user_ids:
-        users = User.objects.filter(id__in=user_ids)
-        for user in users:
-            try:
-                sent += send_push_notification_to_user(user, title=title, body=body, url=url, image=image, actions=actions, tag="test")
-            except Exception:
-                failed += 1
-        return Response({
-            "sent": sent,
-            "failed": failed,
-            "total_subscriptions": PushSubscription.objects.count(),
-            "vapid_configured": bool(settings.VAPID_PRIVATE_KEY and settings.VAPID_PUBLIC_KEY),
-        })
+        target = "user_ids"
+        target_value = list(user_ids)
     else:
+        target = "self"
+        target_value = []
+
+    # Self-test: send synchronously (fast, small number of subscriptions)
+    if target == "self":
+        from notifications.webpush import send_push_notification_to_user
+
+        sent = 0
+        failed = 0
         subs = list(request.user.push_subscriptions.all())
         if not subs:
             subs = list(PushSubscription.objects.filter(user__isnull=True))
 
-    errors = []
+        for sub in subs:
+            try:
+                from notifications.webpush import _get_absolute_url
+                from pywebpush import WebPushException, webpush
+                import json
 
-    for sub in subs:
-        try:
-            from notifications.webpush import _get_absolute_url
+                payload = {
+                    "title": title,
+                    "body": body,
+                    "url": url or "",
+                }
+                if image:
+                    payload["image"] = _get_absolute_url(image)
+                if actions:
+                    payload["actions"] = actions
 
-            payload = {
-                "title": title,
-                "body": body,
-                "url": url or "",
-            }
-            if image:
-                payload["image"] = _get_absolute_url(image)
-            if actions:
-                payload["actions"] = actions
-
-            webpush(
-                subscription_info={
-                    "endpoint": sub.endpoint,
-                    "keys": {"p256dh": sub.p256dh_key, "auth": sub.auth_key},
-                },
-                data=json.dumps(payload).encode("utf-8"),
-                vapid_private_key=settings.VAPID_PRIVATE_KEY,
-                vapid_claims=settings.VAPID_CLAIMS,
-                ttl=86400,
-            )
-            sent += 1
-        except WebPushException as e:
-            failed += 1
-            resp = e.response
-            if resp:
-                errors.append(f"Sub {sub.id}: HTTP {resp.status_code} {resp.reason} — {resp.text[:200]}")
-                if resp.status_code == 410:
+                webpush(
+                    subscription_info={
+                        "endpoint": sub.endpoint,
+                        "keys": {"p256dh": sub.p256dh_key, "auth": sub.auth_key},
+                    },
+                    data=json.dumps(payload).encode("utf-8"),
+                    vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                    vapid_claims=settings.VAPID_CLAIMS,
+                    ttl=86400,
+                )
+                sent += 1
+            except WebPushException as e:
+                failed += 1
+                resp = e.response
+                if resp and resp.status_code == 410:
                     sub.delete()
-            else:
-                errors.append(f"Sub {sub.id}: WebPushException (no response)")
-        except Exception as e:
-            failed += 1
-            import traceback
-            errors.append(f"Sub {sub.id}: {type(e).__name__}: {traceback.format_exc()[:300]}")
+            except Exception:
+                failed += 1
+
+        return Response({
+            "sent": sent,
+            "failed": failed,
+            "total_subscriptions": PushSubscription.objects.count(),
+            "vapid_configured": bool(settings.VAPID_PRIVATE_KEY and settings.VAPID_PUBLIC_KEY),
+        })
+
+    # Async targets: create task + dispatch to Celery
+    task = PushBroadcastTask.objects.create(
+        target=target,
+        target_value=target_value,
+        title=title,
+        body=body,
+        url=url,
+        image=image,
+        actions=actions,
+    )
+
+    from notifications.tasks import execute_push_broadcast_task
+    execute_push_broadcast_task.delay(str(task.id))
+
+    return Response(
+        {"task_id": str(task.id), "status": task.status},
+        status=status.HTTP_202_ACCEPTED,
+    )
+
+
+@swagger_auto_schema(
+    method="get",
+    tags=_TAG,
+    operation_description="Poll the status of a push broadcast task.",
+    responses={
+        200: openapi.Response(
+            description="Task status",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "task_id": openapi.Schema(type=openapi.TYPE_STRING, format="uuid"),
+                    "status": openapi.Schema(type=openapi.TYPE_STRING),
+                    "total": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "sent": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "failed": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "errors": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                    "title": openapi.Schema(type=openapi.TYPE_STRING),
+                    "body": openapi.Schema(type=openapi.TYPE_STRING),
+                    "url": openapi.Schema(type=openapi.TYPE_STRING),
+                    "image": openapi.Schema(type=openapi.TYPE_STRING),
+                    "actions": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT)),
+                },
+            ),
+        ),
+        404: "Task not found",
+    },
+)
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def push_task_status(request, task_id):
+    try:
+        task = PushBroadcastTask.objects.get(id=task_id)
+    except PushBroadcastTask.DoesNotExist:
+        return Response(
+            {"error": "Task not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
     return Response({
-        "sent": sent,
-        "failed": failed,
-        "errors": errors,
-        "total_subscriptions": PushSubscription.objects.count(),
-        "vapid_configured": bool(settings.VAPID_PRIVATE_KEY and settings.VAPID_PUBLIC_KEY),
+        "task_id": str(task.id),
+        "status": task.status,
+        "total": task.total,
+        "sent": task.sent,
+        "failed": task.failed,
+        "errors": task.errors,
+        "title": task.title,
+        "body": task.body,
+        "url": task.url,
+        "image": task.image,
+        "actions": task.actions,
     })
