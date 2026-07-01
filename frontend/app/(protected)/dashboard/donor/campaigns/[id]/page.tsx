@@ -19,7 +19,8 @@ import {
   BarChart3,
 } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
-import { getCampaign, listCampaignDonations, getCampaignDonationChart } from "@/actions/campaigns";
+import { getCampaign, listCampaignDonations, getCampaignDonationChart, getCampaignAnalytics } from "@/actions/campaigns";
+import { Copy, Check, ExternalLink } from "lucide-react";
 
 const chartConfig = {
   total_amount: {
@@ -47,6 +48,10 @@ export default function CampaignDetailPage() {
   const [downloadingCert, setDownloadingCert] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<DonationChartPeriod>("30d");
   const [chartData, setChartData] = useState<DonationChartData | null>(null);
+  const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
+  const [analyticsPeriod, setAnalyticsPeriod] = useState<CampaignAnalyticsPeriod>("day");
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -120,6 +125,29 @@ export default function CampaignDetailPage() {
       cancelled = true;
     };
   }, [id, chartPeriod]);
+
+  useEffect(() => {
+    if (!token || !id) return;
+    const tok = token;
+    const cid = id as string;
+    let cancelled = false;
+
+    async function fetchAnalytics() {
+      try {
+        const data = await getCampaignAnalytics(cid, tok, {
+          period: analyticsPeriod,
+        });
+        if (!cancelled) setAnalytics(data as CampaignAnalytics);
+      } catch {
+        // ignore
+      }
+    }
+    fetchAnalytics();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, id, analyticsPeriod]);
 
   async function handleDownloadCertificate() {
     if (!campaign || !token) return;
@@ -379,6 +407,128 @@ export default function CampaignDetailPage() {
               )}
             </div>
 
+            {/* Campaign View Analytics */}
+            <div className="card p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                  <Eye size={18} style={{ color: "var(--primary)" }} />
+                  <h2 className="font-bold text-[#1A1A2E]">View Analytics</h2>
+                </div>
+                <div className="flex gap-1">
+                  {(["day", "week", "month"] as CampaignAnalyticsPeriod[]).map(
+                    (p) => (
+                      <button
+                        key={p}
+                        onClick={() => setAnalyticsPeriod(p)}
+                        className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                          analyticsPeriod === p
+                            ? "text-white"
+                            : "text-gray-500 hover:bg-gray-100"
+                        }`}
+                        style={
+                          analyticsPeriod === p
+                            ? { background: "var(--primary)" }
+                            : undefined
+                        }
+                      >
+                        {p.charAt(0).toUpperCase() + p.slice(1)}
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
+
+              {analytics ? (
+                <div className="space-y-5">
+                  {/* Summary stats */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gray-50 rounded-xl p-3 text-center">
+                      <div className="text-2xl font-black text-[#1A1A2E]">
+                        {analytics.unique_views}
+                      </div>
+                      <div className="text-[10px] text-gray-500 font-medium">
+                        Unique Views
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-3 text-center">
+                      <div className="text-2xl font-black text-[#1A1A2E]">
+                        {analytics.total_views}
+                      </div>
+                      <div className="text-[10px] text-gray-500 font-medium">
+                        Total Views
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Source breakdown */}
+                  {analytics.sources && Object.keys(analytics.sources).length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        Traffic Sources (24h)
+                      </p>
+                      <div className="space-y-2">
+                        {Object.entries(analytics.sources)
+                          .sort(([, a], [, b]) => b.unique - a.unique)
+                          .map(([src, stats]) => (
+                            <div key={src} className="flex items-center gap-3">
+                              <span className="text-xs font-semibold text-gray-600 w-16 capitalize">
+                                {src}
+                              </span>
+                              <div className="flex-1 bg-gray-100 rounded-full h-2">
+                                <div
+                                  className="h-2 rounded-full transition-all duration-500"
+                                  style={{
+                                    width: `${analytics.unique_views > 0 ? (stats.unique / analytics.unique_views) * 100 : 0}%`,
+                                    background: "var(--primary)",
+                                  }}
+                                />
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-500 w-12 text-right">
+                                {stats.unique}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mini timeline */}
+                  {analytics.timeline && analytics.timeline.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        Views Over Time
+                      </p>
+                      <div className="flex items-end gap-px h-16">
+                        {analytics.timeline.map((point, i) => {
+                          const maxVal = Math.max(...analytics.timeline.map((p) => p.unique), 1);
+                          const height = (point.unique / maxVal) * 100;
+                          return (
+                            <div
+                              key={i}
+                              className="flex-1 min-w-0 rounded-t transition-all duration-300"
+                              style={{
+                                height: `${Math.max(height, 2)}%`,
+                                background: point.unique > 0 ? "var(--primary)" : "#e5e7eb",
+                              }}
+                              title={`${point.period}: ${point.unique} unique`}
+                            />
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span className="text-[9px] text-gray-400">{analytics.start_date}</span>
+                        <span className="text-[9px] text-gray-400">{analytics.end_date}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-32 flex items-center justify-center text-sm text-gray-400">
+                  Loading analytics...
+                </div>
+              )}
+            </div>
+
             {/* Description + Details */}
             <div className="card p-6">
               <h2 className="font-bold text-[#1A1A2E] mb-4">
@@ -510,15 +660,45 @@ export default function CampaignDetailPage() {
                 <Edit size={16} /> Edit Campaign
               </Link>
               <button
-                onClick={() =>
-                  navigator.clipboard.writeText(
-                    `https://joy-fund.com/campaign/${campaign.id}`,
-                  )
-                }
+                onClick={() => setShareOpen(!shareOpen)}
                 className="btn-primary w-full text-sm"
               >
                 <Share2 size={16} /> Share Campaign
               </button>
+              {shareOpen && (
+                <div className="border border-gray-200 rounded-xl p-3 space-y-2 bg-white shadow-sm">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: "Facebook", src: "fb", color: "bg-blue-600", url: `https://www.facebook.com/sharer/sharer.php?u=` },
+                      { label: "Twitter / X", src: "tw", color: "bg-black", url: `https://twitter.com/intent/tweet?url=&text=` },
+                      { label: "WhatsApp", src: "whatsapp", color: "bg-green-500", url: `https://wa.me/?text=` },
+                      { label: "LinkedIn", src: "linkedin", color: "bg-blue-700", url: `https://www.linkedin.com/sharing/share-offsite/?url=` },
+                    ].map((s) => (
+                      <a
+                        key={s.src}
+                        href={`${s.url}${encodeURIComponent(`https://joy-fund.com/campaign/${campaign.id}?src=${s.src}`)}${s.src === "tw" || s.src === "whatsapp" ? encodeURIComponent(` ${campaign.title}`) : ""}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-semibold ${s.color} hover:opacity-90 transition-opacity`}
+                      >
+                        <ExternalLink size={12} />
+                        {s.label}
+                      </a>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://joy-fund.com/campaign/${campaign.id}`);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    {copied ? <><Check size={12} className="text-green-500" /> Copied!</> : <><Copy size={12} /> Copy Link</>}
+                  </button>
+                </div>
+              )}
               <Link
                 href={`/campaign/${campaign.id}`}
                 className="btn-outline w-full text-sm"
