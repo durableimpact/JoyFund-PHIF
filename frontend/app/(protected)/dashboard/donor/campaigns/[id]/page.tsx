@@ -38,6 +38,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -181,10 +182,8 @@ export default function CampaignDetailPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="h-full" style={{ background: "var(--background)" }}>
-        <div className="pt-32 flex items-center justify-center">
-          <Loader2 size={28} className="animate-spin text-[#1DB1DB]" />
+    return <DetailPageSkeleton />;
+  }
         </div>
       </div>
     );
