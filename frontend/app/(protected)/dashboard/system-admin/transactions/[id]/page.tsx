@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { formatXAF, formatDateTime } from "@/lib/utils";
 import { getTransaction } from "@/actions/payments";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 const statusColors: Record<string, string> = {
   SUCCESSFUL: "text-green-600 bg-green-50 border-green-100",
@@ -49,11 +50,7 @@ export default function TransactionDetailPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <Loader2 size={28} className="animate-spin text-[#471DDB]" />
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (isError || !tx) {
