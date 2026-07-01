@@ -92,11 +92,28 @@ export const sendTestPush = async (
   payload: TestPushPayload,
 ) => {
   try {
-    const { data } = await api.post<TestPushResponse>(
-      "/api/notifications/push/test-send/",
-      payload,
+    const { data, status } = await api.post<
+      TestPushSyncResponse | TestPushAsyncResponse
+    >("/api/notifications/push/test-send/", payload, {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+    return { data, status };
+  } catch (e) {
+    handleError(e);
+  }
+};
+
+export const getPushTaskStatus = async (
+  access_token: string,
+  taskId: string,
+) => {
+  try {
+    const { data } = await api.get<PushBroadcastTaskStatus>(
+      `/api/notifications/push/task/${taskId}/`,
       { headers: { Authorization: `Bearer ${access_token}` } },
     );
     return data;
-  } catch (e) { handleError(e); }
+  } catch (e) {
+    handleError(e);
+  }
 };
