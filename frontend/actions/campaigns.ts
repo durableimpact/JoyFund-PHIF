@@ -144,7 +144,7 @@ export const getAvailableBalances = async (
 };
 
 export const getCampaignLeaderboard = async (
-  params?: Partial<{ page: number; page_size: number }>,
+  params?: Partial<{ page: number; page_size: number; ordering: string }>,
 ) => {
   try {
     const { data } = await api.get<
