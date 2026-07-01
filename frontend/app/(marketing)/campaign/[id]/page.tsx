@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
@@ -25,6 +25,7 @@ import {
 import Navbar from "@/components/shared/Navbar";
 import { Helmet } from "react-helmet-async";
 import { getCampaign, listCampaignDonations } from "@/actions/campaigns";
+import { useCampaignViewTracker } from "@/hooks/useCampaignViewTracker";
 import { formatXAF, cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -565,6 +566,9 @@ export default function CampaignDetailPage() {
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const hasFetchedCampaign = useRef(false);
 
+  // Track campaign page view with source attribution
+  useCampaignViewTracker(id);
+
   // Fetch campaign
   useEffect(() => {
     if (!id || hasFetchedCampaign.current) return;
@@ -633,6 +637,14 @@ export default function CampaignDetailPage() {
     navigator.clipboard.writeText(url).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const getShareUrl = (platform: string) => {
+    const base =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/campaign/${campaign?.id}`
+        : "";
+    return `${base}?src=${platform}`;
   };
 
   // Loading state
@@ -1020,7 +1032,15 @@ export default function CampaignDetailPage() {
                   <Button
                     variant="outline"
                     className="w-full h-12 rounded-full border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors gap-2"
-                    onClick={handleCopy}
+                    onClick={() => {
+                      const shareUrl = getShareUrl("share");
+                      const text = campaign?.title ? `Support: ${campaign.title}` : "Check out this campaign";
+                      if (navigator.share) {
+                        navigator.share({ title: campaign?.title, url: shareUrl, text }).catch(() => {});
+                      } else {
+                        handleCopy();
+                      }
+                    }}
                   >
                     {copied ? (
                       <>
