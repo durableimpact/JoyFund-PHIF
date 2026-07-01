@@ -25,6 +25,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Helmet } from "react-helmet-async";
 import { getCampaign, listCampaignDonations } from "@/actions/campaigns";
 import { useCampaignViewTracker } from "@/hooks/useCampaignViewTracker";
@@ -558,7 +559,6 @@ export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
   const [campaignData, setCampaignData] = useState<CampaignDetail | null>(null);
   const [isCampaignLoading, setIsCampaignLoading] = useState(true);
   const [donationPages, setDonationPages] = useState<
@@ -1032,59 +1032,58 @@ export default function CampaignDetailPage() {
                       Donate now
                     </Button>
                   </Link>
-                  <div className="relative">
-                    <Button
-                      variant="outline"
-                      className="w-full h-12 rounded-full border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors gap-2"
-                      onClick={() => setShareOpen(!shareOpen)}
-                    >
-                      {copied ? (
-                        <>
-                          <CheckCircle className="w-4 h-4 text-green-500" />
-                          Link copied!
-                        </>
-                      ) : (
-                        <>
-                          <Share2 className="w-4 h-4" />
-                          Share
-                        </>
-                      )}
-                    </Button>
-                    {shareOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl p-3 space-y-2 shadow-lg z-50">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
-                            { label: "Facebook", src: "fb", color: "bg-blue-600", url: "https://www.facebook.com/sharer/sharer.php?u=" },
-                            { label: "Twitter / X", src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?url=&text=" },
-                            { label: "WhatsApp", src: "whatsapp", color: "bg-green-500", url: "https://wa.me/?text=" },
-                            { label: "LinkedIn", src: "linkedin", color: "bg-blue-700", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
-                          ].map((s) => (
-                            <a
-                              key={s.src}
-                              href={`${s.url}${encodeURIComponent(getShareUrl(s.src))}${s.src === "tw" || s.src === "whatsapp" ? encodeURIComponent(` ${campaign?.title || ""}`) : ""}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-semibold ${s.color} hover:opacity-90 transition-opacity`}
-                            >
-                              <ExternalLink size={12} />
-                              {s.label}
-                            </a>
-                          ))}
-                        </div>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(getShareUrl("share")).catch(() => {});
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          }}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition-colors"
-                        >
-                          <Copy size={12} /> Copy Link
-                        </button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full h-12 rounded-full border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors gap-2"
+                      >
+                        {copied ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            Link copied!
+                          </>
+                        ) : (
+                          <>
+                            <Share2 className="w-4 h-4" />
+                            Share
+                          </>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" sideOffset={8} className="w-64 p-3">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { label: "Facebook", src: "fb", color: "bg-blue-600", url: "https://www.facebook.com/sharer/sharer.php?u=" },
+                          { label: "Twitter / X", src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?url=&text=" },
+                          { label: "WhatsApp", src: "whatsapp", color: "bg-green-500", url: "https://wa.me/?text=" },
+                          { label: "LinkedIn", src: "linkedin", color: "bg-blue-700", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
+                        ].map((s) => (
+                          <a
+                            key={s.src}
+                            href={`${s.url}${encodeURIComponent(getShareUrl(s.src))}${s.src === "tw" || s.src === "whatsapp" ? encodeURIComponent(` ${campaign?.title || ""}`) : ""}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-semibold ${s.color} hover:opacity-90 transition-opacity`}
+                          >
+                            <ExternalLink size={12} />
+                            {s.label}
+                          </a>
+                        ))}
                       </div>
-                    )}
-                  </div>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(getShareUrl("share")).catch(() => {});
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition-colors mt-2"
+                      >
+                        <Copy size={12} /> Copy Link
+                      </button>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
