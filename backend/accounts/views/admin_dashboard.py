@@ -779,8 +779,8 @@ class AdminComprehensiveAnalyticsView(APIView):
         donations_agg = Donation.objects.filter(
             status="SUCCESS", created_at__date__lte=current_end
         ).aggregate(
-            current=Sum("net_amount", filter=Q(created_at__date__gte=current_start)),
-            prev=Sum("net_amount", filter=Q(created_at__date__gte=ov_prev_start, created_at__date__lte=ov_prev_end)),
+            current=Sum("net_amount"),
+            prev=Sum("net_amount", filter=Q(created_at__date__lte=ov_prev_end)),
         )
         donations_current = float(donations_agg["current"] or 0)
         donations_prev = float(donations_agg["prev"] or 0)
