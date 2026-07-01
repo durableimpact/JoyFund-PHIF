@@ -100,23 +100,20 @@ export default function VerifyEmailPage() {
       });
 
       setSuccess(true);
-      toast.success("Email verified! Logging you in...");
+      toast.success("Email verified!");
 
       // Get stored credentials
       const storedPassword = sessionStorage.getItem("temp_password");
 
       if (!storedPassword) {
-        const message = "Password not found. Please log in manually.";
-        setError(message);
-        toast.error(message);
-        setTimeout(() => {
-          sessionStorage.removeItem("temp_email");
-          router.push("/login");
-        }, 2000);
+        // Already logged in (e.g. from dashboard banner) — skip re-auth
+        queryClient.clear();
+        sessionStorage.removeItem("temp_email");
+        window.location.replace("/dashboard/donor");
         return;
       }
 
-      // Auto-login after verification
+      // Auto-login after verification (new registration flow)
       const result = await signIn("credentials", {
         email: email,
         password: storedPassword,
@@ -196,7 +193,7 @@ export default function VerifyEmailPage() {
           {success && (
             <div className="bg-green-50 border border-green-100 text-green-600 text-sm rounded-xl px-4 py-3 flex gap-2">
               <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
-              <span>Email verified! Logging you in...</span>
+              <span>Email verified! Redirecting to dashboard...</span>
             </div>
           )}
 
