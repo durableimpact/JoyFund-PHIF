@@ -66,7 +66,7 @@ export default function Paginator({
       <div className="text-xs text-gray-600">
         Showing <span className="font-semibold">{from}</span> to{" "}
         <span className="font-semibold">{to}</span> of{" "}
-        <span className="font-semibold">{totalCount}</span> results
+        <span className="font-semibold">{totalCount.toLocaleString()}</span> results
       </div>
 
       <Pagination>
@@ -87,9 +87,10 @@ export default function Paginator({
             ) : (
               <PaginationItem key={item}>
                 <PaginationLink
+                  size="default"
                   isActive={item === currentPage}
                   onClick={() => onPageChange(item)}
-                  className="cursor-pointer"
+                  className="cursor-pointer min-w-[2.25rem] justify-center text-center"
                 >
                   {item}
                 </PaginationLink>
