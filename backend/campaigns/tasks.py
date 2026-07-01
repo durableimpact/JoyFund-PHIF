@@ -266,7 +266,7 @@ def send_campaign_donation_reminder(self, campaign_id, reminder_type):
 
     title = msg["title"]
     message = msg["message"].format(title=campaign.title)
-    action_url = f"/campaign/{campaign.id}/"
+    action_url = f"/campaign/{campaign.id}/?src=push"
 
     # 1. Create DB notification
     Notification.objects.create(
