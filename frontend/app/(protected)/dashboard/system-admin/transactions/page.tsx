@@ -7,6 +7,7 @@ import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { formatXAF, formatDate } from "@/lib/utils";
 import { listTransactions } from "@/actions/payments";
 import Paginator from "@/components/shared/Paginator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const STATUS_FILTERS = ["all", "SUCCESSFUL", "PENDING", "FAILED"];
 const TYPE_FILTERS = ["all", "DONATION", "PLATFORM_FEE", "DISBURSEMENT", "REFUND"];
@@ -77,7 +78,7 @@ export default function TransactionsPage() {
 
       <div className="card p-4 md:p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#471DDB] animate-spin" /></div>
+          <div className="flex items-center justify-center py-12"><Skeleton className="h-6 w-6 rounded" /></div>
         ) : !rows.length ? (
           <p className="text-gray-400 text-sm text-center py-12">No transactions found</p>
         ) : (
