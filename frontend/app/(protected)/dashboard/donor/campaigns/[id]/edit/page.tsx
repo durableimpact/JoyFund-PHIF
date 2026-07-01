@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Loader2, ImagePlus, X } from "lucide-react";
 import { getCampaign, updateCampaign } from "@/actions/campaigns";
+import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function EditCampaignPage() {
   const { id } = useParams<{ id: string }>();
@@ -118,10 +119,8 @@ export default function EditCampaignPage() {
   };
 
   if (isLoading || !campaign) {
-    return (
-      <div className="min-h-screen" style={{ background: "var(--background)" }}>
-        <div className="pt-32 flex items-center justify-center">
-          <Loader2 size={28} className="animate-spin text-[#1DB1DB]" />
+    return <DetailPageSkeleton />;
+  }
         </div>
       </div>
     );
