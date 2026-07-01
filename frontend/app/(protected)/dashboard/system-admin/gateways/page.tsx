@@ -6,6 +6,7 @@ import { Globe, Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react";
 import { useState } from "react";
 import { formatDate } from "@/lib/utils";
 import { listGateways, createGateway, updateGateway, deleteGateway } from "@/actions/payments";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GatewaysPage() {
   const { data: session } = useSession();
@@ -93,7 +94,7 @@ export default function GatewaysPage() {
 
       <div className="card p-4 md:p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#471DDB] animate-spin" /></div>
+          <div className="flex items-center justify-center py-12"><Skeleton className="h-6 w-6 rounded" /></div>
         ) : !gateways.length ? (
           <p className="text-gray-400 text-sm text-center py-12">No gateways configured yet</p>
         ) : (
