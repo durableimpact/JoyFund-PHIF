@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DEVICE_PATHS: Record<string, string> = {
   SYSTEM_ADMIN: "/dashboard/system-admin/devices",
@@ -26,7 +27,7 @@ export default function DevicesRedirect() {
 
   return (
     <div className="flex items-center justify-center py-20">
-      <Loader2 size={22} className="animate-spin text-gray-300" />
+      <Skeleton className="h-6 w-6 rounded" />
     </div>
   );
 }
