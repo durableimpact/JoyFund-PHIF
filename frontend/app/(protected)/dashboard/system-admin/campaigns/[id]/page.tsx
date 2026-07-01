@@ -36,6 +36,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { Line, LineChart, XAxis, YAxis, CartesianGrid } from "recharts";
+
+const analyticsChartConfig = {
+  unique: {
+    label: "Unique Views",
+    color: "#471DDB",
+  },
+} satisfies ChartConfig;
 
 export default function AdminCampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -902,23 +916,54 @@ export default function AdminCampaignDetailPage() {
                 {analytics.timeline && analytics.timeline.length > 0 && (
                   <div>
                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Timeline</p>
-                    <div className="flex items-end gap-px h-12">
-                      {analytics.timeline.map((point, i) => {
-                        const maxVal = Math.max(...analytics.timeline.map((p) => p.unique), 1);
-                        const height = (point.unique / maxVal) * 100;
-                        return (
-                          <div
-                            key={i}
-                            className="flex-1 min-w-0 rounded-t transition-all duration-300"
-                            style={{
-                              height: `${Math.max(height, 2)}%`,
-                              background: point.unique > 0 ? "#471DDB" : "#e5e7eb",
-                            }}
-                            title={`${point.period}: ${point.unique} unique`}
-                          />
-                        );
-                      })}
-                    </div>
+                    <ChartContainer config={analyticsChartConfig} className="h-32 w-full">
+                      <LineChart
+                        data={analytics.timeline}
+                        margin={{ top: 4, right: 8, left: -12, bottom: 0 }}
+                      >
+                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis
+                          dataKey="period"
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(v: string) => {
+                            const d = new Date(v);
+                            return d.toLocaleDateString("en", { month: "short", day: "numeric" });
+                          }}
+                          fontSize={9}
+                          tickMargin={4}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          fontSize={9}
+                          tickMargin={4}
+                          allowDecimals={false}
+                        />
+                        <ChartTooltip
+                          content={
+                            <ChartTooltipContent
+                              formatter={(value) => [`${value}`, "Unique Views"]}
+                              labelFormatter={(label) =>
+                                new Date(String(label)).toLocaleDateString("en", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })
+                              }
+                            />
+                          }
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="unique"
+                          stroke="#471DDB"
+                          strokeWidth={2}
+                          dot={false}
+                          activeDot={{ r: 3, strokeWidth: 0 }}
+                        />
+                      </LineChart>
+                    </ChartContainer>
                     <div className="flex justify-between mt-1">
                       <span className="text-[8px] text-gray-400">{analytics.start_date}</span>
                       <span className="text-[8px] text-gray-400">{analytics.end_date}</span>
