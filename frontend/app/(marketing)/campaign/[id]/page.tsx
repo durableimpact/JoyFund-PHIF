@@ -868,6 +868,24 @@ export default function CampaignDetailPage() {
                       </p>
                     </div>
                   </div>
+                  {campaign.end_date && (
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-2xl p-4">
+                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-100">
+                        <Calendar className="w-4 h-4 text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                          Ends
+                        </p>
+                        <p className="text-sm font-bold text-[#1A1A2E]">
+                          {new Date(campaign.end_date).toLocaleDateString(
+                            "en-US",
+                            { month: "long", day: "numeric", year: "numeric" },
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
 
@@ -1033,23 +1051,20 @@ export default function CampaignDetailPage() {
                     </Button>
                   </Link>
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full h-12 rounded-full border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors gap-2"
-                      >
-                        {copied ? (
-                          <>
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            Link copied!
-                          </>
-                        ) : (
-                          <>
-                            <Share2 className="w-4 h-4" />
-                            Share
-                          </>
-                        )}
-                      </Button>
+                    <PopoverTrigger
+                      className="inline-flex items-center justify-center gap-2 w-full h-12 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors text-sm"
+                    >
+                      {copied ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          Link copied!
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-4 h-4" />
+                          Share
+                        </>
+                      )}
                     </PopoverTrigger>
                     <PopoverContent align="start" sideOffset={8} className="w-64 p-3">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
