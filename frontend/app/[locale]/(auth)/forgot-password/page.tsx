@@ -5,11 +5,13 @@ import { requestPasswordReset } from '@/actions/accounts';
 import { Heart, Loader2, ArrowLeft, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useI18n } from '@/locales/client';
 
 type Step = 'form' | 'sent';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const t = useI18n();
   const [email, setEmail] = useState('');
   const [step, setStep] = useState<Step>('form');
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export default function ForgotPasswordPage() {
       
       // Move to next step and prepare to navigate after delay
       setStep('sent');
-      toast.success('Password reset code sent. Check your email.');
+      toast.success(t('auth.forgotPassword.codeSent'));
       
       // Auto-navigate to reset password page after 3 seconds
       setTimeout(() => {
@@ -65,12 +67,12 @@ export default function ForgotPasswordPage() {
             <Heart size={28} />
           </div>
           <h1 className="text-2xl font-black text-[#1A1A2E]">
-            {step === 'form' ? 'Forgot your password?' : 'Check your inbox'}
+            {step === 'form' ? t('auth.forgotPassword.title') : t('auth.forgotPassword.sentTitle')}
           </h1>
           <p className="text-gray-500 text-sm mt-2">
             {step === 'form'
-              ? "Enter your email and we'll send you a reset code."
-              : `We sent a 6-digit code to ${email}`}
+              ? t('auth.forgotPassword.subtitle')
+              : `${t('auth.forgotPassword.sentSubtitle')} ${email}`}
           </p>
         </div>
 
@@ -87,7 +89,7 @@ export default function ForgotPasswordPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-                  Email address
+                  {t('auth.forgotPassword.email')}
                 </label>
                 <input
                   type="email"
@@ -106,15 +108,15 @@ export default function ForgotPasswordPage() {
                 style={{ background: 'var(--primary)' }}
               >
                 {loading
-                  ? <><Loader2 size={16} className="animate-spin" /> Sending...</>
-                  : 'Send Reset Code'}
+                  ? <><Loader2 size={16} className="animate-spin" /> {t('auth.forgotPassword.loading')}</>
+                  : t('auth.forgotPassword.button')}
               </button>
 
               <Link
                 href="/login"
                 className="flex items-center justify-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition"
               >
-                <ArrowLeft size={14} /> Back to Sign In
+                <ArrowLeft size={14} /> {t('auth.forgotPassword.back')}
               </Link>
             </form>
           )}
@@ -127,10 +129,7 @@ export default function ForgotPasswordPage() {
               </div>
 
               <p className="text-sm text-gray-500 leading-relaxed">
-                If an account exists for{' '}
-                <span className="font-semibold text-[#1A1A2E]">{email}</span>,
-                you will receive a 6-digit code shortly. Check your spam folder
-                if it doesn't arrive within a few minutes.
+                {t('auth.forgotPassword.sentNote', { email })}
               </p>
 
               <button
@@ -138,14 +137,14 @@ export default function ForgotPasswordPage() {
                 className="w-full py-3 rounded-xl font-bold text-white text-sm flex items-center justify-center transition"
                 style={{ background: 'var(--primary)' }}
               >
-                Enter Reset Code
+                {t('auth.forgotPassword.enterCode')}
               </button>
 
               <button
                 onClick={() => { setStep('form'); setError(''); }}
                 className="text-sm text-gray-500 hover:text-gray-700 transition underline underline-offset-2"
               >
-                Use a different email
+                {t('auth.forgotPassword.useDifferent')}
               </button>
             </div>
           )}

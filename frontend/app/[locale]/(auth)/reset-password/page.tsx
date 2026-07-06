@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Loader2, Eye, EyeOff, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useI18n } from '@/locales/client';
 
 type Step = 'code' | 'password' | 'done';
 
@@ -12,6 +13,7 @@ function ResetPasswordPageContent() {
   const router = useRouter();
   const params = useSearchParams();
   const emailFromQuery = params.get('email') ?? '';
+  const t = useI18n();
 
   const [step, setStep] = useState<Step>('code');
   const [email, setEmail] = useState(emailFromQuery);
@@ -78,7 +80,7 @@ function ResetPasswordPageContent() {
       // Code verification will happen when user submits password
       // For now, just move to password step
       setStep('password');
-      toast.success('Code confirmed. Enter a new password.');
+      toast.success(t('auth.resetPassword.codeConfirmed'));
     } catch (err) {
       const errorData = typeof err === 'string' ? JSON.parse(err) : err;
       console.error('[verify code error]', errorData);
@@ -148,14 +150,14 @@ function ResetPasswordPageContent() {
   // ── Render ───────────────────────────────────────────────────────
 
   const titles: Record<Step, string> = {
-    code:     'Enter your reset code',
-    password: 'Set a new password',
-    done:     'Password updated!',
+    code:     t('auth.resetPassword.titleCode'),
+    password: t('auth.resetPassword.titlePassword'),
+    done:     t('auth.resetPassword.titleDone'),
   };
   const subtitles: Record<Step, string> = {
-    code:     `Enter the 6-digit code sent to ${email || 'your email'}.`,
-    password: 'Choose a strong password for your account.',
-    done:     'You can now sign in with your new password.',
+    code:     t('auth.resetPassword.subtitleCode', { email: email || 'your email' }),
+    password: t('auth.resetPassword.subtitlePassword'),
+    done:     t('auth.resetPassword.subtitleDone'),
   };
 
   return (
@@ -192,7 +194,7 @@ function ResetPasswordPageContent() {
               {!emailFromQuery && (
                 <div>
                   <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-                    Email address
+                    {t('auth.resetPassword.email')}
                   </label>
                   <input
                     type="email"
@@ -208,7 +210,7 @@ function ResetPasswordPageContent() {
               {/* 6-box code input */}
               <div>
                 <label className="block text-sm font-semibold text-[#1A1A2E] mb-3 text-center">
-                  6-digit code
+                  {t('auth.resetPassword.codeLabel')}
                 </label>
                 <div className="flex gap-2 justify-center">
                   {code.map((digit, i) => (
@@ -236,16 +238,16 @@ function ResetPasswordPageContent() {
                 style={{ background: 'var(--primary)' }}
               >
                 {loading
-                  ? <><Loader2 size={16} className="animate-spin" /> Verifying...</>
-                  : 'Verify Code'}
+                  ? <><Loader2 size={16} className="animate-spin" /> {t('auth.resetPassword.verifying')}</>
+                  : t('auth.resetPassword.verifyCode')}
               </button>
 
               <div className="flex items-center justify-between text-sm text-gray-500">
                 <Link href="/login" className="flex items-center gap-1.5 hover:text-gray-700 transition">
-                  <ArrowLeft size={14} /> Back to Sign In
+                  <ArrowLeft size={14} /> {t('auth.resetPassword.back')}
                 </Link>
                 <Link href="/forgot-password" className="text-[#1DB1DB] hover:underline">
-                  Resend code
+                  {t('auth.resetPassword.resendCode')}
                 </Link>
               </div>
             </form>
@@ -264,13 +266,13 @@ function ResetPasswordPageContent() {
               <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-4 py-2.5">
                 <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />
                 <span className="text-sm text-green-700">
-                  Code <span className="font-bold tracking-widest">{fullCode}</span> verified
+                  {t('auth.resetPassword.codeVerified', { code: fullCode })}
                 </span>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-                  New password
+                  {t('auth.resetPassword.newPassword')}
                 </label>
                 <div className="relative">
                   <input
@@ -278,7 +280,7 @@ function ResetPasswordPageContent() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 8 characters"
+                    placeholder={t('auth.register.passwordPlaceholder')}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition pr-12"
                   />
                   <button
@@ -293,14 +295,14 @@ function ResetPasswordPageContent() {
 
               <div>
                 <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-                  Confirm new password
+                  {t('auth.resetPassword.confirmPassword')}
                 </label>
                 <input
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat your new password"
+                  placeholder={t('auth.resetPassword.confirmPlaceholder')}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] transition"
                 />
               </div>
@@ -340,8 +342,8 @@ function ResetPasswordPageContent() {
                 style={{ background: 'var(--primary)' }}
               >
                 {loading
-                  ? <><Loader2 size={16} className="animate-spin" /> Saving...</>
-                  : 'Set New Password'}
+                  ? <><Loader2 size={16} className="animate-spin" /> {t('auth.resetPassword.saving')}</>
+                  : t('auth.resetPassword.setPassword')}
               </button>
             </form>
           )}
@@ -354,8 +356,7 @@ function ResetPasswordPageContent() {
               </div>
 
               <p className="text-sm text-gray-500 leading-relaxed">
-                Your password has been updated successfully. You can now sign in
-                with your new credentials.
+                {t('auth.resetPassword.doneMessage')}
               </p>
 
               <button
@@ -363,7 +364,7 @@ function ResetPasswordPageContent() {
                 className="w-full py-3 rounded-xl font-bold text-white text-sm transition"
                 style={{ background: 'var(--primary)' }}
               >
-                Go to Sign In
+                {t('auth.resetPassword.goToLogin')}
               </button>
             </div>
           )}

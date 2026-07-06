@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 const ROLE_HOME: Record<string, string> = {
   DONOR: "/dashboard/donor",
@@ -25,6 +26,7 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const redirectParam = searchParams?.get("redirect") || undefined;
+  const t = useI18n();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -142,10 +144,10 @@ function LoginPageContent() {
             />
           </div>
           <h1 className="text-2xl font-black text-[#1A1A2E]">
-            Sign in to JoyFund
+            {t("auth.login.title")}
           </h1>
           <p className="text-gray-500 text-sm mt-2">
-            Enter your credentials to access your portal
+            {t("auth.login.subtitle")}
           </p>
         </div>
 
@@ -163,7 +165,7 @@ function LoginPageContent() {
           {/* Email */}
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-              Email address
+              {t("auth.login.email")}
             </label>
             <input
               type="email"
@@ -179,13 +181,13 @@ function LoginPageContent() {
           <div>
             <div className="flex justify-between items-center mb-1.5">
               <label className="block text-sm font-semibold text-[#1A1A2E]">
-                Password
+                {t("auth.login.password")}
               </label>
               <Link
                 href="/forgot-password"
                 className="text-xs text-[#1DB1DB] hover:underline"
               >
-                Forgot password?
+                {t("auth.login.forgotPassword")}
               </Link>
             </div>
             <div className="relative">
@@ -194,7 +196,7 @@ function LoginPageContent() {
                 required
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="Enter your password"
+                placeholder={t("auth.login.passwordPlaceholder")}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB1DB] focus:border-transparent transition pr-12"
               />
               <button
@@ -216,21 +218,21 @@ function LoginPageContent() {
           >
             {loading ? (
               <>
-                <Loader2 size={16} className="animate-spin" /> Signing in...
+                <Loader2 size={16} className="animate-spin" /> {t("auth.login.loading")}
               </>
             ) : (
-              "Sign In"
+              t("auth.login.button")
             )}
           </button>
 
           {/* Register link */}
           <p className="text-center text-sm text-gray-500">
-            New donor?{" "}
+            {t("auth.login.newDonor")}{" "}
             <Link
               href="/register"
               className="text-[#1DB1DB] font-semibold hover:underline"
             >
-              Create a JoyFund account
+              {t("auth.login.createAccountLink")}
             </Link>
           </p>
         </form>

@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/input-otp";
 import { CheckCircle2, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useI18n } from "@/locales/client";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const t = useI18n();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -170,10 +172,10 @@ export default function VerifyEmailPage() {
             ✓
           </div>
           <h1 className="text-2xl font-black text-[#1A1A2E]">
-            Verify your email
+            {t("auth.verifyEmail.title")}
           </h1>
           <p className="text-gray-500 text-sm mt-2">
-            We've sent a 6-digit code to
+            {t("auth.verifyEmail.subtitle")}
             <br />
             <span className="font-semibold text-gray-700">{email}</span>
           </p>
@@ -193,13 +195,13 @@ export default function VerifyEmailPage() {
           {success && (
             <div className="bg-green-50 border border-green-100 text-green-600 text-sm rounded-xl px-4 py-3 flex gap-2">
               <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
-              <span>Email verified! Redirecting to dashboard...</span>
+              <span>{t("auth.verifyEmail.successMessage")}</span>
             </div>
           )}
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-4">
-              Enter verification code
+              {t("auth.verifyEmail.codeLabel")}
             </label>
             <InputOTP
               maxLength={6}
@@ -243,10 +245,10 @@ export default function VerifyEmailPage() {
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  Verifying...
+                  {t("auth.verifyEmail.loading")}
                 </>
               ) : (
-                "Verify Email"
+                t("auth.verifyEmail.button")
               )}
             </button>
 
@@ -266,15 +268,14 @@ export default function VerifyEmailPage() {
               ) : (
                 <>
                   <RefreshCw size={16} />
-                  {resendCooldown > 0 ? `${resendCooldown}s` : "Resend"}
+                  {resendCooldown > 0 ? `${resendCooldown}s` : t("auth.verifyEmail.resend")}
                 </>
               )}
             </button>
           </div>
 
           <p className="text-center text-xs text-gray-400 mt-6">
-            Didn't receive a code? Click the Resend button above or check your
-            spam folder.
+            {t("auth.verifyEmail.noCodeHint")}
           </p>
         </form>
       </div>

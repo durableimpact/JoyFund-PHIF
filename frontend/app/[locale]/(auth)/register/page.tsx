@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { InputPhone } from "@/components/ui/input-phone";
+import { useI18n } from "@/locales/client";
 
 type RegisterInput = {
   first_name: string;
@@ -23,6 +24,7 @@ type RegisterInput = {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useI18n();
 
   const {
     register,
@@ -52,18 +54,18 @@ export default function RegisterPage() {
     setGeneralError("");
     // client-side password checks
     if (data.password !== data.confirmPassword) {
-      setGeneralError("Passwords do not match.");
+      setGeneralError(t("auth.register.passwordMismatch"));
       setFieldError("confirmPassword", {
         type: "manual",
-        message: "Passwords do not match.",
+        message: t("auth.register.passwordMismatch"),
       });
       return;
     }
     if (data.password.length < 8) {
-      setGeneralError("Password must be at least 8 characters.");
+      setGeneralError(t("auth.register.passwordMin"));
       setFieldError("password", {
         type: "manual",
-        message: "Password must be at least 8 characters.",
+        message: t("auth.register.passwordMin"),
       });
       return;
     }
@@ -81,7 +83,7 @@ export default function RegisterPage() {
       });
 
       if (!account) {
-        const message = "Account creation failed. Please try again.";
+        const message = t("auth.register.accountFailed");
         setGeneralError(message);
         toast.error(message);
         setLoading(false);
@@ -89,7 +91,7 @@ export default function RegisterPage() {
       }
 
       // Account created successfully - now automatically sign in the user
-      toast.success("Account created successfully! Signing you in...");
+      toast.success(t("auth.register.success"));
 
       try {
         const signInResult = await signIn("credentials", {
@@ -195,10 +197,10 @@ export default function RegisterPage() {
             />
           </div>
           <h1 className="text-2xl font-black text-[#1A1A2E]">
-            Create your JoyFund account
+            {t("auth.register.title")}
           </h1>
           <p className="text-gray-500 text-sm mt-2">
-            Start creating campaigns for people you love
+            {t("auth.register.subtitle")}
           </p>
         </div>
 
@@ -214,11 +216,11 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-              First name
+              {t("auth.register.firstName")}
             </label>
             <Input
               {...register("first_name", {
-                required: "First name is required",
+                required: t("auth.register.firstNameRequired"),
               })}
               type="text"
               placeholder="e.g. Jean-Pierre"
@@ -233,10 +235,10 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-              Last name
+              {t("auth.register.lastName")}
             </label>
             <Input
-              {...register("last_name", { required: "Last name is required" })}
+              {...register("last_name", { required: t("auth.register.lastNameRequired") })}
               type="text"
               placeholder="e.g. Mbarga"
               className=" rounded-xl py-5 px-4"
@@ -250,10 +252,10 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-              Email address
+              {t("auth.register.email")}
             </label>
             <Input
-              {...register("email", { required: "Email is required" })}
+              {...register("email", { required: t("auth.register.emailRequired") })}
               type="email"
               placeholder="you@example.com"
               className=" rounded-xl py-5 px-4"
@@ -267,12 +269,12 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-              Phone (MTN / Orange)
+              {t("auth.register.phone")}
             </label>
             <Controller
               name="phone"
               control={control}
-              rules={{ required: "Phone number is required" }}
+              rules={{ required: t("auth.register.phoneRequired") }}
               render={({ field }) => (
                 <InputPhone
                   {...field}
@@ -291,13 +293,13 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-              Password
+              {t("auth.register.password")}
             </label>
             <div className="relative">
               <Input
-                {...register("password", { required: "Password is required" })}
+                {...register("password", { required: t("auth.register.passwordRequired") })}
                 type={showPassword ? "text" : "password"}
-                placeholder="At least 8 characters"
+                placeholder={t("auth.register.passwordPlaceholder")}
                 className="pr-12 rounded-xl py-5 px-4"
               />
               <button
@@ -317,14 +319,14 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-semibold text-[#1A1A2E] mb-1.5">
-              Confirm password
+              {t("auth.register.confirmPassword")}
             </label>
             <Input
               {...register("confirmPassword", {
-                required: "Please confirm your password",
+                required: t("auth.register.confirmRequired"),
               })}
               type="password"
-              placeholder="Repeat your password"
+              placeholder={t("auth.register.confirmPlaceholder")}
               className="rounded-xl py-5 px-4"
             />
             {errors.confirmPassword && (
@@ -357,21 +359,20 @@ export default function RegisterPage() {
           >
             {loading ? (
               <>
-                <Loader2 size={16} className="animate-spin" /> Creating
-                account...
+                <Loader2 size={16} className="animate-spin" /> {t("auth.register.loading")}
               </>
             ) : (
-              "Create Account"
+              t("auth.register.button")
             )}
           </button>
 
           <p className="text-center text-sm text-gray-500">
-            Already have an account?{" "}
+            {t("auth.register.haveAccount")}{" "}
             <Link
               href="/login"
               className="text-[#1DB1DB] font-semibold hover:underline"
             >
-              Sign in
+              {t("auth.register.signIn")}
             </Link>
           </p>
         </form>
