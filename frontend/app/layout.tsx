@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import { cookies } from "next/headers";
 import "./globals.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { cn } from "@/lib/utils";
@@ -118,14 +119,20 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let locale = "en";
+  try {
+    const cookieStore = await cookies();
+    locale = cookieStore.get("Next-Locale")?.value || "en";
+  } catch {}
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       suppressContentEditableWarning
       className={cn("h-full", plusJakartaSans.variable, spaceGrotesk.variable)}
