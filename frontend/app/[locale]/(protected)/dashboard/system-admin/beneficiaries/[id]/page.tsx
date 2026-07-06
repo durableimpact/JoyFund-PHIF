@@ -329,11 +329,11 @@ export default function AdminBeneficiaryDetailPage() {
                       <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
                         <button onClick={() => verifyHiMutation.mutate(hi.id)} disabled={verifyHiMutation.isPending}
                           className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors flex items-center gap-1">
-                          {verifyHiMutation.isPending ? <Loader2 size={10} className="animate-spin" /> : null} Validate
+                          {verifyHiMutation.isPending ? <Loader2 size={10} className="animate-spin" /> : null} {t('systemAdmin.beneficiaries.detail.validate')}
                         </button>
                         <button onClick={() => { setRejectHiId(hi.id); setRejectReason(''); }}
                           className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
-                          Reject
+                          {t('systemAdmin.beneficiaries.detail.reject')}
                         </button>
                       </div>
                     )}
@@ -341,7 +341,7 @@ export default function AdminBeneficiaryDetailPage() {
                       <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
                         <button onClick={() => openVoucherCreate(String(hi.id))}
                           className="text-[10px] font-bold px-2.5 py-1 rounded-lg text-white hover:opacity-90 transition-colors flex items-center gap-1" style={{ background: '#471DDB' }}>
-                          <Ticket size={10} /> Create Voucher
+                          <Ticket size={10} /> {t('systemAdmin.beneficiaries.detail.createVoucher')}
                         </button>
                       </div>
                     )}
@@ -355,14 +355,14 @@ export default function AdminBeneficiaryDetailPage() {
           <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                <FileText size={14} /> Documents ({docCount})
+                <FileText size={14} /> {t('systemAdmin.beneficiaries.detail.documents')} ({docCount})
               </h2>
               <button onClick={() => setShowDocUpload(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#471DDB' }}>
-                <Upload size={14} /> Upload
+                <Upload size={14} /> {t('systemAdmin.beneficiaries.detail.upload')}
               </button>
             </div>
             {documents.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4">No documents uploaded yet.</p>
+              <p className="text-xs text-gray-400 py-4">{t('systemAdmin.beneficiaries.detail.noDocuments')}</p>
             ) : (<>
               <div className="space-y-2">
                 {documents.map((doc) => {
@@ -380,12 +380,12 @@ export default function AdminBeneficiaryDetailPage() {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{doc.description || 'Document'}</p>
+                          <p className="text-sm font-medium text-gray-800 truncate">{doc.description || t('systemAdmin.beneficiaries.detail.document')}</p>
                           {doc.uploaded_at && <p className="text-[10px] text-gray-400">{formatDate(doc.uploaded_at)}</p>}
                         </div>
                       </button>
                       {docUrl && (
-                        <a href={fullUrl} target="_blank" rel="noopener noreferrer" download className="p-1.5 text-gray-400 hover:text-purple-600 rounded-lg hover:bg-purple-50 transition-colors shrink-0" title="Download">
+                        <a href={fullUrl} target="_blank" rel="noopener noreferrer" download className="p-1.5 text-gray-400 hover:text-purple-600 rounded-lg hover:bg-purple-50 transition-colors shrink-0" title={t('systemAdmin.beneficiaries.detail.download')}>
                           <Download size={14} />
                         </a>
                       )}
@@ -400,14 +400,14 @@ export default function AdminBeneficiaryDetailPage() {
           <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                <Ticket size={14} /> Vouchers ({voucherCount})
+                <Ticket size={14} /> {t('systemAdmin.beneficiaries.detail.vouchers')} ({voucherCount})
               </h2>
               <button onClick={() => openVoucherCreate()} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#471DDB' }}>
-                <Plus size={14} /> Create Voucher
+                <Plus size={14} /> {t('systemAdmin.beneficiaries.detail.createVoucherBtn')}
               </button>
             </div>
             {vouchers.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4">No vouchers issued to this beneficiary.</p>
+              <p className="text-xs text-gray-400 py-4">{t('systemAdmin.beneficiaries.detail.noVouchers')}</p>
             ) : (
               <div className="space-y-2">
                 {vouchers.map((v) => (
