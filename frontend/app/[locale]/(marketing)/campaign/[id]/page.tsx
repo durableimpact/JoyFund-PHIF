@@ -49,6 +49,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useI18n } from "@/locales/client";
 
 const VISIBLE_DONORS = 8;
 
@@ -63,6 +64,7 @@ function DonorListDialog({
   campaignId: string;
   campaignTitle: string;
 }) {
+  const t = useI18n();
   const [pages, setPages] = useState<PaginationResponse<Donation>[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -240,6 +242,7 @@ function DonorList({
   campaignId: string;
   campaignTitle: string;
 }) {
+  const t = useI18n();
   const [dialogOpen, setDialogOpen] = useState(false);
   const visible = donations.slice(0, VISIBLE_DONORS);
 
@@ -247,9 +250,9 @@ function DonorList({
     <>
       <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden">
         <div className="px-6 pt-5 pb-3 flex items-center justify-between">
-          <h3 className="font-bold text-[#1A1A2E] text-sm">Recent donors</h3>
+          <h3 className="font-bold text-[#1A1A2E] text-sm">{t("campaignDetail.recentDonors")}</h3>
           <span className="text-xs text-gray-400 font-medium">
-            {totalDonors} total
+            {t("campaignDetail.total")}
           </span>
         </div>
 
@@ -296,7 +299,7 @@ function DonorList({
             <div className="py-10 text-center">
               <HandHeart className="mx-auto text-gray-200 mb-3 w-8 h-8" />
               <p className="text-gray-400 text-xs font-medium">
-                Be the first to donate!
+                {t("campaignDetail.beFirst")}
               </p>
             </div>
           )}
@@ -558,6 +561,7 @@ function TransparencyTimeline({
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const t = useI18n();
   const [copied, setCopied] = useState(false);
   const [campaignData, setCampaignData] = useState<CampaignDetail | null>(null);
   const [isCampaignLoading, setIsCampaignLoading] = useState(true);
@@ -658,7 +662,7 @@ export default function CampaignDetailPage() {
         <div className="pt-32 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-gray-400">
             <Loader2 className="w-8 h-8 text-[#1DB1DB] animate-spin" />
-            <p className="text-sm font-medium">Loading campaign details…</p>
+            <p className="text-sm font-medium">{t("campaignDetail.loading")}</p>
           </div>
         </div>
       </div>
@@ -675,17 +679,16 @@ export default function CampaignDetailPage() {
               <Heart size={32} className="text-gray-300" />
             </div>
             <CardTitle className="text-2xl font-bold">
-              Campaign not found
+              {t("campaignDetail.notFound")}
             </CardTitle>
             <CardDescription>
-              The campaign you&apos;re looking for might have been closed or
-              removed.
+              {t("campaignDetail.notFoundDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center pb-8">
             <Link href="/explore">
               <Button className="bg-[#1DB1DB] hover:bg-[#1a9fc5] text-white rounded-full px-8">
-                Back to Explore
+                {t("campaignDetail.backToExplore")}
               </Button>
             </Link>
           </CardContent>
@@ -764,7 +767,7 @@ export default function CampaignDetailPage() {
             className="flex items-center gap-2 text-gray-500 hover:text-[#1DB1DB] text-sm mb-6 transition-colors font-semibold group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Explore
+            {t("campaignDetail.backToExplore")}
           </button>
 
           <div className="space-y-4">
@@ -806,19 +809,19 @@ export default function CampaignDetailPage() {
                   value="story"
                   className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors"
                 >
-                  Story
+                  {t("campaignDetail.story")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="impact"
                   className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors"
                 >
-                  Impact
+                  {t("campaignDetail.impact")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="transparency"
                   className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[#1DB1DB] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors"
                 >
-                  Transparency
+                  {t("campaignDetail.transparency")}
                 </TabsTrigger>
               </TabsList>
 
@@ -829,11 +832,11 @@ export default function CampaignDetailPage() {
               >
                 <div className="prose prose-gray max-w-none">
                   <h2 className="text-xl font-bold text-[#1A1A2E] mb-4 font-heading">
-                    About this campaign
+                    {t("campaignDetail.aboutCampaign")}
                   </h2>
                   <p className="text-gray-600 leading-relaxed whitespace-pre-wrap text-[15px]">
                     {campaign.description ||
-                      "No description provided for this campaign."}
+                      t("campaignDetail.noDescription")}
                   </p>
                 </div>
 
@@ -1047,7 +1050,7 @@ export default function CampaignDetailPage() {
                     className="block"
                   >
                     <Button className="w-full h-14 text-lg font-bold bg-[#1DB1DB] hover:bg-[#1a9fc5] text-white rounded-full shadow-lg shadow-[#1DB1DB]/25 transition-all hover:shadow-xl hover:shadow-[#1DB1DB]/30 active:scale-[0.98]">
-                      Donate now
+                      {t("campaignDetail.donateNow")}
                     </Button>
                   </Link>
                   <Popover>
@@ -1057,12 +1060,12 @@ export default function CampaignDetailPage() {
                       {copied ? (
                         <>
                           <CheckCircle className="w-4 h-4 text-green-500" />
-                          Link copied!
+                          {t("campaignDetail.linkCopied")}
                         </>
                       ) : (
                         <>
                           <Share2 className="w-4 h-4" />
-                          Share
+                          {t("campaignDetail.share")}
                         </>
                       )}
                     </PopoverTrigger>
@@ -1120,7 +1123,7 @@ export default function CampaignDetailPage() {
 
                   <div className="min-w-0">
                     <p className="text-xs text-gray-400 font-medium">
-                      Organized by
+                      {t("campaignDetail.organizedBy")}
                     </p>
                     {campaign.donor && (
                       <p className="text-sm font-bold text-[#1A1A2E] truncate">

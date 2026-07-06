@@ -6,10 +6,11 @@ import Navbar from "@/components/shared/Navbar";
 import { Helmet } from "react-helmet-async";
 import CampaignCard from "@/components/shared/CampaignCard";
 import { listCampaigns } from "@/actions/campaigns";
+import { useI18n } from "@/locales/client";
 
 // Display labels for event types
-const EVENT_TYPE_LABELS = [
-  { value: "All", label: "All Types" },
+const getEventLabels = (t: any) => [
+  { value: "All", label: t("explore.allTypes") },
   { value: "BIRTHDAY", label: "Birthday" },
   { value: "WEDDING", label: "Wedding" },
   { value: "GRADUATION", label: "Graduation" },
@@ -18,6 +19,7 @@ const EVENT_TYPE_LABELS = [
 ];
 
 export default function ExplorePage() {
+  const t = useI18n();
   const [params, setParams] = useUrlSearchParams(
     { search: "", filter: "All", statusFilter: "all" },
     {},
@@ -82,9 +84,9 @@ export default function ExplorePage() {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="section-title text-3xl">Explore JoyFunds</h1>
+            <h1 className="section-title text-3xl">{t("explore.title")}</h1>
             <p className="section-sub">
-              Discover campaigns and give a gift that truly matters
+              {t("explore.subtitle")}
             </p>
           </div>
 
@@ -97,7 +99,7 @@ export default function ExplorePage() {
               />
               <input
                 className="input-field pl-10"
-                placeholder="Search campaigns or donors..."
+                placeholder={t("explore.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setParams({ search: e.target.value })}
               />
@@ -107,15 +109,15 @@ export default function ExplorePage() {
               value={statusFilter}
               onChange={(e) => setParams({ statusFilter: e.target.value })}
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
+              <option value="all">{t("explore.allStatus")}</option>
+              <option value="active">{t("explore.active")}</option>
+              <option value="completed">{t("explore.completed")}</option>
             </select>
           </div>
 
           {/* Type pills */}
           <div className="flex gap-2 overflow-x-auto pb-2 mb-8">
-            {EVENT_TYPE_LABELS.map(({ value, label }) => (
+            {getEventLabels(t).map(({ value, label }) => (
               <button
                 key={value}
                 onClick={() => setParams({ filter: value })}
@@ -129,21 +131,22 @@ export default function ExplorePage() {
 
           {/* Results */}
           {isLoading ? (
-            <div className="card p-8 text-center">Loading campaigns…</div>
+            <div className="card p-8 text-center">{t("explore.loading")}</div>
           ) : (
             <>
               <p className="text-sm text-gray-500 mb-5">
-                {filtered.length} campaign{filtered.length !== 1 ? "s" : ""}{" "}
-                found
+                {filtered.length === 1
+                  ? t("explore.campaignFound", { count: filtered.length })
+                  : t("explore.campaignsFound", { count: filtered.length })}
               </p>
               {filtered.length === 0 ? (
                 <div className="card p-16 text-center">
                   <div className="text-5xl mb-4">🔍</div>
                   <h3 className="font-bold text-lg text-[#1A1A2E] mb-2">
-                    No campaigns found
+                    {t("explore.noResults")}
                   </h3>
                   <p className="text-gray-500 text-sm">
-                    Try adjusting your search or filters.
+                    {t("explore.noResultsHint")}
                   </p>
                 </div>
               ) : (

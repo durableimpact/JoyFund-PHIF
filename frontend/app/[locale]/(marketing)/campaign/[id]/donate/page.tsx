@@ -16,6 +16,7 @@ import * as z from "zod";
 import { InputPhone } from "@/components/ui/input-phone";
 import { toast } from "sonner";
 import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
+import { useI18n } from "@/locales/client";
 
 const PAYMENT_METHODS = [
   {
@@ -59,6 +60,7 @@ type DonateFormValues = z.infer<typeof donateSchema>;
 function DonatePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const t = useI18n();
   const searchParams = useSearchParams();
   const confettiRef = useRef<{ fire: (opts: { particleCount: number; spread: number; origin: { y: number } }) => void } | null>(null);
   const { data: session } = useSession();
@@ -250,7 +252,7 @@ function DonatePage() {
             onClick={() => router.back()}
             className="flex items-center gap-1 text-gray-500 text-sm mb-6 hover:text-gray-700"
           >
-            <ArrowLeft size={16} /> Back
+            <ArrowLeft size={16} /> {t("donate.back")}
           </button>
 
           {/* Campaign summary */}
@@ -328,7 +330,7 @@ function DonatePage() {
             className="card p-6 space-y-5"
           >
             <h1 className="text-xl font-black text-[#1A1A2E]">
-              Make a Donation
+              {t("donate.makeDonation")}
             </h1>
 
             {/* Donor name */}

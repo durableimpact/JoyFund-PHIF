@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Footer from "@/components/shared/Footer";
 
 export const metadata: Metadata = {
-  title: "JoyFund",
+  title: "JoyFund — Your Joy Saves Lives",
   description:
-    "JoyFund is a transparent crowdfunding platform that turns celebrations into maternal healthcare for vulnerable women across Cameroon.",
+    "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
   openGraph: {
     type: "website",
     siteName: "JoyFund",
-    title: "JoyFund",
+    title: "JoyFund — Your Joy Saves Lives",
     description:
       "Turn celebrations into maternal healthcare. Donate via MTN MoMo or Orange Money.",
   },

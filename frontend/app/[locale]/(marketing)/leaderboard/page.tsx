@@ -7,10 +7,11 @@ import { Trophy, TrendingUp, ExternalLink, Loader2, User, ArrowUpDown } from 'lu
 import Navbar from '@/components/shared/Navbar';
 import { Helmet } from 'react-helmet-async';
 import { getCampaignLeaderboard } from '@/actions/campaigns';
-import { Table, TableBody, TableHeader, TableHead, TableRow, TableCell } from '@/components/ui/table';
+import { useI18n } from '@/locales/client';
 
 export default function LeaderboardPage() {
   const router = useRouter();
+  const t = useI18n();
   const [ordering, setOrdering] = useState<string>('raised');
 
   const {
@@ -66,14 +67,10 @@ export default function LeaderboardPage() {
 
   const getMedalIcon = (rank: number) => {
     switch (rank) {
-      case 1:
-        return '🥇';
-      case 2:
-        return '🥈';
-      case 3:
-        return '🥉';
-      default:
-        return null;
+      case 1: return '🥇';
+      case 2: return '🥈';
+      case 3: return '🥉';
+      default: return null;
     }
   };
 
@@ -81,13 +78,21 @@ export default function LeaderboardPage() {
     return campaign.donor.user.first_name || 'Anonymous';
   };
 
+  const totalRaised = leaderboard.length > 0
+    ? leaderboard.reduce((sum: number, c: any) => sum + (parseFloat(c?.total_net_raised as string) || 0), 0)
+    : 0;
+
+  const avgProgress = leaderboard.length > 0
+    ? (leaderboard.reduce((sum: number, c: any) => sum + (c?.progress_percentage ?? 0), 0) / leaderboard.length).toFixed(1)
+    : '0';
+
   const handleDonorClick = (e: React.MouseEvent, campaign: CampaignLeaderboardEntry) => {
     e.stopPropagation();
     router.push(`/donor/${campaign.donor.id}`);
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+    <div className="min-h-screen bg-background">
       <Helmet>
         <title>Campaign Leaderboard - Top JoyFund Campaigns</title>
         <meta name="description" content="See the top-performing JoyFund campaigns making the biggest impact on maternal healthcare in Cameroon." />
@@ -96,7 +101,6 @@ export default function LeaderboardPage() {
         <meta property="og:description" content="Celebrating the campaigns making the biggest impact on maternal healthcare in Cameroon." />
         <meta property="og:url" content="https://joy-fund.com/leaderboard" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://joy-fund.com/og-image.png" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebPage",
@@ -106,254 +110,219 @@ export default function LeaderboardPage() {
         })}</script>
       </Helmet>
       <Navbar />
-      <div className="pt-24 pb-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          {/* Header Section */}
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-4">
-              <Trophy size={32} className="text-yellow-500" />
-              <h1 className="text-4xl font-black" style={{ color: '#1A1A2E' }}>
-                Campaign Leaderboard
-              </h1>
+
+      <main className="relative">
+        {/* Hero */}
+        <div className="border-b border-[#E2E8F0] bg-white">
+          <div className="mx-auto max-w-5xl px-4 pt-32 pb-14 text-center">
+            <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#1DB1DB] to-[#0D8EBA] shadow-sm">
+              <Trophy className="size-7 text-white" />
             </div>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Celebrating the campaigns making the biggest impact on maternal healthcare. <br />
-              <span className="font-semibold" style={{ color: 'var(--primary)' }}>
-                Join the movement and start your own JoyFund today.
-              </span>
+            <h1 className="mb-3 font-heading text-4xl font-bold tracking-tight text-[#0F172A]">
+              {t('leaderboard.title')}
+            </h1>
+            <div className="mx-auto mb-4 h-1 w-16 rounded-full bg-[#1DB1DB]" />
+            <p className="mx-auto max-w-2xl text-balance text-base leading-relaxed text-[#475569]">
+              {t('leaderboard.subtitle')}
+            </p>
+            <p className="mt-2 text-sm font-medium text-[#1DB1DB]">
+              {t('leaderboard.joinMovement')}
             </p>
           </div>
+        </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
-            <div className="card p-6 text-center">
-              <div className="text-3xl font-black mb-1" style={{ color: 'var(--primary)' }}>
-                {leaderboard?.length ?? 0}
-              </div>
-              <div className="text-sm text-gray-600">Active Campaigns</div>
-            </div>
-            <div className="card p-6 text-center">
-              <div className="text-3xl font-black mb-1" style={{ color: 'var(--secondary)' }}>
-                {leaderboard && leaderboard.length > 0
-                  ? `XAF ${leaderboard.reduce((sum: number, c: any) => sum + (parseFloat(c?.total_net_raised as string) || 0), 0).toLocaleString()}`
-                  : 'XAF 0'}
-              </div>
-              <div className="text-sm text-gray-600">Total Raised</div>
-            </div>
-            {leaderboard && leaderboard.length > 0 && (
-              <div className="card p-6 text-center">
-                <div className="text-3xl font-black mb-1 flex items-center justify-center gap-1">
-                  <TrendingUp size={28} style={{ color: 'var(--primary)' }} />
-                  <span style={{ color: 'var(--primary)' }}>
-                    {(
-                      leaderboard.reduce((sum: number, c: any) => sum + (c?.progress_percentage ?? 0), 0) /
-                      leaderboard.length
-                    ).toFixed(1)}
-                    %
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600">Avg. Progress</div>
-              </div>
-            )}
-          </div>
-
-          {/* Loading State - Skeleton Loader */}
+        <div className="mx-auto max-w-5xl px-4 py-12">
+          {/* Stats Overview — Loading */}
           {isLoading && (
-            <div className="space-y-4">
-              {/* Stats Skeleton */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="card p-6">
-                    <div className="h-10 bg-gray-200 rounded mb-2 animate-pulse" />
-                    <div className="h-4 bg-gray-100 rounded animate-pulse" />
-                  </div>
-                ))}
-              </div>
+            <div className="mb-10 grid grid-cols-3 gap-5">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse rounded-xl bg-white p-6 ring-1 ring-[#E2E8F0]">
+                  <div className="mb-2 h-8 w-24 rounded bg-[#E2E8F0]" />
+                  <div className="h-4 w-32 rounded bg-[#F1F5F9]" />
+                </div>
+              ))}
+            </div>
+          )}
 
-              {/* Table Skeleton */}
-              <div className="card overflow-hidden">
-                <div className="bg-gray-50 p-4 border-b border-gray-200">
-                  <div className="grid grid-cols-5 gap-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="h-4 bg-gray-200 rounded animate-pulse" />
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-3 p-4">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="grid grid-cols-5 gap-4">
-                      <div className="h-8 bg-gray-200 rounded animate-pulse" />
-                      <div className="h-8 bg-gray-200 rounded animate-pulse" />
-                      <div className="h-8 bg-gray-200 rounded animate-pulse" />
-                      <div className="h-8 bg-gray-200 rounded animate-pulse" />
-                      <div className="h-8 bg-gray-200 rounded animate-pulse" />
-                    </div>
-                  ))}
-                </div>
+          {/* Stats Overview — Loaded */}
+          {!isLoading && !error && (
+            <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-xl bg-white p-6 text-center ring-1 ring-[#E2E8F0]">
+                <p className="font-heading text-3xl font-bold text-[#1DB1DB]">
+                  {leaderboard.length}
+                </p>
+                <p className="mt-1 text-sm text-[#64748B]">{t('leaderboard.activeCampaigns')}</p>
               </div>
+              <div className="rounded-xl bg-white p-6 text-center ring-1 ring-[#E2E8F0]">
+                <p className="font-heading text-3xl font-bold text-[#0F172A]">
+                  XAF {totalRaised.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                </p>
+                <p className="mt-1 text-sm text-[#64748B]">{t('leaderboard.totalRaised')}</p>
+              </div>
+              {leaderboard.length > 0 && (
+                <div className="rounded-xl bg-white p-6 text-center ring-1 ring-[#E2E8F0]">
+                  <p className="inline-flex items-center gap-1.5 font-heading text-3xl font-bold text-[#1DB1DB]">
+                    <TrendingUp className="size-7" />
+                    {avgProgress}%
+                  </p>
+                  <p className="mt-1 text-sm text-[#64748B]">{t('leaderboard.avgProgress')}</p>
+                </div>
+              )}
             </div>
           )}
 
           {/* Error State */}
           {error && (
-            <div className="card p-8 border-l-4" style={{ borderLeftColor: '#EF4444' }}>
-              <p className="text-red-600 font-semibold">Unable to load leaderboard</p>
-              <p className="text-gray-600 text-sm mt-2">Please try refreshing the page.</p>
+            <div className="mb-10 rounded-xl border-l-4 border-l-red-500 bg-white p-6 ring-1 ring-[#E2E8F0]">
+              <p className="font-semibold text-red-600">{t('leaderboard.errorTitle')}</p>
+              <p className="mt-1 text-sm text-[#64748B]">{t('leaderboard.errorHint')}</p>
             </div>
           )}
 
           {/* Empty State */}
           {!isLoading && !error && (!leaderboard || leaderboard.length === 0) && (
-            <div className="card p-12 text-center">
-              <Trophy size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-600 text-lg font-semibold mb-2">No campaigns yet</p>
-              <p className="text-gray-500">Be the first to start a JoyFund and make an impact!</p>
+            <div className="rounded-xl bg-white px-4 py-16 text-center ring-1 ring-[#E2E8F0]">
+              <Trophy className="mx-auto mb-4 size-12 text-[#CBD5E1]" />
+              <p className="mb-1 text-lg font-semibold text-[#475569]">{t('leaderboard.noCampaigns')}</p>
+              <p className="text-sm text-[#94A3B8]">{t('leaderboard.noCampaignsHint')}</p>
             </div>
           )}
 
-          {/* Sort Controls */}
+          {/* Table Area */}
           {!isLoading && !error && leaderboard && leaderboard.length > 0 && (
-            <div className="flex items-center gap-2 mb-4">
-              <ArrowUpDown size={14} className="text-gray-400" />
-              <span className="text-xs text-gray-500 font-medium">Sort by:</span>
-              {[
-                { value: 'raised', label: 'Most Raised' },
-                { value: 'goal', label: 'Goal (Low → High)' },
-                { value: '-goal', label: 'Goal (High → Low)' },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setOrdering(opt.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    ordering === opt.value
-                      ? 'text-white'
-                      : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
-                  }`}
-                  style={
-                    ordering === opt.value
-                      ? { background: 'var(--primary)' }
-                      : {}
-                  }
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          )}
+            <>
+              {/* Sort Controls */}
+              <div className="mb-4 flex items-center gap-2">
+                <ArrowUpDown className="size-3.5 text-[#94A3B8]" />
+                <span className="text-xs font-medium text-[#64748B]">{t('leaderboard.sortBy')}</span>
+                {[
+                  { value: 'raised', label: t('leaderboard.mostRaised') },
+                  { value: 'goal', label: t('leaderboard.goalLowHigh') },
+                  { value: '-goal', label: t('leaderboard.goalHighLow') },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setOrdering(opt.value)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                      ordering === opt.value
+                        ? 'bg-[#1DB1DB] text-white shadow-sm'
+                        : 'bg-white text-[#64748B] ring-1 ring-[#E2E8F0] hover:ring-[#1DB1DB]/30'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
 
-          {/* Leaderboard Table */}
-          {!isLoading && !error && leaderboard && Array.isArray(leaderboard) && leaderboard.length > 0 && (
-            <div className="card overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50" style={{ borderBottomColor: 'var(--primary)' }}>
-                    <TableHead className="w-12 text-center font-black text-[#1A1A2E]">Rank</TableHead>
-                    <TableHead className="font-black text-[#1A1A2E]">Campaign</TableHead>
-                    <TableHead className="text-right font-black text-[#1A1A2E]">Goal</TableHead>
-                    <TableHead className="text-right font-black text-[#1A1A2E]">Raised</TableHead>
-                    <TableHead className="text-center font-black text-[#1A1A2E]">Progress</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leaderboard.map((campaign: any, index: number) => {
-                    const rank = index + 1;
-                    const progress = campaign?.progress_percentage ?? 0;
-                    const medal = getMedalIcon(rank);
-                    const goalAmount = parseFloat(campaign?.goal_amount as string) || 0;
-                    const raisedAmount = parseFloat(campaign?.total_net_raised as string) || 0;
+              {/* Table */}
+              <div className="overflow-hidden rounded-xl bg-white ring-1 ring-[#E2E8F0]">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                      <th className="w-14 px-4 py-3.5 text-center font-heading text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                        {t('leaderboard.rank')}
+                      </th>
+                      <th className="px-4 py-3.5 text-left font-heading text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                        {t('leaderboard.campaign')}
+                      </th>
+                      <th className="px-4 py-3.5 text-right font-heading text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                        {t('leaderboard.goal')}
+                      </th>
+                      <th className="px-4 py-3.5 text-right font-heading text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                        {t('leaderboard.raised')}
+                      </th>
+                      <th className="px-4 py-3.5 text-center font-heading text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                        {t('leaderboard.progress')}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaderboard.map((campaign: any, index: number) => {
+                      const rank = index + 1;
+                      const progress = campaign?.progress_percentage ?? 0;
+                      const medal = getMedalIcon(rank);
+                      const goalAmount = parseFloat(campaign?.goal_amount as string) || 0;
+                      const raisedAmount = parseFloat(campaign?.total_net_raised as string) || 0;
 
-                    return (
-                      <TableRow
-                        key={campaign?.id ?? index}
-                        className="hover:bg-blue-50/50 transition-colors cursor-pointer group"
-                        onClick={() => router.push(`/campaign/${campaign?.id}`)}
-                      >
-                        {/* Rank */}
-                        <TableCell className="text-center font-black text-lg">
-                          {medal ? (
-                            <span className="text-2xl">{medal}</span>
-                          ) : (
-                            <span className="text-gray-600">#{rank}</span>
-                          )}
-                        </TableCell>
+                      return (
+                        <tr
+                          key={campaign?.id ?? index}
+                          className="cursor-pointer border-b border-[#E2E8F0] transition-colors last:border-0 hover:bg-[#F0FDFA]"
+                          onClick={() => router.push(`/campaign/${campaign?.id}`)}
+                        >
+                          {/* Rank */}
+                          <td className="px-4 py-4 text-center">
+                            {medal ? (
+                              <span className="text-2xl">{medal}</span>
+                            ) : (
+                              <span className="font-heading text-sm font-semibold text-[#94A3B8]">
+                                #{rank}
+                              </span>
+                            )}
+                          </td>
 
-                        {/* Campaign Title & Donor */}
-                        <TableCell>
-                          <div>
-                            <p className="font-bold text-[#1A1A2E] truncate group-hover:text-primary transition-colors flex items-center gap-2">
-                              {campaign?.title ?? 'Untitled'}
-                              <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                          {/* Campaign */}
+                          <td className="px-4 py-4">
+                            <p className="flex items-center gap-2 font-medium text-[#0F172A] transition-colors group-hover:text-[#1DB1DB]">
+                              {campaign?.title ?? t('leaderboard.untitled')}
+                              <ExternalLink className="size-3.5 text-[#94A3B8] opacity-0 transition-opacity group-hover:opacity-100" />
                             </p>
                             <button
                               onClick={(e) => handleDonorClick(e, campaign)}
-                              className="text-xs text-gray-500 hover:text-[#1DB1DB] transition-colors flex items-center gap-1 mt-0.5"
+                              className="mt-0.5 inline-flex items-center gap-1 text-xs text-[#94A3B8] transition-colors hover:text-[#1DB1DB]"
                             >
-                              <User size={10} />
+                              <User className="size-3" />
                               by {getDonorName(campaign)}
                             </button>
-                          </div>
-                        </TableCell>
+                          </td>
 
-                        {/* Goal Amount */}
-                        <TableCell className="text-right">
-                          <p className="font-semibold text-gray-700">
-                            XAF {goalAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                          </p>
-                        </TableCell>
-
-                        {/* Raised Amount */}
-                        <TableCell className="text-right">
-                          <p
-                            className="font-bold text-lg"
-                            style={{ color: 'var(--primary)' }}
-                          >
-                            XAF {raisedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                          </p>
-                        </TableCell>
-
-                        {/* Progress Bar */}
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${Math.min(progress, 100)}%`,
-                                  background: 'var(--primary)',
-                                }}
-                              />
-                            </div>
-                            <span className="text-sm font-bold text-gray-700 w-12 text-right">
-                              {progress.toFixed(0)}%
+                          {/* Goal */}
+                          <td className="px-4 py-4 text-right">
+                            <span className="text-sm font-medium text-[#64748B]">
+                              XAF {goalAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                             </span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                          </td>
 
-              {/* Infinite scroll sentinel */}
-              {hasNextPage && (
-                <div ref={sentinelRef} className="py-4 flex justify-center border-t border-gray-100">
-                  {isFetchingNextPage && (
-                    <Loader2 className="w-5 h-5 text-[#1DB1DB] animate-spin" />
-                  )}
-                </div>
-              )}
-            </div>
+                          {/* Raised */}
+                          <td className="px-4 py-4 text-right">
+                            <span className="font-heading text-base font-bold text-[#1DB1DB]">
+                              XAF {raisedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                            </span>
+                          </td>
+
+                          {/* Progress */}
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#F1F5F9]">
+                                <div
+                                  className="h-full rounded-full bg-[#1DB1DB] transition-all duration-500"
+                                  style={{ width: `${Math.min(progress, 100)}%` }}
+                                />
+                              </div>
+                              <span className="w-10 text-right text-sm font-semibold text-[#475569]">
+                                {progress.toFixed(0)}%
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+
+                {/* Infinite scroll sentinel */}
+                {hasNextPage && (
+                  <div ref={sentinelRef} className="flex justify-center border-t border-[#E2E8F0] py-5">
+                    {isFetchingNextPage && (
+                      <Loader2 className="size-5 animate-spin text-[#1DB1DB]" />
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
-      </div>
-
-      <style>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
+      </main>
     </div>
   );
 }

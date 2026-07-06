@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 /* ────────────────────────────────────────────────────────────────────────
    Static content - tied to the JoyFund / Durable Impact project document
@@ -29,23 +30,25 @@ const pressQuotes = [
   },
 ];
 
-const differentiators = [
-  {
-    icon: HandHeart,
-    title: "Rooted in Community Solidarity",
-    desc: "Cameroonians have always pooled resources for each other. JoyFund digitalises this culture of mutual aid into a structured, sustainable People's Health Fund.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Verified, never anonymous",
-    desc: "Every beneficiary is identified and vetted by social workers in partnership with hospitals and community structures before a single voucher is issued.",
-  },
-  {
-    icon: Smartphone,
-    title: "Built for how Cameroon pays",
-    desc: "Donations and payouts run on MTN Mobile Money and Orange Money, with vouchers redeemed directly at partner hospitals - no cash, no detours.",
-  },
-];
+function getDifferentiators(t: any) {
+  return [
+    {
+      icon: HandHeart,
+      title: t("about.diff1Title"),
+      desc: t("about.diff1Desc"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("about.diff2Title"),
+      desc: t("about.diff2Desc"),
+    },
+    {
+      icon: Smartphone,
+      title: t("about.diff3Title"),
+      desc: t("about.diff3Desc"),
+    },
+  ];
+}
 
 const partners = [
   {
@@ -70,6 +73,7 @@ const partners = [
 /* ──────────────────────────────────────────────────────────────────────── */
 
 export default function AboutPage() {
+  const t = useI18n();
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
@@ -105,15 +109,10 @@ export default function AboutPage() {
 
         <div className="relative z-10 max-w-3xl mx-auto text-center px-4">
           <h1 className="text-3xl sm:text-4xl font-black text-[#1A1A2E] mb-4">
-            About JoyFund
+            {t("about.title")}
           </h1>
           <p className="text-gray-700 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            JoyFund turns everyday celebrations - birthdays, weddings,
-            graduations, promotions - into a community health pooling platform that funds safe
-            deliveries and emergency care for vulnerable mothers and elderly
-            people across Cameroon. A project of{" "}
-            <span className="font-semibold text-[#1A1A2E]">Durable Impact</span>
-            .
+            {t("about.heroDesc")}
           </p>
         </div>
 
@@ -143,34 +142,22 @@ export default function AboutPage() {
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-black text-[#1A1A2E] text-center mb-14">
-            How We&apos;re Different
+            {t("about.howDifferentTitle")}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
             <div>
               <p className="font-bold text-[#1A1A2E] mb-4 leading-relaxed">
-                At JoyFund, we&apos;ve built a platform that turns
-                Cameroon&apos;s culture of solidarity into measurable,
-                transparent healthcare impact.
+                {t("about.differentDesc1")}
               </p>
               <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                Formal health insurance coverage in Cameroon remains extremely
-                low, and existing subsidy schemes rarely reach the poorest
-                households. Families are left to pay out of pocket - exposing
-                them to catastrophic costs and, too often, forcing a choice
-                between healthcare and basic needs.
+                {t("about.differentDesc2")}
               </p>
               <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                At the same time, Cameroonians have strong traditions of mutual
-                aid - community pooling groups, alumni giving, diaspora support - and
-                widespread access to mobile money. JoyFund channels that
-                existing generosity into a structured People&apos;s Health Fund.
+                {t("about.differentDesc3")}
               </p>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Every JoyFund campaign you create - for a birthday, a wedding, a
-                graduation, a promotion - adds to a shared, trackable fund that
-                pays hospital bills directly for verified, vulnerable
-                beneficiaries.
+                {t("about.differentDesc4")}
               </p>
             </div>
             <div className="relative rounded-3xl overflow-hidden h-72 sm:h-80">
@@ -185,7 +172,7 @@ export default function AboutPage() {
 
           {/* Differentiator cards */}
           <div className="grid md:grid-cols-3 gap-6">
-            {differentiators.map((d) => (
+            {getDifferentiators(t).map((d) => (
               <div
                 key={d.title}
                 className="rounded-2xl border border-gray-100 p-6"
@@ -212,39 +199,27 @@ export default function AboutPage() {
       <section className="py-20 px-4 bg-[#F9FAFB]">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-black text-[#1A1A2E] text-center mb-12">
-            How It Started
+            {t("about.howStartedTitle")}
           </h2>
  
           <p className="font-bold text-[#1A1A2E] mb-4">
-            Hi, I&apos;m Dr. Eric Kepeh Moh - Founder / CEO of Durable Impact and the
-            person behind JoyFund.
+            {t("about.founderIntro")}
           </p>
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            Want to know how and why JoyFund started? I&apos;d love to fill you
-            in.
+            {t("about.founderStory1")}
           </p>
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            For years, I watched the same story repeat itself across
-            hospitals in Cameroon: a mother arrives in labour, the family
-            scrambles for cash, and a delay of even a few hours can mean the
-            difference between life and death. Meanwhile, every week, someone
-            in our community is celebrating a birthday, a wedding, a
-            graduation, a promotion - and spending money on gifts that are
-            forgotten within days.
+            {t("about.founderStory2")}
           </p>
  
           <div className="my-12 text-center">
             <p className="text-2xl sm:text-3xl font-black text-[#1A1A2E] leading-snug max-w-lg mx-auto">
-              &ldquo;This was the perfect time to turn celebration into
-              care.&rdquo;
+              &ldquo;{t("about.quote1")}&rdquo;
             </p>
           </div>
  
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            I wanted to build a platform that made it easy, joyful, and
-            rewarding to give - one that fits naturally into the moments
-            people already celebrate. More ways to mark a milestone. More
-            ways to make that milestone matter to someone else.
+            {t("about.founderStory3")}
           </p>
  
           <div className="relative rounded-3xl overflow-hidden my-10 h-64 sm:h-80">
@@ -257,53 +232,37 @@ export default function AboutPage() {
           </div>
  
           <h3 className="font-bold text-[#1A1A2E] mb-3">
-            Turning community solidarity into a national health fund.
+            {t("about.turningTitle")}
           </h3>
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            That&apos;s when JoyFund was born - a digital pooled-giving platform linked
-            directly to MTN Mobile Money and Orange Money, designed so that
-            every donation becomes a care voucher a verified beneficiary can
-            redeem at a partner hospital.
+            {t("about.founderStory4")}
           </p>
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            We started with a simple goal: reduce maternal and elderly-related
-            deaths by removing financial barriers to essential care - one
-            celebration at a time.
+            {t("about.founderStory5")}
           </p>
  
           <p className="font-bold text-[#1A1A2E] mb-3">
-            The impact is already real.
+            {t("about.impactReal")}
           </p>
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            Every JoyFund campaign - whether it raises a few thousand or
-            hundreds of thousands of XAF - feeds a transparent People&apos;s
-            Health Fund. Working with social workers and partner hospitals
-            across Cameroon, from Yaoundé to remote districts, we&apos;re
-            building a system where hospital detention for unpaid bills
-            becomes a thing of the past.
+            {t("about.founderStory6")}
           </p>
  
           <div className="my-12 text-center">
             <p className="text-2xl sm:text-3xl font-black text-[#1A1A2E] leading-snug max-w-lg mx-auto">
-              &ldquo;I hope you&apos;ll become part of the JoyFund
-              journey.&rdquo;
+              &ldquo;{t("about.quote2")}&rdquo;
             </p>
           </div>
  
           <p className="text-gray-500 text-sm leading-relaxed mb-4">
-            Most importantly, we continue to work on making giving simple,
-            joyful, and powerful - and on making sure every contribution is
-            fully traceable, from your celebration to a real person&apos;s
-            care.
+            {t("about.founderStory7")}
           </p>
           <p className="text-gray-500 text-sm leading-relaxed mb-8">
-            If you have questions, ideas, or want to partner with us, please
-            reach out. To your celebration&apos;s success - and to someone
-            else&apos;s safe delivery.
+            {t("about.founderStory8")}
           </p>
  
           <p className="font-bold text-[#1A1A2E]">
-            Dr. Eric Kepeh Moh & The JoyFund / Durable Impact Team
+            {t("about.founderSignature")}
           </p>
         </div>
       </section>
@@ -431,16 +390,16 @@ export default function AboutPage() {
             <div className="absolute inset-0 bg-black/40" />
             <div className="relative z-10 px-8">
               <h3 className="text-white text-xl sm:text-2xl font-black mb-4 leading-snug">
-                Discover JoyFunds
+                {t("about.discoverTitle1")}
                 <br />
-                near you
+                {t("about.discoverTitle2")}
               </h3>
               <Link
                 href="/explore"
                 className="inline-flex items-center gap-2 bg-white font-bold px-6 py-3 rounded-full text-sm"
                 style={{ color: "var(--secondary)" }}
               >
-                Fund Someone <ArrowRight size={16} />
+                {t("about.discoverButton")} <ArrowRight size={16} />
               </Link>
             </div>
           </div>
@@ -455,16 +414,16 @@ export default function AboutPage() {
             <div className="absolute inset-0 bg-black/40" />
             <div className="relative z-10 px-8">
               <h3 className="text-white text-xl sm:text-2xl font-black mb-4 leading-snug">
-                Create
+                {t("about.createTitle1")}
                 <br />
-                your JoyFund
+                {t("about.createTitle2")}
               </h3>
               <Link
                 href="/dashboard/donor/campaigns/create"
                 className="inline-flex items-center gap-2 bg-white font-bold px-6 py-3 rounded-full text-sm"
                 style={{ color: "var(--secondary)" }}
               >
-                Start Fundraising <Heart size={16} className="fill-current" />
+                {t("about.createButton")} <Heart size={16} className="fill-current" />
               </Link>
             </div>
           </div>
@@ -477,7 +436,7 @@ export default function AboutPage() {
       <section className="py-16 px-4 bg-[#F9FAFB]">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-xs font-bold uppercase tracking-widest mb-8 text-gray-400">
-            Our Partners
+            {t("about.ourPartners")}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-10">
   {partners.map((p) => (

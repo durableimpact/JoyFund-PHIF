@@ -2,94 +2,43 @@
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/shared/Navbar';
 import { Helmet } from 'react-helmet-async';
-import { Receipt, CreditCard, Building2, Heart, Calculator, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { getCurrentFeePolicy } from '@/actions/payments';
 import { useState } from 'react';
+import { useI18n } from '@/locales/client';
+import Link from 'next/link';
 
 const EXAMPLE_AMOUNTS = [1000, 2500, 5000, 10000, 25000, 50000];
 
-const FAQ_ITEMS = [
-  {
-    q: "Who pays the fees?",
-    a: "Fees are deducted from the donation amount before it reaches the campaign. The donor pays the full donation amount — no extra charges are added on top."
-  },
-  {
-    q: "Why is there a 2% Campay fee?",
-    a: "Campay is our payment processing partner that handles mobile money transactions (MTN MoMo and Orange Money). The 2% fee covers the cost of securely processing your payment."
-  },
-  {
-    q: "What does the platform fee cover?",
-    a: "The platform fee covers server hosting, SMS delivery for care vouchers, fraud prevention systems, customer support, and ongoing development to keep the platform running smoothly."
-  },
-  {
-    q: "Are fees refundable?",
-    a: "Donations are non-refundable once processed. The fees cover the actual cost of payment processing and platform operations that have already occurred."
-  },
-  {
-    q: "Can I see where my money goes?",
-    a: "Yes! Every donation is tracked on our Transparency Dashboard. You can see exactly how your contribution was allocated and the healthcare impact it created."
-  }
-];
+function getFaqItems(t: any) {
+  return [
+    { q: t("pricing.faq1Q"), a: t("pricing.faq1A") },
+    { q: t("pricing.faq2Q"), a: t("pricing.faq2A") },
+    { q: t("pricing.faq3Q"), a: t("pricing.faq3A") },
+    { q: t("pricing.faq4Q"), a: t("pricing.faq4A") },
+    { q: t("pricing.faq5Q"), a: t("pricing.faq5A") },
+  ];
+}
 
-function FeeBreakdownCard({ amount, platformFeePct }: { amount: number; platformFeePct: number }) {
-  const campayFee = Math.round(amount * 0.02);
-  const platformFee = Math.round(amount * platformFeePct / 100);
-  const netToCampaign = amount - campayFee - platformFee;
-
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-[#1A1A2E]">Donation</span>
-        <span className="text-lg font-black text-[#1A1A2E]">{amount.toLocaleString()} XAF</span>
-      </div>
-
-      <div className="space-y-2 pt-3 border-t border-gray-100">
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-amber-400" />
-            <span className="text-gray-600">Campay fee (2%)</span>
-          </div>
-          <span className="font-semibold text-gray-900">-{campayFee.toLocaleString()} XAF</span>
-        </div>
-
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-400" />
-            <span className="text-gray-600">Platform fee ({platformFeePct}%)</span>
-          </div>
-          <span className="font-semibold text-gray-900">-{platformFee.toLocaleString()} XAF</span>
-        </div>
-      </div>
-
-      <div className="pt-3 border-t border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-bold text-emerald-700">Goes to campaign</span>
-          </div>
-          <span className="text-lg font-black text-emerald-600">{netToCampaign.toLocaleString()} XAF</span>
-        </div>
-        <div className="mt-2 bg-emerald-50 rounded-lg px-3 py-1.5">
-          <span className="text-xs font-semibold text-emerald-600">
-            {Math.round((netToCampaign / amount) * 100)}% of your donation directly supports healthcare
-          </span>
-        </div>
-      </div>
-    </div>
-  );
+function formatXaf(n: number) {
+  return n.toLocaleString('en-US');
 }
 
 export default function PricingPage() {
+  const t = useI18n();
   const { data: feePolicy } = useQuery({
     queryKey: ['fee-policy-current'],
     queryFn: getCurrentFeePolicy,
   });
 
   const platformFeePct = Number(feePolicy?.platform_fee_percentage ?? 5);
+  const escrowFeePct = Number(feePolicy?.escrow_fee_percentage ?? 0);
+  const campayFeePct = 2;
+  const pctToCampaign = 100 - campayFeePct - platformFeePct - escrowFeePct;
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <Helmet>
         <title>Pricing & Fees | JoyFund</title>
         <meta name="description" content="Understand how JoyFund fees work. See exactly where your donation goes — transparent pricing for maternal healthcare crowdfunding in Cameroon." />
@@ -109,170 +58,145 @@ export default function PricingPage() {
       </Helmet>
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 pt-32 pb-20">
-        {/* Hero */}
-        <div className="text-center mb-16">
-          <div className="w-16 h-16 bg-[#1DB1DB]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Receipt className="w-8 h-8 text-[#1DB1DB]" />
-          </div>
-          <h1 className="text-4xl font-black text-[#1A1A2E] mb-3">Transparent Pricing</h1>
-          <p className="text-gray-500 max-w-xl mx-auto">
-            We believe you deserve to know exactly where every franc of your donation goes.
-            Here&apos;s a clear breakdown of our fees.
+      <main className="max-w-3xl mx-auto px-4 pt-32 pb-24">
+        {/* ── Header ── */}
+        <header className="mb-16">
+          <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--primary)' }}>
+            {t('pricing.title')}
           </p>
-        </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-[#1A1A2E] leading-tight mb-4">
+            Where every franc goes
+          </h1>
+          <p className="text-gray-500 text-base leading-relaxed max-w-lg">
+            {t('pricing.subtitle')}
+          </p>
+        </header>
 
-        {/* Fee Structure */}
+        {/* ── Fee breakdown ── */}
         <section className="mb-16">
-          <div className="grid md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
-              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <CreditCard className="w-6 h-6 text-amber-600" />
-              </div>
-              <h3 className="font-bold text-[#1A1A2E] mb-1">2%</h3>
-              <p className="text-sm font-semibold text-[#1DB1DB] mb-2">Campay Fee</p>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                Payment processing by Campay for MTN MoMo and Orange Money transactions.
-              </p>
+          <div className="grid grid-cols-4 gap-0 text-center border-y border-gray-200">
+            <div className="py-8 px-4">
+              <p className="text-3xl font-black text-[#1A1A2E] mb-1">{campayFeePct}%</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{t('pricing.campayFee')}</p>
+              <p className="text-xs text-gray-500 leading-relaxed">{t('pricing.campayFeeDesc')}</p>
             </div>
-
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Building2 className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="font-bold text-[#1A1A2E] mb-1">{platformFeePct}%</h3>
-              <p className="text-sm font-semibold text-[#1DB1DB] mb-2">Platform Fee</p>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                Covers server hosting, SMS vouchers, fraud prevention, support, and development.
-              </p>
+            <div className="py-8 px-4 border-x border-gray-200">
+              <p className="text-3xl font-black text-[#1A1A2E] mb-1">{platformFeePct}%</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{t('pricing.platformFee')}</p>
+              <p className="text-xs text-gray-500 leading-relaxed">{t('pricing.platformFeeDesc')}</p>
             </div>
-
-            <div className="bg-white rounded-2xl border border-emerald-100 p-6 text-center ring-2 ring-emerald-200">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Heart className="w-6 h-6 text-emerald-600" />
-              </div>
-              <h3 className="font-bold text-[#1A1A2E] mb-1">{100 - 2 - platformFeePct}%</h3>
-              <p className="text-sm font-semibold text-emerald-600 mb-2">Goes to Campaign</p>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                Directly funds safe deliveries and maternal healthcare for vulnerable women.
-              </p>
+            <div className="py-8 px-4 border-r border-gray-200">
+              <p className="text-3xl font-black text-[#1A1A2E] mb-1">{escrowFeePct}%</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Escrow</p>
+              <p className="text-xs text-gray-500 leading-relaxed">Secure fund holding until care is delivered</p>
+            </div>
+            <div className="py-8 px-4">
+              <p className="text-3xl font-black mb-1" style={{ color: 'var(--primary)' }}>{pctToCampaign}%</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{t('pricing.goesToCampaign')}</p>
+              <p className="text-xs text-gray-500 leading-relaxed">{t('pricing.goesToCampaignDesc')}</p>
             </div>
           </div>
         </section>
 
-        {/* Calculator */}
+        {/* ── Calculator ── */}
         <section className="mb-16">
-          <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-[#1DB1DB]/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Calculator className="w-6 h-6 text-[#1DB1DB]" />
-            </div>
-            <h2 className="text-2xl font-black text-[#1A1A2E] mb-2">See How It Works</h2>
-            <p className="text-gray-500 text-sm">Pick an amount to see exactly how your donation is split.</p>
+          <h2 className="text-lg font-black text-[#1A1A2E] mb-2">{t('pricing.calculatorTitle')}</h2>
+          <p className="text-gray-500 text-sm mb-8">{t('pricing.calculatorSubtitle')}</p>
+
+          {/* Table header */}
+          <div className="grid grid-cols-5 gap-4 py-3 border-b border-gray-200 text-xs font-bold uppercase tracking-widest text-gray-400">
+            <div>{t('pricing.donation')}</div>
+            <div className="text-right">Campay</div>
+            <div className="text-right">Platform</div>
+            <div className="text-right">Escrow</div>
+            <div className="text-right" style={{ color: 'var(--primary)' }}>{t('pricing.goesToCampaign')}</div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {EXAMPLE_AMOUNTS.map((amount) => (
-              <FeeBreakdownCard key={amount} amount={amount} platformFeePct={platformFeePct} />
+          {/* Table rows */}
+          {EXAMPLE_AMOUNTS.map((amount) => {
+            const campay = Math.round(amount * campayFeePct / 100);
+            const platform = Math.round(amount * platformFeePct / 100);
+            const escrow = Math.round(amount * escrowFeePct / 100);
+            const net = amount - campay - platform - escrow;
+            return (
+              <div key={amount} className="grid grid-cols-5 gap-4 py-4 border-b border-gray-100 text-sm">
+                <div className="font-bold text-[#1A1A2E]">{formatXaf(amount)} XAF</div>
+                <div className="text-right text-gray-500">-{formatXaf(campay)}</div>
+                <div className="text-right text-gray-500">-{formatXaf(platform)}</div>
+                <div className="text-right text-gray-500">-{formatXaf(escrow)}</div>
+                <div className="text-right font-bold" style={{ color: 'var(--primary)' }}>{formatXaf(net)}</div>
+              </div>
+            );
+          })}
+
+          <p className="text-xs text-gray-400 mt-3">
+            * {t('pricing.supportsHealthcare')}
+          </p>
+        </section>
+
+        {/* ── Example walkthrough ── */}
+        <section className="mb-16">
+          <h2 className="text-lg font-black text-[#1A1A2E] mb-6">{t('pricing.exampleTitle')}</h2>
+          <div className="space-y-0">
+            {[
+              { step: '1', bold: t('pricing.step1'), desc: t('pricing.step1Desc') },
+              { step: '2', bold: `${formatXaf(Math.round(5000 * campayFeePct / 100))} XAF ${t('pricing.step2')}`, desc: t('pricing.step2Desc') },
+              { step: '3', bold: t('pricing.step3', { amount: formatXaf(Math.round(5000 * platformFeePct / 100)), pct: platformFeePct }), desc: t('pricing.step3Desc') },
+              { step: '4', bold: `${formatXaf(Math.round(5000 * escrowFeePct / 100))} XAF — Escrow (${escrowFeePct}%)`, desc: 'Held securely until care is confirmed' },
+              { step: '5', bold: t('pricing.step4', { amount: formatXaf(5000 - Math.round(5000 * campayFeePct / 100) - Math.round(5000 * platformFeePct / 100) - Math.round(5000 * escrowFeePct / 100)), pct: pctToCampaign }), desc: t('pricing.step4Desc') },
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-4 py-4 border-t border-gray-200">
+                <span className="text-xs font-bold text-gray-400 mt-0.5 w-5 shrink-0">{item.step}</span>
+                <div>
+                  <p className="font-bold text-[#1A1A2E] text-sm">{item.bold}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                </div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* Example walkthrough */}
+        {/* ── Divider ── */}
+        <div className="h-px bg-gray-200 mb-16" />
+
+        {/* ── FAQ ── */}
         <section className="mb-16">
-          <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 p-8 md:p-12">
-            <h2 className="text-2xl font-black text-[#1A1A2E] mb-6">Example: 5,000 XAF Donation</h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-sm font-bold text-gray-600">1</span>
-                </div>
-                <div>
-                  <p className="font-bold text-[#1A1A2E]">You donate 5,000 XAF</p>
-                  <p className="text-sm text-gray-500">via MTN MoMo or Orange Money</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-sm font-bold text-amber-600">2</span>
-                </div>
-                <div>
-                  <p className="font-bold text-[#1A1A2E]">100 XAF goes to Campay (2%)</p>
-                  <p className="text-sm text-gray-500">Covers mobile money transaction processing</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-sm font-bold text-blue-600">3</span>
-                </div>
-                <div>
-                  <p className="font-bold text-[#1A1A2E]">{Math.round(5000 * platformFeePct / 100).toLocaleString()} XAF goes to platform operations ({platformFeePct}%)</p>
-                  <p className="text-sm text-gray-500">Keeps the platform running, sends SMS vouchers, prevents fraud</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-sm font-bold text-emerald-600">4</span>
-                </div>
-                <div>
-                  <p className="font-bold text-emerald-700 text-lg">{(5000 - 100 - Math.round(5000 * platformFeePct / 100)).toLocaleString()} XAF goes to the campaign ({100 - 2 - platformFeePct}%)</p>
-                  <p className="text-sm text-gray-500">This is what actually funds safe deliveries and maternal healthcare</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-[#1DB1DB]/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <HelpCircle className="w-6 h-6 text-[#1DB1DB]" />
-            </div>
-            <h2 className="text-2xl font-black text-[#1A1A2E] mb-2">Frequently Asked Questions</h2>
-          </div>
-
-          <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
-            {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className={i < FAQ_ITEMS.length - 1 ? "border-b border-gray-100" : ""}>
+          <h2 className="text-lg font-black text-[#1A1A2E] mb-6">{t('pricing.faqTitle')}</h2>
+          <div className="space-y-0">
+            {getFaqItems(t).map((item, i) => (
+              <div key={i}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-between py-5 text-left border-t border-gray-200 hover:text-gray-600 transition-colors"
                 >
-                  <span className="font-bold text-[#1A1A2E] pr-4">{item.q}</span>
+                  <span className="font-bold text-sm text-[#1A1A2E] pr-4">{item.q}</span>
                   {openFaq === i ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400 shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400 shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
                   )}
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-6 text-sm text-gray-600 leading-relaxed">
+                  <p className="pb-5 text-sm text-gray-600 leading-relaxed">
                     {item.a}
-                  </div>
+                  </p>
                 )}
               </div>
             ))}
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="text-center">
-          <div className="bg-gradient-to-br from-[#1DB1DB] to-[#178fa8] rounded-[2.5rem] p-10 md:p-14 text-white">
-            <h2 className="text-3xl font-black mb-3">Ready to Make a Difference?</h2>
-            <p className="text-white/80 mb-6 max-w-md mx-auto">
-              Every donation directly supports safe deliveries for vulnerable women across Cameroon.
-            </p>
-            <a
-              href="/explore"
-              className="inline-block bg-white text-[#1DB1DB] font-bold px-8 py-3 rounded-xl hover:bg-gray-100 transition-colors"
-            >
-              Explore Campaigns
-            </a>
-          </div>
-        </section>
+        {/* ── CTA ── */}
+        <div className="pt-8 border-t border-gray-200">
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-2 text-sm font-bold transition-colors group"
+            style={{ color: 'var(--primary)' }}
+          >
+            Explore active campaigns
+            <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
+          </Link>
+        </div>
       </main>
     </div>
   );
