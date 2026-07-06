@@ -5,8 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckCircle, Clock, Heart, Plus, UserPlus, Users } from "lucide-react";
 import { getSocialWorkerDashboard } from "@/actions/accounts";
 import { listBeneficiaries } from "@/actions/beneficiaries";
+import { useI18n } from "@/locales/client";
 
 export default function SocialWorkerDashboard() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = session?.accessToken || session?.user?.accessToken;
   const currentUser = session?.user?.userInfo as SocialWorkerInfo | undefined;
@@ -38,32 +40,32 @@ export default function SocialWorkerDashboard() {
 
   const kpis = [
     {
-      label: "Total Enrolled",
+      label: t("socialWorker.dashboard.totalEnrolled"),
       value: totalCount,
       icon: Users,
       color: "#0D9488",
-      sub: "Beneficiaries registered",
+      sub: t("socialWorker.dashboard.beneficiariesRegistered"),
     },
     {
-      label: "Awaiting Match",
+      label: t("socialWorker.dashboard.awaitingMatch"),
       value: dashboard?.awaiting_match ?? 0,
       icon: Clock,
       color: "#f59e0b",
-      sub: "Pending voucher assignment",
+      sub: t("socialWorker.dashboard.pendingVoucherAssignment"),
     },
     {
-      label: "Vouchers Issued",
+      label: t("socialWorker.dashboard.vouchersIssued"),
       value: dashboard?.voucher_issued ?? 0,
       icon: Heart,
       color: "#8B5CF6",
-      sub: "Assigned to beneficiaries",
+      sub: t("socialWorker.dashboard.assignedToBeneficiaries"),
     },
     {
-      label: "Care Received",
+      label: t("socialWorker.dashboard.careReceived"),
       value: dashboard?.care_received ?? 0,
       icon: CheckCircle,
       color: "#22C55E",
-      sub: "Completed treatment",
+      sub: t("socialWorker.dashboard.completedTreatment"),
     },
   ];
 
@@ -71,9 +73,9 @@ export default function SocialWorkerDashboard() {
     <>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-black text-gray-900">{t("socialWorker.dashboard.title")}</h1>
           <p className="text-gray-500 text-sm">
-            Welcome, {currentUser?.first_name || "Social Worker"}
+            {t("socialWorker.dashboard.welcome", { name: currentUser?.first_name || t("socialWorker.dashboard.socialWorkerFallback") })}
           </p>
         </div>
         <Link
@@ -81,7 +83,7 @@ export default function SocialWorkerDashboard() {
           className="btn-admin text-sm flex items-center gap-2"
           style={{ background: "#0D9488" }}
         >
-          <UserPlus size={15} /> Enroll Beneficiary
+          <UserPlus size={15} /> {t("socialWorker.dashboard.enrollBeneficiary")}
         </Link>
       </div>
 
@@ -110,7 +112,7 @@ export default function SocialWorkerDashboard() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="card p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Recent Enrollments</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t("socialWorker.dashboard.recentEnrollments")}</h3>
           {dLoading ? (
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
@@ -143,13 +145,13 @@ export default function SocialWorkerDashboard() {
                   <span
                     className={`badge text-[10px] ${b.is_verified ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
                   >
-                    {b.is_verified ? "Verified" : "Pending"}
+                    {b.is_verified ? t("socialWorker.dashboard.verified") : t("socialWorker.dashboard.pending")}
                   </span>
                 </div>
               ))}
               {beneficiaries.length === 0 && (
                 <p className="text-gray-400 text-sm text-center py-6">
-                  No beneficiaries enrolled yet
+                  {t("socialWorker.dashboard.noBeneficiaries")}
                 </p>
               )}
             </div>
@@ -157,17 +159,17 @@ export default function SocialWorkerDashboard() {
         </div>
 
         <div className="card p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t("socialWorker.dashboard.quickActions")}</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
               {
-                label: "View Beneficiaries",
+                label: t("socialWorker.dashboard.viewBeneficiaries"),
                 href: "/dashboard/social-worker/beneficiaries",
                 icon: <Users size={20} />,
                 color: "#0D9488",
               },
               {
-                label: "Enroll New",
+                label: t("socialWorker.dashboard.enrollNew"),
                 href: "/dashboard/social-worker/beneficiaries/create",
                 icon: <Plus size={20} />,
                 color: "#8B5CF6",
@@ -190,13 +192,13 @@ export default function SocialWorkerDashboard() {
           </div>
 
           <h3 className="font-bold text-gray-900 mt-5 mb-3">
-            Enrollment Breakdown
+            {t("socialWorker.dashboard.enrollmentBreakdown")}
           </h3>
           <div className="space-y-3">
             {[
-              { label: "Total Enrolled", value: totalCount, bar: 100 },
+              { label: t("socialWorker.dashboard.totalEnrolled"), value: totalCount, bar: 100 },
               {
-                label: "Awaiting Match",
+                label: t("socialWorker.dashboard.awaitingMatch"),
                 value: dashboard?.awaiting_match ?? 0,
                 bar:
                   totalCount > 0
@@ -206,7 +208,7 @@ export default function SocialWorkerDashboard() {
                     : 0,
               },
               {
-                label: "Vouchers Issued",
+                label: t("socialWorker.dashboard.vouchersIssued"),
                 value: dashboard?.voucher_issued ?? 0,
                 bar:
                   totalCount > 0
@@ -216,7 +218,7 @@ export default function SocialWorkerDashboard() {
                     : 0,
               },
               {
-                label: "Care Received",
+                label: t("socialWorker.dashboard.careReceived"),
                 value: dashboard?.care_received ?? 0,
                 bar:
                   totalCount > 0

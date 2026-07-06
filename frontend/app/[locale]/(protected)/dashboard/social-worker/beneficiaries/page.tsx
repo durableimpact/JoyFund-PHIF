@@ -7,10 +7,12 @@ import { ChevronLeft, ChevronRight, Heart, Plus, Search } from "lucide-react";
 import { listBeneficiaries } from "@/actions/beneficiaries";
 import { formatDate } from "@/lib/utils";
 import Paginator from "@/components/shared/Paginator";
+import { useI18n } from "@/locales/client";
 
 const PAGE_SIZE = 10;
 
 export default function SocialWorkerBeneficiaries() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = session?.accessToken || session?.user?.accessToken;
   const socialWorkerId = (
@@ -55,9 +57,9 @@ export default function SocialWorkerBeneficiaries() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Beneficiaries</h1>
+          <h1 className="text-2xl font-black text-gray-900">{t("socialWorker.beneficiaries.title")}</h1>
           <p className="text-gray-500 text-sm">
-            {totalCount} enrolled beneficiaries
+            {t("socialWorker.beneficiaries.count", { count: totalCount })}
           </p>
         </div>
         <Link
@@ -65,7 +67,7 @@ export default function SocialWorkerBeneficiaries() {
           className="btn-admin text-sm flex items-center gap-2"
           style={{ background: "#0D9488" }}
         >
-          <Plus size={16} /> Enroll Beneficiary
+          <Plus size={16} /> {t("socialWorker.beneficiaries.enrollBeneficiary")}
         </Link>
       </div>
 
@@ -76,7 +78,7 @@ export default function SocialWorkerBeneficiaries() {
         />
         <input
           className="input-field pl-10"
-          placeholder="Search by name, health ID, city..."
+          placeholder={t("socialWorker.beneficiaries.searchPlaceholder")}
           value={search}
           onChange={(e) => setParams({ search: e.target.value, page: 1 })}
         />
@@ -88,12 +90,12 @@ export default function SocialWorkerBeneficiaries() {
             <thead>
               <tr className="border-b border-gray-100">
                 {[
-                  "Beneficiary",
-                  "Health ID",
-                  "Location",
-                  "Health Issues",
-                  "Enrolled",
-                  "Status",
+                  t("socialWorker.beneficiaries.table.beneficiary"),
+                  t("socialWorker.beneficiaries.table.healthId"),
+                  t("socialWorker.beneficiaries.table.location"),
+                  t("socialWorker.beneficiaries.table.healthIssues"),
+                  t("socialWorker.beneficiaries.table.enrolled"),
+                  t("socialWorker.beneficiaries.table.status"),
                 ].map((h) => (
                   <th
                     key={h}
@@ -121,7 +123,7 @@ export default function SocialWorkerBeneficiaries() {
                     colSpan={6}
                     className="text-center py-16 text-gray-400 text-sm"
                   >
-                    No beneficiaries found
+                    {t("socialWorker.beneficiaries.noBeneficiariesFound")}
                   </td>
                 </tr>
               ) : (
@@ -161,7 +163,7 @@ export default function SocialWorkerBeneficiaries() {
                             </span>
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400">None</span>
+                          <span className="text-xs text-gray-400">{t("socialWorker.beneficiaries.none")}</span>
                         )}
                       </td>
                       <td className="p-4 text-gray-400 text-xs">
@@ -171,7 +173,7 @@ export default function SocialWorkerBeneficiaries() {
                         <span
                           className={`badge text-[10px] ${b.is_verified ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
                         >
-                          {b.is_verified ? "Verified" : "Pending"}
+                          {b.is_verified ? t("socialWorker.beneficiaries.verified") : t("socialWorker.beneficiaries.pending")}
                         </span>
                       </td>
                     </tr>

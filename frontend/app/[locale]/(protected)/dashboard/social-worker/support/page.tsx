@@ -6,8 +6,10 @@ import { TicketList } from "@/components/support";
 import { listMyTickets } from "@/actions/support";
 import { Loader2 } from "lucide-react";
 import { SupportPageSkeleton } from "@/components/shared/PageSkeletons";
+import { useI18n } from "@/locales/client";
 
 export default function SocialWorkerSupportPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken;
 
@@ -27,9 +29,9 @@ export default function SocialWorkerSupportPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Support</h1>
+          <h1 className="text-2xl font-black text-gray-900">{t("socialWorker.support.title")}</h1>
           <p className="text-gray-500 text-sm">
-            Get help with your account or report issues
+            {t("socialWorker.support.subtitle")}
           </p>
         </div>
       </div>

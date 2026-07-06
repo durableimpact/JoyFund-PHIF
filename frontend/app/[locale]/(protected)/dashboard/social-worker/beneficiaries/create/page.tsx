@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Loader2, Upload, UserPlus, MapPin, Navigation, X } from 'lucide-react';
 import { z } from 'zod';
 import { createBeneficiary } from '@/actions/beneficiaries';
+import { useI18n } from '@/locales/client';
 
 const LocationPickerMap = dynamic(() => import('@/components/shared/LocationPickerMap'), {
   ssr: false,
@@ -68,6 +69,7 @@ const STEPS = [
 type Step = typeof STEPS[number];
 
 export default function CreateBeneficiaryPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const router = useRouter();
@@ -179,12 +181,12 @@ export default function CreateBeneficiaryPage() {
 
   return (<>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-        <ArrowLeft size={16} /> Back
+        <ArrowLeft size={16} /> {t("socialWorker.createBeneficiary.back")}
       </button>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Enroll New Beneficiary</h1>
-        <p className="text-gray-500 text-sm">Step {stepIdx + 1} of {STEPS.length}</p>
+        <h1 className="text-2xl font-black text-gray-900">{t("socialWorker.createBeneficiary.title")}</h1>
+        <p className="text-gray-500 text-sm">{t("socialWorker.createBeneficiary.stepIndicator", { current: stepIdx + 1, total: STEPS.length })}</p>
       </div>
 
       <div className="flex items-center gap-1 mb-8">
@@ -202,7 +204,7 @@ export default function CreateBeneficiaryPage() {
                 style={active ? { background: '#0D9488' } : {}}
               >
                 {done ? <Check size={12} /> : <span className="text-[10px] font-black">{s.num}</span>}
-                <span className="hidden sm:inline">{s.label}</span>
+                <span className="hidden sm:inline">{t(`socialWorker.createBeneficiary.step${s.key}`)}</span>
               </button>
               {i < STEPS.length - 1 && <div className={`w-4 h-px shrink-0 ${i < stepIdx ? 'bg-teal-300' : 'bg-gray-200'}`} />}
             </div>
@@ -216,39 +218,39 @@ export default function CreateBeneficiaryPage() {
 
           {stepIdx === 0 && (
             <section className="space-y-4">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Personal Information</h2>
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">{t("socialWorker.createBeneficiary.personalInfo")}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Full Name *" error={errors.full_name?.message}>
-                  <input className="input-field" {...form.register('full_name')} placeholder="e.g. Marie Kamga" />
+                <Field label={t("socialWorker.createBeneficiary.fullNameRequired")} error={errors.full_name?.message}>
+                  <input className="input-field" {...form.register('full_name')} placeholder={t("socialWorker.createBeneficiary.fullNamePlaceholder")} />
                 </Field>
-                <Field label="Date of Birth *" error={errors.date_of_birth?.message}>
+                <Field label={t("socialWorker.createBeneficiary.dateOfBirthRequired")} error={errors.date_of_birth?.message}>
                   <input type="date" className="input-field" {...form.register('date_of_birth')} />
                 </Field>
-                <Field label="Gender *" error={errors.gender?.message}>
+                <Field label={t("socialWorker.createBeneficiary.genderRequired")} error={errors.gender?.message}>
                   <Controller name="gender" control={control} render={({ field }) => (
                     <select className="input-field" value={field.value || ''} onChange={e => field.onChange(e.target.value || undefined)}>
-                      <option value="">— Select —</option>
-                      {GENDERS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                      <option value="">{t("socialWorker.createBeneficiary.selectPlaceholder")}</option>
+                      {GENDERS.map(g => <option key={g.value} value={g.value}>{t(`socialWorker.createBeneficiary.${g.value.toLowerCase()}`)}</option>)}
                     </select>
                   )} />
                 </Field>
-                <Field label="Category *" error={errors.category?.message}>
+                <Field label={t("socialWorker.createBeneficiary.categoryRequired")} error={errors.category?.message}>
                   <Controller name="category" control={control} render={({ field }) => (
                     <select className="input-field" value={field.value || ''} onChange={e => field.onChange(e.target.value || undefined)}>
-                      <option value="">— Select —</option>
-                      {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                      <option value="">{t("socialWorker.createBeneficiary.selectPlaceholder")}</option>
+                      {CATEGORIES.map(c => <option key={c.value} value={c.value}>{t(`socialWorker.createBeneficiary.category${c.value}`)}</option>)}
                     </select>
                   )} />
                 </Field>
-                <Field label="Phone *" error={errors.phone?.message}>
-                  <input type="tel" className="input-field" {...form.register('phone')} placeholder="+237..." />
+                <Field label={t("socialWorker.createBeneficiary.phoneRequired")} error={errors.phone?.message}>
+                  <input type="tel" className="input-field" {...form.register('phone')} placeholder={t("socialWorker.createBeneficiary.phonePlaceholder")} />
                 </Field>
-                <Field label="Email" error={errors.email?.message}>
-                  <input type="email" className="input-field" {...form.register('email')} placeholder="marie@example.com" />
+                <Field label={t("socialWorker.createBeneficiary.email")} error={errors.email?.message}>
+                  <input type="email" className="input-field" {...form.register('email')} placeholder={t("socialWorker.createBeneficiary.emailPlaceholder")} />
                 </Field>
                 <div className="sm:col-span-2">
-                  <Field label="National ID Number *" error={errors.national_id_number?.message}>
-                    <input className="input-field" {...form.register('national_id_number')} placeholder="e.g. NID-112345" />
+                  <Field label={t("socialWorker.createBeneficiary.nationalIdRequired")} error={errors.national_id_number?.message}>
+                    <input className="input-field" {...form.register('national_id_number')} placeholder={t("socialWorker.createBeneficiary.nationalIdPlaceholder")} />
                   </Field>
                 </div>
               </div>
@@ -257,13 +259,13 @@ export default function CreateBeneficiaryPage() {
 
           {stepIdx === 1 && (
             <section className="space-y-4">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Additional Details</h2>
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">{t("socialWorker.createBeneficiary.additionalDetails")}</h2>
               {canShowDetails ? (
-                <Field label="Number of Previous Births" error={errors.number_of_previous_births?.message}>
-                  <input type="number" min="0" className="input-field" {...form.register('number_of_previous_births')} placeholder="e.g. 2" />
+                <Field label={t("socialWorker.createBeneficiary.previousBirths")} error={errors.number_of_previous_births?.message}>
+                  <input type="number" min="0" className="input-field" {...form.register('number_of_previous_births')} placeholder={t("socialWorker.createBeneficiary.previousBirthsPlaceholder")} />
                 </Field>
               ) : (
-                <p className="text-gray-400 text-sm py-8 text-center">No additional details required for the selected category and gender.</p>
+                <p className="text-gray-400 text-sm py-8 text-center">{t("socialWorker.createBeneficiary.noAdditionalDetails")}</p>
               )}
             </section>
           )}
@@ -271,29 +273,29 @@ export default function CreateBeneficiaryPage() {
           {stepIdx === 2 && (
             <section className="space-y-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                <MapPin size={14} /> Location
+                <MapPin size={14} /> {t("socialWorker.createBeneficiary.location")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Region *" error={errors.region?.message}>
-                  <input className="input-field" {...form.register('region')} placeholder="e.g. Centre" />
+                <Field label={t("socialWorker.createBeneficiary.regionRequired")} error={errors.region?.message}>
+                  <input className="input-field" {...form.register('region')} placeholder={t("socialWorker.createBeneficiary.regionPlaceholder")} />
                 </Field>
-                <Field label="City *" error={errors.city?.message}>
-                  <input className="input-field" {...form.register('city')} placeholder="e.g. Yaoundé" />
+                <Field label={t("socialWorker.createBeneficiary.cityRequired")} error={errors.city?.message}>
+                  <input className="input-field" {...form.register('city')} placeholder={t("socialWorker.createBeneficiary.cityPlaceholder")} />
                 </Field>
                 <div className="sm:col-span-2">
-                  <Field label="Address *" error={errors.address?.message}>
-                    <input className="input-field" {...form.register('address')} placeholder="Quartier, rue..." />
+                  <Field label={t("socialWorker.createBeneficiary.addressRequired")} error={errors.address?.message}>
+                    <input className="input-field" {...form.register('address')} placeholder={t("socialWorker.createBeneficiary.addressPlaceholder")} />
                   </Field>
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Pin Location on Map</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t("socialWorker.createBeneficiary.pinLocation")}</label>
                   <button type="button" onClick={handleLocateMe} disabled={geoLoading}
                     className="text-[10px] font-semibold flex items-center gap-1 text-teal-600 hover:text-teal-700">
                     <Navigation size={12} className={geoLoading ? 'animate-pulse' : ''} />
-                    {geoLoading ? 'Locating...' : 'Use my location'}
+                    {geoLoading ? t("socialWorker.createBeneficiary.locating") : t("socialWorker.createBeneficiary.useMyLocation")}
                   </button>
                 </div>
                 <LocationPickerMap
@@ -308,11 +310,11 @@ export default function CreateBeneficiaryPage() {
                   }}
                 />
                 <div className="grid grid-cols-2 gap-3 mt-2">
-                  <Field label="Latitude" error={errors.lat?.message}>
-                    <input className="input-field text-xs" {...form.register('lat')} placeholder="Auto-filled from map" />
+                  <Field label={t("socialWorker.createBeneficiary.latitude")} error={errors.lat?.message}>
+                    <input className="input-field text-xs" {...form.register('lat')} placeholder={t("socialWorker.createBeneficiary.autoFilled")} />
                   </Field>
-                  <Field label="Longitude" error={errors.lng?.message}>
-                    <input className="input-field text-xs" {...form.register('lng')} placeholder="Auto-filled from map" />
+                  <Field label={t("socialWorker.createBeneficiary.longitude")} error={errors.lng?.message}>
+                    <input className="input-field text-xs" {...form.register('lng')} placeholder={t("socialWorker.createBeneficiary.autoFilled")} />
                   </Field>
                 </div>
               </div>
@@ -321,19 +323,19 @@ export default function CreateBeneficiaryPage() {
 
           {stepIdx === 3 && (
             <section className="space-y-4">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Emergency Contact</h2>
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">{t("socialWorker.createBeneficiary.emergencyContact")}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Field label="Name *" error={errors.emergency_contact_name?.message}>
-                  <input className="input-field" {...form.register('emergency_contact_name')} placeholder="Jean Kamga" />
+                <Field label={t("socialWorker.createBeneficiary.ecNameRequired")} error={errors.emergency_contact_name?.message}>
+                  <input className="input-field" {...form.register('emergency_contact_name')} placeholder={t("socialWorker.createBeneficiary.ecNamePlaceholder")} />
                 </Field>
-                <Field label="Phone *" error={errors.emergency_contact_phone?.message}>
-                  <input type="tel" className="input-field" {...form.register('emergency_contact_phone')} placeholder="+237..." />
+                <Field label={t("socialWorker.createBeneficiary.ecPhoneRequired")} error={errors.emergency_contact_phone?.message}>
+                  <input type="tel" className="input-field" {...form.register('emergency_contact_phone')} placeholder={t("socialWorker.createBeneficiary.ecPhonePlaceholder")} />
                 </Field>
-                <Field label="Relationship *" error={errors.emergency_contact_relationship?.message}>
+                <Field label={t("socialWorker.createBeneficiary.ecRelationshipRequired")} error={errors.emergency_contact_relationship?.message}>
                   <Controller name="emergency_contact_relationship" control={control} render={({ field }) => (
                     <select className="input-field" value={field.value || ''} onChange={e => field.onChange(e.target.value || undefined)}>
-                      <option value="">— Select —</option>
-                      {RELATIONSHIPS.map(r => <option key={r} value={r}>{r.charAt(0) + r.slice(1).toLowerCase()}</option>)}
+                      <option value="">{t("socialWorker.createBeneficiary.selectPlaceholder")}</option>
+                      {RELATIONSHIPS.map(r => <option key={r} value={r}>{t(`socialWorker.createBeneficiary.relationship${r}`)}</option>)}
                     </select>
                   )} />
                 </Field>
@@ -343,7 +345,7 @@ export default function CreateBeneficiaryPage() {
 
           {stepIdx === 4 && (
             <section className="space-y-4">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Supporting Documents</h2>
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">{t("socialWorker.createBeneficiary.supportingDocuments")}</h2>
               <div className="space-y-2">
                 {documents.length > 0 && (
                   <div className="space-y-1">
@@ -358,30 +360,30 @@ export default function CreateBeneficiaryPage() {
                 <input ref={fileInputRef} type="file" multiple accept="image/*,.pdf" onChange={handleFiles} className="hidden" />
                 <button type="button" onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-2 text-xs font-semibold border border-dashed border-gray-300 rounded-xl px-4 py-3 text-gray-500 hover:border-teal-400 hover:text-teal-600 transition-colors w-full justify-center">
-                  <Upload size={14} /> Upload Documents (photos, PDFs)
+                  <Upload size={14} /> {t("socialWorker.createBeneficiary.uploadDocuments")}
                 </button>
               </div>
-              {documents.length === 0 && <p className="text-gray-400 text-xs">No documents uploaded. You can skip this step.</p>}
+              {documents.length === 0 && <p className="text-gray-400 text-xs">{t("socialWorker.createBeneficiary.noDocuments")}</p>}
             </section>
           )}
 
           <div className="flex gap-3 pt-6">
             {stepIdx > 0 ? (
               <button type="button" onClick={prev} className="btn-outline flex items-center gap-1.5">
-                <ChevronLeft size={14} /> Back
+                <ChevronLeft size={14} /> {t("socialWorker.createBeneficiary.back")}
               </button>
             ) : (
-              <button type="button" onClick={() => router.back()} className="btn-outline">Cancel</button>
+              <button type="button" onClick={() => router.back()} className="btn-outline">{t("socialWorker.createBeneficiary.cancel")}</button>
             )}
 
             {stepIdx < STEPS.length - 1 ? (
               <button type="button" onClick={next} className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-1.5" style={{ background: '#0D9488' }}>
-                Continue <ChevronRight size={14} />
+                {t("socialWorker.createBeneficiary.continue")} <ChevronRight size={14} />
               </button>
             ) : (
               <button type="submit" disabled={createMutation.isPending} className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#0D9488' }}>
                 {createMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-                <UserPlus size={16} /> Enroll Beneficiary
+                <UserPlus size={16} /> {t("socialWorker.createBeneficiary.enrollBeneficiary")}
               </button>
             )}
           </div>

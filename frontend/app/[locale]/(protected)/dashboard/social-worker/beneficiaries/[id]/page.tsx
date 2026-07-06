@@ -24,10 +24,12 @@ import {
 } from 'lucide-react';
 import { getBeneficiary, listHealthIssues, listBeneficiaryDocuments, createHealthIssue, createBeneficiaryDocument, updateBeneficiary } from '@/actions/beneficiaries';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { useI18n } from '@/locales/client';
 
 const SUB_PAGE_SIZE = 5;
 
 export default function BeneficiaryDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -116,12 +118,12 @@ export default function BeneficiaryDetailPage() {
   }
 
   if (!beneficiary) {
-    return (<div className="text-center py-16 text-gray-400">Beneficiary not found.</div>);
+    return (<div className="text-center py-16 text-gray-400">{t("socialWorker.beneficiaryDetail.notFound")}</div>);
   }
 
   return (<>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-        <ArrowLeft size={16} /> Back to Beneficiaries
+        <ArrowLeft size={16} /> {t("socialWorker.beneficiaryDetail.backToBeneficiaries")}
       </button>
 
       <div className="mb-6 flex items-start justify-between">
@@ -130,12 +132,12 @@ export default function BeneficiaryDetailPage() {
           <p className="text-gray-500 text-sm mt-1">
             {beneficiary.digital_health_id && <span className="font-mono mr-3">{beneficiary.digital_health_id}</span>}
             <span className={`badge text-xs ${beneficiary.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-              {beneficiary.is_verified ? 'Verified' : 'Pending Verification'}
+              {beneficiary.is_verified ? t("socialWorker.beneficiaryDetail.verified") : t("socialWorker.beneficiaryDetail.pendingVerification")}
             </span>
           </p>
         </div>
         <button onClick={() => setShowEdit(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#0D9488' }}>
-          <Pencil size={16} /> Edit
+          <Pencil size={16} /> {t("socialWorker.beneficiaryDetail.edit")}
         </button>
       </div>
 
@@ -143,53 +145,53 @@ export default function BeneficiaryDetailPage() {
         <div className="lg:col-span-2 space-y-5">
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <User size={14} /> Personal Information
+              <User size={14} /> {t("socialWorker.beneficiaryDetail.personalInfo")}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Full Name" value={beneficiary.full_name} />
-              <Detail label="Gender" value={beneficiary.gender} />
-              <Detail label="Category" value={beneficiary.category} />
-              <Detail label="Date of Birth" value={formatDate(beneficiary.date_of_birth)} />
-              <Detail label="National ID" value={beneficiary.national_id_number} mono />
-              <Detail label="Phone" value={beneficiary.phone} />
-              {beneficiary.email && <Detail label="Email" value={beneficiary.email} />}
-              {beneficiary.number_of_previous_births != null && <Detail label="Previous Births" value={String(beneficiary.number_of_previous_births)} />}
+              <Detail label={t("socialWorker.beneficiaryDetail.fullName")} value={beneficiary.full_name} />
+              <Detail label={t("socialWorker.beneficiaryDetail.gender")} value={beneficiary.gender} />
+              <Detail label={t("socialWorker.beneficiaryDetail.category")} value={beneficiary.category} />
+              <Detail label={t("socialWorker.beneficiaryDetail.dateOfBirth")} value={formatDate(beneficiary.date_of_birth)} />
+              <Detail label={t("socialWorker.beneficiaryDetail.nationalId")} value={beneficiary.national_id_number} mono />
+              <Detail label={t("socialWorker.beneficiaryDetail.phone")} value={beneficiary.phone} />
+              {beneficiary.email && <Detail label={t("socialWorker.beneficiaryDetail.email")} value={beneficiary.email} />}
+              {beneficiary.number_of_previous_births != null && <Detail label={t("socialWorker.beneficiaryDetail.previousBirths")} value={String(beneficiary.number_of_previous_births)} />}
             </div>
           </div>
 
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <MapPin size={14} /> Location
+              <MapPin size={14} /> {t("socialWorker.beneficiaryDetail.location")}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Region" value={beneficiary.region} />
-              <Detail label="City" value={beneficiary.city} />
-              <Detail label="Address" value={beneficiary.address} className="col-span-2" />
+              <Detail label={t("socialWorker.beneficiaryDetail.region")} value={beneficiary.region} />
+              <Detail label={t("socialWorker.beneficiaryDetail.city")} value={beneficiary.city} />
+              <Detail label={t("socialWorker.beneficiaryDetail.address")} value={beneficiary.address} className="col-span-2" />
             </div>
           </div>
 
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Phone size={14} /> Emergency Contact
+              <Phone size={14} /> {t("socialWorker.beneficiaryDetail.emergencyContact")}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Name" value={beneficiary.emergency_contact_name || '—'} />
-              <Detail label="Phone" value={beneficiary.emergency_contact_phone || '—'} />
-              <Detail label="Relationship" value={beneficiary.emergency_contact_relationship || '—'} />
+              <Detail label={t("socialWorker.beneficiaryDetail.ecName")} value={beneficiary.emergency_contact_name || '—'} />
+              <Detail label={t("socialWorker.beneficiaryDetail.ecPhone")} value={beneficiary.emergency_contact_phone || '—'} />
+              <Detail label={t("socialWorker.beneficiaryDetail.ecRelationship")} value={beneficiary.emergency_contact_relationship || '—'} />
             </div>
           </div>
 
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                <Heart size={14} /> Health Issues ({hiCount})
+                <Heart size={14} /> {t("socialWorker.beneficiaryDetail.healthIssues", { count: hiCount })}
               </h2>
               <button onClick={() => setShowHiForm(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#0D9488' }}>
-                <Plus size={14} /> Add Issue
+                <Plus size={14} /> {t("socialWorker.beneficiaryDetail.addIssue")}
               </button>
             </div>
             {healthIssues.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4">No health issues recorded yet.</p>
+              <p className="text-xs text-gray-400 py-4">{t("socialWorker.beneficiaryDetail.noHealthIssues")}</p>
             ) : (<>
               <div className="space-y-3">
                 {healthIssues.map((hi) => (
@@ -205,7 +207,7 @@ export default function BeneficiaryDetailPage() {
                     </div>
                     <p className="text-xs text-gray-600">{hi.description}</p>
                     <div className="flex items-center gap-3 mt-1.5 text-[10px] text-gray-400">
-                      <span>Severity: {hi.severity}</span>
+                      <span>{t("socialWorker.beneficiaryDetail.severity", { severity: hi.severity })}</span>
                       {hi.created_at && <span>{formatDate(hi.created_at)}</span>}
                     </div>
                   </div>
@@ -218,14 +220,14 @@ export default function BeneficiaryDetailPage() {
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                <FileText size={14} /> Documents ({docCount})
+                <FileText size={14} /> {t("socialWorker.beneficiaryDetail.documents", { count: docCount })}
               </h2>
               <button onClick={() => setShowDocUpload(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#0D9488' }}>
-                <Upload size={14} /> Upload
+                <Upload size={14} /> {t("socialWorker.beneficiaryDetail.upload")}
               </button>
             </div>
             {documents.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4">No documents uploaded yet.</p>
+              <p className="text-xs text-gray-400 py-4">{t("socialWorker.beneficiaryDetail.noDocuments")}</p>
             ) : (<>
               <div className="space-y-2">
                 {documents.map((doc) => {
@@ -243,12 +245,12 @@ export default function BeneficiaryDetailPage() {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{doc.description || 'Document'}</p>
+                          <p className="text-sm font-medium text-gray-800 truncate">{doc.description || t("socialWorker.beneficiaryDetail.documentLabel")}</p>
                           {doc.uploaded_at && <p className="text-[10px] text-gray-400">{formatDate(doc.uploaded_at)}</p>}
                         </div>
                       </button>
                       {docUrl && (
-                        <a href={fullUrl} target="_blank" rel="noopener noreferrer" download className="p-1.5 text-gray-400 hover:text-teal-600 rounded-lg hover:bg-teal-50 transition-colors shrink-0" title="Download">
+                        <a href={fullUrl} target="_blank" rel="noopener noreferrer" download className="p-1.5 text-gray-400 hover:text-teal-600 rounded-lg hover:bg-teal-50 transition-colors shrink-0" title={t("socialWorker.beneficiaryDetail.download")}>
                           <Download size={14} />
                         </a>
                       )}
@@ -264,22 +266,22 @@ export default function BeneficiaryDetailPage() {
         <div className="space-y-4">
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Calendar size={14} /> Enrollment Info
+              <Calendar size={14} /> {t("socialWorker.beneficiaryDetail.enrollmentInfo")}
             </h2>
             <div className="space-y-3">
-              <Detail label="Status" value={beneficiary.is_active ? 'Active' : 'Inactive'} />
-              <Detail label="Created" value={beneficiary.created_at ? formatDateTime(beneficiary.created_at) : '—'} />
-              <Detail label="Updated" value={beneficiary.updated_at ? formatDateTime(beneficiary.updated_at) : '—'} />
+              <Detail label={t("socialWorker.beneficiaryDetail.status")} value={beneficiary.is_active ? t("socialWorker.beneficiaryDetail.active") : t("socialWorker.beneficiaryDetail.inactive")} />
+              <Detail label={t("socialWorker.beneficiaryDetail.created")} value={beneficiary.created_at ? formatDateTime(beneficiary.created_at) : '—'} />
+              <Detail label={t("socialWorker.beneficiaryDetail.updated")} value={beneficiary.updated_at ? formatDateTime(beneficiary.updated_at) : '—'} />
             </div>
           </div>
 
           <div className="card">
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Summary</h2>
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">{t("socialWorker.beneficiaryDetail.summary")}</h2>
             <div className="space-y-3">
               {[
-                { label: 'Health Issues', value: hiCount },
-                { label: 'Documents', value: docCount },
-                { label: 'Verified', value: beneficiary.is_verified ? 'Yes' : 'No' },
+                { label: t("socialWorker.beneficiaryDetail.summaryHealthIssues"), value: hiCount },
+                { label: t("socialWorker.beneficiaryDetail.summaryDocuments"), value: docCount },
+                { label: t("socialWorker.beneficiaryDetail.summaryVerified"), value: beneficiary.is_verified ? t("socialWorker.beneficiaryDetail.yes") : t("socialWorker.beneficiaryDetail.no") },
               ].map(row => (
                 <div key={row.label} className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">{row.label}</span>
@@ -291,52 +293,52 @@ export default function BeneficiaryDetailPage() {
         </div>
       </div>
 
-      {showHiForm && <Modal title="Add Health Issue" onClose={() => setShowHiForm(false)}>
+      {showHiForm && <Modal title={t("socialWorker.beneficiaryDetail.addHealthIssue")} onClose={() => setShowHiForm(false)}>
         <div className="space-y-4">
-          <SelectField label="Category *" value={hiCategory} onChange={setHiCategory} options={[
-            { value: '', label: '— Select —' }, { value: 'MATERNAL', label: 'Pregnancy / Maternal' }, { value: 'EMERGENCY', label: 'Emergency' },
-            { value: 'CHRONIC', label: 'Chronic' }, { value: 'MENTAL_HEALTH', label: 'Mental Health' },
-            { value: 'INFECTIOUS', label: 'Infectious' }, { value: 'ELDERLY', label: 'Elderly' }, { value: 'OTHER', label: 'Other' },
+          <SelectField label={t("socialWorker.beneficiaryDetail.categoryRequired")} value={hiCategory} onChange={setHiCategory} options={[
+            { value: '', label: t("socialWorker.beneficiaryDetail.selectPlaceholder") }, { value: 'MATERNAL', label: t("socialWorker.beneficiaryDetail.hiCategoryMaternal") }, { value: 'EMERGENCY', label: t("socialWorker.beneficiaryDetail.hiCategoryEmergency") },
+            { value: 'CHRONIC', label: t("socialWorker.beneficiaryDetail.hiCategoryChronic") }, { value: 'MENTAL_HEALTH', label: t("socialWorker.beneficiaryDetail.hiCategoryMentalHealth") },
+            { value: 'INFECTIOUS', label: t("socialWorker.beneficiaryDetail.hiCategoryInfectious") }, { value: 'ELDERLY', label: t("socialWorker.beneficiaryDetail.hiCategoryElderly") }, { value: 'OTHER', label: t("socialWorker.beneficiaryDetail.hiCategoryOther") },
           ]} />
-          <SelectField label="Severity *" value={hiSeverity} onChange={setHiSeverity} options={[
-            { value: '', label: '— Select —' }, { value: 'LOW', label: 'Low' }, { value: 'MEDIUM', label: 'Medium' },
-            { value: 'HIGH', label: 'High' }, { value: 'CRITICAL', label: 'Critical' },
+          <SelectField label={t("socialWorker.beneficiaryDetail.severityRequired")} value={hiSeverity} onChange={setHiSeverity} options={[
+            { value: '', label: t("socialWorker.beneficiaryDetail.selectPlaceholder") }, { value: 'LOW', label: t("socialWorker.beneficiaryDetail.severityLow") }, { value: 'MEDIUM', label: t("socialWorker.beneficiaryDetail.severityMedium") },
+            { value: 'HIGH', label: t("socialWorker.beneficiaryDetail.severityHigh") }, { value: 'CRITICAL', label: t("socialWorker.beneficiaryDetail.severityCritical") },
           ]} />
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Description *</label>
-            <textarea className="input-field min-h-[80px]" value={hiDescription} onChange={e => setHiDescription(e.target.value)} placeholder="Describe the health issue..." />
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t("socialWorker.beneficiaryDetail.descriptionRequired")}</label>
+            <textarea className="input-field min-h-[80px]" value={hiDescription} onChange={e => setHiDescription(e.target.value)} placeholder={t("socialWorker.beneficiaryDetail.describeHealthIssue")} />
           </div>
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setShowHiForm(false)} className="btn-outline flex-1">Cancel</button>
+            <button onClick={() => setShowHiForm(false)} className="btn-outline flex-1">{t("socialWorker.beneficiaryDetail.cancel")}</button>
             <button onClick={() => createHiMutation.mutate()} disabled={createHiMutation.isPending || !hiCategory || !hiSeverity || !hiDescription}
               className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#0D9488' }}>
-              {createHiMutation.isPending && <Loader2 size={16} className="animate-spin" />} Submit
+              {createHiMutation.isPending && <Loader2 size={16} className="animate-spin" />} {t("socialWorker.beneficiaryDetail.submit")}
             </button>
           </div>
         </div>
       </Modal>}
 
       {previewDoc && (
-        <Modal title={previewDoc.description || 'Document Preview'} onClose={() => setPreviewDoc(null)}>
+        <Modal title={previewDoc.description || t("socialWorker.beneficiaryDetail.documentPreview")} onClose={() => setPreviewDoc(null)}>
           <DocPreview doc={previewDoc} />
         </Modal>
       )}
 
-      {showDocUpload && <Modal title="Upload Document" onClose={() => setShowDocUpload(false)}>
+      {showDocUpload && <Modal title={t("socialWorker.beneficiaryDetail.uploadDocument")} onClose={() => setShowDocUpload(false)}>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">File *</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t("socialWorker.beneficiaryDetail.fileRequired")}</label>
             <input type="file" accept="image/*,.pdf" onChange={e => setDocFile(e.target.files?.[0] || null)} className="text-xs" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Description</label>
-            <input className="input-field" value={docDescription} onChange={e => setDocDescription(e.target.value)} placeholder="e.g. National ID photo" />
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t("socialWorker.beneficiaryDetail.documentDescription")}</label>
+            <input className="input-field" value={docDescription} onChange={e => setDocDescription(e.target.value)} placeholder={t("socialWorker.beneficiaryDetail.documentDescriptionPlaceholder")} />
           </div>
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setShowDocUpload(false)} className="btn-outline flex-1">Cancel</button>
+            <button onClick={() => setShowDocUpload(false)} className="btn-outline flex-1">{t("socialWorker.beneficiaryDetail.cancel")}</button>
             <button onClick={() => uploadDocMutation.mutate()} disabled={uploadDocMutation.isPending || !docFile}
               className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#0D9488' }}>
-              {uploadDocMutation.isPending && <Loader2 size={16} className="animate-spin" />} Upload
+              {uploadDocMutation.isPending && <Loader2 size={16} className="animate-spin" />} {t("socialWorker.beneficiaryDetail.uploadDocButton")}
             </button>
           </div>
         </div>
@@ -396,6 +398,7 @@ function MiniPagination({ page, setPage, hasPrev, hasNext }: { page: number; set
 }
 
 function EditBeneficiaryModal({ beneficiary, onClose, onSave, saving }: { beneficiary: any; onClose: () => void; onSave: (fd: FormData) => void; saving: boolean }) {
+  const t = useI18n();
   const [full_name, setFullName] = useState(beneficiary.full_name);
   const [date_of_birth, setDob] = useState(beneficiary.date_of_birth);
   const [gender, setGender] = useState(beneficiary.gender);
@@ -431,37 +434,37 @@ function EditBeneficiaryModal({ beneficiary, onClose, onSave, saving }: { benefi
   };
 
   return (
-    <Modal title="Edit Beneficiary" onClose={onClose}>
+    <Modal title={t("socialWorker.beneficiaryDetail.editBeneficiary")} onClose={onClose}>
       <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Full Name" value={full_name} onChange={setFullName} />
-          <Field label="Date of Birth" type="date" value={date_of_birth} onChange={setDob} />
-          <SelectField label="Gender" value={gender} onChange={setGender} options={[
-            { value: 'MALE', label: 'Male' }, { value: 'FEMALE', label: 'Female' }, { value: 'OTHER', label: 'Other' },
+          <Field label={t("socialWorker.beneficiaryDetail.fullName")} value={full_name} onChange={setFullName} />
+          <Field label={t("socialWorker.beneficiaryDetail.dateOfBirth")} type="date" value={date_of_birth} onChange={setDob} />
+          <SelectField label={t("socialWorker.beneficiaryDetail.gender")} value={gender} onChange={setGender} options={[
+            { value: 'MALE', label: t("socialWorker.beneficiaryDetail.male") }, { value: 'FEMALE', label: t("socialWorker.beneficiaryDetail.female") }, { value: 'OTHER', label: t("socialWorker.beneficiaryDetail.genderOther") },
           ]} />
-          <SelectField label="Category" value={category} onChange={setCategory} options={[
-            { value: 'MATERNAL', label: 'Pregnant Woman' }, { value: 'ELDERLY', label: 'Elderly' }, { value: 'OTHER', label: 'Other' },
+          <SelectField label={t("socialWorker.beneficiaryDetail.category")} value={category} onChange={setCategory} options={[
+            { value: 'MATERNAL', label: t("socialWorker.beneficiaryDetail.pregnantWoman") }, { value: 'ELDERLY', label: t("socialWorker.beneficiaryDetail.elderly") }, { value: 'OTHER', label: t("socialWorker.beneficiaryDetail.categoryOther") },
           ]} />
-          <Field label="Phone" value={phone} onChange={setPhone} />
-          <Field label="Email" value={email} onChange={setEmail} />
-          <div className="col-span-2"><Field label="National ID" value={national_id_number} onChange={setNid} /></div>
-          <Field label="Previous Births" type="number" value={previousBirths} onChange={setPrevBirths} />
+          <Field label={t("socialWorker.beneficiaryDetail.phone")} value={phone} onChange={setPhone} />
+          <Field label={t("socialWorker.beneficiaryDetail.email")} value={email} onChange={setEmail} />
+          <div className="col-span-2"><Field label={t("socialWorker.beneficiaryDetail.nationalId")} value={national_id_number} onChange={setNid} /></div>
+          <Field label={t("socialWorker.beneficiaryDetail.previousBirths")} type="number" value={previousBirths} onChange={setPrevBirths} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Region" value={region} onChange={setRegion} />
-          <Field label="City" value={city} onChange={setCity} />
-          <div className="col-span-2"><Field label="Address" value={address} onChange={setAddress} /></div>
+          <Field label={t("socialWorker.beneficiaryDetail.region")} value={region} onChange={setRegion} />
+          <Field label={t("socialWorker.beneficiaryDetail.city")} value={city} onChange={setCity} />
+          <div className="col-span-2"><Field label={t("socialWorker.beneficiaryDetail.address")} value={address} onChange={setAddress} /></div>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <Field label="EC Name" value={ecName} onChange={setEcName} />
-          <Field label="EC Phone" value={ecPhone} onChange={setEcPhone} />
-          <Field label="EC Relationship" value={ecRel} onChange={setEcRel} />
+          <Field label={t("socialWorker.beneficiaryDetail.ecName")} value={ecName} onChange={setEcName} />
+          <Field label={t("socialWorker.beneficiaryDetail.ecPhone")} value={ecPhone} onChange={setEcPhone} />
+          <Field label={t("socialWorker.beneficiaryDetail.ecRelationship")} value={ecRel} onChange={setEcRel} />
         </div>
       </div>
       <div className="flex gap-3 pt-4">
-        <button onClick={onClose} className="btn-outline flex-1">Cancel</button>
+        <button onClick={onClose} className="btn-outline flex-1">{t("socialWorker.beneficiaryDetail.cancel")}</button>
         <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#0D9488' }}>
-          {saving ? 'Saving…' : 'Save Changes'}
+          {saving ? t("socialWorker.beneficiaryDetail.saving") : t("socialWorker.beneficiaryDetail.saveChanges")}
         </button>
       </div>
     </Modal>
@@ -469,6 +472,7 @@ function EditBeneficiaryModal({ beneficiary, onClose, onSave, saving }: { benefi
 }
 
 function DocPreview({ doc }: { doc: BeneficiaryDocument }) {
+  const t = useI18n();
   const docUrl = typeof doc.document === 'string' ? doc.document : (doc.document?.url || doc.document?.file || '');
   const fullUrl = docUrl.startsWith('http') ? docUrl : `${process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://localhost:8000'}${docUrl}`;
   const isImage = docUrl && /\.(png|jpg|jpeg|gif|webp|svg)/i.test(docUrl);
@@ -477,20 +481,20 @@ function DocPreview({ doc }: { doc: BeneficiaryDocument }) {
     <div className="space-y-3">
       {isImage ? (
         <div className="relative w-full max-h-[60vh] min-h-[300px] rounded-xl overflow-hidden">
-          <Image src={fullUrl} alt={doc.description || 'Document'} fill className="object-contain" />
+          <Image src={fullUrl} alt={doc.description || t("socialWorker.beneficiaryDetail.documentLabel")} fill className="object-contain" />
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3 py-8">
           <FileText size={48} className="text-gray-300" />
-          <p className="text-sm text-gray-500">This document cannot be previewed inline.</p>
+          <p className="text-sm text-gray-500">{t("socialWorker.beneficiaryDetail.cannotPreview")}</p>
           <a href={fullUrl} target="_blank" rel="noopener noreferrer" download
             className="py-2 px-4 rounded-xl font-semibold text-sm text-white" style={{ background: '#0D9488' }}>
-            Download
+            {t("socialWorker.beneficiaryDetail.download")}
           </a>
         </div>
       )}
       {doc.description && <p className="text-xs text-gray-500 text-center">{doc.description}</p>}
-      {doc.uploaded_at && <p className="text-[10px] text-gray-400 text-center">Uploaded {formatDate(doc.uploaded_at)}</p>}
+      {doc.uploaded_at && <p className="text-[10px] text-gray-400 text-center">{t("socialWorker.beneficiaryDetail.uploaded", { date: formatDate(doc.uploaded_at) })}</p>}
     </div>
   );
 }
