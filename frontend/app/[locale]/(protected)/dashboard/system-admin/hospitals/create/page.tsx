@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";

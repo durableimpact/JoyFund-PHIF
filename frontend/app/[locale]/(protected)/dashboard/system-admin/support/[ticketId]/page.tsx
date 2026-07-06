@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from '@/locales/client';
 import { use } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";

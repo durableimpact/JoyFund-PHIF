@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { useSession } from "next-auth/react";
 import Link from "next/link";

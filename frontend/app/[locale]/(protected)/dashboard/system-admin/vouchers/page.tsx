@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { ChevronLeft, ChevronRight, Plus, Search, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";

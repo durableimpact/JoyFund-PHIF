@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
+import { useI18n } from '@/locales/client';
 import {
   Calendar,
   Download,
@@ -59,7 +60,7 @@ function GrowthBadge({
   if (change_percent === null || change_percent === undefined) {
     return (
       <span className="text-xs text-gray-400 flex items-center gap-0.5">
-        <Minus size={12} /> New
+        <Minus size={12} /> {t('systemAdmin.analytics.new')}
       </span>
     );
   }
@@ -86,6 +87,7 @@ function GrowthBadge({
 }
 
 export default function AdminAnalytics() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token =
     (session as any)?.accessToken || (session?.user as any)?.accessToken;
@@ -106,12 +108,12 @@ export default function AdminAnalytics() {
 
   const periodLabel =
     period === "day"
-      ? "Last 7 Days"
+      ? t('systemAdmin.analytics.last7Days')
       : period === "week"
-        ? "Last 7 Days"
+        ? t('systemAdmin.analytics.last7Days')
         : period === "year"
-          ? "Last 365 Days"
-          : "Last 30 Days";
+          ? t('systemAdmin.analytics.last365Days')
+          : t('systemAdmin.analytics.last30Days');
 
   const exec = analytics?.executive_summary;
   const userGrowth = analytics?.user_growth;
@@ -124,42 +126,42 @@ export default function AdminAnalytics() {
 
   const execKpis = [
     {
-      label: "Total Users",
+      label: t('systemAdmin.analytics.totalUsers'),
       value: exec?.total_users?.current ?? 0,
       icon: Users,
       color: "#471DDB",
       growth: exec?.total_users,
     },
     {
-      label: "Total Donations",
+      label: t('systemAdmin.analytics.totalDonations'),
       value: formatXAF(exec?.total_donations?.current ?? 0),
       icon: TrendingUp,
       color: "#1DB1DB",
       growth: exec?.total_donations,
     },
     {
-      label: "Total Campaigns",
+      label: t('systemAdmin.analytics.totalCampaigns'),
       value: exec?.total_campaigns?.current ?? 0,
       icon: Target,
       color: "#1CDBC9",
       growth: exec?.total_campaigns,
     },
     {
-      label: "Total Vouchers",
+      label: t('systemAdmin.analytics.totalVouchers'),
       value: exec?.total_vouchers?.current ?? 0,
       icon: Ticket,
       color: "#f59e0b",
       growth: exec?.total_vouchers,
     },
     {
-      label: "Beneficiaries",
+      label: t('systemAdmin.analytics.beneficiaries'),
       value: exec?.total_beneficiaries?.current ?? 0,
       icon: Heart,
       color: "#ef4444",
       growth: exec?.total_beneficiaries,
     },
     {
-      label: "Escrow Balance",
+      label: t('systemAdmin.analytics.escrowBalance'),
       value: formatXAF(exec?.escrow_balance?.current ?? 0),
       icon: Wallet,
       color: "#8b5cf6",
@@ -222,10 +224,10 @@ export default function AdminAnalytics() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-900">
-            Impact Analytics
+            {t('systemAdmin.analytics.title')}
           </h1>
           <p className="text-gray-500 text-sm">
-            Platform-wide growth metrics and fund transparency
+            {t('systemAdmin.analytics.description')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -236,18 +238,18 @@ export default function AdminAnalytics() {
               onChange={(e) => setPeriod(e.target.value)}
               className="text-sm font-medium text-gray-700 bg-transparent border-none outline-none cursor-pointer"
             >
-              <option value="day">Daily</option>
-              <option value="week">Weekly</option>
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
+              <option value="day">{t('systemAdmin.analytics.daily')}</option>
+              <option value="week">{t('systemAdmin.analytics.weekly')}</option>
+              <option value="month">{t('systemAdmin.analytics.monthly')}</option>
+              <option value="year">{t('systemAdmin.analytics.yearly')}</option>
             </select>
           </div>
           <button
             className="btn-admin text-sm flex items-center gap-2"
             style={{ background: "#471DDB" }}
-            onClick={() => alert("Export feature coming soon")}
+            onClick={() => alert(t('systemAdmin.analytics.exportComingSoon'))}
           >
-            <Download size={16} /> Export
+            <Download size={16} /> {t('systemAdmin.analytics.export')}
           </button>
         </div>
       </div>
@@ -285,7 +287,7 @@ export default function AdminAnalytics() {
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-gray-900">
-              User Registrations ({periodLabel})
+              {t('systemAdmin.analytics.userRegistrations')} ({periodLabel})
             </h3>
             <GrowthBadge indicator={userGrowth?.total_users} />
           </div>
@@ -294,7 +296,7 @@ export default function AdminAnalytics() {
           ) : (
             <ChartContainer
               config={{
-                users: { label: "New Users", color: "#471DDB" },
+                users: { label: t('systemAdmin.analytics.newUsers'), color: "#471DDB" },
               }}
               className="h-64 w-full aspect-auto"
             >
@@ -334,9 +336,9 @@ export default function AdminAnalytics() {
           {userGrowth && (
             <div className="grid grid-cols-3 gap-2 mt-4">
               {[
-                { label: "Donors", data: userGrowth.donors, color: "#471DDB" },
-                { label: "Hosp. Admins", data: userGrowth.hospital_admins, color: "#1DB1DB" },
-                { label: "Social Workers", data: userGrowth.social_workers, color: "#1CDBC9" },
+                { label: t('systemAdmin.analytics.donors'), data: userGrowth.donors, color: "#471DDB" },
+                { label: t('systemAdmin.analytics.hospAdmins'), data: userGrowth.hospital_admins, color: "#1DB1DB" },
+                { label: t('systemAdmin.analytics.socialWorkers'), data: userGrowth.social_workers, color: "#1CDBC9" },
               ].map((r) => (
                 <div
                   key={r.label}
@@ -357,12 +359,12 @@ export default function AdminAnalytics() {
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-gray-900">
-              Donation Trends ({periodLabel})
+              {t('systemAdmin.analytics.donationTrends')} ({periodLabel})
             </h3>
             <div className="text-right">
-              <div className="text-xs text-gray-500">Period Total</div>
+              <div className="text-xs text-gray-500">{t('systemAdmin.analytics.periodTotal')}</div>
               <div className="text-sm font-bold text-[#471DDB]">
-                {dailyActivity?.summary?.donations_count ?? 0} donations
+                {dailyActivity?.summary?.donations_count ?? 0} {t('systemAdmin.analytics.donationsLower')}
               </div>
             </div>
           </div>
@@ -371,7 +373,7 @@ export default function AdminAnalytics() {
           ) : (
             <ChartContainer
               config={{
-                amount: { label: "Donations", color: "#471DDB" },
+                amount: { label: t('systemAdmin.analytics.donations'), color: "#471DDB" },
               }}
               className="h-64 w-full aspect-auto"
             >
@@ -413,17 +415,17 @@ export default function AdminAnalytics() {
           <div className="grid grid-cols-3 gap-2 mt-4">
             {[
               {
-                label: "Amount Raised",
+                label: t('systemAdmin.analytics.amountRaised'),
                 value: formatXAF(dailyActivity?.summary?.donations_amount ?? 0),
                 color: "#471DDB",
               },
               {
-                label: "Platform Fees",
+                label: t('systemAdmin.analytics.platformFees'),
                 value: formatXAF(dailyActivity?.summary?.platform_fees ?? 0),
                 color: "#f59e0b",
               },
               {
-                label: "Avg Donation",
+                label: t('systemAdmin.analytics.avgDonation'),
                 value: formatXAF(campaignPerf?.avg_donation ?? 0),
                 color: "#1DB1DB",
               },
@@ -452,15 +454,15 @@ export default function AdminAnalytics() {
           {isLoading ? (
             <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
           ) : dailyData.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-16">
-              No recent activity
-            </p>
+              <p className="text-gray-400 text-sm text-center py-16">
+                {t('systemAdmin.analytics.noRecentActivity')}
+              </p>
           ) : (
             <ChartContainer
               config={{
-                users: { label: "Users", color: "#471DDB" },
-                donations_count: { label: "Donations", color: "#1DB1DB" },
-                vouchers_generated: { label: "Vouchers", color: "#1CDBC9" },
+                users: { label: t('systemAdmin.analytics.users'), color: "#471DDB" },
+                donations_count: { label: t('systemAdmin.analytics.donations'), color: "#1DB1DB" },
+                vouchers_generated: { label: t('systemAdmin.analytics.vouchers'), color: "#1CDBC9" },
               }}
               className="h-64 w-full aspect-auto"
             >
@@ -516,7 +518,7 @@ export default function AdminAnalytics() {
 
         {/* Campaign Performance */}
         <div className="card p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Campaign Performance</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('systemAdmin.analytics.campaignPerformance')}</h3>
           {isLoading ? (
             <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
           ) : (
@@ -525,22 +527,22 @@ export default function AdminAnalytics() {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   {
-                    label: "Total Campaigns",
+                    label: t('systemAdmin.analytics.totalCampaigns'),
                     value: campaignPerf?.total_campaigns ?? 0,
                     color: "#471DDB",
                   },
                   {
-                    label: "Active",
+                    label: t('systemAdmin.analytics.active'),
                     value: campaignPerf?.active_campaigns ?? 0,
                     color: "#1DB1DB",
                   },
                   {
-                    label: "Funded",
+                    label: t('systemAdmin.analytics.funded'),
                     value: campaignPerf?.funded_campaigns ?? 0,
                     color: "#1CDBC9",
                   },
                   {
-                    label: "Completion Rate",
+                    label: t('systemAdmin.analytics.completionRate'),
                     value: `${campaignPerf?.completion_rate ?? 0}%`,
                     color: "#f59e0b",
                   },
@@ -565,9 +567,9 @@ export default function AdminAnalytics() {
                   <div className="w-32 h-32 flex-shrink-0">
                     <ChartContainer
                       config={{
-                        Active: { label: "Active", color: "#471DDB" },
-                        Funded: { label: "Funded", color: "#1CDBC9" },
-                        Closed: { label: "Closed", color: "#6b7280" },
+                        Active: { label: t('systemAdmin.analytics.active'), color: "#471DDB" },
+                        Funded: { label: t('systemAdmin.analytics.funded'), color: "#1CDBC9" },
+                        Closed: { label: t('systemAdmin.analytics.closed'), color: "#6b7280" },
                       }}
                       className="h-full aspect-auto"
                     >
@@ -608,7 +610,7 @@ export default function AdminAnalytics() {
               {/* Fundraising progress */}
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Total Raised (Period)</span>
+                  <span className="text-gray-600">{t('systemAdmin.analytics.totalRaisedPeriod')}</span>
                   <span className="font-bold text-[#471DDB]">
                     {formatXAF(campaignPerf?.total_raised ?? 0)}
                   </span>
@@ -632,7 +634,7 @@ export default function AdminAnalytics() {
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Financial Overview */}
         <div className="card p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Financial Overview</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('systemAdmin.analytics.financialOverview')}</h3>
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
@@ -648,25 +650,25 @@ export default function AdminAnalytics() {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   {
-                    label: "Escrow Balance",
+                    label: t('systemAdmin.analytics.escrowBalance'),
                     value: financial?.summary?.escrow_balance ?? 0,
                     color: "#471DDB",
                     icon: Wallet,
                   },
                   {
-                    label: "Total Donations",
+                    label: t('systemAdmin.analytics.totalDonations'),
                     value: financial?.summary?.total_donations_received ?? 0,
                     color: "#1DB1DB",
                     icon: TrendingUp,
                   },
                   {
-                    label: "Disbursements",
+                    label: t('systemAdmin.analytics.disbursements'),
                     value: financial?.summary?.total_disbursements ?? 0,
                     color: "#1CDBC9",
                     icon: DollarSign,
                   },
                   {
-                    label: "Platform Fees",
+                    label: t('systemAdmin.analytics.platformFeesCollect'),
                     value: financial?.summary?.platform_fees_collected ?? 0,
                     color: "#f59e0b",
                     icon: Percent,
@@ -693,16 +695,16 @@ export default function AdminAnalytics() {
               {financialMonthly.length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase">
-                    Monthly Trends
+                    {t('systemAdmin.analytics.monthlyTrends')}
                   </h4>
                   <ChartContainer
                     config={{
-                      donations: { label: "Donations", color: "#471DDB" },
+                      donations: { label: t('systemAdmin.analytics.donations'), color: "#471DDB" },
                       disbursements: {
-                        label: "Disbursements",
+                        label: t('systemAdmin.analytics.disbursements'),
                         color: "#1CDBC9",
                       },
-                      fees: { label: "Fees", color: "#f59e0b" },
+                      fees: { label: t('systemAdmin.analytics.fees'), color: "#f59e0b" },
                     }}
                     className="h-40 w-full aspect-auto"
                   >
@@ -755,7 +757,7 @@ export default function AdminAnalytics() {
 
         {/* Voucher Analytics */}
         <div className="card p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Voucher Analytics</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('systemAdmin.analytics.voucherAnalytics')}</h3>
           {isLoading ? (
             <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
           ) : (
@@ -764,19 +766,19 @@ export default function AdminAnalytics() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   {
-                    label: "Generated",
+                    label: t('systemAdmin.analytics.generated'),
                     current: voucherAnalytics?.total_generated?.current ?? 0,
                     growth: voucherAnalytics?.total_generated,
                     color: "#471DDB",
                   },
                   {
-                    label: "Redeemed",
+                    label: t('systemAdmin.analytics.redeemed'),
                     current: voucherAnalytics?.total_redeemed?.current ?? 0,
                     growth: voucherAnalytics?.total_redeemed,
                     color: "#1CDBC9",
                   },
                   {
-                    label: "Redemption Rate",
+                    label: t('systemAdmin.analytics.redemptionRate'),
                     current: `${voucherAnalytics?.redemption_rate ?? 0}%`,
                     growth: undefined,
                     color: "#f59e0b",
@@ -801,7 +803,7 @@ export default function AdminAnalytics() {
               {voucherChartData.length > 0 && (
                 <ChartContainer
                   config={{
-                    vouchers: { label: "Vouchers", color: "#1CDBC9" },
+                    vouchers: { label: t('systemAdmin.analytics.vouchers'), color: "#1CDBC9" },
                   }}
                   className="h-40 w-full aspect-auto"
                 >
@@ -842,7 +844,7 @@ export default function AdminAnalytics() {
                 voucherAnalytics.by_hospital.length > 0 && (
                   <div>
                     <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase">
-                      Top Hospitals by Vouchers
+                      {t('systemAdmin.analytics.topHospitalsByVouchers')}
                     </h4>
                     <div className="space-y-1.5">
                       {voucherAnalytics.by_hospital.slice(0, 4).map((h) => (
@@ -871,7 +873,7 @@ export default function AdminAnalytics() {
         {/* User Role Distribution */}
         <div className="card p-6">
           <h3 className="font-bold text-gray-900 mb-4">
-            User Role Distribution
+            {t('systemAdmin.analytics.userRoleDistribution')}
           </h3>
           {rolePieData.length > 0 ? (
             <div className="flex items-center gap-8">
@@ -920,7 +922,7 @@ export default function AdminAnalytics() {
                 ))}
                 <div className="pt-2 border-t border-gray-100">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Total Users</span>
+                    <span className="text-sm text-gray-500">{t('systemAdmin.analytics.totalUsers')}</span>
                     <span className="text-sm font-black text-[#471DDB]">
                       {roleSummary?.total_users ?? 0}
                     </span>
@@ -929,15 +931,15 @@ export default function AdminAnalytics() {
               </div>
             </div>
           ) : (
-            <p className="text-gray-400 text-sm text-center py-8">
-              No role data available
-            </p>
+              <p className="text-gray-400 text-sm text-center py-8">
+                {t('systemAdmin.analytics.noRoleData')}
+              </p>
           )}
         </div>
 
         {/* Hospital Network */}
         <div className="card p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Hospital Network</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('systemAdmin.analytics.hospitalNetwork')}</h3>
           {isLoading ? (
             <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
           ) : (
@@ -948,7 +950,7 @@ export default function AdminAnalytics() {
                   <div className="text-2xl font-black text-[#471DDB]">
                     {hospitalNetwork?.total_hospitals?.current ?? 0}
                   </div>
-                  <div className="text-xs text-gray-500">Total Hospitals</div>
+                  <div className="text-xs text-gray-500">{t('systemAdmin.analytics.totalHospitals')}</div>
                   <GrowthBadge
                     indicator={hospitalNetwork?.total_hospitals}
                   />
@@ -978,7 +980,7 @@ export default function AdminAnalytics() {
               {hospitalChartData.length > 0 && (
                 <ChartContainer
                   config={{
-                    hospitals: { label: "Hospitals", color: "#1D38DB" },
+                    hospitals: { label: t('systemAdmin.analytics.hospitals'), color: "#1D38DB" },
                   }}
                   className="h-32 w-full aspect-auto"
                 >
@@ -1016,7 +1018,7 @@ export default function AdminAnalytics() {
                 hospitalNetwork.top_hospitals.length > 0 && (
                   <div>
                     <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase">
-                      Top Hospitals
+                      {t('systemAdmin.analytics.topHospitals')}
                     </h4>
                     <div className="space-y-1.5">
                       {hospitalNetwork.top_hospitals.slice(0, 4).map((h) => (
@@ -1033,7 +1035,7 @@ export default function AdminAnalytics() {
                             </span>
                           </div>
                           <span className="text-xs font-bold text-[#471DDB]">
-                            {h.vouchers_redeemed} vouchers
+                            {h.vouchers_redeemed} {t('systemAdmin.analytics.vouchersLabel')}
                           </span>
                         </div>
                       ))}

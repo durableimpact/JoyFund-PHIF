@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { Wallet, Banknote, Loader2 } from "lucide-react";
@@ -6,6 +7,7 @@ import { formatXAF, formatDate } from "@/lib/utils";
 import { getEscrowAccount, getFeeAccount, listAccounts } from "@/actions/payments";
 
 export default function AccountsPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
@@ -31,8 +33,8 @@ export default function AccountsPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Accounts</h1>
-          <p className="text-gray-500 text-sm">Escrow, fee, and operational accounts</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.accounts.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('systemAdmin.accounts.description')}</p>
         </div>
       </div>
 
@@ -44,8 +46,8 @@ export default function AccountsPage() {
               <Wallet size={20} className="text-[#1DB1DB]" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900">Escrow Account</h3>
-              <p className="text-xs text-gray-400">Funds held in escrow</p>
+              <h3 className="font-bold text-gray-900">{t('systemAdmin.accounts.escrowAccount')}</h3>
+              <p className="text-xs text-gray-400">{t('systemAdmin.accounts.escrowDescription')}</p>
             </div>
           </div>
           {eLoading ? (
@@ -53,7 +55,7 @@ export default function AccountsPage() {
           ) : (
             <>
               <div className="text-3xl font-black text-[#1DB1DB]">{formatXAF(escrow?.balance ?? 0)}</div>
-              <div className="mt-3 text-xs text-gray-400">Updated {formatDate(escrow?.updated_at ?? null)}</div>
+              <div className="mt-3 text-xs text-gray-400">{t('systemAdmin.accounts.updated')} {formatDate(escrow?.updated_at ?? null)}</div>
             </>
           )}
         </div>
@@ -65,8 +67,8 @@ export default function AccountsPage() {
               <Banknote size={20} className="text-[#471DDB]" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900">Fee Account</h3>
-              <p className="text-xs text-gray-400">Platform fee collections</p>
+              <h3 className="font-bold text-gray-900">{t('systemAdmin.accounts.feeAccount')}</h3>
+              <p className="text-xs text-gray-400">{t('systemAdmin.accounts.feeDescription')}</p>
             </div>
           </div>
           {fLoading ? (
@@ -74,7 +76,7 @@ export default function AccountsPage() {
           ) : (
             <>
               <div className="text-3xl font-black text-[#471DDB]">{formatXAF(fee?.balance ?? 0)}</div>
-              <div className="mt-3 text-xs text-gray-400">Updated {formatDate(fee?.updated_at ?? null)}</div>
+              <div className="mt-3 text-xs text-gray-400">{t('systemAdmin.accounts.updated')} {formatDate(fee?.updated_at ?? null)}</div>
             </>
           )}
         </div>
@@ -82,21 +84,21 @@ export default function AccountsPage() {
 
       {/* All Accounts */}
       <div className="card p-4 md:p-6">
-        <h3 className="font-bold text-gray-900 mb-4">All Accounts</h3>
+        <h3 className="font-bold text-gray-900 mb-4">{t('systemAdmin.accounts.allAccounts')}</h3>
         {aLoading ? (
           <div className="flex items-center justify-center py-8"><Loader2 className="w-5 h-5 text-[#471DDB] animate-spin" /></div>
         ) : !allAccounts?.results?.length ? (
-          <p className="text-gray-400 text-sm text-center py-8">No accounts found</p>
+          <p className="text-gray-400 text-sm text-center py-8">{t('systemAdmin.accounts.noAccounts')}</p>
         ) : (
           <>
             {/* Mobile: card layout */}
             <div className="md:hidden space-y-3">
               {allAccounts.results.map((a: Account) => (
                 <div key={a.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Name</span><span className="font-semibold text-gray-900">{a.name}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Balance</span><span className="font-bold" style={{ color: '#471DDB' }}>{formatXAF(a.balance)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Created</span><span className="text-gray-400 text-xs">{formatDate(a.created_at)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Updated</span><span className="text-gray-400 text-xs">{formatDate(a.updated_at)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">{t('systemAdmin.accounts.name')}</span><span className="font-semibold text-gray-900">{a.name}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.accounts.balance')}</span><span className="font-bold" style={{ color: '#471DDB' }}>{formatXAF(a.balance)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.accounts.created')}</span><span className="text-gray-400 text-xs">{formatDate(a.created_at)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.accounts.updated')}</span><span className="text-gray-400 text-xs">{formatDate(a.updated_at)}</span></div>
                 </div>
               ))}
             </div>
@@ -105,7 +107,7 @@ export default function AccountsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["Name", "Balance", "Created", "Updated"].map(h => (
+                    {[t('systemAdmin.accounts.name'), t('systemAdmin.accounts.balance'), t('systemAdmin.accounts.created'), t('systemAdmin.accounts.updated')].map(h => (
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                     ))}
                   </tr>

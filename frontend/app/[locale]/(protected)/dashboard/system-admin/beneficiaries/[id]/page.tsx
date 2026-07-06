@@ -1,4 +1,5 @@
 'use client';
+import { useI18n } from '@/locales/client';
 import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -32,6 +33,7 @@ import { formatXAF, formatDate, formatDateTime, statusColor } from '@/lib/utils'
 const SUB_PAGE_SIZE = 5;
 
 export default function AdminBeneficiaryDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -223,12 +225,12 @@ export default function AdminBeneficiaryDetailPage() {
   }
 
   if (!beneficiary) {
-    return (<div className="text-center py-16 text-gray-400">Beneficiary not found.</div>);
+    return (<div className="text-center py-16 text-gray-400">{t('systemAdmin.beneficiaries.detail.notFound')}</div>);
   }
 
   return (<>
       <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-        <ArrowLeft size={16} /> Back to Beneficiaries
+        <ArrowLeft size={16} /> {t('systemAdmin.beneficiaries.detail.backToList')}
       </button>
 
       <div className="mb-6 flex items-start justify-between">
@@ -237,7 +239,7 @@ export default function AdminBeneficiaryDetailPage() {
           <p className="text-gray-500 text-sm mt-1">
             {beneficiary.digital_health_id && <span className="font-mono mr-3">{beneficiary.digital_health_id}</span>}
             <span className={`badge text-xs ${beneficiary.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-              {beneficiary.is_verified ? 'Verified' : 'Pending Verification'}
+              {beneficiary.is_verified ? t('systemAdmin.beneficiaries.detail.verified') : t('systemAdmin.beneficiaries.detail.pendingVerification')}
             </span>
           </p>
         </div>
@@ -245,11 +247,11 @@ export default function AdminBeneficiaryDetailPage() {
           {!beneficiary.is_verified && (
             <button onClick={() => verifyMutation.mutate()} disabled={verifyMutation.isPending}
               className="btn-admin text-sm flex items-center gap-2" style={{ background: '#059669' }}>
-              {verifyMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : null} Verify
+              {verifyMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : null} {t('systemAdmin.beneficiaries.detail.verify')}
             </button>
           )}
           <button onClick={() => setShowEdit(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
-            <Pencil size={16} /> Edit
+            <Pencil size={16} /> {t('systemAdmin.beneficiaries.detail.edit')}
           </button>
         </div>
       </div>
@@ -258,7 +260,7 @@ export default function AdminBeneficiaryDetailPage() {
         <div className="lg:col-span-2 space-y-5">
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <User size={14} /> Personal Information
+              <User size={14} /> {t('systemAdmin.beneficiaries.detail.personalInfo')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <Detail label="Full Name" value={beneficiary.full_name} />
@@ -274,7 +276,7 @@ export default function AdminBeneficiaryDetailPage() {
 
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <MapPin size={14} /> Location
+              <MapPin size={14} /> {t('systemAdmin.beneficiaries.detail.location')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <Detail label="Region" value={beneficiary.region} />
@@ -285,7 +287,7 @@ export default function AdminBeneficiaryDetailPage() {
 
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Phone size={14} /> Emergency Contact
+              <Phone size={14} /> {t('systemAdmin.beneficiaries.detail.emergencyContact')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <Detail label="Name" value={beneficiary.emergency_contact_name || '—'} />
@@ -297,14 +299,14 @@ export default function AdminBeneficiaryDetailPage() {
           <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                <Heart size={14} /> Health Issues ({hiCount})
+                <Heart size={14} /> {t('systemAdmin.beneficiaries.detail.healthIssues')} ({hiCount})
               </h2>
               <button onClick={() => setShowHiForm(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#471DDB' }}>
-                <Plus size={14} /> Add Issue
+                <Plus size={14} /> {t('systemAdmin.beneficiaries.detail.addIssue')}
               </button>
             </div>
             {healthIssues.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4">No health issues recorded yet.</p>
+              <p className="text-xs text-gray-400 py-4">{t('systemAdmin.beneficiaries.detail.noHealthIssues')}</p>
             ) : (<>
               <div className="space-y-3">
                 {healthIssues.map((hi) => (
@@ -320,7 +322,7 @@ export default function AdminBeneficiaryDetailPage() {
                     </div>
                     <p className="text-xs text-gray-600">{hi.description}</p>
                     <div className="flex items-center gap-3 mt-1.5 text-[10px] text-gray-400">
-                      <span>Severity: {hi.severity}</span>
+                      <span>{t('systemAdmin.beneficiaries.detail.severity')}: {hi.severity}</span>
                       {hi.created_at && <span>{formatDate(hi.created_at)}</span>}
                     </div>
                     {hi.status === 'REPORTED' && (

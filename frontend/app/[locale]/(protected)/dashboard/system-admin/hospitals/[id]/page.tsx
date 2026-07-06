@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { ArrowLeft, CreditCard, Pencil, Users, Stethoscope } from "lucide-react";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";

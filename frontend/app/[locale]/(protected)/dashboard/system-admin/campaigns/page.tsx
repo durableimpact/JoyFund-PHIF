@@ -3,6 +3,7 @@ import { useUrlSearchParams } from '@/hooks/use-url-search-params';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { useI18n } from '@/locales/client';
 import {
   Megaphone,
   ChevronLeft,
@@ -19,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const PAGE_SIZE = 10;
 
 export default function AdminCampaigns() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const [params, setParams] = useUrlSearchParams({ search: "", page: 1 }, { page: Number });
@@ -51,8 +53,8 @@ export default function AdminCampaigns() {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Campaigns</h1>
-          <p className="text-gray-500 text-sm">{totalCount} total campaigns</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.campaigns.title')}</h1>
+          <p className="text-gray-500 text-sm">{totalCount} {t('systemAdmin.campaigns.totalSuffix')}</p>
         </div>
       </div>
 
@@ -60,7 +62,7 @@ export default function AdminCampaigns() {
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         <input 
           className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#471DDB]/20 focus:border-[#471DDB] transition-all" 
-          placeholder="Search by title or description…" 
+          placeholder={t('systemAdmin.campaigns.searchPlaceholder')} 
           value={search} 
           onChange={e => setParams({ search: e.target.value, page: 1 })} 
         />
@@ -71,8 +73,8 @@ export default function AdminCampaigns() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
-                {['Campaign','Progress','Donations'].map(h => (
-                  <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                {[t('systemAdmin.campaigns.campaign'), t('systemAdmin.campaigns.progress'), t('systemAdmin.campaigns.donations')].map((h, i) => (
+                  <th key={i} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -80,7 +82,7 @@ export default function AdminCampaigns() {
               {isLoading ? (
                 <tr><td colSpan={3} className="text-center py-16"><Skeleton className="h-5 w-5 rounded mx-auto" /></td></tr>
               ) : campaigns.length === 0 ? (
-                <tr><td colSpan={3} className="text-center py-16 text-gray-400 text-sm">{search ? 'No campaigns matching your search' : 'No campaigns yet'}</td></tr>
+                <tr><td colSpan={3} className="text-center py-16 text-gray-400 text-sm">{search ? t('systemAdmin.campaigns.noSearchResults') : t('systemAdmin.campaigns.noCampaigns')}</td></tr>
               ) : campaigns.map((c: CampaignList) => (
                 <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="p-4">
@@ -110,7 +112,7 @@ export default function AdminCampaigns() {
                   <td className="p-4">
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Users size={12} className="text-gray-400" />
-                      {c.total_number_of_successfull_donations} donations
+                      {c.total_number_of_successfull_donations} {t('systemAdmin.campaigns.donationsLabel')}
                     </div>
                   </td>
                 </tr>

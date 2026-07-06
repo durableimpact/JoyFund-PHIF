@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, Gift, CreditCard, User, MessageSquare } from "lucide-react";

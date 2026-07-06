@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";

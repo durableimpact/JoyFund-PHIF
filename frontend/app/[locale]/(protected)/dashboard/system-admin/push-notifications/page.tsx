@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from '@/locales/client';
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation } from "@tanstack/react-query";

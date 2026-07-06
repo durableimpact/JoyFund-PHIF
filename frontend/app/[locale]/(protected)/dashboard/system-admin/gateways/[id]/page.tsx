@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from '@/locales/client';
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
@@ -31,9 +32,6 @@ export default function GatewayDetailPage() {
 
   if (loading) {
     return <DetailPageSkeleton />;
-  }
-      </div>
-    );
   }
 
   if (!gateway) {

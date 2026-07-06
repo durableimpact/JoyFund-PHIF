@@ -41,8 +41,10 @@ import {
   getAdminDonationTrends,
   getAdminUserAnalytics,
 } from "@/actions/accounts";
+import { useI18n } from "@/locales/client";
 export default function AdminDashboard() {
   const { data: session } = useSession();
+  const t = useI18n();
   const token =
     (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
@@ -83,28 +85,28 @@ export default function AdminDashboard() {
     oLoading || orgLoading || bvLoading || finLoading || trLoading || ugLoading;
   const kpis = [
     {
-      label: "Total Donations",
+      label: t("dashboard.admin.totalDonations"),
       value: formatXAF(overview?.total_donations?.current ?? 0),
       icon: TrendingUp,
       color: "#471DDB",
       sub: periodLabel,
     },
     {
-      label: "Total Campaigns",
+      label: t("dashboard.admin.totalCampaigns"),
       value: overview?.total_campaigns?.current ?? 0,
       icon: Activity,
       color: "#1DB1DB",
       sub: periodLabel,
     },
     {
-      label: "Total Beneficiaries",
+      label: t("dashboard.admin.totalBeneficiaries"),
       value: overview?.total_beneficiaries?.current ?? 0,
       icon: CheckCircle,
       color: "#1CDBC9",
       sub: periodLabel,
     },
     {
-      label: "Hospitals",
+      label: t("dashboard.admin.hospitals"),
       value: overview?.total_hospitals?.current ?? 0,
       icon: Building2,
       color: "#f59e0b",
@@ -115,9 +117,9 @@ export default function AdminDashboard() {
     <>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">System Overview</h1>
+          <h1 className="text-2xl font-black text-gray-900">{t("dashboard.admin.systemOverview")}</h1>
           <p className="text-gray-500 text-sm">
-            Welcome, {currentUser?.first_name || "Admin"}
+            {t("dashboard.admin.welcome", { name: currentUser?.first_name || "Admin" })}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -139,7 +141,7 @@ export default function AdminDashboard() {
             className="btn-admin text-sm flex items-center gap-2"
             style={{ background: "#471DDB" }}
           >
-            <Users size={15} /> Create User
+            <Users size={15} /> {t("dashboard.admin.createUser")}
           </Link>
         </div>
       </div>

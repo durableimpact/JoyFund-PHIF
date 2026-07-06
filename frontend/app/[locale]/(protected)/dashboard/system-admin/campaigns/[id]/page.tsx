@@ -28,6 +28,7 @@ import {
   ChevronRight,
   Eye,
 } from "lucide-react";
+import { useI18n } from '@/locales/client';
 import { formatXAF, formatDateTime } from "@/lib/utils";
 import { getCampaign, listCampaignDonations, getCampaignAnalytics } from "@/actions/campaigns";
 import {
@@ -53,6 +54,7 @@ const analyticsChartConfig = {
 } satisfies ChartConfig;
 
 export default function AdminCampaignDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
@@ -116,25 +118,25 @@ export default function AdminCampaignDetailPage() {
     switch (type) {
       case "DONATION":
         return {
-          label: "Donation",
+          label: t('systemAdmin.campaigns.detail.donation'),
           icon: <ArrowDownLeft size={12} />,
           color: "text-green-600 bg-green-50",
         };
       case "VOUCHER_ALLOCATED":
         return {
-          label: "Allocation",
+          label: t('systemAdmin.campaigns.detail.allocation'),
           icon: <ArrowUpRight size={12} />,
           color: "text-blue-600 bg-blue-50",
         };
       case "HOSPITAL_SETTLED":
         return {
-          label: "Settlement",
+          label: t('systemAdmin.campaigns.detail.settlement'),
           icon: <Building2 size={12} />,
           color: "text-purple-600 bg-purple-50",
         };
       case "SURPLUS_REFUND":
         return {
-          label: "Refund",
+          label: t('systemAdmin.campaigns.detail.refund'),
           icon: <CheckCircle2 size={12} />,
           color: "text-amber-600 bg-amber-50",
         };
@@ -157,25 +159,25 @@ export default function AdminCampaignDetailPage() {
     return (
       <div className="text-center py-20 px-4">
         <AlertTriangle size={48} className="mx-auto text-amber-500 mb-4" />
-        <h3 className="text-lg font-bold text-gray-900 mb-2">
-          {isUnauthorized ? 'Access Denied' : 'Campaign Not Found'}
-        </h3>
-        <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-          {isUnauthorized 
-            ? 'You do not have the required permissions to audit this campaign or your session has expired.'
-            : 'The campaign you are looking for does not exist or has been removed.'}
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button onClick={() => router.back()} className="btn-secondary px-6 py-2 rounded-xl text-sm font-bold border border-gray-200">
-            Go Back
-          </button>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="btn-primary px-6 py-2 rounded-xl text-sm font-bold text-white"
-            style={{ background: '#471DDB' }}
-          >
-            Retry Fetch
-          </button>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            {t(isUnauthorized ? 'systemAdmin.campaigns.detail.accessDenied' : 'systemAdmin.campaigns.detail.notFound')}
+          </h3>
+          <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+            {isUnauthorized 
+              ? t('systemAdmin.campaigns.detail.noPermission')
+              : t('systemAdmin.campaigns.detail.removed')}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button onClick={() => router.back()} className="btn-secondary px-6 py-2 rounded-xl text-sm font-bold border border-gray-200">
+              {t('systemAdmin.campaigns.detail.goBack')}
+            </button>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="btn-primary px-6 py-2 rounded-xl text-sm font-bold text-white"
+              style={{ background: '#471DDB' }}
+            >
+              {t('systemAdmin.campaigns.detail.retryFetch')}
+            </button>
         </div>
       </div>
     );
@@ -202,7 +204,7 @@ export default function AdminCampaignDetailPage() {
           </button>
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl font-black text-gray-900">
-              Campaign Audit
+              {t('systemAdmin.campaigns.detail.campaignAudit')}
             </h1>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span
@@ -222,7 +224,7 @@ export default function AdminCampaignDetailPage() {
           target="_blank"
           className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm self-start sm:self-auto"
         >
-          <ExternalLink size={16} /> Public View
+          <ExternalLink size={16} /> {t('systemAdmin.campaigns.detail.publicView')}
         </Link>
       </div>
 
@@ -270,12 +272,12 @@ export default function AdminCampaignDetailPage() {
                   </div>
                   <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
-                      Organized By
+                      {t('systemAdmin.campaigns.detail.organizedBy')}
                     </p>
                     <p className="text-sm font-bold text-gray-900 truncate max-w-[180px] sm:max-w-none">
                       {donor.first_name
                         ? `${donor.first_name} ${donor.last_name}`
-                        : "Anonymous Donor"}
+                        : t('systemAdmin.campaigns.detail.anonymousDonor')}
                     </p>
                   </div>
                 </div>
@@ -285,7 +287,7 @@ export default function AdminCampaignDetailPage() {
                   </div>
                   <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
-                      Timeline
+                      {t('systemAdmin.campaigns.detail.timeline')}
                     </p>
                     <p className="text-sm font-bold text-gray-900">
                       {new Date(campaign.created_at).toLocaleDateString()} —{" "}
@@ -305,29 +307,29 @@ export default function AdminCampaignDetailPage() {
                   <TrendingUp size={20} />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">
-                  Transaction Ledger
+                  {t('systemAdmin.campaigns.detail.transactionLedger')}
                 </h3>
               </div>
 
               <div className="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-100 overflow-x-auto no-scrollbar w-full md:w-auto">
-                {[
-                  "ALL",
-                  "DONATION",
-                  "VOUCHER_ALLOCATED",
-                  "HOSPITAL_SETTLED",
-                  "SURPLUS_REFUND",
-                ].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setTxFilter(type)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all whitespace-nowrap ${
-                      txFilter === type
-                        ? "bg-[#471DDB] text-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {type.replace("_", " ")}
-                  </button>
+                  {[
+                    { key: "ALL", label: t('systemAdmin.campaigns.detail.filterAll') },
+                    { key: "DONATION", label: t('systemAdmin.campaigns.detail.donation') },
+                    { key: "VOUCHER_ALLOCATED", label: t('systemAdmin.campaigns.detail.allocation') },
+                    { key: "HOSPITAL_SETTLED", label: t('systemAdmin.campaigns.detail.settlement') },
+                    { key: "SURPLUS_REFUND", label: t('systemAdmin.campaigns.detail.refund') },
+                  ].map(({ key, label }) => (
+                    <button
+                      key={key}
+                      onClick={() => setTxFilter(key)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all whitespace-nowrap ${
+                        txFilter === key
+                          ? "bg-[#471DDB] text-white shadow-sm"
+                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {label}
+                    </button>
                 ))}
               </div>
             </div>
@@ -335,9 +337,9 @@ export default function AdminCampaignDetailPage() {
             {transactions.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                 <Clock size={32} className="mx-auto text-gray-300 mb-3" />
-                <p className="text-sm text-gray-500">
-                  No matching transactions recorded yet.
-                </p>
+                  <p className="text-sm text-gray-500">
+                    {t('systemAdmin.campaigns.detail.noTransactions')}
+                  </p>
               </div>
             ) : (
               <>
@@ -353,8 +355,8 @@ export default function AdminCampaignDetailPage() {
                             {tx.transaction_type === "DONATION" || tx.transaction_type === "SURPLUS_REFUND" ? "+" : "-"} {formatXAF(tx.amount)}
                           </span>
                         </div>
-                        <div className="flex justify-between text-sm"><span className="text-gray-500">Description</span><span className="text-xs text-gray-600 truncate max-w-[200px]">{tx.description}</span></div>
-                        <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="text-gray-400 text-xs">{new Date(tx.created_at).toLocaleDateString()}</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.campaigns.detail.description')}</span><span className="text-xs text-gray-600 truncate max-w-[200px]">{tx.description}</span></div>
+                        <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.campaigns.detail.date')}</span><span className="text-gray-400 text-xs">{new Date(tx.created_at).toLocaleDateString()}</span></div>
                       </div>
                     );
                   })}
@@ -365,10 +367,10 @@ export default function AdminCampaignDetailPage() {
                     <table className="w-full text-sm">
                       <thead className="sticky top-0 bg-white shadow-sm z-10">
                         <tr className="text-left border-b border-gray-100">
-                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Type</th>
-                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Description</th>
-                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Amount</th>
-                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Date</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">{t('systemAdmin.campaigns.detail.type')}</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">{t('systemAdmin.campaigns.detail.description')}</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">{t('systemAdmin.campaigns.detail.amount')}</th>
+                          <th className="p-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">{t('systemAdmin.campaigns.detail.date')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
@@ -409,11 +411,11 @@ export default function AdminCampaignDetailPage() {
                   <Gift size={20} />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">
-                  Donation History
+                  {t('systemAdmin.campaigns.detail.donationHistory')}
                 </h3>
               </div>
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded-md shrink-0">
-                {donations.length} Contribution{donations.length !== 1 ? "s" : ""}
+                {donations.length} {donations.length === 1 ? t('systemAdmin.campaigns.detail.contribution') : t('systemAdmin.campaigns.detail.contributions')}
               </span>
             </div>
 
@@ -425,7 +427,7 @@ export default function AdminCampaignDetailPage() {
               <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                 <Heart size={32} className="mx-auto text-gray-300 mb-3" />
                 <p className="text-sm text-gray-500">
-                  No donations received for this campaign.
+                  {t('systemAdmin.campaigns.detail.noDonations')}
                 </p>
               </div>
             ) : (
@@ -444,17 +446,17 @@ export default function AdminCampaignDetailPage() {
                             <UserIcon size={12} />
                           </div>
                           <span className="font-bold text-gray-900 text-xs">
-                            {d.is_anonymous ? "Anonymous" : d.donor_name || "Guest"}
+                            {d.is_anonymous ? t('systemAdmin.campaigns.detail.anonymous') : d.donor_name || t('systemAdmin.campaigns.detail.guest')}
                           </span>
                         </div>
                         <ChevronRight size={14} className="text-gray-300" />
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Gross</span>
+                        <span className="text-gray-500">{t('systemAdmin.campaigns.detail.gross')}</span>
                         <span className="font-black text-xs text-gray-900">{formatXAF(d.payment?.amount || d.amount)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Net to Campaign</span>
+                        <span className="text-gray-500">{t('systemAdmin.campaigns.detail.netToCampaign')}</span>
                         <span className="font-bold text-xs text-green-600">{formatXAF(d.net_amount || 0)}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
@@ -473,14 +475,14 @@ export default function AdminCampaignDetailPage() {
                     <table className="w-full text-sm">
                       <thead className="sticky top-0 bg-white shadow-sm z-10">
                         <tr className="text-left border-b border-gray-100">
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Donor</th>
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider">Method</th>
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Gross Amount</th>
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Aggregator Fee</th>
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Platform Fee</th>
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Net to Campaign</th>
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-center">Status</th>
-                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">Date</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider">{t('systemAdmin.campaigns.detail.donor')}</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider">{t('systemAdmin.campaigns.detail.method')}</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">{t('systemAdmin.campaigns.detail.grossAmount')}</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">{t('systemAdmin.campaigns.detail.aggregatorFee')}</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">{t('systemAdmin.campaigns.detail.platformFee')}</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">{t('systemAdmin.campaigns.detail.netToCampaign')}</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-center">{t('systemAdmin.campaigns.detail.statusLabel')}</th>
+                          <th className="p-3 font-bold text-gray-400 text-[10px] uppercase tracking-wider text-right">{t('systemAdmin.campaigns.detail.date')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
@@ -496,7 +498,7 @@ export default function AdminCampaignDetailPage() {
                                   <UserIcon size={12} />
                                 </div>
                                 <p className="font-bold text-gray-900 text-xs">
-                                  {d.is_anonymous ? "Anonymous" : d.donor_name || "Guest"}
+                                  {d.is_anonymous ? t('systemAdmin.campaigns.detail.anonymous') : d.donor_name || t('systemAdmin.campaigns.detail.guest')}
                                 </p>
                               </div>
                             </td>
@@ -552,7 +554,7 @@ export default function AdminCampaignDetailPage() {
                   <>
                     <DialogHeader>
                       <DialogTitle className="text-lg font-black text-gray-900">
-                        Donation Detail
+                        {t('systemAdmin.campaigns.detail.donationDetail')}
                       </DialogTitle>
                     </DialogHeader>
 
@@ -564,7 +566,7 @@ export default function AdminCampaignDetailPage() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-gray-900">
-                            {d.is_anonymous ? "Anonymous" : d.donor_name || "Guest"}
+                            {d.is_anonymous ? t('systemAdmin.campaigns.detail.anonymous') : d.donor_name || t('systemAdmin.campaigns.detail.guest')}
                           </p>
                           <p className="text-[10px] text-gray-400 font-medium">
                             {new Date(d.created_at).toLocaleString()}
@@ -580,23 +582,23 @@ export default function AdminCampaignDetailPage() {
                     {/* Fee Breakdown */}
                     <div className="space-y-0 border border-gray-100 rounded-2xl overflow-hidden">
                       <div className="flex justify-between items-center p-4 bg-white">
-                        <span className="text-sm text-gray-600">Gross Amount (what donor paid)</span>
+                        <span className="text-sm text-gray-600">{t('systemAdmin.campaigns.detail.grossAmountWhatDonorPaid')}</span>
                         <span className="text-sm font-black text-gray-900">{formatXAF(gross)}</span>
                       </div>
                       <div className="flex justify-between items-center p-4 bg-gray-50 border-t border-gray-100">
-                        <span className="text-sm text-gray-600">Aggregator Fee ({payment.payment_method || "—"})</span>
+                        <span className="text-sm text-gray-600">{t('systemAdmin.campaigns.detail.aggregatorFeeLabel')} ({payment.payment_method || "—"})</span>
                         <span className="text-sm font-medium text-red-500">-{formatXAF(aggFee)}</span>
                       </div>
                       <div className="flex justify-between items-center p-4 bg-white border-t border-gray-100">
-                        <span className="text-sm text-gray-600">App Amount (received by platform)</span>
+                        <span className="text-sm text-gray-600">{t('systemAdmin.campaigns.detail.appAmount')}</span>
                         <span className="text-sm font-bold text-gray-700">{formatXAF(appAmount)}</span>
                       </div>
                       <div className="flex justify-between items-center p-4 bg-gray-50 border-t border-gray-100">
-                        <span className="text-sm text-gray-600">Platform Fee (JoyFund)</span>
+                        <span className="text-sm text-gray-600">{t('systemAdmin.campaigns.detail.platformFeeLabel')}</span>
                         <span className="text-sm font-medium text-amber-600">-{formatXAF(platformFee)}</span>
                       </div>
                       <div className="flex justify-between items-center p-4 bg-green-50 border-t border-green-100">
-                        <span className="text-sm font-bold text-green-700">Net to Campaign</span>
+                        <span className="text-sm font-bold text-green-700">{t('systemAdmin.campaigns.detail.netToCampaign')}</span>
                         <span className="text-sm font-black text-green-700">{formatXAF(net)}</span>
                       </div>
                     </div>
@@ -604,19 +606,19 @@ export default function AdminCampaignDetailPage() {
                     {/* Payment Details */}
                     <div className="space-y-3">
                       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                        <CreditCard size={14} /> Payment Details
+                        <CreditCard size={14} /> {t('systemAdmin.campaigns.detail.paymentDetails')}
                       </h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="p-3 bg-gray-50 rounded-xl">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Method</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">{t('systemAdmin.campaigns.detail.method')}</p>
                           <p className="text-sm font-bold text-gray-900">{payment.payment_method || "—"}</p>
                         </div>
                         <div className="p-3 bg-gray-50 rounded-xl">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Phone</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">{t('systemAdmin.campaigns.detail.phone')}</p>
                           <p className="text-sm font-bold text-gray-900">{payment.phone_number || "—"}</p>
                         </div>
                         <div className="p-3 bg-gray-50 rounded-xl col-span-2">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Reference</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">{t('systemAdmin.campaigns.detail.reference')}</p>
                           <p className="text-xs font-mono text-gray-600 break-all">{payment.payment_reference || "—"}</p>
                         </div>
                       </div>
@@ -626,7 +628,7 @@ export default function AdminCampaignDetailPage() {
                     {d.message && (
                       <div className="space-y-2">
                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                          <MessageSquare size={14} /> Donor Message
+                          <MessageSquare size={14} /> {t('systemAdmin.campaigns.detail.donorMessage')}
                         </h4>
                         <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-600">
                           {d.message}
@@ -637,12 +639,12 @@ export default function AdminCampaignDetailPage() {
                     {/* IDs */}
                     <div className="p-3 bg-gray-50 rounded-xl space-y-1">
                       <div className="flex justify-between">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase">Donation ID</span>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase">{t('systemAdmin.campaigns.detail.donationId')}</span>
                         <span className="text-[10px] font-mono text-gray-500">{d.id}</span>
                       </div>
                       {payment.payment_id && (
                         <div className="flex justify-between">
-                          <span className="text-[10px] text-gray-400 font-bold uppercase">Payment ID</span>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase">{t('systemAdmin.campaigns.detail.paymentId')}</span>
                           <span className="text-[10px] font-mono text-gray-500">{payment.payment_id}</span>
                         </div>
                       )}
@@ -660,14 +662,14 @@ export default function AdminCampaignDetailPage() {
                 <Gift size={20} />
               </div>
               <h3 className="text-lg font-bold text-gray-900">
-                Beneficiary Support
+                {t('systemAdmin.campaigns.detail.beneficiarySupport')}
               </h3>
             </div>
 
             <div className="grid gap-4">
               {voucherFundings.length === 0 ? (
                 <div className="text-center py-8 text-gray-400 text-sm">
-                  No vouchers have been funded by this campaign yet.
+                  {t('systemAdmin.campaigns.detail.noVoucherFundings')}
                 </div>
               ) : (
                 voucherFundings.map((vf: any) => (
@@ -702,7 +704,7 @@ export default function AdminCampaignDetailPage() {
                     <div className="flex items-center gap-6 sm:text-right">
                       <div>
                         <p className="text-[9px] text-gray-400 font-bold uppercase">
-                          Committed
+                          {t('systemAdmin.campaigns.detail.committed')}
                         </p>
                         <p className="text-xs font-bold text-gray-700">
                           {formatXAF(vf.committed_amount)}
@@ -710,7 +712,7 @@ export default function AdminCampaignDetailPage() {
                       </div>
                       <div>
                         <p className="text-[9px] text-gray-400 font-bold uppercase">
-                          Utilized
+                          {t('systemAdmin.campaigns.detail.utilized')}
                         </p>
                         <p className="text-xs font-bold text-emerald-600">
                           {formatXAF(vf.utilized_amount)}
@@ -730,7 +732,7 @@ export default function AdminCampaignDetailPage() {
           <div className="card p-4 md:p-6 bg-[#471DDB] text-white">
             <h3 className="font-bold text-white/80 text-xs uppercase tracking-wider mb-6 flex items-center gap-2">
               <Wallet size={14} />
-              Campaign Wallet
+              {t('systemAdmin.campaigns.detail.campaignWallet')}
             </h3>
 
             <div className="space-y-6">
@@ -739,7 +741,7 @@ export default function AdminCampaignDetailPage() {
                   {formatXAF(campaign.available_balance || 0)}
                 </p>
                 <p className="text-white/60 text-xs font-medium uppercase tracking-tight">
-                  Available Balance
+                  {t('systemAdmin.campaigns.detail.availableBalance')}
                 </p>
               </div>
 
@@ -747,7 +749,7 @@ export default function AdminCampaignDetailPage() {
                 <div className="flex justify-between items-end">
                   <div>
                     <p className="text-white/60 text-[10px] font-bold uppercase tracking-tight mb-1">
-                      Total Net Raised
+                      {t('systemAdmin.campaigns.detail.totalNetRaised')}
                     </p>
                     <p className="text-xl font-bold">
                       {formatXAF(campaign.total_net_raised)}
@@ -755,7 +757,7 @@ export default function AdminCampaignDetailPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-white/60 text-[10px] font-bold uppercase tracking-tight mb-1">
-                      Completion
+                      {t('systemAdmin.campaigns.detail.completion')}
                     </p>
                     <p className="text-xl font-bold">{progress.toFixed(1)}%</p>
                   </div>
@@ -771,7 +773,7 @@ export default function AdminCampaignDetailPage() {
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div>
                   <p className="text-white/60 text-[10px] font-bold uppercase tracking-tight mb-1">
-                    Goal Amount
+                    {t('systemAdmin.campaigns.detail.goalAmount')}
                   </p>
                   <p className="text-sm font-bold">
                     {formatXAF(campaign.goal_amount)}
@@ -779,7 +781,7 @@ export default function AdminCampaignDetailPage() {
                 </div>
                 <div>
                   <p className="text-white/60 text-[10px] font-bold uppercase tracking-tight mb-1">
-                    Vouchers Funded
+                    {t('systemAdmin.campaigns.detail.vouchersFunded')}
                   </p>
                   <p className="text-sm font-bold">{voucherFundings.length}</p>
                 </div>
@@ -791,12 +793,12 @@ export default function AdminCampaignDetailPage() {
           <div className="card p-4 md:p-6">
             <h3 className="font-bold text-gray-900 text-sm mb-6 flex items-center gap-2">
               <Clock size={18} className="text-[#471DDB]" />
-              Status History
+              {t('systemAdmin.campaigns.detail.statusHistory')}
             </h3>
             <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
               {events.length === 0 ? (
                 <p className="text-xs text-gray-400 pl-6">
-                  No status changes recorded.
+                  {t('systemAdmin.campaigns.detail.noStatusChanges')}
                 </p>
               ) : (
                 events.map((event: any, idx: number) => (
@@ -827,23 +829,23 @@ export default function AdminCampaignDetailPage() {
           <div className="card p-4 md:p-6 border-2 border-amber-100 bg-amber-50/30">
             <h3 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2">
               <ShieldCheck size={18} className="text-amber-600" />
-              Administrative View
+              {t('systemAdmin.campaigns.detail.administrativeView')}
             </h3>
             <div className="space-y-3">
               <div className="p-3 bg-white rounded-xl border border-amber-100">
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
-                  Visibility
+                  {t('systemAdmin.campaigns.detail.visibility')}
                 </p>
                 <p className="text-sm font-bold text-gray-700">
-                  {campaign.is_public ? "Public" : "Private"}
+                  {campaign.is_public ? t('systemAdmin.campaigns.detail.public') : t('systemAdmin.campaigns.detail.private')}
                 </p>
               </div>
               <div className="p-3 bg-white rounded-xl border border-amber-100">
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
-                  Operational Status
+                  {t('systemAdmin.campaigns.detail.operationalStatus')}
                 </p>
                 <p className="text-sm font-bold text-gray-700">
-                  {campaign.is_active ? "Active" : "Inactive"}
+                  {campaign.is_active ? t('systemAdmin.campaigns.detail.active') : t('systemAdmin.campaigns.detail.inactive')}
                 </p>
               </div>
             </div>
@@ -854,7 +856,7 @@ export default function AdminCampaignDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2">
                 <Eye size={18} className="text-[#471DDB]" />
-                View Analytics
+                {t('systemAdmin.campaigns.detail.viewAnalytics')}
               </h3>
               <div className="flex gap-0.5 bg-gray-50 p-0.5 rounded-lg border border-gray-100">
                 {(["day", "week", "month"] as CampaignAnalyticsPeriod[]).map((p) => (
@@ -878,17 +880,17 @@ export default function AdminCampaignDetailPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-[#471DDB]/5 rounded-xl p-3 text-center">
                     <div className="text-xl font-black text-[#471DDB]">{analytics.unique_views}</div>
-                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Unique Views</div>
+                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">{t('systemAdmin.campaigns.detail.uniqueViews')}</div>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-3 text-center">
                     <div className="text-xl font-black text-gray-900">{analytics.total_views}</div>
-                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">Total Views</div>
+                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tight">{t('systemAdmin.campaigns.detail.totalViews')}</div>
                   </div>
                 </div>
 
                 {analytics.sources && Object.keys(analytics.sources).length > 0 && (
                   <div>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Sources</p>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t('systemAdmin.campaigns.detail.sources')}</p>
                     <div className="space-y-2">
                       {Object.entries(analytics.sources)
                         .sort(([, a], [, b]) => b.unique - a.unique)
@@ -912,7 +914,7 @@ export default function AdminCampaignDetailPage() {
 
                 {analytics.timeline && analytics.timeline.length > 0 && (
                   <div>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Timeline</p>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t('systemAdmin.campaigns.detail.timeline')}</p>
                     <ChartContainer config={analyticsChartConfig} className="h-32 w-full">
                       <LineChart
                         data={analytics.timeline}
@@ -940,7 +942,7 @@ export default function AdminCampaignDetailPage() {
                         <ChartTooltip
                           content={
                             <ChartTooltipContent
-                              formatter={(value) => [`${value}`, "Unique Views"]}
+                              formatter={(value) => [`${value}`, t('systemAdmin.campaigns.detail.uniqueViews')]}
                               labelFormatter={(label) =>
                                 new Date(String(label)).toLocaleDateString("en", {
                                   month: "short",
@@ -970,7 +972,7 @@ export default function AdminCampaignDetailPage() {
               </div>
             ) : (
               <div className="h-24 flex items-center justify-center text-xs text-gray-400">
-                Loading analytics...
+                {t('systemAdmin.campaigns.detail.loadingAnalytics')}
               </div>
             )}
           </div>
