@@ -416,7 +416,7 @@ export default function AdminBeneficiaryDetailPage() {
                       <p className="text-sm font-mono font-bold text-gray-900">{v.voucher_code}</p>
                       <div className="flex items-center gap-2 mt-1">
                         {v.hospital_name && <span className="text-[10px] text-gray-400">{v.hospital_name}</span>}
-                        {v.expiry_date && <span className="text-[10px] text-gray-400">Exp: {formatDate(v.expiry_date)}</span>}
+                        {v.expiry_date && <span className="text-[10px] text-gray-400">{t('systemAdmin.beneficiaries.detail.expiry')}: {formatDate(v.expiry_date)}</span>}
                       </div>
                     </div>
                     <span className={`badge text-[10px] ${statusColor(v.status)}`}>{v.status?.replace(/_/g, ' ')}</span>
@@ -430,17 +430,17 @@ export default function AdminBeneficiaryDetailPage() {
         <div className="space-y-4">
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Calendar size={14} /> Enrollment Info
+              <Calendar size={14} /> {t('systemAdmin.beneficiaries.detail.enrollmentInfo')}
             </h2>
             <div className="space-y-3">
-              <Detail label="Status" value={beneficiary.is_active ? 'Active' : 'Inactive'} />
-              <Detail label="Created" value={beneficiary.created_at ? formatDateTime(beneficiary.created_at) : '—'} />
-              <Detail label="Updated" value={beneficiary.updated_at ? formatDateTime(beneficiary.updated_at) : '—'} />
+              <Detail label={t('systemAdmin.beneficiaries.detail.status')} value={beneficiary.is_active ? t('systemAdmin.beneficiaries.detail.active') : t('systemAdmin.beneficiaries.detail.inactive')} />
+              <Detail label={t('systemAdmin.beneficiaries.detail.created')} value={beneficiary.created_at ? formatDateTime(beneficiary.created_at) : '—'} />
+              <Detail label={t('systemAdmin.beneficiaries.detail.updated')} value={beneficiary.updated_at ? formatDateTime(beneficiary.updated_at) : '—'} />
             </div>
           </div>
 
           <div className="card p-5">
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Summary</h2>
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">{t('systemAdmin.beneficiaries.detail.summary')}</h2>
             <div className="space-y-3">
               {[
                 { label: 'Health Issues', value: hiCount },
