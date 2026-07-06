@@ -443,10 +443,10 @@ export default function AdminBeneficiaryDetailPage() {
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">{t('systemAdmin.beneficiaries.detail.summary')}</h2>
             <div className="space-y-3">
               {[
-                { label: 'Health Issues', value: hiCount },
-                { label: 'Documents', value: docCount },
-                { label: 'Vouchers', value: voucherCount },
-                { label: 'Verified', value: beneficiary.is_verified ? 'Yes' : 'No' },
+                { label: t('systemAdmin.beneficiaries.detail.summaryHealthIssues'), value: hiCount },
+                { label: t('systemAdmin.beneficiaries.detail.summaryDocuments'), value: docCount },
+                { label: t('systemAdmin.beneficiaries.detail.summaryVouchers'), value: voucherCount },
+                { label: t('systemAdmin.beneficiaries.detail.summaryVerified'), value: beneficiary.is_verified ? t('systemAdmin.beneficiaries.detail.yes') : t('systemAdmin.beneficiaries.detail.no') },
               ].map(row => (
                 <div key={row.label} className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">{row.label}</span>
@@ -458,20 +458,20 @@ export default function AdminBeneficiaryDetailPage() {
         </div>
       </div>
 
-      {showHiForm && <Modal title="Add Health Issue" onClose={() => setShowHiForm(false)}>
+      {showHiForm && <Modal title={t('systemAdmin.beneficiaries.detail.addHealthIssueModal')} onClose={() => setShowHiForm(false)}>
         <div className="space-y-4">
-          <SelectField label="Category *" value={hiCategory} onChange={setHiCategory} options={[
-            { value: '', label: '— Select —' }, { value: 'MATERNAL', label: 'Pregnancy / Maternal' }, { value: 'EMERGENCY', label: 'Emergency' },
-            { value: 'CHRONIC', label: 'Chronic' }, { value: 'MENTAL_HEALTH', label: 'Mental Health' },
-            { value: 'INFECTIOUS', label: 'Infectious' }, { value: 'ELDERLY', label: 'Elderly' }, { value: 'OTHER', label: 'Other' },
+          <SelectField label={t('systemAdmin.beneficiaries.detail.categoryField')} value={hiCategory} onChange={setHiCategory} options={[
+            { value: '', label: t('systemAdmin.beneficiaries.detail.selectDefault') }, { value: 'MATERNAL', label: t('systemAdmin.beneficiaries.detail.maternal') }, { value: 'EMERGENCY', label: t('systemAdmin.beneficiaries.detail.emergency') },
+            { value: 'CHRONIC', label: t('systemAdmin.beneficiaries.detail.chronic') }, { value: 'MENTAL_HEALTH', label: t('systemAdmin.beneficiaries.detail.mentalHealth') },
+            { value: 'INFECTIOUS', label: t('systemAdmin.beneficiaries.detail.infectious') }, { value: 'ELDERLY', label: t('systemAdmin.beneficiaries.detail.elderly') }, { value: 'OTHER', label: t('systemAdmin.beneficiaries.detail.other') },
           ]} />
-          <SelectField label="Severity *" value={hiSeverity} onChange={setHiSeverity} options={[
-            { value: '', label: '— Select —' }, { value: 'LOW', label: 'Low' }, { value: 'MEDIUM', label: 'Medium' },
-            { value: 'HIGH', label: 'High' }, { value: 'CRITICAL', label: 'Critical' },
+          <SelectField label={t('systemAdmin.beneficiaries.detail.severityField')} value={hiSeverity} onChange={setHiSeverity} options={[
+            { value: '', label: t('systemAdmin.beneficiaries.detail.selectDefault') }, { value: 'LOW', label: t('systemAdmin.beneficiaries.detail.low') }, { value: 'MEDIUM', label: t('systemAdmin.beneficiaries.detail.medium') },
+            { value: 'HIGH', label: t('systemAdmin.beneficiaries.detail.high') }, { value: 'CRITICAL', label: t('systemAdmin.beneficiaries.detail.critical') },
           ]} />
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Description *</label>
-            <textarea className="input-field min-h-[80px]" value={hiDescription} onChange={e => setHiDescription(e.target.value)} placeholder="Describe the health issue..." />
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.beneficiaries.detail.descriptionField')}</label>
+            <textarea className="input-field min-h-[80px]" value={hiDescription} onChange={e => setHiDescription(e.target.value)} placeholder={t('systemAdmin.beneficiaries.detail.describeHealthIssue')} />
           </div>
           <div className="flex gap-3 pt-2">
             <button onClick={() => setShowHiForm(false)} className="btn-outline flex-1">Cancel</button>
