@@ -5,8 +5,10 @@ import { TicketForm } from "@/components/support";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 export default function DonorNewTicketPage() {
+  const t = useI18n();
   const { data: session } = useSession();
 
   return (
@@ -18,9 +20,9 @@ export default function DonorNewTicketPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Create Support Ticket</h1>
+          <h1 className="text-2xl font-bold">{t('donor.support.createTicket')}</h1>
           <p className="text-muted-foreground">
-            Describe your issue or request and we'll help you
+            {t('donor.support.createTicketSubtitle')}
           </p>
         </div>
       </div>

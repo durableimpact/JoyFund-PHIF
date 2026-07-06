@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import { roleRedirectMap } from "@/lib/role-redirect";
+import { useI18n } from "@/locales/client";
 
 export default function DashboardPage() {
     const router = useRouter();
+    const t = useI18n();
 
     const { data: session, status } = useSession();
 
@@ -33,7 +35,7 @@ export default function DashboardPage() {
     if (status === "loading") {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p className="text-xl">Loading...</p>
+                <p className="text-xl">{t("dashboard.main.loading")}</p>
             </div>
         );
     }

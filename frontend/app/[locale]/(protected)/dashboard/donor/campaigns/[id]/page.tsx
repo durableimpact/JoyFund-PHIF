@@ -3,20 +3,12 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowLeft,
   Loader2,
-  Heart,
   Share2,
   Edit,
-  Gift,
-  Calendar,
-  Eye,
-  TrendingUp,
   Download,
-  Target,
-  BarChart3,
   Copy,
   Check,
   ExternalLink,
@@ -24,13 +16,7 @@ import {
 import { formatXAF } from "@/lib/utils";
 import { getCampaign, listCampaignDonations, getCampaignDonationChart, getCampaignAnalytics } from "@/actions/campaigns";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-
-const chartConfig = {
-  total_amount: {
-    label: "Amount",
-    color: "var(--primary)",
-  },
-} satisfies ChartConfig;
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ChartContainer,
   ChartTooltip,
@@ -39,10 +25,26 @@ import {
 } from "@/components/ui/chart";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid } from "recharts";
 import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
+import { useI18n } from "@/locales/client";
+
+const chartConfig = { total_amount: { label: "Amount", color: "var(--primary)" } } satisfies ChartConfig;
+
+const statusColor: Record<string, string> = {
+  ACTIVE: "text-emerald-700 bg-emerald-50",
+  DRAFT: "text-gray-600 bg-gray-100",
+  FUNDED: "text-blue-700 bg-blue-50",
+  CLOSED: "text-red-700 bg-red-50",
+  INACTIVE: "text-orange-700 bg-orange-50",
+};
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
 
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const t = useI18n();
   const { data: session, status } = useSession();
   const token = session?.accessToken || session?.user?.accessToken;
 
@@ -57,701 +59,355 @@ export default function CampaignDetailPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace(`/login?redirect=/dashboard/donor/campaigns/${id}`);
-    }
+    if (status === "unauthenticated") router.replace(`/login?redirect=/dashboard/donor/campaigns/${id}`);
   }, [status, router, id]);
 
   useEffect(() => {
     if (!token || !id) return;
-    let cancelled = false;
-
-    async function fetchData() {
-      try {
-        const data = await getCampaign(id as string, token);
-        if (!cancelled) setCampaign(data as CampaignDetail);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
+    let off = false;
+    (async () => {
+      try { const d = await getCampaign(id as string, token); if (!off) setCampaign(d as CampaignDetail); }
+      finally { if (!off) setIsLoading(false); }
+    })();
+    return () => { off = true; };
   }, [token, id]);
 
   useEffect(() => {
     if (!token || !id) return;
-    let cancelled = false;
-
-    async function fetchDonations() {
+    let off = false;
+    (async () => {
       try {
-        const data = await listCampaignDonations(id as string, { status: "SUCCESS" });
-        if (!cancelled) {
-          setDonations(
-            (data as any)?.json?.results ||
-              (data as any)?.results ||
-              (Array.isArray((data as any)?.json)
-                ? (data as any).json
-                : (data as any)?.json
-                  ? [(data as any).json]
-                  : []),
-          );
-        }
-      } catch {
-        // ignore
-      }
-    }
-    fetchDonations();
-
-    return () => {
-      cancelled = true;
-    };
+        const d = await listCampaignDonations(id as string, { status: "SUCCESS" });
+        if (!off) setDonations((d as any)?.json?.results || (d as any)?.results || []);
+      } catch {}
+    })();
+    return () => { off = true; };
   }, [token, id]);
 
   useEffect(() => {
     if (!id) return;
-    let cancelled = false;
-
-    async function fetchChart() {
-      try {
-        const data = await getCampaignDonationChart(id as string, chartPeriod);
-        if (!cancelled) setChartData(data as DonationChartData);
-      } catch {
-        // ignore
-      }
-    }
-    fetchChart();
-
-    return () => {
-      cancelled = true;
-    };
+    let off = false;
+    (async () => {
+      try { const d = await getCampaignDonationChart(id as string, chartPeriod); if (!off) setChartData(d as DonationChartData); } catch {}
+    })();
+    return () => { off = true; };
   }, [id, chartPeriod]);
 
   useEffect(() => {
     if (!token || !id) return;
-    const tok = token;
-    const cid = id as string;
-    let cancelled = false;
-
-    async function fetchAnalytics() {
-      try {
-        const data = await getCampaignAnalytics(cid, tok, {
-          period: analyticsPeriod,
-        });
-        if (!cancelled) setAnalytics(data as CampaignAnalytics);
-      } catch {
-        // ignore
-      }
-    }
-    fetchAnalytics();
-
-    return () => {
-      cancelled = true;
-    };
+    let off = false;
+    (async () => {
+      try { const d = await getCampaignAnalytics(id as string, token, { period: analyticsPeriod }); if (!off) setAnalytics(d as CampaignAnalytics); } catch {}
+    })();
+    return () => { off = true; };
   }, [token, id, analyticsPeriod]);
 
   async function handleDownloadCertificate() {
     if (!campaign || !token) return;
     setDownloadingCert(true);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000";
-      const res = await fetch(
-        `${baseUrl}/api/campaigns/${campaign.id}/certificate/`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      if (!res.ok) {
-        throw new Error(`Download failed (${res.status})`);
-      }
+      const base = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000";
+      const res = await fetch(`${base}/api/campaigns/${campaign.id}/certificate/`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error(`Download failed (${res.status})`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${campaign.slug || "campaign"}_impact_certificate.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Certificate download failed", err);
-    } finally {
-      setDownloadingCert(false);
-    }
+      const a = document.createElement("a"); a.href = url; a.download = `${campaign.slug || "campaign"}_certificate.pdf`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    } catch (err) { console.error("Certificate download failed", err); }
+    finally { setDownloadingCert(false); }
   }
 
-  if (isLoading) {
-    return <DetailPageSkeleton />;
-  }
-        </div>
-      </div>
-    );
-  }
-
+  if (isLoading) return <DetailPageSkeleton />;
   if (!campaign) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "var(--background)" }}
-      >
-        <div className="text-center card p-10 max-w-sm">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--background)" }}>
+        <div className="text-center">
           <p className="text-gray-500 mb-4">Campaign not found</p>
-          <Link href="/dashboard/donor/campaigns" className="btn-primary">
-            Back to Campaigns
-          </Link>
+          <Link href="/dashboard/donor/campaigns" className="text-sm font-bold" style={{ color: 'var(--primary)' }}>Back to campaigns →</Link>
         </div>
       </div>
     );
   }
 
-  const pct =
-    ((campaign.total_net_raised || 0) / (campaign.goal_amount || 1)) * 100;
-
-  function fmtDate(iso: string) {
-    return new Date(iso).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  }
+  const pct = ((campaign.total_net_raised || 0) / (campaign.goal_amount || 1)) * 100;
+  const sc = statusColor[campaign.status as string] || "text-gray-600 bg-gray-100";
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       {/* ── Header ── */}
-      <div>
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <ArrowLeft size={20} className="text-gray-600" />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-[#1A1A2E] truncate">
-              {campaign.title}
-            </h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {campaign.event_type}
-            </p>
+      <div className="max-w-4xl mx-auto px-4 pt-32 pb-0">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-6"
+        >
+          <ArrowLeft size={14} />
+          Back
+        </button>
+
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${sc}`}>{campaign.status}</span>
+              <span className="text-xs text-gray-400">{campaign.event_type}</span>
+            </div>
+            <h1 className="text-2xl font-black text-[#1A1A2E] leading-tight">{campaign.title}</h1>
           </div>
-          <span
-            className="shrink-0 px-3 py-1 rounded-full text-xs font-bold text-white"
-            style={{ background: "var(--primary)" }}
-          >
-            {campaign.status}
-          </span>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* ── Main Column ── */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Cover Image */}
-            {campaign.cover_image && (
-              <div className="card overflow-hidden">
-                <div className="relative h-56 w-full">
-                  <Image
-                    src={campaign.cover_image}
-                    alt="Campaign cover"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Progress */}
-            <div className="card p-6">
-              <div className="flex items-center gap-2 mb-5">
-                <TrendingUp size={18} style={{ color: "var(--primary)" }} />
-                <h2 className="font-bold text-[#1A1A2E]">Funding Progress</h2>
-              </div>
-              <div className="mb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-[#1A1A2E]">
-                    {pct.toFixed(1)}%
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {formatXAF(campaign.total_net_raised || 0)} of{" "}
-                    {formatXAF(campaign.goal_amount || 0)}
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${Math.min(pct, 100)}%` }}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 rounded-xl bg-gray-50">
-                  <p className="text-xs text-gray-500 mb-1">Raised</p>
-                  <p className="font-bold text-lg text-[#1A1A2E]">
-                    {formatXAF(campaign.total_net_raised || 0)}
-                  </p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-gray-50">
-                  <p className="text-xs text-gray-500 mb-1">Goal</p>
-                  <p className="font-bold text-lg text-[#1A1A2E]">
-                    {formatXAF(campaign.goal_amount || 0)}
-                  </p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-gray-50">
-                  <p className="text-xs text-gray-500 mb-1">Status</p>
-                  <p className="font-bold text-lg capitalize text-[#1A1A2E]">
-                    {campaign.status || "Draft"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Donation Chart */}
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <BarChart3 size={18} style={{ color: "var(--primary)" }} />
-                  <h2 className="font-bold text-[#1A1A2E]">Donation Trends</h2>
-                </div>
-                <div className="flex gap-1">
-                  {(["7d", "30d", "90d", "1y", "all"] as DonationChartPeriod[]).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => setChartPeriod(p)}
-                        className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
-                          chartPeriod === p
-                            ? "text-white"
-                            : "text-gray-500 hover:bg-gray-100"
-                        }`}
-                        style={
-                          chartPeriod === p
-                            ? { background: "var(--primary)" }
-                            : undefined
-                        }
-                      >
-                        {p === "all" ? "All" : p.replace("d", "D").replace("y", "Y")}
-                      </button>
-                    ),
-                  )}
-                </div>
-              </div>
-
-              {chartData && chartData.series.length > 0 ? (
-                <ChartContainer config={chartConfig} className="h-52 w-full">
-                  <LineChart data={chartData.series} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis
-                      dataKey="date"
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(v: string) => {
-                        const d = new Date(v);
-                        return d.toLocaleDateString("en", { month: "short", day: "numeric" });
-                      }}
-                      fontSize={11}
-                      tickMargin={8}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(v: number) => formatXAF(v)}
-                      fontSize={11}
-                      tickMargin={4}
-                    />
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          formatter={(value) => [formatXAF(Number(value)), "Amount"]}
-                          labelFormatter={(label) =>
-                            new Date(String(label)).toLocaleDateString("en", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })
-                          }
-                        />
-                      }
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="total_amount"
-                      stroke="var(--primary)"
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 5, strokeWidth: 0 }}
-                    />
-                  </LineChart>
-                </ChartContainer>
-              ) : (
-                <div className="h-52 flex items-center justify-center text-sm text-gray-400">
-                  No donations in this period
-                </div>
-              )}
-
-              {chartData && (
-                <div className="flex gap-6 mt-4 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-xs text-gray-500">Total</p>
-                    <p className="font-bold text-sm text-[#1A1A2E]">
-                      {formatXAF(Number(chartData.totals.amount))}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Donations</p>
-                    <p className="font-bold text-sm text-[#1A1A2E]">
-                      {chartData.totals.count}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Campaign View Analytics */}
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <Eye size={18} style={{ color: "var(--primary)" }} />
-                  <h2 className="font-bold text-[#1A1A2E]">View Analytics</h2>
-                </div>
-                <div className="flex gap-1">
-                  {(["day", "week", "month"] as CampaignAnalyticsPeriod[]).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => setAnalyticsPeriod(p)}
-                        className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
-                          analyticsPeriod === p
-                            ? "text-white"
-                            : "text-gray-500 hover:bg-gray-100"
-                        }`}
-                        style={
-                          analyticsPeriod === p
-                            ? { background: "var(--primary)" }
-                            : undefined
-                        }
-                      >
-                        {p.charAt(0).toUpperCase() + p.slice(1)}
-                      </button>
-                    ),
-                  )}
-                </div>
-              </div>
-
-              {analytics ? (
-                <div className="space-y-5">
-                  {/* Summary stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-2xl font-black text-[#1A1A2E]">
-                        {analytics.unique_views}
-                      </div>
-                      <div className="text-[10px] text-gray-500 font-medium">
-                        Unique Views
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-2xl font-black text-[#1A1A2E]">
-                        {analytics.total_views}
-                      </div>
-                      <div className="text-[10px] text-gray-500 font-medium">
-                        Total Views
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Source breakdown */}
-                  {analytics.sources && Object.keys(analytics.sources).length > 0 && (
-                    <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                        Traffic Sources (24h)
-                      </p>
-                      <div className="space-y-2">
-                        {Object.entries(analytics.sources)
-                          .sort(([, a], [, b]) => b.unique - a.unique)
-                          .map(([src, stats]) => (
-                            <div key={src} className="flex items-center gap-3">
-                              <span className="text-xs font-semibold text-gray-600 w-16 capitalize">
-                                {src}
-                              </span>
-                              <div className="flex-1 bg-gray-100 rounded-full h-2">
-                                <div
-                                  className="h-2 rounded-full transition-all duration-500"
-                                  style={{
-                                    width: `${analytics.unique_views > 0 ? (stats.unique / analytics.unique_views) * 100 : 0}%`,
-                                    background: "var(--primary)",
-                                  }}
-                                />
-                              </div>
-                              <span className="text-[10px] font-bold text-gray-500 w-12 text-right">
-                                {stats.unique}
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Views Over Time */}
-                  {analytics.timeline && analytics.timeline.length > 0 && (
-                    <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                        Views Over Time
-                      </p>
-                      <ChartContainer config={chartConfig} className="h-40 w-full">
-                        <LineChart
-                          data={analytics.timeline}
-                          margin={{ top: 4, right: 8, left: -12, bottom: 0 }}
-                        >
-                          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis
-                            dataKey="period"
-                            tickLine={false}
-                            axisLine={false}
-                            tickFormatter={(v: string) => {
-                              const d = new Date(v);
-                              return d.toLocaleDateString("en", { month: "short", day: "numeric" });
-                            }}
-                            fontSize={10}
-                            tickMargin={6}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            fontSize={10}
-                            tickMargin={4}
-                            allowDecimals={false}
-                          />
-                          <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                formatter={(value) => [`${value}`, "Unique Views"]}
-                                labelFormatter={(label) =>
-                                  new Date(String(label)).toLocaleDateString("en", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })
-                                }
-                              />
-                            }
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="unique"
-                            stroke="var(--primary)"
-                            strokeWidth={2}
-                            dot={false}
-                            activeDot={{ r: 4, strokeWidth: 0 }}
-                          />
-                        </LineChart>
-                      </ChartContainer>
-                      <div className="flex justify-between mt-1">
-                        <span className="text-[9px] text-gray-400">{analytics.start_date}</span>
-                        <span className="text-[9px] text-gray-400">{analytics.end_date}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="h-32 flex items-center justify-center text-sm text-gray-400">
-                  Loading analytics...
-                </div>
-              )}
-            </div>
-
-            {/* Description + Details */}
-            <div className="card p-6">
-              <h2 className="font-bold text-[#1A1A2E] mb-4">
-                About This Campaign
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-5">
-                {campaign.description}
-              </p>
-              <div className="border-t border-gray-100 pt-4 space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar size={16} className="text-gray-400" />
-                  <span className="text-gray-500">Created</span>
-                  <span className="ml-auto font-medium text-[#1A1A2E]">
-                    {campaign.created_at
-                      ? fmtDate(campaign.created_at)
-                      : "-"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar size={16} className="text-gray-400" />
-                  <span className="text-gray-500">Ends</span>
-                  <span className="ml-auto font-medium text-[#1A1A2E]">
-                    {campaign.end_date
-                      ? fmtDate(campaign.end_date)
-                      : "-"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Eye size={16} className="text-gray-400" />
-                  <span className="text-gray-500">Visibility</span>
-                  <span className="ml-auto font-medium text-[#1A1A2E]">
-                    {campaign.is_public ? "Public" : "Private"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Donations */}
-            {donations.length > 0 && (
-              <div className="card p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Gift size={18} style={{ color: "var(--primary)" }} />
-                  <h2 className="font-bold text-[#1A1A2E]">
-                    Donations ({donations.length})
-                  </h2>
-                </div>
-                <div className="divide-y divide-gray-50">
-                  {donations.map((donation) => (
-                    <div
-                      key={donation.id}
-                      className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[#1A1A2E] truncate">
-                          {donation.is_anonymous
-                            ? "Anonymous"
-                            : donation.donor_name}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {fmtDate(donation.created_at)}
-                        </p>
-                      </div>
-                      <div className="text-right ml-4 shrink-0">
-                        <p
-                          className="font-bold text-sm"
-                          style={{ color: "var(--primary)" }}
-                        >
-                          {formatXAF(donation.amount)}
-                        </p>
-                        <p
-                          className={`text-xs font-semibold ${
-                            donation.status === "SUCCESS"
-                              ? "text-emerald-600"
-                              : donation.status === "FAILED"
-                                ? "text-red-600"
-                                : "text-amber-600"
-                          }`}
-                        >
-                          {donation.status}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        {/* ── Progress ── */}
+        <div className="mb-6 space-y-3">
+          <div className="flex items-baseline gap-3">
+            <span className="text-3xl font-black" style={{ color: 'var(--primary)' }}>{formatXAF(campaign.total_net_raised || 0)}</span>
+            <span className="text-xs text-gray-400">of {formatXAF(campaign.goal_amount || 0)} XAF</span>
+            <span className="text-sm font-bold text-gray-500 ml-auto hidden sm:inline">{pct.toFixed(0)}%</span>
+            <span className="text-xs text-gray-400 hidden sm:inline">{donations.length} donor{donations.length !== 1 ? "s" : ""}</span>
           </div>
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(pct, 100)}%`, background: 'var(--primary)' }} />
+          </div>
+          <div className="flex items-center justify-between sm:hidden text-xs text-gray-400">
+            <span>{pct.toFixed(0)}% funded</span>
+            <span>{donations.length} donor{donations.length !== 1 ? "s" : ""}</span>
+          </div>
+        </div>
 
-          {/* ── Sidebar ── */}
-          <div className="space-y-4">
-            {/* Stats */}
-            <div className="card p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Target size={18} style={{ color: "var(--primary)" }} />
-                <h3 className="font-bold text-[#1A1A2E]">Campaign Stats</h3>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Total Raised</p>
-                  <p
-                    className="text-2xl font-black"
-                    style={{ color: "var(--primary)" }}
-                  >
-                    {formatXAF(campaign.total_net_raised || 0)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Goal Amount</p>
-                  <p className="text-lg font-bold text-[#1A1A2E]">
-                    {formatXAF(campaign.goal_amount || 0)}
-                  </p>
-                </div>
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-1">Progress</p>
-                  <p className="text-lg font-bold text-[#1A1A2E]">
-                    {pct.toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* ── Content: Tabs + Sidebar ── */}
+        <div className="grid md:grid-cols-[1fr_280px] gap-10">
+          <div className="min-w-0">
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList variant="line" className="w-full justify-start gap-6 border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
+                <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[var(--primary)] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="donations" className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[var(--primary)] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors">
+                  Donations ({donations.length})
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="rounded-none border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-gray-500 data-active:border-[var(--primary)] data-active:text-[#1A1A2E] data-active:bg-transparent hover:text-[#1A1A2E] transition-colors">
+                  Analytics
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Actions */}
-            <div className="card p-6 space-y-3">
-              <h3 className="font-bold text-[#1A1A2E] mb-4">Actions</h3>
-              <Link
-                href={`/dashboard/donor/campaigns/${campaign.id}/edit`}
-                className="btn-primary w-full text-sm"
-              >
-                <Edit size={16} /> Edit Campaign
-              </Link>
-              <Popover>
-                <PopoverTrigger
-                  className="btn-primary w-full text-sm inline-flex items-center justify-center gap-2"
-                >
-                  <Share2 size={16} /> Share Campaign
-                </PopoverTrigger>
-                <PopoverContent align="start" sideOffset={8} className="w-64 p-3">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { label: "Facebook", src: "fb", color: "bg-blue-600", url: "https://www.facebook.com/sharer/sharer.php?u=" },
-                      { label: "Twitter / X", src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?url=&text=" },
-                      { label: "WhatsApp", src: "whatsapp", color: "bg-green-500", url: "https://wa.me/?text=" },
-                      { label: "LinkedIn", src: "linkedin", color: "bg-blue-700", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
-                    ].map((s) => (
-                      <a
-                        key={s.src}
-                        href={`${s.url}${encodeURIComponent(`https://joy-fund.com/campaign/${campaign.id}?src=${s.src}`)}${s.src === "tw" || s.src === "whatsapp" ? encodeURIComponent(` ${campaign.title}`) : ""}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-semibold ${s.color} hover:opacity-90 transition-opacity`}
-                      >
-                        <ExternalLink size={12} />
-                        {s.label}
-                      </a>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`https://joy-fund.com/campaign/${campaign.id}`);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition-colors mt-2"
-                  >
-                    {copied ? <><Check size={12} className="text-green-500" /> Copied!</> : <><Copy size={12} /> Copy Link</>}
-                  </button>
-                </PopoverContent>
-              </Popover>
-              <Link
-                href={`/campaign/${campaign.id}`}
-                className="btn-outline w-full text-sm"
-              >
-                <Heart size={16} /> View Public Page
-              </Link>
-              {campaign.certificate_generated && (
-                <button
-                  onClick={handleDownloadCertificate}
-                  disabled={downloadingCert}
-                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 active:scale-95 cursor-pointer border-2 border-emerald-300 text-emerald-700 bg-white hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {downloadingCert ? (
-                    <Loader2 size={16} className="animate-spin" />
+              <div className="py-8">
+                {/* ═══ Overview Tab ═══ */}
+                <TabsContent value="overview" className="focus-visible:outline-none space-y-8 w-full">
+                  {campaign.description && (
+                    <section>
+                      <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">About</h2>
+                      <p className="text-sm text-gray-600 leading-relaxed">{campaign.description}</p>
+                    </section>
+                  )}
+                  <section>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Details</h2>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase text-gray-400 mb-0.5">Created</p>
+                        <p className="text-[#1A1A2E] font-medium">{campaign.created_at ? fmtDate(campaign.created_at) : "—"}</p>
+                      </div>
+                      {campaign.end_date && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase text-gray-400 mb-0.5">Ends</p>
+                          <p className="text-[#1A1A2E] font-medium">{fmtDate(campaign.end_date)}</p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-[10px] font-bold uppercase text-gray-400 mb-0.5">Visibility</p>
+                        <p className="text-[#1A1A2E] font-medium">{campaign.is_public ? "Public" : "Private"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase text-gray-400 mb-0.5">Goal</p>
+                        <p className="text-[#1A1A2E] font-medium">{formatXAF(campaign.goal_amount || 0)} XAF</p>
+                      </div>
+                    </div>
+                  </section>
+                  <section>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Recent activity</h2>
+                    <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 overflow-x-auto">
+                      {chartData && chartData.series.length > 0 ? (
+                        <ChartContainer config={chartConfig} className="h-40 w-full">
+                          <LineChart data={chartData.series} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
+                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickFormatter={(v: string) => new Date(v).toLocaleDateString("en", { month: "short", day: "numeric" })} fontSize={11} tickMargin={8} />
+                            <YAxis tickLine={false} axisLine={false} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} fontSize={11} tickMargin={8} width={36} />
+                            <ChartTooltip content={<ChartTooltipContent formatter={(v) => [formatXAF(Number(v)), ""]} labelFormatter={(l) => new Date(String(l)).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })} />} />
+                            <Line type="monotone" dataKey="total_amount" stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                          </LineChart>
+                        </ChartContainer>
+                      ) : (
+                        <p className="text-xs text-gray-400 py-6 text-center">No donations yet</p>
+                      )}
+                    </div>
+                  </section>
+                </TabsContent>
+
+                {/* ═══ Donations Tab ═══ */}
+                <TabsContent value="donations" className="focus-visible:outline-none w-full">
+                  {donations.length === 0 ? (
+                    <p className="text-sm text-gray-400 py-10 text-center">No donations yet</p>
                   ) : (
-                    <Download size={16} />
+                    <div className="space-y-0">
+                      <div className="grid grid-cols-12 gap-4 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-200">
+                        <div className="col-span-5">Donor</div>
+                        <div className="col-span-2">Status</div>
+                        <div className="col-span-3">Date</div>
+                        <div className="col-span-2 text-right">Amount</div>
+                      </div>
+                      {donations.map((d: any) => (
+                        <div key={d.id} className="grid grid-cols-12 gap-4 py-4 border-b border-gray-100 items-center">
+                          <div className="col-span-5 min-w-0">
+                            <p className="text-sm font-medium text-[#1A1A2E] truncate">{d.is_anonymous ? "Anonymous" : d.donor_name}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                              d.status === "SUCCESS" ? "text-emerald-700 bg-emerald-50" : d.status === "FAILED" ? "text-red-700 bg-red-50" : "text-amber-700 bg-amber-50"
+                            }`}>{d.status}</span>
+                          </div>
+                          <div className="col-span-3 text-xs text-gray-500">{fmtDate(d.created_at)}</div>
+                          <div className="col-span-2 text-right">
+                            <span className="text-sm font-bold" style={{ color: 'var(--primary)' }}>{formatXAF(d.amount)}</span>
+                            <span className="text-xs text-gray-400 ml-0.5">XAF</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  {downloadingCert ? "Downloading..." : "Download Certificate"}
-                </button>
-              )}
-            </div>
+                </TabsContent>
+
+                {/* ═══ Analytics Tab ═══ */}
+                <TabsContent value="analytics" className="focus-visible:outline-none space-y-8 w-full">
+                  <section>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">Donation trends</h2>
+                      <div className="flex gap-1">
+                        {(["7d", "30d", "90d", "1y", "all"] as DonationChartPeriod[]).map((p) => (
+                          <button key={p} onClick={() => setChartPeriod(p)} className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition-colors ${chartPeriod === p ? "text-white" : "text-gray-400 hover:text-gray-600"}`} style={chartPeriod === p ? { background: "var(--primary)" } : undefined}>
+                            {p === "all" ? "All" : p.replace("d", "D").replace("y", "Y")}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-xl p-5 border border-gray-100">
+                      {chartData && chartData.series.length > 0 ? (
+                        <>
+                          <ChartContainer config={chartConfig} className="h-48 w-full">
+                            <LineChart data={chartData.series} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
+                              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                              <XAxis dataKey="date" tickLine={false} axisLine={false} tickFormatter={(v: string) => new Date(v).toLocaleDateString("en", { month: "short", day: "numeric" })} fontSize={11} tickMargin={8} />
+                              <YAxis tickLine={false} axisLine={false} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} fontSize={11} tickMargin={8} width={36} />
+                              <ChartTooltip content={<ChartTooltipContent formatter={(v) => [formatXAF(Number(v)), ""]} labelFormatter={(l) => new Date(String(l)).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })} />} />
+                              <Line type="monotone" dataKey="total_amount" stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
+                            </LineChart>
+                          </ChartContainer>
+                          <div className="flex gap-8 mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
+                            <span>Total: <strong className="text-[#1A1A2E]">{formatXAF(Number(chartData.totals.amount))}</strong></span>
+                            <span>Count: <strong className="text-[#1A1A2E]">{chartData.totals.count}</strong></span>
+                          </div>
+                        </>
+                      ) : <p className="text-sm text-gray-400 py-8 text-center">No donations in this period</p>}
+                    </div>
+                  </section>
+
+                  <section>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">Page views</h2>
+                      <div className="flex gap-1">
+                        {(["day", "week", "month"] as CampaignAnalyticsPeriod[]).map((p) => (
+                          <button key={p} onClick={() => setAnalyticsPeriod(p)} className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition-colors ${analyticsPeriod === p ? "text-white" : "text-gray-400 hover:text-gray-600"}`} style={analyticsPeriod === p ? { background: "var(--primary)" } : undefined}>
+                            {p.charAt(0).toUpperCase() + p.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {analytics ? (
+                      <div className="bg-white rounded-xl p-5 border border-gray-100 space-y-5">
+                        <div className="flex items-baseline gap-8">
+                          <div><span className="text-2xl font-black text-[#1A1A2E]">{analytics.unique_views}</span><span className="text-xs text-gray-400 ml-1.5">unique</span></div>
+                          <div><span className="text-2xl font-black text-[#1A1A2E]">{analytics.total_views}</span><span className="text-xs text-gray-400 ml-1.5">total</span></div>
+                        </div>
+                        {analytics.sources && Object.keys(analytics.sources).length > 0 && (
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Traffic sources</p>
+                            <div className="space-y-2.5">
+                              {Object.entries(analytics.sources).sort(([, a], [, b]) => b.unique - a.unique).map(([src, stats]) => (
+                                <div key={src} className="flex items-center gap-3">
+                                  <span className="text-xs font-medium text-gray-600 w-16 capitalize">{src}</span>
+                                  <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${analytics.unique_views > 0 ? (stats.unique / analytics.unique_views) * 100 : 0}%`, background: "var(--primary)" }} />
+                                  </div>
+                                  <span className="text-xs font-bold text-gray-500 w-10 text-right">{stats.unique}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {analytics.timeline && analytics.timeline.length > 0 && (
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Views over time</p>
+                            <ChartContainer config={chartConfig} className="h-36 w-full">
+                              <LineChart data={analytics.timeline} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                                <XAxis dataKey="period" tickLine={false} axisLine={false} tickFormatter={(v: string) => new Date(v).toLocaleDateString("en", { month: "short", day: "numeric" })} fontSize={11} tickMargin={8} />
+                                <YAxis tickLine={false} axisLine={false} fontSize={11} tickMargin={8} width={36} allowDecimals={false} />
+                                <ChartTooltip content={<ChartTooltipContent formatter={(v) => [`${v}`, ""]} labelFormatter={(l) => new Date(String(l)).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })} />} />
+                                <Line type="monotone" dataKey="unique" stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                              </LineChart>
+                            </ChartContainer>
+                            <div className="flex justify-between mt-1 text-[9px] text-gray-400">
+                              <span>{analytics.start_date}</span><span>{analytics.end_date}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : <p className="text-sm text-gray-400 py-6 text-center">Loading analytics…</p>}
+                  </section>
+                </TabsContent>
+              </div>
+            </Tabs>
           </div>
+
+          {/* ── Sidebar (always visible) ── */}
+          <aside className="space-y-5">
+            <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Actions</h3>
+              <div className="space-y-2">
+                <Link href={`/dashboard/donor/campaigns/${campaign.id}/edit`} className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'var(--primary)' }}>
+                  <Edit size={14} /> Edit
+                </Link>
+                <Popover>
+                  <PopoverTrigger className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+                    <Share2 size={14} /> Share
+                  </PopoverTrigger>
+                  <PopoverContent align="start" sideOffset={8} className="w-52 p-2">
+                    <div className="space-y-0.5">
+                      {[
+                        { label: "Facebook", src: "fb", url: "https://www.facebook.com/sharer/sharer.php?u=" },
+                        { label: "Twitter / X", src: "tw", url: "https://twitter.com/intent/tweet?url=&text=" },
+                        { label: "WhatsApp", src: "whatsapp", url: "https://wa.me/?text=" },
+                        { label: "LinkedIn", src: "linkedin", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
+                      ].map((s) => (
+                        <a key={s.src} href={`${s.url}${encodeURIComponent(`https://joy-fund.com/campaign/${campaign.id}?src=${s.src}`)}${s.src === "tw" || s.src === "whatsapp" ? encodeURIComponent(` ${campaign.title}`) : ""}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                          <ExternalLink size={11} className="text-gray-400" />{s.label}
+                        </a>
+                      ))}
+                    </div>
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button onClick={() => { navigator.clipboard.writeText(`https://joy-fund.com/campaign/${campaign.id}`); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+                        {copied ? <><Check size={11} className="text-emerald-500" /> Copied!</> : <><Copy size={11} /> Copy link</>}
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <Link href={`/campaign/${campaign.id}`} className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+                  View public page
+                </Link>
+                {campaign.certificate_generated && (
+                  <button onClick={handleDownloadCertificate} disabled={downloadingCert} className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors disabled:opacity-50">
+                    {downloadingCert ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                    {downloadingCert ? "Downloading…" : "Certificate"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </div>

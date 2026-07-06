@@ -9,6 +9,7 @@ import Navbar from '@/components/shared/Navbar';
 import { formatXAF } from '@/lib/utils';
 import { createCampaign, donateToCampaign } from '@/actions/campaigns';
 import { useForm } from 'react-hook-form';
+import { useI18n } from '@/locales/client';
 
 // Exact choices from Campaign.EventType model
 const EVENT_TYPES = [
@@ -22,10 +23,26 @@ const EVENT_TYPES = [
 const COLORS = ['#1DB1DB', '#1D38DB', '#471DDB', '#1CDBC9', '#1D75DB'];
 
 function CreateCampaignContent() {
+  const t = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const eventTypeT = (id: string) => ({
+    BIRTHDAY: t('donor.campaigns.create.eventType.birthday'),
+    WEDDING: t('donor.campaigns.create.eventType.wedding'),
+    GRADUATION: t('donor.campaigns.create.eventType.graduation'),
+    PROMOTION: t('donor.campaigns.create.eventType.promotion'),
+    MEMORIAL: t('donor.campaigns.create.eventType.memorial'),
+  }[id] || id);
+  const eventTypeDescT = (id: string) => ({
+    BIRTHDAY: t('donor.campaigns.create.eventType.birthdayDesc'),
+    WEDDING: t('donor.campaigns.create.eventType.weddingDesc'),
+    GRADUATION: t('donor.campaigns.create.eventType.graduationDesc'),
+    PROMOTION: t('donor.campaigns.create.eventType.promotionDesc'),
+    MEMORIAL: t('donor.campaigns.create.eventType.memorialDesc'),
+  }[id] || '');
 
   const [step, setStep] = useState(1);
   const [eventType, setEventType] = useState('BIRTHDAY');
@@ -49,8 +66,8 @@ function CreateCampaignContent() {
   const [donationMessage, setDonationMessage] = useState('');
   const [campaignCreatedForDonation, setCampaignCreatedForDonation] = useState<any>(null);
 
-  const eventLabel = EVENT_TYPES.find(e => e.id === eventType)?.label || 'Celebration';
-  const userName = session?.user?.name || 'Donor';
+  const eventLabel = eventTypeT(eventType) || t('donor.campaigns.create.celebration');
+  const userName = session?.user?.name || t('donor.campaigns.create.donorFallback');
   const userInitials = userName.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
 
   // Mutation for creating campaign (used at step 5 before donation)
@@ -80,9 +97,9 @@ function CreateCampaignContent() {
     onError: (error: any) => {
       try {
         const errorData = JSON.parse(error);
-        alert(errorData?.error || 'Failed to create campaign');
+        alert(errorData?.error || t('donor.campaigns.create.createFailed'));
       } catch {
-        alert(error?.message || 'Failed to create campaign');
+        alert(error?.message || t('donor.campaigns.create.createFailed'));
       }
     },
   });
@@ -121,9 +138,9 @@ function CreateCampaignContent() {
     onError: (error: any) => {
       try {
         const errorData = JSON.parse(error);
-        alert(errorData?.error || 'Failed to initiate payment');
+        alert(errorData?.error || t('donor.campaigns.create.paymentInitFailed'));
       } catch {
-        alert(error?.message || 'Failed to initiate payment');
+        alert(error?.message || t('donor.campaigns.create.paymentInitFailed'));
       }
     },
   });
@@ -237,13 +254,19 @@ function CreateCampaignContent() {
       return;
     }
     if (!title || !description || !goalAmount || !endDate) {
-      alert('Please fill all required fields');
+      alert(t('donor.campaigns.create.fillRequired'));
       return;
     }
     setStep(5);
   };
 
-  const steps = ['Event Type', 'Details', 'Goal', 'Preview', 'Donate'];
+  const steps = [
+    t('donor.campaigns.create.step.eventType'),
+    t('donor.campaigns.create.step.details'),
+    t('donor.campaigns.create.step.goal'),
+    t('donor.campaigns.create.step.preview'),
+    t('donor.campaigns.create.step.donate'),
+  ];
 
   return (
     <div className="h-full" style={{ background: 'var(--background)' }}>
@@ -274,8 +297,8 @@ function CreateCampaignContent() {
           {/* Step 1 — Event Type */}
           {step === 1 && (
             <div className="card p-6">
-              <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">What are you celebrating?</h2>
-              <p className="text-gray-500 text-sm mb-6">Choose your milestone</p>
+              <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">{t('donor.campaigns.create.whatCelebrating')}</h2>
+              <p className="text-gray-500 text-sm mb-6">{t('donor.campaigns.create.chooseMilestone')}</p>
               <div className="grid grid-cols-2 gap-3 mb-5">
                 {EVENT_TYPES.map(e => {
                   const Icon = e.icon;
@@ -284,14 +307,14 @@ function CreateCampaignContent() {
                       className={`p-4 rounded-2xl border-2 text-left transition-all ${eventType === e.id ? 'text-white' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
                       style={eventType === e.id ? { borderColor: 'var(--primary)', background: 'var(--primary)' } : {}}>
                       <div className={`mb-2 ${eventType === e.id ? 'text-white' : 'text-gray-500'}`}><Icon size={22} /></div>
-                      <div className={`font-bold text-sm ${eventType === e.id ? 'text-white' : 'text-[#1A1A2E]'}`}>{e.label}</div>
-                      <div className={`text-xs mt-0.5 ${eventType === e.id ? 'text-white/80' : 'text-gray-500'}`}>{e.desc}</div>
+                      <div className={`font-bold text-sm ${eventType === e.id ? 'text-white' : 'text-[#1A1A2E]'}`}>{eventTypeT(e.id)}</div>
+                      <div className={`text-xs mt-0.5 ${eventType === e.id ? 'text-white/80' : 'text-gray-500'}`}>{eventTypeDescT(e.id)}</div>
                     </button>
                   );
                 })}
               </div>
               <div className="mb-6">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Campaign Colour</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">{t('donor.campaigns.create.campaignColour')}</label>
                 <div className="flex gap-3">
                   {COLORS.map(c => (
                     <button key={c} onClick={() => setCoverColor(c)}
@@ -301,7 +324,7 @@ function CreateCampaignContent() {
                 </div>
               </div>
               <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => setStep(2)}>
-                Continue
+                {t('donor.campaigns.create.continue')}
                 <ArrowRight size={16} />
               </button>
             </div>
@@ -310,17 +333,17 @@ function CreateCampaignContent() {
           {/* Step 2 — Details */}
           {step === 2 && (
             <div className="card p-6 space-y-4">
-              <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">Campaign Details</h2>
+              <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">{t('donor.campaigns.create.campaignDetails')}</h2>
               
               {/* Cover Image */}
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-2 block">Campaign Cover Image</label>
+                <label className="text-xs font-semibold text-gray-500 mb-2 block">{t('donor.campaigns.create.campaignCoverImage')}</label>
                 <div className="relative">
                   {coverImagePreview ? (
                     <div className="relative rounded-2xl overflow-hidden border-2 border-gray-200 h-40 bg-gray-100">
                       <Image
                         src={coverImagePreview}
-                        alt="Campaign cover"
+                        alt={t('donor.campaigns.create.campaignCoverAlt')}
                         fill
                         className="object-cover"
                       />
@@ -339,8 +362,8 @@ function CreateCampaignContent() {
                       className="w-full border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:border-[#1DB1DB] transition-colors"
                     >
                       <ImagePlus size={32} className="mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm font-medium text-gray-700">Click to upload campaign cover image</p>
-                      <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                      <p className="text-sm font-medium text-gray-700">{t('donor.campaigns.create.clickToUploadCover')}</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('donor.campaigns.create.uploadHint')}</p>
                     </button>
                   )}
                   <input
@@ -355,32 +378,32 @@ function CreateCampaignContent() {
 
               {/* Campaign Title */}
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Campaign Title *</label>
-                <input className="input-field" placeholder={`e.g. ${userName.split(' ')[0]}'s ${eventLabel} JoyFund`}
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.campaignTitle')}</label>
+                <input className="input-field" placeholder={t('donor.campaigns.create.titlePlaceholder', { name: userName.split(' ')[0], event: eventLabel })}
                   value={title} onChange={e => setTitle(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Your Story * <span className="font-normal text-gray-400">(min 50 characters)</span></label>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.yourStory')} <span className="font-normal text-gray-400">{t('donor.campaigns.create.minChars')}</span></label>
                 <textarea className="input-field min-h-35 resize-none" rows={5}
-                  placeholder="This year I turn 30, and instead of receiving gifts, I want to give the gift of life to vulnerable mothers in Cameroon..."
+                  placeholder={t('donor.campaigns.create.storyPlaceholder')}
                   value={description} onChange={e => setDescription(e.target.value)} />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>{description.length} characters</span>
+                  <span>{description.length} {t('donor.campaigns.create.characters')}</span>
                   <span className={description.length < 50 ? 'text-amber-500' : 'text-emerald-500'}>
-                    {description.length < 50 ? `${50 - description.length} more needed` : '✓ Good'}
+                    {description.length < 50 ? t('donor.campaigns.create.moreNeeded', { count: 50 - description.length }) : t('donor.campaigns.create.good')}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <input type="checkbox" id="isPublic" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="rounded" />
-                <label htmlFor="isPublic" className="text-sm text-gray-700">Make this campaign public (visible to everyone)</label>
+                <label htmlFor="isPublic" className="text-sm text-gray-700">{t('donor.campaigns.create.makePublic')}</label>
               </div>
               <div className="flex gap-3">
                 <button className="btn-outline flex-1 flex items-center justify-center gap-2" onClick={() => setStep(1)}>
-                  <ArrowLeft size={16} /> Back
+                  <ArrowLeft size={16} /> {t('general.back')}
                 </button>
                 <button className="btn-primary flex-1 flex items-center justify-center gap-2" onClick={() => setStep(3)} disabled={!title || description.length < 50}>
-                  Continue
+                  {t('donor.campaigns.create.continue')}
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -390,13 +413,15 @@ function CreateCampaignContent() {
           {/* Step 3 — Goal */}
           {step === 3 && (
             <div className="card p-6 space-y-5">
-              <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">Set Your Goal</h2>
+              <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">{t('donor.campaigns.create.setGoal')}</h2>
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Goal Amount (XAF) *</label>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.goalAmount')}</label>
                 <input className="input-field font-mono text-lg" type="number" min={6000} step={6000}
-                  placeholder="e.g. 120000" value={goalAmount} onChange={e => setGoalAmount(Number(e.target.value))} />
+                  placeholder={t('donor.campaigns.create.goalPlaceholder')} value={goalAmount} onChange={e => setGoalAmount(Number(e.target.value))} />
                 <p className="text-xs text-gray-400 mt-1">
-                  ≈ {Math.round(goalAmount / 60000)} safe {Math.round(goalAmount / 60000) === 1 ? 'delivery' : 'deliveries'} funded
+                  {Math.round(goalAmount / 60000) === 1
+                    ? t('donor.campaigns.create.deliveryFunded', { count: Math.round(goalAmount / 60000) })
+                    : t('donor.campaigns.create.deliveriesFunded', { count: Math.round(goalAmount / 60000) })}
                 </p>
               </div>
               <div className="grid grid-cols-4 gap-2">
@@ -409,7 +434,7 @@ function CreateCampaignContent() {
                 ))}
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Campaign End Date *</label>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.campaignEndDate')}</label>
                 <div className="relative">
                   <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input className="input-field pl-9" type="date" value={endDate} min={new Date().toISOString().split('T')[0]}
@@ -418,10 +443,10 @@ function CreateCampaignContent() {
               </div>
               <div className="flex gap-3">
                 <button className="btn-outline flex-1 flex items-center justify-center gap-2" onClick={() => setStep(2)}>
-                  <ArrowLeft size={16} /> Back
+                  <ArrowLeft size={16} /> {t('general.back')}
                 </button>
                 <button className="btn-primary flex-1 flex items-center justify-center gap-2" onClick={() => setStep(4)} disabled={!goalAmount || !endDate}>
-                  Preview
+                  {t('donor.campaigns.create.preview')}
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -431,7 +456,7 @@ function CreateCampaignContent() {
           {/* Step 4 — Preview */}
           {step === 4 && !publishedCampaign && (
             <div className="card p-6">
-              <h2 className="font-bold text-xl text-[#1A1A2E] mb-4">Preview</h2>
+              <h2 className="font-bold text-xl text-[#1A1A2E] mb-4">{t('donor.campaigns.create.preview')}</h2>
               <div className="rounded-2xl overflow-hidden border border-gray-200 mb-5">
                 <div className="h-8" style={{ background: coverColor }} />
                 <div className="p-4">
@@ -441,12 +466,12 @@ function CreateCampaignContent() {
                     </div>
                     <div>
                       <p className="font-bold text-sm text-[#1A1A2E]">{title}</p>
-                      <p className="text-xs text-gray-500">{eventLabel} · Goal: {formatXAF(goalAmount)}</p>
+                      <p className="text-xs text-gray-500">{eventLabel} · {t('campaign.goal', { amount: formatXAF(goalAmount) })}</p>
                     </div>
                   </div>
                   <p className="text-xs text-gray-600 line-clamp-3">{description}</p>
                   <p className="text-xs text-gray-400 mt-2">
-                    Ends:{' '}
+                    {t('donor.campaigns.create.ends')}{' '}
                     {new Date(endDate).toLocaleDateString('en-US', {
                       day: '2-digit',
                       month: 'short',
@@ -457,13 +482,13 @@ function CreateCampaignContent() {
               </div>
               <div className="flex gap-3">
                 <button className="btn-outline flex-1 flex items-center justify-center gap-2" onClick={() => setStep(3)}>
-                  <ArrowLeft size={16} /> Edit
+                  <ArrowLeft size={16} /> {t('general.edit')}
                 </button>
                 <button
                   className="btn-primary flex-1 flex items-center justify-center gap-2"
                   onClick={handlePublish}
                 >
-                  Continue to Donate
+                  {t('donor.campaigns.create.continueToDonate')}
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -477,22 +502,22 @@ function CreateCampaignContent() {
                 // Loading state - creating campaign
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
                   <Loader2 size={32} className="animate-spin" style={{ color: 'var(--primary)' }} />
-                  <h2 className="font-bold text-xl text-[#1A1A2E]">Creating Your JoyFund...</h2>
-                  <p className="text-gray-500 text-sm">Setting up your campaign</p>
+                  <h2 className="font-bold text-xl text-[#1A1A2E]">{t('donor.campaigns.create.creatingJoyFund')}</h2>
+                  <p className="text-gray-500 text-sm">{t('donor.campaigns.create.settingUpCampaign')}</p>
                 </div>
               ) : (
                 // Donation form
                 <>
-                  <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">Make Your Initial Donation</h2>
+                  <h2 className="font-bold text-xl text-[#1A1A2E] mb-1">{t('donor.campaigns.create.makeInitialDonation')}</h2>
                   <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
                     <p className="text-sm text-blue-900">
-                      <strong>Kindly donate at least 10% of your campaign goal.</strong> This shows your commitment to the cause and helps build trust with contributors.
+                      <strong>{t('donor.campaigns.create.initialDonationHintStrong')}</strong>{' '}{t('donor.campaigns.create.initialDonationHintRest')}
                     </p>
                   </div>
                   
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Donation Amount (XAF) *</label>
-                    <div className="text-xs text-gray-400 mb-2">Minimum: {formatXAF(Math.round(goalAmount * 0.1))} (10% of goal)</div>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.donationAmount')}</label>
+                    <div className="text-xs text-gray-400 mb-2">{t('donor.campaigns.create.minimumAmount', { amount: formatXAF(Math.round(goalAmount * 0.1)) })}</div>
                     <input 
                       className="input-field font-mono text-lg" 
                       type="number" 
@@ -509,16 +534,18 @@ function CreateCampaignContent() {
                       }} 
                     />
                     <p className="text-xs text-emerald-600 font-medium mt-1">
-                      ≈ {Math.round(donationAmount / 60000 * 10) / 10} safe {Math.round(donationAmount / 60000) === 1 ? 'delivery' : 'deliveries'} funded
+                      {Math.round(donationAmount / 60000) === 1
+                        ? t('donor.campaigns.create.donationDeliveryFunded', { count: Math.round(donationAmount / 60000 * 10) / 10 })
+                        : t('donor.campaigns.create.donationDeliveriesFunded', { count: Math.round(donationAmount / 60000 * 10) / 10 })}
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-2 block">Payment Method *</label>
+                    <label className="text-xs font-semibold text-gray-500 mb-2 block">{t('donor.campaigns.create.paymentMethod')}</label>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { id: 'MTN', label: 'MTN Mobile Money', color: '#FFC107' },
-                        { id: 'ORANGE', label: 'Orange Money', color: '#FF5A00' }
+                        { id: 'MTN', label: t('donor.campaigns.create.mtnMobileMoney'), color: '#FFC107' },
+                        { id: 'ORANGE', label: t('donor.campaigns.create.orangeMoney'), color: '#FF5A00' }
                       ].map(pm => (
                         <button 
                           key={pm.id} 
@@ -533,26 +560,26 @@ function CreateCampaignContent() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Mobile Money Number *</label>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.mobileMoneyNumber')}</label>
                     <div className="relative">
                       <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input 
                         className="input-field pl-9" 
                         type="tel"
-                        placeholder={paymentMethod === 'MTN' ? '67X XXX XXX (MTN)' : '69X XXX XXX (Orange)'}
+                        placeholder={paymentMethod === 'MTN' ? t('donor.campaigns.create.mtnPhonePlaceholder') : t('donor.campaigns.create.orangePhonePlaceholder')}
                         value={phoneNumber} 
                         onChange={e => setPhoneNumber(e.target.value)} 
                       />
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">You will receive a payment prompt on this number.</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('donor.campaigns.create.paymentPromptHint')}</p>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Message (Optional)</label>
+                    <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.messageOptional')}</label>
                     <textarea 
                       className="input-field min-h-20 resize-none" 
                       rows={3}
-                      placeholder="Share why you're supporting this campaign..."
+                      placeholder={t('donor.campaigns.create.messagePlaceholder')}
                       value={donationMessage} 
                       onChange={e => setDonationMessage(e.target.value)} 
                     />
@@ -560,7 +587,7 @@ function CreateCampaignContent() {
 
                   <div className="flex gap-3">
                     <button className="btn-outline flex-1 flex items-center justify-center gap-2" onClick={() => setStep(4)}>
-                      <ArrowLeft size={16} /> Back
+                      <ArrowLeft size={16} /> {t('general.back')}
                     </button>
                     <button
                       className="btn-primary flex-1 flex items-center justify-center gap-2"
@@ -570,11 +597,11 @@ function CreateCampaignContent() {
                       {donateMutation.isPending ? (
                         <>
                           <Loader2 size={16} className="animate-spin" />
-                          Initiating Payment…
+                          {t('donor.campaigns.create.initiatingPayment')}
                         </>
                       ) : (
                         <>
-                          Donate {formatXAF(donationAmount)}
+                          {t('donor.campaigns.create.donateAmount', { amount: formatXAF(donationAmount) })}
                           <ArrowRight size={16} />
                         </>
                       )}
@@ -594,19 +621,19 @@ function CreateCampaignContent() {
               >
                 <Check size={28} />
               </div>
-              <h2 className="text-2xl font-black text-[#1A1A2E] mb-2">Your JoyFund is Live!</h2>
-              <p className="text-gray-500 text-sm mb-5">Share it to start collecting gifts that fund safe deliveries.</p>
+              <h2 className="text-2xl font-black text-[#1A1A2E] mb-2">{t('donor.campaigns.create.joyFundIsLive')}</h2>
+              <p className="text-gray-500 text-sm mb-5">{t('donor.campaigns.create.shareToCollect')}</p>
               <div className="bg-gray-50 rounded-2xl p-4 mb-5 text-left space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Title</span>
+                  <span className="text-gray-500">{t('donor.campaigns.create.titleLabel')}</span>
                   <span className="font-medium truncate ml-4">{publishedCampaign.title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Goal</span>
+                  <span className="text-gray-500">{t('donor.campaigns.create.goalLabel')}</span>
                   <span className="font-medium">{formatXAF(Number(publishedCampaign.goal_amount))}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Status</span>
+                  <span className="text-gray-500">{t('donor.campaigns.create.statusLabel')}</span>
                   <span className="font-medium capitalize">{publishedCampaign.status}</span>
                 </div>
               </div>
@@ -617,10 +644,10 @@ function CreateCampaignContent() {
                     navigator.clipboard.writeText(
                       `https://joy-fund.com/campaign/${publishedCampaign.id}`
                     );
-                    alert('Link copied!');
+                    alert(t('donor.campaigns.create.linkCopied'));
                   }}
                 >
-                  <Share2 size={16} /> Copy Campaign Link
+                  <Share2 size={16} /> {t('donor.campaigns.create.copyCampaignLink')}
                 </button>
                 <button
                   className="btn-secondary w-full"
@@ -630,7 +657,7 @@ function CreateCampaignContent() {
                     )
                   }
                 >
-                  View Campaign
+                  {t('donor.campaigns.create.viewCampaign')}
                 </button>
               </div>
             </div>

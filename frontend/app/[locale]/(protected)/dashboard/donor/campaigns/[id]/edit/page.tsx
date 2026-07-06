@@ -8,8 +8,10 @@ import Image from "next/image";
 import { ArrowLeft, Loader2, ImagePlus, X } from "lucide-react";
 import { getCampaign, updateCampaign } from "@/actions/campaigns";
 import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
+import { useI18n } from "@/locales/client";
 
 export default function EditCampaignPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -85,15 +87,15 @@ export default function EditCampaignPage() {
       await queryClient.invalidateQueries({
         queryKey: ["my-campaigns", authUserId],
       });
-      alert("Campaign updated successfully!");
+      alert(t('donor.campaigns.edit.updateSuccess'));
       router.push(`/dashboard/donor/campaigns/${id}`);
     },
     onError: (error: any) => {
       try {
         const errorData = JSON.parse(error);
-        alert(errorData?.error || "Failed to update campaign");
+        alert(errorData?.error || t('donor.campaigns.edit.updateFailed'));
       } catch {
-        alert(error?.message || "Failed to update campaign");
+        alert(error?.message || t('donor.campaigns.edit.updateFailed'));
       }
     },
   });
@@ -121,10 +123,6 @@ export default function EditCampaignPage() {
   if (isLoading || !campaign) {
     return <DetailPageSkeleton />;
   }
-        </div>
-      </div>
-    );
-  }
 
   if (!campaign) {
     return (
@@ -133,9 +131,9 @@ export default function EditCampaignPage() {
         style={{ background: "var(--background)" }}
       >
         <div className="text-center card p-10 max-w-sm">
-          <p className="text-gray-500 mb-4">Campaign not found</p>
+          <p className="text-gray-500 mb-4">{t('donor.campaigns.edit.campaignNotFound')}</p>
           <Link href="/dashboard/donor/campaigns" className="btn-primary">
-            Back to Campaigns
+            {t('donor.campaigns.edit.backToCampaigns')}
           </Link>
         </div>
       </div>
@@ -150,26 +148,26 @@ export default function EditCampaignPage() {
             onClick={() => router.back()}
             className="flex items-center gap-1 text-gray-500 text-sm mb-6 hover:text-gray-700"
           >
-            <ArrowLeft size={16} /> Back
+            <ArrowLeft size={16} /> {t('general.back')}
           </button>
 
           <div className="card p-6">
             <h1 className="text-2xl font-black text-[#1A1A2E] mb-6">
-              Edit Campaign
+              {t('donor.campaigns.edit.editCampaign')}
             </h1>
 
             <div className="space-y-6">
               {/* Cover Image */}
               <div>
                 <label className="text-xs font-semibold text-gray-500 mb-2 block">
-                  Campaign Cover Image
+                  {t('donor.campaigns.edit.campaignCoverImage')}
                 </label>
                 <div className="relative">
                   {coverImagePreview ? (
                     <div className="relative rounded-2xl overflow-hidden border-2 border-gray-200 h-40 bg-gray-100">
                       <Image
                         src={coverImagePreview}
-                        alt="Campaign cover"
+                        alt={t('donor.campaigns.edit.campaignCoverAlt')}
                         fill
                         className="object-cover"
                       />
@@ -192,10 +190,10 @@ export default function EditCampaignPage() {
                         className="mx-auto text-gray-400 mb-2"
                       />
                       <p className="text-sm font-medium text-gray-700">
-                        Click to upload campaign cover image
+                        {t('donor.campaigns.edit.clickToUploadCover')}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        PNG, JPG, GIF up to 5MB
+                        {t('donor.campaigns.edit.uploadHint')}
                       </p>
                     </button>
                   )}
@@ -212,23 +210,23 @@ export default function EditCampaignPage() {
               {/* Campaign Title */}
               <div>
                 <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                  Campaign Title *
+                  {t('donor.campaigns.edit.campaignTitle')}
                 </label>
                 <input
                   type="text"
                   className="input-field"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter campaign title"
+                  placeholder={t('donor.campaigns.edit.titlePlaceholder')}
                 />
               </div>
 
               {/* Description */}
               <div>
                 <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                  Campaign Description *{" "}
+                  {t('donor.campaigns.edit.campaignDescription')}{" "}
                   <span className="font-normal text-gray-400">
-                    (min 50 characters)
+                    {t('donor.campaigns.edit.minChars')}
                   </span>
                 </label>
                 <textarea
@@ -236,10 +234,10 @@ export default function EditCampaignPage() {
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Tell your campaign story..."
+                  placeholder={t('donor.campaigns.edit.descriptionPlaceholder')}
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>{description.length} characters</span>
+                  <span>{description.length} {t('donor.campaigns.edit.characters')}</span>
                   <span
                     className={
                       description.length < 50
@@ -248,8 +246,8 @@ export default function EditCampaignPage() {
                     }
                   >
                     {description.length < 50
-                      ? `${50 - description.length} more needed`
-                      : "✓ Good"}
+                      ? t('donor.campaigns.edit.moreNeeded', { count: 50 - description.length })
+                      : t('donor.campaigns.edit.good')}
                   </span>
                 </div>
               </div>
@@ -257,7 +255,7 @@ export default function EditCampaignPage() {
               {/* Goal Amount */}
               <div>
                 <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                  Goal Amount (XAF) *
+                  {t('donor.campaigns.edit.goalAmount')}
                 </label>
                 <input
                   type="number"
@@ -266,21 +264,19 @@ export default function EditCampaignPage() {
                   step={6000}
                   value={goalAmount}
                   onChange={(e) => setGoalAmount(Number(e.target.value))}
-                  placeholder="e.g. 120000"
+                  placeholder={t('donor.campaigns.edit.goalPlaceholder')}
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  ≈ {Math.round(goalAmount / 60000)} safe{" "}
                   {Math.round(goalAmount / 60000) === 1
-                    ? "delivery"
-                    : "deliveries"}{" "}
-                  funded
+                    ? t('donor.campaigns.edit.deliveryFunded', { count: Math.round(goalAmount / 60000) })
+                    : t('donor.campaigns.edit.deliveriesFunded', { count: Math.round(goalAmount / 60000) })}
                 </p>
               </div>
 
               {/* End Date */}
               <div>
                 <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                  Campaign End Date *
+                  {t('donor.campaigns.edit.campaignEndDate')}
                 </label>
                 <input
                   type="date"
@@ -301,7 +297,7 @@ export default function EditCampaignPage() {
                   className="rounded"
                 />
                 <label htmlFor="isPublic" className="text-sm text-gray-700">
-                  Make this campaign public (visible to everyone)
+                  {t('donor.campaigns.edit.makePublic')}
                 </label>
               </div>
 
@@ -311,7 +307,7 @@ export default function EditCampaignPage() {
                   onClick={() => router.back()}
                   className="btn-outline flex-1"
                 >
-                  Cancel
+                  {t('general.cancel')}
                 </button>
                 <button
                   onClick={() => updateMutation.mutate()}
@@ -327,10 +323,10 @@ export default function EditCampaignPage() {
                   {updateMutation.isPending ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      Updating…
+                      {t('donor.campaigns.edit.updating')}
                     </>
                   ) : (
-                    "Update Campaign"
+                    t('donor.campaigns.edit.updateCampaign')
                   )}
                 </button>
               </div>

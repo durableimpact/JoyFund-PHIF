@@ -6,9 +6,9 @@ import VerificationBanner from '@/components/dashboard/VerificationBanner'
 function layout({children}: PropsWithChildren) {
   return (
     <ProtectedRoute requiredRole={"DONOR"}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen flex-1 flex flex-col bg-background">
         <DonorNavbar />
-        <main className="p-4 lg:p-6 max-w-7xl mx-auto">
+        <main className="p-4 lg:p-6 flex-1 max-w-7xl mx-auto">
           <VerificationBanner />
           {children}
         </main>

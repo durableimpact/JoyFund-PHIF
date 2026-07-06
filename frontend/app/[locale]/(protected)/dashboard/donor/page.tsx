@@ -8,9 +8,11 @@ import CampaignDashboardCard from "@/components/dashboard/cards/CampaignDashboar
 import { formatXAF } from "@/lib/utils";
 import { getMyCampaigns, getMyDonations } from "@/actions/campaigns";
 import { getDonorDashboard } from "@/actions/accounts";
+import { useI18n } from "@/locales/client";
 
 export default function DonorDashboardPage() {
   const router = useRouter();
+  const t = useI18n();
   const { data: session, status } = useSession();
   const token = session?.accessToken || session?.user?.accessToken;
   const donorProfileId = (session?.user?.userInfo as DonorInfo | undefined)
@@ -158,7 +160,7 @@ export default function DonorDashboardPage() {
         <div className="max-w-5xl mx-auto">
           <div className="flex items-start justify-between mb-8">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Welcome back</p>
+              <p className="text-sm text-gray-500 mb-1">{t("dashboard.donor.welcomeBack")}</p>
               <h1 className="text-2xl font-black text-[#1A1A2E]">
                 {displayName}
               </h1>
@@ -167,7 +169,7 @@ export default function DonorDashboardPage() {
               href="/dashboard/donor/campaigns/create"
               className="btn-primary text-sm"
             >
-              <Plus size={16} /> New JoyFund
+              <Plus size={16} /> {t("dashboard.donor.newJoyFund")}
             </Link>
           </div>
 

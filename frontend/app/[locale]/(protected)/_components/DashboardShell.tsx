@@ -77,9 +77,7 @@ export default function DashboardShell({
         : "U";
 
   const displayName =
-    currentUser?.first_name ||
-    session?.user?.name?.split(" ")[0] ||
-    "User";
+    currentUser?.first_name || session?.user?.name?.split(" ")[0] || "User";
 
   const PROFILE_PATHS: Record<string, string> = {
     SYSTEM_ADMIN: "/dashboard/system-admin/profile",
@@ -102,8 +100,8 @@ export default function DashboardShell({
     <div className="flex flex-col h-full">
       {/* Brand */}
       <div className="px-5 py-5 border-b border-white/10">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl overflow-hidden bg-white/10">
+        <Link href="/" className="flex items-start gap-2.5">
+          <div className="w-8 h-8 rounded-xl overflow-hidden ">
             <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
@@ -113,9 +111,13 @@ export default function DashboardShell({
             />
           </div>
           <div>
-            <p className="font-black text-white text-sm leading-tight">
+            {/* <p className="font-black text-white text-sm leading-tight">
               JoyFund
-            </p>
+            </p> */}
+            <div className="font-black text-sm leading-tight">
+              <span className="text-[#80B034]">Joy</span>
+              <span className="text-[#3D77B9]">Fund</span>
+            </div>
             {brandSub && <p className="text-white/60 text-xs">{brandSub}</p>}
           </div>
         </Link>
@@ -281,15 +283,11 @@ export default function DashboardShell({
                 <DropdownMenuLabel>{session?.user?.email}</DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => router.push(profilePath)}
-              >
+              <DropdownMenuItem onClick={() => router.push(profilePath)}>
                 <User size={16} />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push(devicesPath)}
-              >
+              <DropdownMenuItem onClick={() => router.push(devicesPath)}>
                 <Shield size={16} />
                 Security & Devices
               </DropdownMenuItem>
