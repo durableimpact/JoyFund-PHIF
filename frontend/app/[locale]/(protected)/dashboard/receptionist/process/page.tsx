@@ -24,6 +24,7 @@ import {
   createVoucherTopUpRequest,
 } from '@/actions/hospital';
 import { formatDate } from '@/lib/utils';
+import { useI18n } from '@/locales/client';
 
 function money(amount: number): string {
   if (isNaN(amount)) return '0 XAF';
@@ -39,6 +40,7 @@ interface PendingItem {
 let nextTempId = 1;
 
 export default function ProcessVoucher() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const userInfo = (session?.user as any)?.userInfo;
@@ -74,12 +76,12 @@ export default function ProcessVoucher() {
   const checkMutation = useMutation({
     mutationFn: () => checkVoucher(token, voucherCode.trim()),
     onSuccess: (data) => {
-      if (!data) { setError('Invalid voucher response'); return; }
+      if (!data) { setError(t('receptionist.process.invalidVoucherResponse')); return; }
       setError('');
       setVoucherData(data);
       setStep('checked');
     },
-    onError: () => setError('Invalid voucher code or network error'),
+    onError: () => setError(t('receptionist.process.invalidVoucherError')),
   });
 
   // ── Hospital Services ──
@@ -127,7 +129,7 @@ export default function ProcessVoucher() {
       setPendingItems([]);
       setStep('manage');
     },
-    onError: () => setError('Failed to create medical claim'),
+    onError: () => setError(t('receptionist.process.createClaimError')),
   });
 
   // ── Add extra items after creation ──
@@ -141,7 +143,7 @@ export default function ProcessVoucher() {
       setExtraItemAmount('');
       setExtraServiceId('');
     },
-    onError: () => setError('Failed to add item'),
+    onError: () => setError(t('receptionist.process.addItemError')),
   });
 
   const fetchClaim = async () => {
@@ -163,7 +165,7 @@ export default function ProcessVoucher() {
       setProofType('BILL');
       fetchClaim();
     },
-    onError: () => setError('Failed to upload proof'),
+    onError: () => setError(t('receptionist.process.uploadProofError')),
   });
 
   // ── Complete Claim ──
@@ -173,7 +175,7 @@ export default function ProcessVoucher() {
       queryClient.invalidateQueries({ queryKey: ['rec-claims'] });
       resetAll();
     },
-    onError: () => setError('Failed to complete claim — ensure all proofs are uploaded'),
+    onError: () => setError(t('receptionist.process.completeClaimError')),
   });
 
   // ── Top-Up Request ──
@@ -191,9 +193,9 @@ export default function ProcessVoucher() {
       setShowTopUp(false);
       setTopUpAmount('');
       setTopUpReason('');
-      alert('Top-up request submitted for hospital admin review.');
+      alert(t('receptionist.process.topUpSubmitted'));
     },
-    onError: () => setError('Failed to submit top-up request'),
+    onError: () => setError(t('receptionist.process.topUpError')),
   });
 
   const resetAll = () => {
@@ -227,8 +229,8 @@ export default function ProcessVoucher() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Process Voucher</h1>
-        <p className="text-gray-500 text-sm">Enter a beneficiary&apos;s voucher code to begin</p>
+        <h1 className="text-2xl font-black text-gray-900">{t('receptionist.process.title')}</h1>
+        <p className="text-gray-500 text-sm">{t('receptionist.process.subtitle')}</p>
       </div>
 
       {error && (
@@ -245,12 +247,12 @@ export default function ProcessVoucher() {
           <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-4">
             <Search size={28} className="text-[#1D75DB]" />
           </div>
-          <h2 className="text-lg font-black text-gray-900 mb-2">Enter Voucher Code</h2>
-          <p className="text-sm text-gray-500 mb-6">Ask the beneficiary for their voucher code to begin processing.</p>
+          <h2 className="text-lg font-black text-gray-900 mb-2">{t('receptionist.process.enterCode')}</h2>
+          <p className="text-sm text-gray-500 mb-6">{t('receptionist.process.askCode')}</p>
           <div className="flex gap-3">
             <input
               className="input-field flex-1 text-center font-mono text-lg tracking-widest uppercase"
-              placeholder="e.g. ABC-12345"
+              placeholder={t('receptionist.process.voucherPlaceholder')}
               value={voucherCode}
               onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === 'Enter' && voucherCode.trim() && checkMutation.mutate()}
@@ -263,7 +265,7 @@ export default function ProcessVoucher() {
               style={{ background: '#1D75DB' }}
             >
               {checkMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-              Check
+              {t('receptionist.process.check')}
             </button>
           </div>
         </div>
@@ -274,14 +276,14 @@ export default function ProcessVoucher() {
         <div className="space-y-5">
           {/* Voucher + Beneficiary Info */}
           <div className="card p-5">
-            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Voucher & Beneficiary</h3>
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">{t('receptionist.process.voucherAndBeneficiary')}</h3>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Code</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.process.code')}</dt>
                 <dd className="text-sm font-mono font-bold text-gray-900">{voucherData.voucher_code}</dd>
               </div>
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Status</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.process.status')}</dt>
                 <dd>
                   <span className={`badge text-xs ${voucherData.is_valid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
                     {voucherData.status?.replace(/_/g, ' ')}
@@ -289,31 +291,31 @@ export default function ProcessVoucher() {
                 </dd>
               </div>
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Allocated Amount</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.process.allocatedAmount')}</dt>
                 <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherData.amount)}</dd>
               </div>
               {voucherData.expiry_date && (
                 <div>
-                  <dt className="text-[10px] text-gray-400 uppercase">Expiry</dt>
+                  <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.process.expiry')}</dt>
                   <dd className="text-sm text-gray-700">{formatDate(voucherData.expiry_date)}</dd>
                 </div>
               )}
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100">
-              <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Beneficiary</h4>
+              <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">{t('receptionist.process.beneficiary')}</h4>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-                <div><span className="text-gray-400 text-xs">Name</span><p className="font-semibold">{voucherData.beneficiary.full_name}</p></div>
-                <div><span className="text-gray-400 text-xs">Health ID</span><p className="font-mono text-xs">{voucherData.beneficiary.digital_health_id || '—'}</p></div>
-                <div><span className="text-gray-400 text-xs">Phone</span><p>{voucherData.beneficiary.phone}</p></div>
-                <div><span className="text-gray-400 text-xs">Category</span><p>{voucherData.beneficiary.category}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.process.name')}</span><p className="font-semibold">{voucherData.beneficiary.full_name}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.process.healthId')}</span><p className="font-mono text-xs">{voucherData.beneficiary.digital_health_id || '—'}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.process.phone')}</span><p>{voucherData.beneficiary.phone}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.process.category')}</span><p>{voucherData.beneficiary.category}</p></div>
               </div>
             </div>
           </div>
 
           {!voucherData.is_valid && (
             <div className="text-center">
-              <p className="text-red-500 text-sm mb-3">This voucher is not valid for processing.</p>
-              <button onClick={resetAll} className="btn-outline">Start Over</button>
+              <p className="text-red-500 text-sm mb-3">{t('receptionist.process.notValid')}</p>
+              <button onClick={resetAll} className="btn-outline">{t('receptionist.process.startOver')}</button>
             </div>
           )}
 
@@ -322,28 +324,28 @@ export default function ProcessVoucher() {
               {/* Service Description + Add Services (single form) */}
               <div className="card p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Create Medical Claim</h3>
+                  <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">{t('receptionist.process.createClaim')}</h3>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-gray-400">Budget:</span>
+                    <span className="text-gray-400">{t('receptionist.process.budget')}:</span>
                     <span className="font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</span>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Service Description *</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.serviceDescription')}</label>
                     <textarea
                       className="input-field min-h-20"
-                      placeholder="Describe the medical services being provided..."
+                      placeholder={t('receptionist.process.serviceDescriptionPlaceholder')}
                       value={serviceDescription}
                       onChange={(e) => setServiceDescription(e.target.value)}
                     />
                   </div>
 
                   <div className="border-t border-gray-100 pt-4">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Select Hospital Service</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.selectService')}</label>
                     <select className="input-field" value={selectedServiceId} onChange={(e) => handleServiceSelect(e.target.value)}>
-                      <option value="">— Choose a service —</option>
+                      <option value="">{t('receptionist.process.chooseService')}</option>
                       {services.filter((s: any) => s.is_available).map((s: any) => (
                         <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                       ))}
@@ -352,11 +354,11 @@ export default function ProcessVoucher() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Service Name *</label>
-                      <input className="input-field" placeholder="e.g. Consultation, Blood Test" value={itemName} onChange={(e) => setItemName(e.target.value)} />
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.serviceName')}</label>
+                      <input className="input-field" placeholder={t('receptionist.process.serviceNamePlaceholder')} value={itemName} onChange={(e) => setItemName(e.target.value)} />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Amount (XAF) *</label>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.amount')}</label>
                       <input className="input-field" type="number" min="0" placeholder="0" value={itemAmount} onChange={(e) => setItemAmount(e.target.value)} />
                     </div>
                   </div>
@@ -367,7 +369,7 @@ export default function ProcessVoucher() {
                     className="py-2 px-4 rounded-xl font-bold text-xs text-white disabled:opacity-60 flex items-center gap-2"
                     style={{ background: '#1D75DB' }}
                   >
-                    <Plus size={14} /> Add Service
+                    <Plus size={14} /> {t('receptionist.process.addService')}
                   </button>
                 </div>
 
@@ -377,9 +379,9 @@ export default function ProcessVoucher() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-gray-100">
-                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">#</th>
-                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">Service</th>
-                          <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.process.colNum')}</th>
+                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.process.colService')}</th>
+                          <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.process.colAmount')}</th>
                           <th className="w-10"></th>
                         </tr>
                       </thead>
@@ -397,7 +399,7 @@ export default function ProcessVoucher() {
                           </tr>
                         ))}
                         <tr className="bg-gray-50">
-                          <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
+<td colSpan={2} className="p-3 font-bold text-gray-900 text-right">{t('receptionist.process.total')}</td>
                           <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{money(pendingTotal)}</td>
                           <td></td>
                         </tr>
@@ -407,7 +409,7 @@ export default function ProcessVoucher() {
                 )}
 
                 {pendingItems.length === 0 && (
-                  <p className="text-xs text-gray-400 text-center py-3">No services added yet. Select from the hospital services above.</p>
+                  <p className="text-xs text-gray-400 text-center py-3">{t('receptionist.process.noServices')}</p>
                 )}
               </div>
 
@@ -415,13 +417,13 @@ export default function ProcessVoucher() {
               {overBudget && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs text-amber-700">
                   <AlertTriangle size={14} />
-                  Total ({money(pendingTotal)}) exceeds voucher budget ({money(voucherAmount)}). You can still create the claim and request a top-up later.
+                  {t('receptionist.process.overBudgetWarning', { total: money(pendingTotal), budget: money(voucherAmount) })}
                 </div>
               )}
 
               {/* Create Claim Button */}
               <div className="flex gap-3">
-                <button onClick={resetAll} className="btn-outline flex-1">Cancel</button>
+                <button onClick={resetAll} className="btn-outline flex-1">{t('receptionist.process.cancel')}</button>
                 <button
                   onClick={() => createClaimMutation.mutate()}
                   disabled={!serviceDescription.trim() || pendingItems.length === 0 || createClaimMutation.isPending}
@@ -429,7 +431,7 @@ export default function ProcessVoucher() {
                   style={{ background: '#1D75DB' }}
                 >
                   {createClaimMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-                  Create Claim ({pendingItems.length} service{pendingItems.length !== 1 ? 's' : ''})
+                  {t('receptionist.process.createClaimButton', { count: pendingItems.length })}
                 </button>
               </div>
             </>
@@ -453,18 +455,18 @@ export default function ProcessVoucher() {
             </div>
             <div className="grid grid-cols-3 gap-4 pt-3 border-t border-gray-100">
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Voucher Budget</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.process.voucherBudget')}</dt>
                 <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</dd>
               </div>
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Claim Total</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.process.claimTotal')}</dt>
                 <dd className={`text-sm font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>
                   {money(claimTotal)}
-                  {overBudget && <span className="text-xs ml-1">(over budget)</span>}
+                  {overBudget && <span className="text-xs ml-1">{t('receptionist.process.overBudget')}</span>}
                 </dd>
               </div>
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Remaining</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.process.remaining')}</dt>
                 <dd className={`text-sm font-bold ${overBudget ? 'text-red-600' : 'text-green-600'}`}>
                   {money(voucherAmount - claimTotal)}
                 </dd>
@@ -475,7 +477,7 @@ export default function ProcessVoucher() {
           {/* Claim Items */}
           <div className="card p-5">
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
-              Services / Items ({claimData.claim_items?.length || 0})
+              {t('receptionist.process.servicesItems', { count: claimData.claim_items?.length || 0 })}
             </h3>
 
             {claimData.claim_items && claimData.claim_items.length > 0 && (
@@ -483,9 +485,9 @@ export default function ProcessVoucher() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100">
-                      <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">#</th>
-                      <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">Service</th>
-                      <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                      <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.process.colNum')}</th>
+                      <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.process.colService')}</th>
+                      <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.process.colAmount')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -497,7 +499,7 @@ export default function ProcessVoucher() {
                       </tr>
                     ))}
                     <tr className="bg-gray-50">
-                      <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
+                      <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">{t('receptionist.process.total')}</td>
                       <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{money(claimTotal)}</td>
                     </tr>
                   </tbody>
@@ -507,16 +509,16 @@ export default function ProcessVoucher() {
 
             {/* Add more items */}
             <div className="border-t border-gray-100 pt-4">
-              <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Add Another Service</h4>
+              <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">{t('receptionist.process.addAnotherService')}</h4>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Hospital Service (optional)</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.hospitalService')}</label>
                   <select className="input-field" value={extraServiceId} onChange={(e) => {
                     setExtraServiceId(e.target.value);
                     const svc = services.find((s: any) => s.id === e.target.value);
                     if (svc) { setExtraItemName(svc.name); setExtraItemAmount(String(svc.price)); }
                   }}>
-                    <option value="">— Custom entry —</option>
+                    <option value="">{t('receptionist.process.customEntry')}</option>
                     {services.filter((s: any) => s.is_available).map((s: any) => (
                       <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                     ))}
@@ -524,11 +526,11 @@ export default function ProcessVoucher() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Service Name *</label>
-                    <input className="input-field" placeholder="e.g. Consultation, Blood Test" value={extraItemName} onChange={(e) => setExtraItemName(e.target.value)} />
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.serviceName')}</label>
+                    <input className="input-field" placeholder={t('receptionist.process.serviceNamePlaceholder')} value={extraItemName} onChange={(e) => setExtraItemName(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Amount (XAF) *</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.amount')}</label>
                     <input className="input-field" type="number" min="0" placeholder="0" value={extraItemAmount} onChange={(e) => setExtraItemAmount(e.target.value)} />
                   </div>
                 </div>
@@ -539,7 +541,7 @@ export default function ProcessVoucher() {
                   style={{ background: '#1D75DB' }}
                 >
                   {addItemMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                  Add Service
+                  {t('receptionist.process.addAnotherServiceButton')}
                 </button>
               </div>
             </div>
@@ -551,29 +553,28 @@ export default function ProcessVoucher() {
               <div className="flex items-start gap-3">
                 <AlertTriangle size={20} className="text-amber-600 mt-0.5 shrink-0" />
                 <div className="flex-1">
-                  <h4 className="font-bold text-amber-800 text-sm mb-1">Over Budget</h4>
+                  <h4 className="font-bold text-amber-800 text-sm mb-1">{t('receptionist.process.overBudgetTitle')}</h4>
                   <p className="text-xs text-amber-700 mb-3">
-                    Claim total ({money(claimTotal)}) exceeds voucher budget ({money(voucherAmount)}).
-                    You can save and wait, or request a top-up from the hospital admin.
+                    {t('receptionist.process.overBudgetDesc', { claimTotal: money(claimTotal), voucherAmount: money(voucherAmount) })}
                   </p>
                   {!showTopUp && (
-                    <button onClick={() => { setShowTopUp(true); setTopUpAmount(String(claimTotal - voucherAmount)); }} className="text-xs font-bold text-amber-800 underline">Request Top-Up</button>
+                    <button onClick={() => { setShowTopUp(true); setTopUpAmount(String(claimTotal - voucherAmount)); }} className="text-xs font-bold text-amber-800 underline">{t('receptionist.process.requestTopUp')}</button>
                   )}
                   {showTopUp && (
                     <div className="space-y-2 mt-2">
-                      <p className="text-xs text-amber-600">Maximum top-up: {money(claimTotal - voucherAmount)}</p>
+                      <p className="text-xs text-amber-600">{t('receptionist.process.maxTopUp')}: {money(claimTotal - voucherAmount)}</p>
                       <div className="grid grid-cols-2 gap-2">
-                        <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder="Amount (XAF)" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
-                        <input className="input-field" placeholder="Reason" value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />
+                        <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder={t('receptionist.process.topUpAmountPlaceholder')} value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
+                        <input className="input-field" placeholder={t('receptionist.process.topUpReasonPlaceholder')} value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => setShowTopUp(false)} className="text-xs text-amber-700 underline">Cancel</button>
+                        <button onClick={() => setShowTopUp(false)} className="text-xs text-amber-700 underline">{t('receptionist.process.topUpCancel')}</button>
                         <button
                           onClick={() => topUpMutation.mutate()}
                           disabled={!topUpAmount || !topUpReason.trim() || topUpMutation.isPending}
                           className="text-xs font-bold text-white bg-amber-600 px-3 py-1.5 rounded-lg disabled:opacity-60"
                         >
-                          {topUpMutation.isPending ? 'Submitting...' : 'Submit Request'}
+                          {topUpMutation.isPending ? t('receptionist.process.submitting') : t('receptionist.process.submitRequest')}
                         </button>
                       </div>
                     </div>
@@ -586,7 +587,7 @@ export default function ProcessVoucher() {
           {/* Proofs Section */}
           <div className="card p-5">
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
-              Document Proofs ({claimData.proofs?.length || 0})
+              {t('receptionist.process.documentProofs', { count: claimData.proofs?.length || 0 })}
             </h3>
 
             {claimData.proofs && claimData.proofs.length > 0 && (
@@ -613,10 +614,10 @@ export default function ProcessVoucher() {
             )}
 
             <div className="border-t border-gray-100 pt-4">
-              <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Upload Proof</h4>
+              <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">{t('receptionist.process.uploadProof')}</h4>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Document Type</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.process.documentType')}</label>
                   <select className="input-field" value={proofType} onChange={(e) => setProofType(e.target.value)}>
                     {['BILL', 'PRESCRIPTION', 'LAB_RESULT', 'DISCHARGE', 'IMAGING', 'OTHER'].map((t) => (
                       <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>
@@ -636,7 +637,7 @@ export default function ProcessVoucher() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 justify-center text-sm text-gray-400">
-                        <Upload size={16} /> Click to upload document
+                        <Upload size={16} /> {t('receptionist.process.clickToUpload')}
                       </div>
                     )}
                   </button>
@@ -648,7 +649,7 @@ export default function ProcessVoucher() {
                   style={{ background: '#1D75DB' }}
                 >
                   {uploadProofMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                  Upload Proof
+                  {t('receptionist.process.uploadProofButton')}
                 </button>
               </div>
             </div>
@@ -656,7 +657,7 @@ export default function ProcessVoucher() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={resetAll} className="btn-outline flex-1">Cancel / Start Over</button>
+            <button onClick={resetAll} className="btn-outline flex-1">{t('receptionist.process.cancelStartOver')}</button>
             <button
               onClick={() => completeMutation.mutate()}
               disabled={!hasItems || !hasProofs || completeMutation.isPending}
@@ -664,14 +665,14 @@ export default function ProcessVoucher() {
               style={{ background: '#22C55E' }}
             >
               {completeMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-              Complete &amp; Submit
+              {t('receptionist.process.completeAndSubmit')}
             </button>
           </div>
           {(!hasItems || !hasProofs) && (
             <p className="text-xs text-gray-400 text-center -mt-2">
-              {!hasItems && !hasProofs && 'Add service items and upload document proofs before completing.'}
-              {!hasItems && hasProofs && 'Add at least one service item before completing.'}
-              {hasItems && !hasProofs && 'Upload at least one document proof before completing.'}
+              {!hasItems && !hasProofs && t('receptionist.process.completeValidationBoth')}
+              {!hasItems && hasProofs && t('receptionist.process.completeValidationNoItems')}
+              {hasItems && !hasProofs && t('receptionist.process.completeValidationNoProofs')}
             </p>
           )}
         </div>

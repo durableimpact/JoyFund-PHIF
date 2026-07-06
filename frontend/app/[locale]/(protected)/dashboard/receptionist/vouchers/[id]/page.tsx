@@ -32,6 +32,7 @@ import {
   createVoucherTopUpRequest,
 } from '@/actions/hospital';
 import { formatDate, formatDateTime, statusColor } from '@/lib/utils';
+import { useI18n } from '@/locales/client';
 
 function money(amount: number): string {
   if (isNaN(amount)) return '0 XAF';
@@ -47,6 +48,7 @@ interface PendingItem {
 let nextTempId = 1;
 
 export default function ReceptionistVoucherDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -124,7 +126,7 @@ export default function ReceptionistVoucherDetailPage() {
       setServiceDescription('');
       setPendingItems([]);
     },
-    onError: () => setError('Failed to create medical claim'),
+    onError: () => setError(t('receptionist.vouchers.detail.createClaimError')),
   });
 
   const addItemMutation = useMutation({
@@ -137,7 +139,7 @@ export default function ReceptionistVoucherDetailPage() {
       setExtraItemAmount('');
       setExtraServiceId('');
     },
-    onError: () => setError('Failed to add item'),
+    onError: () => setError(t('receptionist.vouchers.detail.addItemError')),
   });
 
   const uploadProofMutation = useMutation({
@@ -152,7 +154,7 @@ export default function ReceptionistVoucherDetailPage() {
       setProofType('BILL');
       queryClient.invalidateQueries({ queryKey: ['rec-voucher-claim', claimId] });
     },
-    onError: () => setError('Failed to upload proof'),
+    onError: () => setError(t('receptionist.vouchers.detail.uploadProofError')),
   });
 
   const completeMutation = useMutation({
@@ -161,7 +163,7 @@ export default function ReceptionistVoucherDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['rec-claims'] });
       queryClient.invalidateQueries({ queryKey: ['rec-voucher-claim', claimId] });
     },
-    onError: () => setError('Failed to complete claim'),
+    onError: () => setError(t('receptionist.vouchers.detail.completeClaimError')),
   });
 
   const topUpMutation = useMutation({
@@ -178,9 +180,9 @@ export default function ReceptionistVoucherDetailPage() {
       setShowTopUp(false);
       setTopUpAmount('');
       setTopUpReason('');
-      alert('Top-up request submitted for hospital admin review.');
+      alert(t('receptionist.vouchers.detail.topUpSubmitted'));
     },
-    onError: () => setError('Failed to submit top-up request'),
+    onError: () => setError(t('receptionist.vouchers.detail.topUpError')),
   });
 
   // ── Helpers ──
@@ -225,13 +227,13 @@ export default function ReceptionistVoucherDetailPage() {
   }
 
   if (!voucher) {
-    return <div className="text-center py-16 text-gray-400">Voucher not found.</div>;
+    return <div className="text-center py-16 text-gray-400">{t('receptionist.vouchers.detail.notFound')}</div>;
   }
 
   return (
     <>
       <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-        <ArrowLeft size={16} /> Back to Vouchers
+        <ArrowLeft size={16} /> {t('receptionist.vouchers.detail.backToVouchers')}
       </button>
 
       {error && (
@@ -249,7 +251,7 @@ export default function ReceptionistVoucherDetailPage() {
           <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                <Receipt size={14} /> Voucher Information
+                <Receipt size={14} /> {t('receptionist.vouchers.detail.voucherInfo')}
               </h2>
               <span className={`badge text-xs ${statusColor(voucher.status)}`}>{voucher.status?.replace(/_/g, ' ')}</span>
             </div>
@@ -257,31 +259,31 @@ export default function ReceptionistVoucherDetailPage() {
               <code className="font-mono text-lg font-bold text-gray-700 bg-gray-100 rounded-lg px-3 py-1 select-all">
                 {voucher.voucher_code}
               </code>
-              <button onClick={() => copyCode(voucher.voucher_code)} className="text-gray-400 hover:text-gray-600 p-1" title="Copy code">
+              <button onClick={() => copyCode(voucher.voucher_code)} className="text-gray-400 hover:text-gray-600 p-1" title={t('receptionist.vouchers.detail.copyCode')}>
                 {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
               </button>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Budget</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.budget')}</dt>
                 <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</dd>
               </div>
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Language</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.language')}</dt>
                 <dd className="text-sm text-gray-700">{voucher.language_preference?.toUpperCase()}</dd>
               </div>
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Expiry</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.expiry')}</dt>
                 <dd className="text-sm text-gray-700">{voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'}</dd>
               </div>
               <div>
-                <dt className="text-[10px] text-gray-400 uppercase">Created</dt>
+                <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.created')}</dt>
                 <dd className="text-sm text-gray-700">{formatDate(voucher.created_at)}</dd>
               </div>
             </div>
             {voucher.patient_confirmation_pin && (
               <div className="mt-3 pt-3 border-t border-gray-100">
-                <span className="text-[10px] text-gray-400 uppercase">Confirmation PIN: </span>
+                <span className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.confirmationPin')}: </span>
                 <span className="font-mono font-bold text-sm">{voucher.patient_confirmation_pin}</span>
               </div>
             )}
@@ -291,13 +293,13 @@ export default function ReceptionistVoucherDetailPage() {
           {voucher.beneficiary && (
             <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <User size={14} /> Beneficiary
+                <User size={14} /> {t('receptionist.vouchers.detail.beneficiary')}
               </h2>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-                <div><span className="text-gray-400 text-xs">Name</span><p className="font-semibold">{voucher.beneficiary.full_name}</p></div>
-                <div><span className="text-gray-400 text-xs">Health ID</span><p className="font-mono text-xs">{voucher.beneficiary.digital_health_id || '—'}</p></div>
-                <div><span className="text-gray-400 text-xs">Phone</span><p>{voucher.beneficiary.phone}</p></div>
-                <div><span className="text-gray-400 text-xs">Category</span><p>{voucher.beneficiary.category}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.vouchers.detail.name')}</span><p className="font-semibold">{voucher.beneficiary.full_name}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.vouchers.detail.healthId')}</span><p className="font-mono text-xs">{voucher.beneficiary.digital_health_id || '—'}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.vouchers.detail.phone')}</span><p>{voucher.beneficiary.phone}</p></div>
+                <div><span className="text-gray-400 text-xs">{t('receptionist.vouchers.detail.category')}</span><p>{voucher.beneficiary.category}</p></div>
               </div>
             </div>
           )}
@@ -306,23 +308,23 @@ export default function ReceptionistVoucherDetailPage() {
           {!activeClaim && !cLoading && (
             <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <ClipboardCheck size={14} /> Create Medical Claim
+                <ClipboardCheck size={14} /> {t('receptionist.vouchers.detail.createClaim')}
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Service Description *</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.vouchers.detail.serviceDescription')}</label>
                   <textarea
                     className="input-field min-h-20"
-                    placeholder="Describe the medical services being provided..."
+                    placeholder={t('receptionist.vouchers.detail.serviceDescriptionPlaceholder')}
                     value={serviceDescription}
                     onChange={(e) => setServiceDescription(e.target.value)}
                   />
                 </div>
 
                 <div className="border-t border-gray-100 pt-4">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Select Hospital Service</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.vouchers.detail.selectService')}</label>
                   <select className="input-field" value={selectedServiceId} onChange={(e) => handleServiceSelect(e.target.value)}>
-                    <option value="">— Choose a service —</option>
+                    <option value="">{t('receptionist.vouchers.detail.chooseService')}</option>
                     {services.filter((s: any) => s.is_available).map((s: any) => (
                       <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                     ))}
@@ -330,11 +332,11 @@ export default function ReceptionistVoucherDetailPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Service Name *</label>
-                    <input className="input-field" placeholder="e.g. Consultation" value={itemName} onChange={(e) => setItemName(e.target.value)} />
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.vouchers.detail.serviceName')}</label>
+                    <input className="input-field" placeholder={t('receptionist.vouchers.detail.serviceNamePlaceholder')} value={itemName} onChange={(e) => setItemName(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Amount (XAF) *</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('receptionist.vouchers.detail.amount')}</label>
                     <input className="input-field" type="number" min="0" placeholder="0" value={itemAmount} onChange={(e) => setItemAmount(e.target.value)} />
                   </div>
                 </div>
@@ -344,7 +346,7 @@ export default function ReceptionistVoucherDetailPage() {
                   className="py-2 px-4 rounded-xl font-bold text-xs text-white disabled:opacity-60 flex items-center gap-2"
                   style={{ background: '#1D75DB' }}
                 >
-                  <Plus size={14} /> Add Service
+                  <Plus size={14} /> {t('receptionist.vouchers.detail.addService')}
                 </button>
 
                 {pendingItems.length > 0 && (
@@ -352,9 +354,9 @@ export default function ReceptionistVoucherDetailPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-gray-100">
-                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">#</th>
-                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">Service</th>
-                          <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.vouchers.detail.colNum')}</th>
+                          <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.vouchers.detail.colService')}</th>
+                          <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.vouchers.detail.colAmount')}</th>
                           <th className="w-10"></th>
                         </tr>
                       </thead>
@@ -372,7 +374,7 @@ export default function ReceptionistVoucherDetailPage() {
                           </tr>
                         ))}
                         <tr className="bg-gray-50">
-                          <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
+                          <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">{t('receptionist.vouchers.detail.total')}</td>
                           <td className={`p-3 text-right font-bold ${overBudget ? 'text-red-600' : 'text-gray-900'}`}>{money(pendingTotal)}</td>
                           <td></td>
                         </tr>
@@ -388,7 +390,7 @@ export default function ReceptionistVoucherDetailPage() {
                   style={{ background: '#1D75DB' }}
                 >
                   {createClaimMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-                  Create Claim ({pendingItems.length} service{pendingItems.length !== 1 ? 's' : ''})
+                  {t('receptionist.vouchers.detail.createClaimButton', { count: pendingItems.length })}
                 </button>
               </div>
             </div>
@@ -414,17 +416,17 @@ export default function ReceptionistVoucherDetailPage() {
                 <p className="text-xs text-gray-400 mb-3">{activeClaim.service_description}</p>
                 <div className="grid grid-cols-3 gap-4 pt-3 border-t border-gray-100">
                   <div>
-                    <dt className="text-[10px] text-gray-400 uppercase">Budget</dt>
+                    <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.budget')}</dt>
                     <dd className="text-sm font-bold" style={{ color: '#1D75DB' }}>{money(voucherAmount)}</dd>
                   </div>
                   <div>
-                    <dt className="text-[10px] text-gray-400 uppercase">Claim Total</dt>
+                    <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.claimTotal')}</dt>
                     <dd className={`text-sm font-bold ${claimTotal > voucherAmount && voucherAmount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                       {money(claimTotal)}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-[10px] text-gray-400 uppercase">Remaining</dt>
+                    <dt className="text-[10px] text-gray-400 uppercase">{t('receptionist.vouchers.detail.remaining')}</dt>
                     <dd className={`text-sm font-bold ${claimTotal > voucherAmount && voucherAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
                       {money(voucherAmount - claimTotal)}
                     </dd>
@@ -435,16 +437,16 @@ export default function ReceptionistVoucherDetailPage() {
               {/* Claim Items */}
               <div className="card p-5">
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
-                  Services / Items ({activeClaim.claim_items?.length || 0})
+                  {t('receptionist.vouchers.detail.servicesItems', { count: activeClaim.claim_items?.length || 0 })}
                 </h3>
 
                 {activeClaim.claim_items && activeClaim.claim_items.length > 0 && (
                   <table className="w-full text-sm mb-4">
                     <thead>
                       <tr className="border-b border-gray-100">
-                        <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">#</th>
-                        <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">Service</th>
-                        <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                        <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.vouchers.detail.colNum')}</th>
+                        <th className="text-left p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.vouchers.detail.colService')}</th>
+                        <th className="text-right p-3 text-xs font-semibold text-gray-500 uppercase">{t('receptionist.vouchers.detail.colAmount')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -456,7 +458,7 @@ export default function ReceptionistVoucherDetailPage() {
                         </tr>
                       ))}
                       <tr className="bg-gray-50">
-                        <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">Total</td>
+                        <td colSpan={2} className="p-3 font-bold text-gray-900 text-right">{t('receptionist.vouchers.detail.total')}</td>
                         <td className={`p-3 text-right font-bold ${claimTotal > voucherAmount && voucherAmount > 0 ? 'text-red-600' : 'text-gray-900'}`}>{money(claimTotal)}</td>
                       </tr>
                     </tbody>
@@ -465,24 +467,24 @@ export default function ReceptionistVoucherDetailPage() {
 
                 {/* Add more items */}
                 <div className="border-t border-gray-100 pt-4">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Add Another Service</h4>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">{t('receptionist.vouchers.detail.addAnotherService')}</h4>
                   <div className="space-y-3">
                     <select className="input-field" value={extraServiceId} onChange={(e) => {
                       setExtraServiceId(e.target.value);
                       const svc = services.find((s: any) => s.id === e.target.value);
                       if (svc) { setExtraItemName(svc.name); setExtraItemAmount(String(svc.price)); }
                     }}>
-                      <option value="">— Hospital service or custom —</option>
+                      <option value="">{t('receptionist.vouchers.detail.hospitalServiceOrCustom')}</option>
                       {services.filter((s: any) => s.is_available).map((s: any) => (
                         <option key={s.id} value={s.id}>{s.name} — {money(s.price)}</option>
                       ))}
                     </select>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="sm:col-span-2">
-                        <input className="input-field" placeholder="Service name" value={extraItemName} onChange={(e) => setExtraItemName(e.target.value)} />
+                        <input className="input-field" placeholder={t('receptionist.vouchers.detail.extraServiceNamePlaceholder')} value={extraItemName} onChange={(e) => setExtraItemName(e.target.value)} />
                       </div>
                       <div>
-                        <input className="input-field" type="number" min="0" placeholder="Amount" value={extraItemAmount} onChange={(e) => setExtraItemAmount(e.target.value)} />
+                        <input className="input-field" type="number" min="0" placeholder={t('receptionist.vouchers.detail.extraAmountPlaceholder')} value={extraItemAmount} onChange={(e) => setExtraItemAmount(e.target.value)} />
                       </div>
                     </div>
                     <button
@@ -492,7 +494,7 @@ export default function ReceptionistVoucherDetailPage() {
                       style={{ background: '#1D75DB' }}
                     >
                       {addItemMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                      Add Service
+                      {t('receptionist.vouchers.detail.addAnotherServiceButton')}
                     </button>
                   </div>
                 </div>
@@ -504,27 +506,27 @@ export default function ReceptionistVoucherDetailPage() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle size={20} className="text-amber-600 mt-0.5 shrink-0" />
                     <div className="flex-1">
-                      <h4 className="font-bold text-amber-800 text-sm mb-1">Over Budget</h4>
+                      <h4 className="font-bold text-amber-800 text-sm mb-1">{t('receptionist.vouchers.detail.overBudgetTitle')}</h4>
                       <p className="text-xs text-amber-700 mb-3">
-                        Claim total ({money(claimTotal)}) exceeds voucher budget ({money(voucherAmount)}).
+                        {t('receptionist.vouchers.detail.overBudgetDesc', { claimTotal: money(claimTotal), voucherAmount: money(voucherAmount) })}
                       </p>
                       {!showTopUp ? (
-                        <button onClick={() => { setShowTopUp(true); setTopUpAmount(String(claimTotal - voucherAmount)); }} className="text-xs font-bold text-amber-800 underline">Request Top-Up</button>
+                        <button onClick={() => { setShowTopUp(true); setTopUpAmount(String(claimTotal - voucherAmount)); }} className="text-xs font-bold text-amber-800 underline">{t('receptionist.vouchers.detail.requestTopUp')}</button>
                       ) : (
                         <div className="space-y-2">
-                          <p className="text-xs text-amber-600">Maximum top-up: {money(claimTotal - voucherAmount)}</p>
+                          <p className="text-xs text-amber-600">{t('receptionist.vouchers.detail.maxTopUp')}: {money(claimTotal - voucherAmount)}</p>
                           <div className="grid grid-cols-2 gap-2">
-                            <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder="Amount" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
-                            <input className="input-field" placeholder="Reason" value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />
+                            <input className="input-field" type="number" min="0" max={claimTotal - voucherAmount} placeholder={t('receptionist.vouchers.detail.topUpAmountPlaceholder')} value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
+                            <input className="input-field" placeholder={t('receptionist.vouchers.detail.topUpReasonPlaceholder')} value={topUpReason} onChange={(e) => setTopUpReason(e.target.value)} />
                           </div>
                           <div className="flex gap-2">
-                            <button onClick={() => setShowTopUp(false)} className="text-xs text-amber-700 underline">Cancel</button>
+                            <button onClick={() => setShowTopUp(false)} className="text-xs text-amber-700 underline">{t('receptionist.vouchers.detail.topUpCancel')}</button>
                             <button
                               onClick={() => topUpMutation.mutate()}
                               disabled={!topUpAmount || !topUpReason.trim() || topUpMutation.isPending}
                               className="text-xs font-bold text-white bg-amber-600 px-3 py-1.5 rounded-lg disabled:opacity-60"
                             >
-                              {topUpMutation.isPending ? 'Submitting...' : 'Submit Request'}
+                              {topUpMutation.isPending ? t('receptionist.vouchers.detail.submitting') : t('receptionist.vouchers.detail.submitRequest')}
                             </button>
                           </div>
                         </div>
@@ -537,7 +539,7 @@ export default function ReceptionistVoucherDetailPage() {
               {/* Proofs */}
               <div className="card p-5">
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
-                  Document Proofs ({activeClaim.proofs?.length || 0})
+                  {t('receptionist.vouchers.detail.documentProofs', { count: activeClaim.proofs?.length || 0 })}
                 </h3>
 
                 {activeClaim.proofs && activeClaim.proofs.length > 0 && (
@@ -564,7 +566,7 @@ export default function ReceptionistVoucherDetailPage() {
                 )}
 
                 <div className="border-t border-gray-100 pt-4">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Upload Proof</h4>
+                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">{t('receptionist.vouchers.detail.uploadProof')}</h4>
                   <div className="space-y-3">
                     <select className="input-field" value={proofType} onChange={(e) => setProofType(e.target.value)}>
                       {['BILL', 'PRESCRIPTION', 'LAB_RESULT', 'DISCHARGE', 'IMAGING', 'OTHER'].map((t) => (
@@ -583,7 +585,7 @@ export default function ReceptionistVoucherDetailPage() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 justify-center text-sm text-gray-400">
-                          <Upload size={16} /> Click to upload document
+                          <Upload size={16} /> {t('receptionist.vouchers.detail.clickToUpload')}
                         </div>
                       )}
                     </button>
@@ -594,7 +596,7 @@ export default function ReceptionistVoucherDetailPage() {
                       style={{ background: '#1D75DB' }}
                     >
                       {uploadProofMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                      Upload Proof
+                      {t('receptionist.vouchers.detail.uploadProofButton')}
                     </button>
                   </div>
                 </div>
@@ -609,11 +611,11 @@ export default function ReceptionistVoucherDetailPage() {
                   style={{ background: '#22C55E' }}
                 >
                   {completeMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                  Complete &amp; Submit
+                  {t('receptionist.vouchers.detail.completeAndSubmit')}
                 </button>
               </div>
               {!hasProofs && (
-                <p className="text-xs text-gray-400 text-center -mt-2">Upload at least one document proof before completing.</p>
+                <p className="text-xs text-gray-400 text-center -mt-2">{t('receptionist.vouchers.detail.noProofsWarning')}</p>
               )}
             </>
           )}
@@ -624,7 +626,7 @@ export default function ReceptionistVoucherDetailPage() {
           {voucher.events && voucher.events.length > 0 && (
             <div className="card p-5">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Activity size={14} /> Activity
+                <Activity size={14} /> {t('receptionist.vouchers.detail.activity')}
               </h3>
               <div className="space-y-0">
                 {[...(voucher.events || [])].reverse().map((event: any, i: number, arr: any[]) => (
@@ -646,25 +648,25 @@ export default function ReceptionistVoucherDetailPage() {
 
           {/* Quick Actions */}
           <div className="card p-5">
-            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Quick Actions</h3>
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">{t('receptionist.vouchers.detail.quickActions')}</h3>
             <div className="space-y-2">
               <button
                 onClick={() => router.push('/dashboard/receptionist/process')}
                 className="w-full text-left p-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                Process New Voucher
+                {t('receptionist.vouchers.detail.processNewVoucher')}
               </button>
               <button
                 onClick={() => router.push('/dashboard/receptionist/claims')}
                 className="w-full text-left p-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                View All Claims
+                {t('receptionist.vouchers.detail.viewAllClaims')}
               </button>
               <button
                 onClick={() => router.push('/dashboard/receptionist/vouchers')}
                 className="w-full text-left p-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                All Vouchers
+                {t('receptionist.vouchers.detail.allVouchers')}
               </button>
             </div>
           </div>

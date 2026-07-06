@@ -21,8 +21,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getMedicalClaim } from '@/actions/hospital';
 import { getVoucher } from '@/actions/vouchers';
 import { useState } from 'react';
+import { useI18n } from '@/locales/client';
 
 export default function ReceptionistClaimDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -60,7 +62,7 @@ export default function ReceptionistClaimDetailPage() {
   }
 
   if (!claim) {
-    return <div className="text-center py-16 text-gray-400">Claim not found.</div>;
+    return <div className="text-center py-16 text-gray-400">{t('receptionist.claims.detail.notFound')}</div>;
   }
 
   const items = claim.claim_items || [];
@@ -70,13 +72,13 @@ export default function ReceptionistClaimDetailPage() {
   return (
     <>
       <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-        <ArrowLeft size={16} /> Back to Claims
+        <ArrowLeft size={16} /> {t('receptionist.claims.detail.backToClaims')}
       </button>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-            Claim Detail
+            {t('receptionist.claims.detail.title')}
             <span className={`badge text-xs ${statusColor(claim.claim_status)}`}>
               {claim.claim_status?.replace(/_/g, ' ')}
             </span>
@@ -85,7 +87,7 @@ export default function ReceptionistClaimDetailPage() {
         </div>
         <div className="text-right">
           <p className="text-2xl font-black" style={{ color: '#1D75DB' }}>{formatXAF(totalCost)}</p>
-          <p className="text-xs text-gray-400">Total Cost</p>
+          <p className="text-xs text-gray-400">{t('receptionist.claims.detail.totalCost')}</p>
         </div>
       </div>
 
@@ -93,36 +95,36 @@ export default function ReceptionistClaimDetailPage() {
         <div className="lg:col-span-2 space-y-5">
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <FileText size={14} /> Claim Information
+              <FileText size={14} /> {t('receptionist.claims.detail.claimInformation')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Claim ID" value={`#${String(claim.id).slice(-8)}`} mono />
-              <Detail label="Status" value={<span className={`badge ${statusColor(claim.claim_status)}`}>{claim.claim_status?.replace(/_/g, ' ')}</span>} />
-              <Detail label="Total Cost" value={formatXAF(totalCost)} />
-              <Detail label="Service Description" value={claim.service_description || '—'} className="col-span-2" />
-              <Detail label="Submitted At" value={claim.submitted_at ? formatDateTime(claim.submitted_at) : '—'} />
-              <Detail label="Reviewed At" value={claim.reviewed_at ? formatDateTime(claim.reviewed_at) : '—'} />
-              <Detail label="Service Completed At" value={claim.service_completed_at ? formatDateTime(claim.service_completed_at) : '—'} />
+              <Detail label={t('receptionist.claims.detail.claimId')} value={`#${String(claim.id).slice(-8)}`} mono />
+              <Detail label={t('receptionist.claims.detail.status')} value={<span className={`badge ${statusColor(claim.claim_status)}`}>{claim.claim_status?.replace(/_/g, ' ')}</span>} />
+              <Detail label={t('receptionist.claims.detail.totalCost')} value={formatXAF(totalCost)} />
+              <Detail label={t('receptionist.claims.detail.serviceDescription')} value={claim.service_description || '—'} className="col-span-2" />
+              <Detail label={t('receptionist.claims.detail.submittedAt')} value={claim.submitted_at ? formatDateTime(claim.submitted_at) : '—'} />
+              <Detail label={t('receptionist.claims.detail.reviewedAt')} value={claim.reviewed_at ? formatDateTime(claim.reviewed_at) : '—'} />
+              <Detail label={t('receptionist.claims.detail.serviceCompletedAt')} value={claim.service_completed_at ? formatDateTime(claim.service_completed_at) : '—'} />
               {claim.rejection_reason && (
-                <Detail label="Rejection Reason" value={claim.rejection_reason} className="col-span-2" />
+                <Detail label={t('receptionist.claims.detail.rejectionReason')} value={claim.rejection_reason} className="col-span-2" />
               )}
             </div>
           </div>
 
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Receipt size={14} /> Claim Items ({items.length})
+              <Receipt size={14} /> {t('receptionist.claims.detail.claimItems', { count: items.length })}
             </h2>
             {items.length === 0 ? (
-              <p className="text-gray-400 text-xs">No items recorded.</p>
+              <p className="text-gray-400 text-xs">{t('receptionist.claims.detail.noItems')}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-gray-100 text-gray-400">
-                      <th className="text-left p-2">#</th>
-                      <th className="text-left p-2">Item</th>
-                      <th className="text-right p-2">Amount</th>
+                      <th className="text-left p-2">{t('receptionist.claims.detail.colNum')}</th>
+                      <th className="text-left p-2">{t('receptionist.claims.detail.colItem')}</th>
+                      <th className="text-right p-2">{t('receptionist.claims.detail.colAmount')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -137,7 +139,7 @@ export default function ReceptionistClaimDetailPage() {
                   <tfoot className="font-semibold text-gray-500">
                     <tr>
                       <td className="p-2" />
-                      <td className="p-2 text-right">Total</td>
+                      <td className="p-2 text-right">{t('receptionist.claims.detail.total')}</td>
                       <td className="p-2 text-right" style={{ color: '#1D75DB' }}>{formatXAF(totalCost)}</td>
                     </tr>
                   </tfoot>
@@ -149,7 +151,7 @@ export default function ReceptionistClaimDetailPage() {
           {voucherId && (
             <div className="space-y-5 border-t-2 border-[#1D75DB]/20 pt-5">
               <h2 className="text-sm font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
-                <Ticket size={14} style={{ color: '#1D75DB' }} /> Associated Voucher
+                <Ticket size={14} style={{ color: '#1D75DB' }} /> {t('receptionist.claims.detail.associatedVoucher')}
               </h2>
 
               {vLoading ? (
@@ -158,7 +160,7 @@ export default function ReceptionistClaimDetailPage() {
                 <>
                   <div className="card">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Voucher Information</h3>
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">{t('receptionist.claims.detail.voucherInfo')}</h3>
                       <span className={`badge text-xs ${statusColor(voucher.status)}`}>
                         {voucher.status?.replace(/_/g, ' ')}
                       </span>
@@ -167,19 +169,19 @@ export default function ReceptionistClaimDetailPage() {
                       <code className="font-mono text-sm font-bold text-gray-700 bg-gray-100 rounded-lg px-3 py-1 select-all">
                         {voucher.voucher_code}
                       </code>
-                      <button onClick={() => copyCode(voucher.voucher_code)} className="text-gray-400 hover:text-gray-600 p-1" title="Copy code">
+                      <button onClick={() => copyCode(voucher.voucher_code)} className="text-gray-400 hover:text-gray-600 p-1" title={t('receptionist.claims.detail.copyCode')}>
                         {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <Detail label="Language" value={voucher.language_preference?.toUpperCase() || 'FR'} />
-                      <Detail label="Expiry Date" value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
-                      <Detail label="Created" value={formatDateTime(voucher.created_at)} />
-                      <Detail label="Locked At" value={voucher.locked_at ? formatDateTime(voucher.locked_at) : '—'} />
-                      <Detail label="Redeemed At" value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
-                      <Detail label="Expired At" value={voucher.expired_at ? formatDateTime(voucher.expired_at) : '—'} />
+                      <Detail label={t('receptionist.claims.detail.language')} value={voucher.language_preference?.toUpperCase() || 'FR'} />
+                      <Detail label={t('receptionist.claims.detail.expiryDate')} value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
+                      <Detail label={t('receptionist.claims.detail.created')} value={formatDateTime(voucher.created_at)} />
+                      <Detail label={t('receptionist.claims.detail.lockedAt')} value={voucher.locked_at ? formatDateTime(voucher.locked_at) : '—'} />
+                      <Detail label={t('receptionist.claims.detail.redeemedAt')} value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
+                      <Detail label={t('receptionist.claims.detail.expiredAt')} value={voucher.expired_at ? formatDateTime(voucher.expired_at) : '—'} />
                       {voucher.patient_confirmation_pin && (
-                        <Detail label="Confirmation PIN" value={voucher.patient_confirmation_pin} mono />
+                        <Detail label={t('receptionist.claims.detail.confirmationPin')} value={voucher.patient_confirmation_pin} mono />
                       )}
                     </div>
                   </div>
@@ -187,19 +189,19 @@ export default function ReceptionistClaimDetailPage() {
                   {voucher.beneficiary && (
                     <div className="card">
                       <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <User size={14} /> Beneficiary
+                        <User size={14} /> {t('receptionist.claims.detail.beneficiary')}
                       </h3>
                       <div className="grid grid-cols-2 gap-3">
-                        <Detail label="Full Name" value={voucher.beneficiary.full_name} />
-                        <Detail label="Digital Health ID" value={voucher.beneficiary.digital_health_id || '—'} mono />
-                        <Detail label="Gender" value={voucher.beneficiary.gender} />
-                        <Detail label="Category" value={voucher.beneficiary.category} />
-                        <Detail label="Date of Birth" value={voucher.beneficiary.date_of_birth ? formatDate(voucher.beneficiary.date_of_birth) : '—'} />
-                        <Detail label="Phone" value={voucher.beneficiary.phone} />
-                        <Detail label="Region" value={voucher.beneficiary.region} />
-                        {voucher.beneficiary.city && <Detail label="City" value={voucher.beneficiary.city} />}
+                        <Detail label={t('receptionist.claims.detail.fullName')} value={voucher.beneficiary.full_name} />
+                        <Detail label={t('receptionist.claims.detail.digitalHealthId')} value={voucher.beneficiary.digital_health_id || '—'} mono />
+                        <Detail label={t('receptionist.claims.detail.gender')} value={voucher.beneficiary.gender} />
+                        <Detail label={t('receptionist.claims.detail.category')} value={voucher.beneficiary.category} />
+                        <Detail label={t('receptionist.claims.detail.dateOfBirth')} value={voucher.beneficiary.date_of_birth ? formatDate(voucher.beneficiary.date_of_birth) : '—'} />
+                        <Detail label={t('receptionist.claims.detail.phone')} value={voucher.beneficiary.phone} />
+                        <Detail label={t('receptionist.claims.detail.region')} value={voucher.beneficiary.region} />
+                        {voucher.beneficiary.city && <Detail label={t('receptionist.claims.detail.city')} value={voucher.beneficiary.city} />}
                         {voucher.beneficiary.emergency_contact_name && (
-                          <Detail label="Emergency Contact" value={`${voucher.beneficiary.emergency_contact_name} · ${voucher.beneficiary.emergency_contact_phone}`} />
+                          <Detail label={t('receptionist.claims.detail.emergencyContact')} value={`${voucher.beneficiary.emergency_contact_name} · ${voucher.beneficiary.emergency_contact_phone}`} />
                         )}
                       </div>
                     </div>
@@ -208,7 +210,7 @@ export default function ReceptionistClaimDetailPage() {
                   {voucher.events && voucher.events.length > 0 && (
                     <div className="card">
                       <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <Activity size={14} /> Voucher Activity Timeline
+                        <Activity size={14} /> {t('receptionist.claims.detail.activityTimeline')}
                       </h3>
                       <div className="space-y-0">
                         {[...(voucher.events || [])].reverse().map((event: any, i: number, arr: any[]) => (
@@ -229,7 +231,7 @@ export default function ReceptionistClaimDetailPage() {
                   )}
                 </>
               ) : (
-                <div className="card"><p className="text-gray-400 text-xs text-center py-8">Could not load voucher details.</p></div>
+                <div className="card"><p className="text-gray-400 text-xs text-center py-8">{t('receptionist.claims.detail.voucherLoadError')}</p></div>
               )}
             </div>
           )}
@@ -238,10 +240,10 @@ export default function ReceptionistClaimDetailPage() {
         <div className="space-y-4">
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <ClipboardCheck size={14} /> Proof Documents ({proofs.length})
+              <ClipboardCheck size={14} /> {t('receptionist.claims.detail.proofDocuments', { count: proofs.length })}
             </h2>
             {proofs.length === 0 ? (
-              <p className="text-gray-400 text-xs">No proof documents uploaded.</p>
+              <p className="text-gray-400 text-xs">{t('receptionist.claims.detail.noProofs')}</p>
             ) : (
               <div className="space-y-3">
                 {proofs.map((proof: any) => (
@@ -258,7 +260,7 @@ export default function ReceptionistClaimDetailPage() {
                         className="text-xs font-semibold hover:underline block mb-2 truncate"
                         style={{ color: '#1D75DB' }}
                       >
-                        View Document
+                        {t('receptionist.claims.detail.viewDocument')}
                       </a>
                     )}
                     <div className="flex items-center justify-between mt-1">

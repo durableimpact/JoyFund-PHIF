@@ -7,11 +7,13 @@ import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { listVouchers } from '@/actions/vouchers';
 import { formatDate, statusColor } from '@/lib/utils';
 import Paginator from '@/components/shared/Paginator';
+import { useI18n } from '@/locales/client';
 
 const STATUS_FILTERS = ['all', 'AVAILABLE', 'ACTIVE', 'PENDING_CONFIRMATION', 'USED', 'EXPIRED'];
 const PAGE_SIZE = 10;
 
 export default function ReceptionistVouchers() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const userInfo = (session?.user as any)?.userInfo;
@@ -48,8 +50,8 @@ export default function ReceptionistVouchers() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Vouchers</h1>
-        <p className="text-gray-500 text-sm">{totalCount} vouchers for this hospital</p>
+        <h1 className="text-2xl font-black text-gray-900">{t('receptionist.vouchers.title')}</h1>
+        <p className="text-gray-500 text-sm">{t('receptionist.vouchers.count', { count: totalCount })}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
@@ -57,14 +59,14 @@ export default function ReceptionistVouchers() {
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             className="input-field pl-10"
-            placeholder="Search by voucher code or beneficiary..."
+            placeholder={t('receptionist.vouchers.searchPlaceholder')}
             value={search}
             onChange={(e) => setParams({ search: e.target.value, page: 1 })}
           />
         </div>
         <select className="input-field w-auto" value={filter} onChange={(e) => setParams({ filter: e.target.value, page: 1 })}>
           {STATUS_FILTERS.map((s) => (
-            <option key={s} value={s}>{s === 'all' ? 'All Status' : s.replace(/_/g, ' ')}</option>
+            <option key={s} value={s}>{s === 'all' ? t('receptionist.vouchers.allStatus') : s.replace(/_/g, ' ')}</option>
           ))}
         </select>
       </div>
@@ -74,7 +76,7 @@ export default function ReceptionistVouchers() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Code', 'Beneficiary', 'Status', 'Expiry', 'Created'].map((h) => (
+                {[t('receptionist.vouchers.colCode'), t('receptionist.vouchers.colBeneficiary'), t('receptionist.vouchers.colStatus'), t('receptionist.vouchers.colExpiry'), t('receptionist.vouchers.colCreated')].map((h) => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -85,7 +87,7 @@ export default function ReceptionistVouchers() {
                   {[...Array(5)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
               )) : vouchers.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">No vouchers found</td></tr>
+                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">{t('receptionist.vouchers.noResults')}</td></tr>
               ) : vouchers.map((v) => (
                 <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4 font-mono text-sm font-bold">

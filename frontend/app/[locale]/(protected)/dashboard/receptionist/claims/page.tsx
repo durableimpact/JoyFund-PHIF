@@ -7,11 +7,13 @@ import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { getMedicalClaims } from '@/actions/hospital';
 import { formatXAF, formatDate, statusColor } from '@/lib/utils';
 import Paginator from '@/components/shared/Paginator';
+import { useI18n } from '@/locales/client';
 
 const STATUS_FILTERS = ['all', 'PENDING', 'APPROVED', 'REJECTED'];
 const PAGE_SIZE = 10;
 
 export default function ReceptionistClaims() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const userInfo = (session?.user as any)?.userInfo;
@@ -48,17 +50,17 @@ export default function ReceptionistClaims() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">My Claims</h1>
-        <p className="text-gray-500 text-sm">{totalCount} claims</p>
+        <h1 className="text-2xl font-black text-gray-900">{t('receptionist.claims.title')}</h1>
+        <p className="text-gray-500 text-sm">{t('receptionist.claims.count', { count: totalCount })}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input className="input-field pl-10" placeholder="Search claims..." value={search} onChange={(e) => setParams({ search: e.target.value, page: 1 })} />
+          <input className="input-field pl-10" placeholder={t('receptionist.claims.searchPlaceholder')} value={search} onChange={(e) => setParams({ search: e.target.value, page: 1 })} />
         </div>
         <select className="input-field w-auto" value={filter} onChange={(e) => setParams({ filter: e.target.value, page: 1 })}>
-          {STATUS_FILTERS.map((s) => <option key={s} value={s}>{s === 'all' ? 'All Status' : s}</option>)}
+          {STATUS_FILTERS.map((s) => <option key={s} value={s}>{s === 'all' ? t('receptionist.claims.allStatus') : s}</option>)}
         </select>
       </div>
 
@@ -67,7 +69,7 @@ export default function ReceptionistClaims() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Claim ID', 'Amount', 'Status', 'Submitted', 'Completed'].map((h) => (
+                {[t('receptionist.claims.colClaimId'), t('receptionist.claims.colAmount'), t('receptionist.claims.colStatus'), t('receptionist.claims.colSubmitted'), t('receptionist.claims.colCompleted')].map((h) => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -78,7 +80,7 @@ export default function ReceptionistClaims() {
                   {[...Array(5)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
               )) : claims.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">No claims found</td></tr>
+                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">{t('receptionist.claims.noResults')}</td></tr>
               ) : claims.map((c) => (
                 <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4 font-mono text-xs font-bold">
