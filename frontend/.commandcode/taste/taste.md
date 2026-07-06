@@ -18,6 +18,9 @@
 - Action functions (`getHospitalStaff`, `getHospitalReceptionists`, `listBeneficiaries`, etc.) return `PaginationResponse<T>` objects with `.results`, not raw arrays — always extract `.results` (with a fallback for legacy array responses) before mapping over the data. Confidence: 0.75
 - `listBeneficiaries` wraps its response in a `json` key: `{ json: { count, next, previous, results: [...] } }` — use `data?.json?.results` (or destructure the `json` key) to access the paginated data. Confidence: 0.70
 
+# nextjs
+- In Next.js 16, the middleware pattern has been replaced by a proxy-based approach — create a proxy/instrumentation instead of a `middleware.ts` file at root. Confidence: 0.70
+
 # git
 - Only commit `.env.example` to git, never commit `.env` files — ensure `.gitignore` excludes `.env` but allows `.env.example`. Confidence: 0.70
 - Always exclude `*.log` files from git commits — add `*.log` to `.gitignore`. Confidence: 0.70

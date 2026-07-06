@@ -43,7 +43,8 @@
 - Use Next.js layout.tsx files for shared shell components (sidebar, header, navigation) instead of including them manually in every page. Store reusable layout components in the _components folder of the route group. Confidence: 0.75
 
 # git
-- Commit each file as a separate commit (one commit per file), not grouped commits. Confidence: 0.80
+- Commit each file as a separate commit (one commit per file), not grouped commits. Confidence: 0.85
+- Write detailed, professional commit messages describing what changed and why, not just one-liners. Confidence: 0.80
 
 # code-fixing
 - When a file's imports or structure are badly corrupted, rewrite the file cleanly from scratch instead of using automated regex/scripts that risk introducing cascading errors. Confidence: 0.85

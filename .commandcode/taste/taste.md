@@ -8,6 +8,8 @@
 
 # workflow
 - Only apply styling or UI changes that are explicitly requested; do not add extra background colors, borders, or unsolicited design elements without the user asking for them. Confidence: 0.65
+- Do not commit changes unless the user explicitly requests a commit. Confidence: 0.80
+- Store project plans and related output files in the current project folder, not in external or system locations. Confidence: 0.70
 
 # charts
 - Use LineChart (Line) from recharts instead of BarChart (Bar) for donation trend visualizations. Confidence: 0.70
@@ -15,4 +17,7 @@
 
 # date-format
 - Display dates in human-friendly/readable format (e.g., 'Jan 15, 2026') instead of numeric/US format (e.g., '6/24/2026') on donation displays. Confidence: 0.65
+
+# number-format
+- Display full numeric values instead of abbreviated "K" notation (e.g., show 1000 instead of 1K) for amounts. Confidence: 0.70
 
