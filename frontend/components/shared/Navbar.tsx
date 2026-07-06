@@ -6,14 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
-
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Impact", href: "/#make-an-impact" },
-  // { label: 'How it Works', href: '/#how-it-works' },
-  { label: "About", href: "/about" },
-  { label: "Explore", href: "/explore" },
-];
+import { LocaleSwitcher } from "./LocaleSwitcher";
+import { useI18n } from "@/locales/client";
+import { cn } from "@/lib/utils";
 
 const roleDashboardMap: Record<string, string> = {
   DONOR: "/dashboard/donor",
@@ -35,6 +30,14 @@ export default function Navbar({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session, status } = useSession();
+  const t = useI18n();
+
+  const navLinks = [
+    { label: t("nav.home"), href: "/" },
+    { label: t("nav.impact"), href: "/#make-an-impact" },
+    { label: t("nav.about"), href: "/about" },
+    { label: t("nav.explore"), href: "/explore" },
+  ];
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -81,7 +84,7 @@ export default function Navbar({
           onClick={handleLogoClick}
           className={`flex items-center gap-1 md:gap-2 font-black text-xs sm:text-sm md:text-lg lg:text-xl tracking-tight shrink-0 whitespace-nowrap ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
         >
-          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl overflow-hidden bg-white/10 shrink-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl overflow-hidden  shrink-0">
             <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
@@ -90,11 +93,14 @@ export default function Navbar({
               className="w-full h-full object-contain"
             />
           </div>
-          <span>JoyFund</span>
+          <div>
+            <span className="text-[#80B034]">Joy</span>
+            <span className="text-[#3D77B9]">Fund</span>
+          </div>
         </button>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -102,7 +108,7 @@ export default function Navbar({
               className={`text-sm font-medium transition-colors ${
                 useDark
                   ? "text-white/85 hover:text-white"
-                  : "text-gray-600 hover:text-[#1D38DB]"
+                  : "text-gray-600 hover:text-[#3D77B9]"
               } ${
                 pathname === link.href
                   ? "font-semibold underline underline-offset-4"
@@ -116,14 +122,15 @@ export default function Navbar({
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-3">
+          <LocaleSwitcher dark={useDark} />
           {isLoggedIn ? (
             <>
               {userRole && (
                 <Link
                   href={dashboardHref}
-                  className="bg-[#1D38DB] hover:bg-[#1530c4] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
+                  className="bg-[#3D77B9] hover:bg-[#1530c4] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
                 >
-                  Dashboard
+                  {t("nav.dashboard")}
                 </Link>
               )}
               <button
@@ -131,10 +138,10 @@ export default function Navbar({
                 className={`text-sm font-medium transition-colors px-3 py-2 ${
                   useDark
                     ? "text-white/85 hover:text-white"
-                    : "text-gray-600 hover:text-[#1D38DB]"
+                    : "text-gray-600 hover:text-[#3D77B9]"
                 }`}
               >
-                Sign Out
+                {t("nav.signOut")}
               </button>
             </>
           ) : (
@@ -144,49 +151,59 @@ export default function Navbar({
                 className={`text-sm font-medium transition-colors px-3 py-2 ${
                   useDark
                     ? "text-white/85 hover:text-white"
-                    : "text-gray-600 hover:text-[#1D38DB]"
+                    : "text-gray-600 hover:text-[#3D77B9]"
                 }`}
               >
-                Sign In
+                {t("nav.signIn")}
               </Link>
               <Link
                 href="/dashboard/donor/campaigns/create"
-                className="bg-[#1D38DB] hover:bg-[#1530c4] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
+                className="bg-[#3D77B9] hover:bg-[#1530c4] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
               >
-                Start a JoyFund
+                {t("nav.startCampaign")}
               </Link>
               <a
                 href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#25D366] hover:text-[#1fb855] text-sm font-semibold px-5 py-2.5 rounded-full transition-all flex items-center gap-2"
+                className={cn(
+                  "text-sm font-semibold px-5 py-2.5 rounded-full transition-all flex items-center gap-2",
+                  useDark
+                    ? "text-secondary hover:text-primary"
+                    : "text-[#25D366] hover:text-[#1fb855] ",
+                )}
               >
-                Talk with us →
+                {t("nav.talkWithUs")} →
               </a>
             </>
           )}
         </div>
 
         {/* Mobile hamburger */}
-        <button
-          className={`md:hidden ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex md:hidden items-center">
+          <LocaleSwitcher dark={useDark} />
+
+          <button
+            className={`md:hidden ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? t("nav.menuClose") : t("nav.menuOpen")}
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-6 px-6 flex flex-col gap-4 border-t border-gray-100">
+          {/* <LocaleSwitcher dark={false} /> */}
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className={`text-gray-700 hover:text-[#1D38DB] font-medium transition-colors ${
-                pathname === link.href ? "font-semibold text-[#1D38DB]" : ""
+              className={`text-gray-700 hover:text-[#3D77B9] font-medium transition-colors ${
+                pathname === link.href ? "font-semibold text-[#3D77B9]" : ""
               }`}
             >
               {link.label}
@@ -201,7 +218,7 @@ export default function Navbar({
                   onClick={() => setMobileOpen(false)}
                   className="bg-[#1DB1DB] text-white font-semibold px-5 py-3 rounded-full text-center"
                 >
-                  Dashboard
+                  {t("nav.dashboard")}
                 </Link>
                 <button
                   onClick={async () => {
@@ -210,7 +227,7 @@ export default function Navbar({
                   }}
                   className="border border-gray-200 text-gray-700 font-semibold px-5 py-3 rounded-full text-center"
                 >
-                  Sign Out
+                  {t("nav.signOut")}
                 </button>
               </>
             ) : (
@@ -220,23 +237,26 @@ export default function Navbar({
                   onClick={() => setMobileOpen(false)}
                   className="border border-gray-200 text-gray-700 font-semibold px-5 py-3 rounded-full text-center"
                 >
-                  Sign In
+                  {t("nav.signIn")}
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMobileOpen(false)}
                   className="bg-[#1DB1DB] text-white font-semibold px-5 py-3 rounded-full text-center"
                 >
-                  Create Account
+                  {t("nav.createAccount")}
                 </Link>
                 <a
                   href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
                   onClick={() => setMobileOpen(false)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#25D366]font-semibold px-5 py-3 rounded-full text-center"
+                  className={cn(
+                    "text-[#25D366] font-semibold px-5 py-3 rounded-full text-center",
+                    !scrolled && "text-white",
+                  )}
                 >
-                  Talk with us →
+                  {t("nav.talkWithUs")} →
                 </a>
               </>
             )}

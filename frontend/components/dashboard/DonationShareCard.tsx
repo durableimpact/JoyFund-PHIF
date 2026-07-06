@@ -1,5 +1,4 @@
 import { forwardRef } from "react";
-import { Heart, TrendingUp, Users, Target } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
 
 interface DonationShareCardProps {
@@ -28,7 +27,7 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
           style={{
             width: "100%",
             height: "100%",
-            background: "linear-gradient(135deg, #0B78A0 0%, #065a78 50%, #1D38DB 100%)",
+            background: "linear-gradient(160deg, #0F172A 0%, #1E293B 50%, #0D8EBA 150%)",
             display: "flex",
             flexDirection: "column",
             padding: 64,
@@ -38,58 +37,53 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
             overflow: "hidden",
           }}
         >
-          {/* Decorative circles */}
+          {/* Decorative circle */}
           <div
             style={{
               position: "absolute",
-              width: 400,
-              height: 400,
+              width: 500,
+              height: 500,
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.05)",
-              top: -100,
-              right: -80,
+              background: "radial-gradient(circle, rgba(29,177,219,0.12) 0%, transparent 70%)",
+              top: -200,
+              right: -150,
             }}
           />
           <div
             style={{
               position: "absolute",
-              width: 250,
-              height: 250,
+              width: 350,
+              height: 350,
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.04)",
-              bottom: 60,
-              left: -60,
+              background: "radial-gradient(circle, rgba(128,176,52,0.08) 0%, transparent 70%)",
+              bottom: -100,
+              left: -100,
             }}
           />
 
           {/* Header: Logo + URL */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 48 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 48, position: "relative", zIndex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 16,
-                  background: "rgba(255,255,255,0.15)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Heart size={30} fill="currentColor" />
-              </div>
+              <img
+                src="/web-app-manifest-192x192.png"
+                alt="JoyFund"
+                width={56}
+                height={56}
+                style={{ borderRadius: 14, objectFit: "contain" }}
+              />
               <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: -0.5 }}>
-                JoyFund
+                <span style={{ color: "#80B034" }}>Joy</span>
+                <span style={{ color: "#3D77B9" }}>Fund</span>
               </span>
             </div>
-            <span style={{ fontSize: 22, opacity: 0.7, fontWeight: 600 }}>
+            <span style={{ fontSize: 22, opacity: 0.5, fontWeight: 600 }}>
               joy-fund.com
             </span>
           </div>
 
           {/* Title */}
-          <div style={{ marginBottom: 48 }}>
-            <p style={{ fontSize: 24, opacity: 0.7, margin: "0 0 8px 0", fontWeight: 600 }}>
+          <div style={{ marginBottom: 48, position: "relative", zIndex: 1 }}>
+            <p style={{ fontSize: 24, opacity: 0.6, margin: "0 0 8px 0", fontWeight: 600 }}>
               {donorName}&apos;s Generosity
             </p>
             <p style={{ fontSize: 56, fontWeight: 800, margin: 0, lineHeight: 1.15, letterSpacing: -1 }}>
@@ -98,21 +92,21 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
           </div>
 
           {/* Stats Grid */}
-          <div style={{ display: "flex", gap: 24, marginBottom: 48 }}>
+          <div style={{ display: "flex", gap: 24, marginBottom: 48, position: "relative", zIndex: 1 }}>
             <StatBox
-              icon={<Users size={28} />}
               value={campaignCount.toLocaleString()}
               label="Total Campaigns"
+              accent="#1DB1DB"
             />
             <StatBox
-              icon={<TrendingUp size={28} />}
               value={formatXAF(totalAmount)}
               label="Total Donated"
+              accent="#80B034"
             />
             <StatBox
-              icon={<Target size={28} />}
               value={formatXAF(averageDonation)}
               label="Average Donation"
+              accent="#3D77B9"
             />
           </div>
 
@@ -125,31 +119,27 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             <div
               style={{
-                background: "rgba(255,255,255,0.95)",
+                background: "rgba(255,255,255,0.08)",
                 borderRadius: 60,
-                padding: "20px 48px",
+                padding: "18px 44px",
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
+                border: "1px solid rgba(255,255,255,0.12)",
               }}
             >
-              <Heart size={24} fill="#0B78A0" color="#0B78A0" />
-              <span
-                style={{
-                  fontSize: 26,
-                  fontWeight: 800,
-                  color: "#0B78A0",
-                }}
-              >
-                Make your impact today
+              <span style={{ fontSize: 26, fontWeight: 800 }}>
+                Turn your joy into care →
               </span>
             </div>
-            <span style={{ fontSize: 20, opacity: 0.5, fontWeight: 600 }}>
-              Donate now →
+            <span style={{ fontSize: 20, opacity: 0.4, fontWeight: 600 }}>
+              {totalDonations} donation{totalDonations !== 1 ? "s" : ""} given
             </span>
           </div>
         </div>
@@ -161,28 +151,28 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
 DonationShareCard.displayName = "DonationShareCard";
 
 function StatBox({
-  icon,
   value,
   label,
+  accent,
 }: {
-  icon: React.ReactNode;
   value: string;
   label: string;
+  accent: string;
 }) {
   return (
     <div
       style={{
         flex: 1,
-        background: "rgba(255,255,255,0.1)",
+        background: "rgba(255,255,255,0.06)",
         borderRadius: 24,
         padding: "32px 28px",
         display: "flex",
         flexDirection: "column",
         gap: 12,
+        border: "1px solid rgba(255,255,255,0.06)",
       }}
     >
-      <div style={{ opacity: 0.7 }}>{icon}</div>
-      <div style={{ fontSize: 36, fontWeight: 800, lineHeight: 1.1 }}>
+      <div style={{ fontSize: 36, fontWeight: 800, lineHeight: 1.1, color: accent }}>
         {value}
       </div>
       <div style={{ fontSize: 18, opacity: 0.6, fontWeight: 600 }}>{label}</div>

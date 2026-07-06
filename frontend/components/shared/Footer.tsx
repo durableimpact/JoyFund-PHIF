@@ -1,9 +1,11 @@
-'use client';
-import Link from 'next/link';
-import Image from 'next/image';
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { useI18n } from "@/locales/client";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const t = useI18n();
 
   return (
     <footer className="bg-[#1A1A2E] text-white py-12 px-4 mt-auto">
@@ -20,37 +22,49 @@ export default function Footer() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="font-black text-lg">JoyFund</span>
+              {/* <span className="font-black text-lg">JoyFund</span> */}
+              <div className="font-black text-lg">
+                <span className="text-[#80B034]">Joy</span>
+                <span className="text-[#3D77B9]">Fund</span>
+              </div>
             </div>
             <p className="text-white/60 text-sm leading-relaxed max-w-xs">
-              Your Joy Saves Lives - a transparent crowdfunding platform turning celebrations into maternal healthcare across Cameroon.
+              {t("footer.tagline")}
             </p>
           </div>
           <div>
-            <p className="font-semibold mb-3 text-sm">Platform</p>
+            <p className="font-semibold mb-3 text-sm">{t("footer.platform")}</p>
             <div className="flex flex-col gap-2 text-white/60 text-sm">
               {[
-                ['Explore Campaigns', '/explore'],
-                ['About JoyFund', '/about'],
-                ['Leaderboard', '/leaderboard'],
-                ['Pricing & Fees', '/pricing'],
-                ['Supported Countries', '/countries'],
-                ['Sign In', '/login'],
+                [t("footer.exploreCampaigns"), "/explore"],
+                [t("footer.about"), "/about"],
+                [t("footer.leaderboard"), "/leaderboard"],
+                [t("footer.pricingFees"), "/pricing"],
+                [t("footer.supportedCountries"), "/countries"],
+                [t("footer.signIn"), "/login"],
               ].map(([l, h]) => (
-                <Link key={h} href={h} className="hover:text-white transition-colors">
+                <Link
+                  key={h}
+                  href={h}
+                  className="hover:text-white transition-colors"
+                >
                   {l}
                 </Link>
               ))}
             </div>
           </div>
           <div>
-            <p className="font-semibold mb-3 text-sm">Legal</p>
+            <p className="font-semibold mb-3 text-sm">{t("footer.legal")}</p>
             <div className="flex flex-col gap-2 text-white/60 text-sm">
               {[
-                ['Terms of Service', '/terms'],
-                ['Privacy Policy', '/privacy'],
+                [t("footer.terms"), "/terms"],
+                [t("footer.privacy"), "/privacy"],
               ].map(([l, h]) => (
-                <Link key={h} href={h} className="hover:text-white transition-colors">
+                <Link
+                  key={h}
+                  href={h}
+                  className="hover:text-white transition-colors"
+                >
                   {l}
                 </Link>
               ))}
@@ -58,8 +72,8 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between gap-3 text-white/55 text-xs">
-          <p>© {currentYear} JoyFund - Solidarity Health Bridge. All rights reserved.</p>
-          <p>Built for Cameroon, with love 🇨🇲</p>
+          <p>{t("footer.copyright", { year: currentYear })}</p>
+          <p>{t("footer.builtFor")} 🇨🇲</p>
         </div>
       </div>
     </footer>

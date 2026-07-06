@@ -28,6 +28,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import NotificationsPanel from "@/components/shared/NotificationsPanel";
+import { LocaleSwitcher } from "../shared/LocaleSwitcher";
 
 const NAV_LINKS = [
   {
@@ -85,19 +86,23 @@ export default function DonorNavbar() {
     <header className="sticky top-0 z-30 bg-white border-b border-gray-100">
       <div className="px-4 lg:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/dashboard/donor" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl overflow-hidden bg-gray-100">
+        <Link href="/dashboard/donor" className="flex items-center">
+          <div className="w-10 h-10 rounded-xl overflow-hidden">
             <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund"
-              width={32}
-              height={32}
+              width={64}
+              height={64}
               className="w-full h-full object-contain"
             />
           </div>
-          <span className="font-black text-[#1A1A2E] text-sm hidden sm:block">
+          {/* <span className="font-black text-[#1A1A2E] text-sm ">
             JoyFund
-          </span>
+          </span> */}
+          <div className="font-black hidden sm:block text-xl">
+            <span className="text-[#80B034]">Joy</span>
+            <span className="text-[#3D77B9]">Fund</span>
+          </div>
         </Link>
 
         {/* Desktop nav links */}
@@ -126,6 +131,7 @@ export default function DonorNavbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          <LocaleSwitcher />
           <NotificationsPanel />
           {/* User dropdown */}
           <DropdownMenu>
