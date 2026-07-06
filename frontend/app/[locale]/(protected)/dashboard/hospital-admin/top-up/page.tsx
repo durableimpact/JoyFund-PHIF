@@ -10,11 +10,13 @@ import {
   listVoucherTopUpRequests,
   getVoucherTopUpRequest,
 } from "@/actions/hospital";
+import { useI18n } from "@/locales/client";
 
 const STATUS_FILTERS = ["all", "PENDING", "APPROVED", "REJECTED"];
 const PAGE_SIZE = 10;
 
 export default function HospitalAdminTopUpRequests() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token =
     (session as any)?.accessToken || (session?.user as any)?.accessToken;
@@ -62,8 +64,8 @@ export default function HospitalAdminTopUpRequests() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Top-Up Requests</h1>
-        <p className="text-gray-500 text-sm">{totalCount} requests</p>
+        <h1 className="text-2xl font-black text-gray-900">{t('hospitalAdmin.topUp.title')}</h1>
+        <p className="text-gray-500 text-sm">{t('hospitalAdmin.topUp.total', { count: totalCount })}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
@@ -76,7 +78,7 @@ export default function HospitalAdminTopUpRequests() {
         >
           {STATUS_FILTERS.map((s) => (
             <option key={s} value={s}>
-              {s === "all" ? "All Status" : s}
+              {s === "all" ? t('hospitalAdmin.topUp.allStatus') : s}
             </option>
           ))}
         </select>
@@ -88,12 +90,12 @@ export default function HospitalAdminTopUpRequests() {
             <thead>
               <tr className="border-b border-gray-100">
                 {[
-                  "Request ID",
-                  "Amount",
-                  "Reason",
-                  "Status",
-                  "Date",
-                  "Actions",
+                  t('hospitalAdmin.topUp.colRequestId'),
+                  t('hospitalAdmin.topUp.colAmount'),
+                  t('hospitalAdmin.topUp.colReason'),
+                  t('hospitalAdmin.topUp.colStatus'),
+                  t('hospitalAdmin.topUp.colDate'),
+                  t('hospitalAdmin.topUp.colActions'),
                 ].map((h) => (
                   <th
                     key={h}
@@ -121,7 +123,7 @@ export default function HospitalAdminTopUpRequests() {
                     colSpan={6}
                     className="text-center py-16 text-gray-400 text-sm"
                   >
-                    No top-up requests found
+                    {t('hospitalAdmin.topUp.noResults')}
                   </td>
                 </tr>
               ) : (
@@ -153,7 +155,7 @@ export default function HospitalAdminTopUpRequests() {
                         className="text-xs font-semibold"
                         style={{ color: "#1D75DB" }}
                       >
-                        View
+                        {t('hospitalAdmin.topUp.view')}
                       </button>
                     </td>
                   </tr>
@@ -173,7 +175,7 @@ export default function HospitalAdminTopUpRequests() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-gray-900">
-                Top-Up Request Detail
+                {t('hospitalAdmin.topUp.detailTitle')}
               </h2>
               <button onClick={() => setSelectedRequest(null)}>
                 <X size={20} className="text-gray-400" />
@@ -181,9 +183,9 @@ export default function HospitalAdminTopUpRequests() {
             </div>
             <div className="space-y-3 text-sm">
               {[
-                ["Request ID", `#${selectedRequest.id?.toString().slice(-8)}`],
+                [t('hospitalAdmin.topUp.requestId'), `#${selectedRequest.id?.toString().slice(-8)}`],
                 [
-                  "Amount",
+                  t('hospitalAdmin.topUp.amount'),
                   formatXAF(
                     Number(
                       selectedRequest.requested_amount ||
@@ -192,24 +194,24 @@ export default function HospitalAdminTopUpRequests() {
                     ),
                   ),
                 ],
-                ["Reason", selectedRequest.reason || "—"],
+                [t('hospitalAdmin.topUp.reason'), selectedRequest.reason || "—"],
                 [
-                  "Status",
+                  t('hospitalAdmin.topUp.status'),
                   (selectedRequest.status || "PENDING").replace(/_/g, " "),
                 ],
                 [
-                  "Created At",
+                  t('hospitalAdmin.topUp.createdAt'),
                   selectedRequest.created_at
                     ? formatDate(selectedRequest.created_at)
                     : "—",
                 ],
                 [
-                  "Reviewed At",
+                  t('hospitalAdmin.topUp.reviewedAt'),
                   selectedRequest.reviewed_at
                     ? formatDate(selectedRequest.reviewed_at)
                     : "—",
                 ],
-                ["Review Notes", selectedRequest.review_notes || "—"],
+                [t('hospitalAdmin.topUp.reviewNotes'), selectedRequest.review_notes || "—"],
               ].map(([k, v]) => (
                 <div
                   key={k}
@@ -226,7 +228,7 @@ export default function HospitalAdminTopUpRequests() {
             {selectedRequest.events && selectedRequest.events.length > 0 && (
               <div className="mt-4">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  Event History
+                  {t('hospitalAdmin.topUp.eventHistory')}
                 </h3>
                 <div className="space-y-2">
                   {selectedRequest.events.map((e: any) => (
@@ -256,7 +258,7 @@ export default function HospitalAdminTopUpRequests() {
               className="btn-outline w-full mt-5"
               onClick={() => setSelectedRequest(null)}
             >
-              Close
+              {t('hospitalAdmin.topUp.close')}
             </button>
           </div>
         </div>

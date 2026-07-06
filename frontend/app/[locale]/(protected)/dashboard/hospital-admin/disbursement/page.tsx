@@ -7,11 +7,13 @@ import { formatXAF, formatDate, statusColor } from "@/lib/utils";
 import { listDisbursements } from "@/actions/disbursement";
 import Link from "next/link";
 import Paginator from "@/components/shared/Paginator";
+import { useI18n } from "@/locales/client";
 
 const STATUS_FILTERS = ["all", "PENDING", "COMPLETED", "FAILED", "CANCELLED"];
 const PAGE_SIZE = 10;
 
 export default function HospitalAdminDisbursements() {
+  const t = useI18n();
   const { data: session } = useSession();
   const userInfo = session?.user?.userInfo as HospitalAdminInfo;
   const hospital_id = userInfo?.hospital?.id;
@@ -50,18 +52,18 @@ export default function HospitalAdminDisbursements() {
   );
 
   const paymentMethodLabels: Record<string, string> = {
-    MOMO: "Mobile Money",
-    BANK_TRANSFER: "Bank Transfer",
-    CASH: "Cash",
-    OTHER: "Other",
+    MOMO: t('hospitalAdmin.disbursement.momo'),
+    BANK_TRANSFER: t('hospitalAdmin.disbursement.bankTransfer'),
+    CASH: t('hospitalAdmin.disbursement.cash'),
+    OTHER: t('hospitalAdmin.disbursement.other'),
   };
 
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Disbursements</h1>
+        <h1 className="text-2xl font-black text-gray-900">{t('hospitalAdmin.disbursement.title')}</h1>
         <p className="text-gray-500 text-sm">
-          {totalCount} total disbursements
+          {t('hospitalAdmin.disbursement.total', { count: totalCount })}
         </p>
       </div>
 
@@ -73,7 +75,7 @@ export default function HospitalAdminDisbursements() {
           />
           <input
             className="input-field pl-10"
-            placeholder="Search by hospital name..."
+            placeholder={t('hospitalAdmin.disbursement.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -91,7 +93,7 @@ export default function HospitalAdminDisbursements() {
         >
           {STATUS_FILTERS.map((s) => (
             <option key={s} value={s}>
-              {s === "all" ? "All Status" : s}
+              {s === "all" ? t('hospitalAdmin.disbursement.allStatus') : s}
             </option>
           ))}
         </select>
@@ -103,11 +105,11 @@ export default function HospitalAdminDisbursements() {
             <thead>
               <tr className="border-b border-gray-100">
                 {[
-                  "Amount",
-                  "Payment Method",
-                  "Status",
-                  "Date",
-                  "Reference",
+                  t('hospitalAdmin.disbursement.colAmount'),
+                  t('hospitalAdmin.disbursement.colPaymentMethod'),
+                  t('hospitalAdmin.disbursement.colStatus'),
+                  t('hospitalAdmin.disbursement.colDate'),
+                  t('hospitalAdmin.disbursement.colReference'),
                 ].map((h) => (
                   <th
                     key={h}
@@ -117,7 +119,7 @@ export default function HospitalAdminDisbursements() {
                   </th>
                 ))}
                 <th className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                  Actions
+                  {t('hospitalAdmin.disbursement.colActions')}
                 </th>
               </tr>
             </thead>
@@ -138,7 +140,7 @@ export default function HospitalAdminDisbursements() {
                     colSpan={6}
                     className="text-center py-16 text-gray-400 text-sm"
                   >
-                    No disbursements found
+                    {t('hospitalAdmin.disbursement.noResults')}
                   </td>
                 </tr>
               ) : (
@@ -172,7 +174,7 @@ export default function HospitalAdminDisbursements() {
                         className="text-xs font-semibold"
                         style={{ color: "#1D75DB" }}
                       >
-                        View
+                        {t('hospitalAdmin.disbursement.view')}
                       </Link>
                     </td>
                   </tr>

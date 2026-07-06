@@ -19,10 +19,12 @@ import {
 } from 'lucide-react';
 import { getBeneficiary, listHealthIssues, listBeneficiaryDocuments } from '@/actions/beneficiaries';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { useI18n } from '@/locales/client';
 
 const SUB_PAGE_SIZE = 5;
 
 export default function HospitalPatientDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -71,12 +73,12 @@ export default function HospitalPatientDetailPage() {
   }
 
   if (!beneficiary) {
-    return (<div className="text-center py-16 text-gray-400">Patient not found.</div>);
+    return (<div className="text-center py-16 text-gray-400">{t('hospitalAdmin.patientDetail.notFound')}</div>);
   }
 
   return (<>
     <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-      <ArrowLeft size={16} /> Back to Patients
+      <ArrowLeft size={16} /> {t('hospitalAdmin.patientDetail.backToPatients')}
     </button>
 
     <div className="mb-6">
@@ -84,7 +86,7 @@ export default function HospitalPatientDetailPage() {
       <p className="text-gray-500 text-sm mt-1">
         {beneficiary.digital_health_id && <span className="font-mono mr-3">{beneficiary.digital_health_id}</span>}
         <span className={`badge text-xs ${beneficiary.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-          {beneficiary.is_verified ? 'Verified' : 'Pending Verification'}
+          {beneficiary.is_verified ? t('hospitalAdmin.patientDetail.verified') : t('hospitalAdmin.patientDetail.pendingVerification')}
         </span>
       </p>
     </div>
@@ -93,48 +95,48 @@ export default function HospitalPatientDetailPage() {
       <div className="lg:col-span-2 space-y-5">
         <div className="card">
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-            <User size={14} /> Personal Information
+            <User size={14} /> {t('hospitalAdmin.patientDetail.personalInfo')}
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            <Detail label="Full Name" value={beneficiary.full_name} />
-            <Detail label="Gender" value={beneficiary.gender} />
-            <Detail label="Category" value={beneficiary.category} />
-            <Detail label="Date of Birth" value={formatDate(beneficiary.date_of_birth)} />
-            <Detail label="National ID" value={beneficiary.national_id_number} mono />
-            <Detail label="Phone" value={beneficiary.phone} />
-            {beneficiary.email && <Detail label="Email" value={beneficiary.email} />}
-            {beneficiary.number_of_previous_births != null && <Detail label="Previous Births" value={String(beneficiary.number_of_previous_births)} />}
+            <Detail label={t('hospitalAdmin.patientDetail.fullName')} value={beneficiary.full_name} />
+            <Detail label={t('hospitalAdmin.patientDetail.gender')} value={beneficiary.gender} />
+            <Detail label={t('hospitalAdmin.patientDetail.category')} value={beneficiary.category} />
+            <Detail label={t('hospitalAdmin.patientDetail.dateOfBirth')} value={formatDate(beneficiary.date_of_birth)} />
+            <Detail label={t('hospitalAdmin.patientDetail.nationalId')} value={beneficiary.national_id_number} mono />
+            <Detail label={t('hospitalAdmin.patientDetail.phone')} value={beneficiary.phone} />
+            {beneficiary.email && <Detail label={t('hospitalAdmin.patientDetail.email')} value={beneficiary.email} />}
+            {beneficiary.number_of_previous_births != null && <Detail label={t('hospitalAdmin.patientDetail.previousBirths')} value={String(beneficiary.number_of_previous_births)} />}
           </div>
         </div>
 
         <div className="card">
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-            <MapPin size={14} /> Location
+            <MapPin size={14} /> {t('hospitalAdmin.patientDetail.location')}
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            <Detail label="Region" value={beneficiary.region} />
-            <Detail label="City" value={beneficiary.city} />
-            <Detail label="Address" value={beneficiary.address} className="col-span-2" />
+            <Detail label={t('hospitalAdmin.patientDetail.region')} value={beneficiary.region} />
+            <Detail label={t('hospitalAdmin.patientDetail.city')} value={beneficiary.city} />
+            <Detail label={t('hospitalAdmin.patientDetail.address')} value={beneficiary.address} className="col-span-2" />
           </div>
         </div>
 
         <div className="card">
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-            <Phone size={14} /> Emergency Contact
+            <Phone size={14} /> {t('hospitalAdmin.patientDetail.emergencyContact')}
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            <Detail label="Name" value={beneficiary.emergency_contact_name || '—'} />
-            <Detail label="Phone" value={beneficiary.emergency_contact_phone || '—'} />
-            <Detail label="Relationship" value={beneficiary.emergency_contact_relationship || '—'} />
+            <Detail label={t('hospitalAdmin.patientDetail.emergencyName')} value={beneficiary.emergency_contact_name || '—'} />
+            <Detail label={t('hospitalAdmin.patientDetail.emergencyPhone')} value={beneficiary.emergency_contact_phone || '—'} />
+            <Detail label={t('hospitalAdmin.patientDetail.emergencyRelationship')} value={beneficiary.emergency_contact_relationship || '—'} />
           </div>
         </div>
 
         <div className="card">
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-            <Heart size={14} /> Health Issues ({hiCount})
+            <Heart size={14} /> {t('hospitalAdmin.patientDetail.healthIssues')} ({hiCount})
           </h2>
           {healthIssues.length === 0 ? (
-            <p className="text-xs text-gray-400 py-4">No health issues recorded yet.</p>
+            <p className="text-xs text-gray-400 py-4">{t('hospitalAdmin.patientDetail.noHealthIssues')}</p>
           ) : (<>
             <div className="space-y-3">
               {healthIssues.map((hi) => (
@@ -150,7 +152,7 @@ export default function HospitalPatientDetailPage() {
                   </div>
                   <p className="text-xs text-gray-600">{hi.description}</p>
                   <div className="flex items-center gap-3 mt-1.5 text-[10px] text-gray-400">
-                    <span>Severity: {hi.severity}</span>
+                    <span>{t('hospitalAdmin.patientDetail.severity')}: {hi.severity}</span>
                     {hi.created_at && <span>{formatDate(hi.created_at)}</span>}
                   </div>
                 </div>
@@ -162,10 +164,10 @@ export default function HospitalPatientDetailPage() {
 
         <div className="card">
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-            <FileText size={14} /> Documents ({docCount})
+            <FileText size={14} /> {t('hospitalAdmin.patientDetail.documents')} ({docCount})
           </h2>
           {documents.length === 0 ? (
-            <p className="text-xs text-gray-400 py-4">No documents uploaded yet.</p>
+            <p className="text-xs text-gray-400 py-4">{t('hospitalAdmin.patientDetail.noDocuments')}</p>
           ) : (<>
             <div className="space-y-2">
               {documents.map((doc) => {
@@ -183,12 +185,12 @@ export default function HospitalPatientDetailPage() {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">{doc.description || 'Document'}</p>
+                        <p className="text-sm font-medium text-gray-800 truncate">{doc.description || t('hospitalAdmin.patientDetail.document')}</p>
                         {doc.uploaded_at && <p className="text-[10px] text-gray-400">{formatDate(doc.uploaded_at)}</p>}
                       </div>
                     </button>
                     {docUrl && (
-                      <a href={fullUrl} target="_blank" rel="noopener noreferrer" download className="p-1.5 text-gray-400 hover:text-[#1D75DB] rounded-lg hover:bg-blue-50 transition-colors shrink-0" title="Download">
+                      <a href={fullUrl} target="_blank" rel="noopener noreferrer" download className="p-1.5 text-gray-400 hover:text-[#1D75DB] rounded-lg hover:bg-blue-50 transition-colors shrink-0" title={t('hospitalAdmin.patientDetail.download')}>
                         <Download size={14} />
                       </a>
                     )}
@@ -204,22 +206,22 @@ export default function HospitalPatientDetailPage() {
       <div className="space-y-4">
         <div className="card">
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-            <Calendar size={14} /> Enrollment Info
+            <Calendar size={14} /> {t('hospitalAdmin.patientDetail.enrollmentInfo')}
           </h2>
           <div className="space-y-3">
-            {/* <Detail label="Status" value={beneficiary.is_active ? 'Active' : 'Inactive'} /> */}
-            <Detail label="Created" value={beneficiary.created_at ? formatDateTime(beneficiary.created_at) : '—'} />
-            <Detail label="Updated" value={beneficiary.updated_at ? formatDateTime(beneficiary.updated_at) : '—'} />
+            {/* <Detail label={t('hospitalAdmin.patientDetail.status')} value={beneficiary.is_active ? t('hospitalAdmin.patientDetail.active') : t('hospitalAdmin.patientDetail.inactive')} /> */}
+            <Detail label={t('hospitalAdmin.patientDetail.created')} value={beneficiary.created_at ? formatDateTime(beneficiary.created_at) : '—'} />
+            <Detail label={t('hospitalAdmin.patientDetail.updated')} value={beneficiary.updated_at ? formatDateTime(beneficiary.updated_at) : '—'} />
           </div>
         </div>
 
         <div className="card">
-          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Summary</h2>
+          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">{t('hospitalAdmin.patientDetail.summary')}</h2>
           <div className="space-y-3">
             {[
-              { label: 'Health Issues', value: hiCount },
-              { label: 'Documents', value: docCount },
-              { label: 'Verified', value: beneficiary.is_verified ? 'Yes' : 'No' },
+              { label: t('hospitalAdmin.patientDetail.healthIssues'), value: hiCount },
+              { label: t('hospitalAdmin.patientDetail.documents'), value: docCount },
+              { label: t('hospitalAdmin.patientDetail.verified'), value: beneficiary.is_verified ? t('hospitalAdmin.patientDetail.yes') : t('hospitalAdmin.patientDetail.no') },
             ].map(row => (
               <div key={row.label} className="flex justify-between items-center text-sm">
                 <span className="text-gray-600">{row.label}</span>
@@ -235,7 +237,7 @@ export default function HospitalPatientDetailPage() {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black text-gray-900">{previewDoc.description || 'Document Preview'}</h2>
+            <h2 className="text-lg font-black text-gray-900">{previewDoc.description || t('hospitalAdmin.patientDetail.documentPreview')}</h2>
             <button onClick={() => setPreviewDoc(null)}><X size={20} className="text-gray-400" /></button>
           </div>
           <DocPreview doc={previewDoc} />
@@ -255,6 +257,7 @@ function Detail({ label, value, mono, className }: { label: string; value: React
 }
 
 function DocPreview({ doc }: { doc: BeneficiaryDocument }) {
+  const t = useI18n();
   const docUrl = typeof doc.document === 'string' ? doc.document : (doc.document?.url || doc.document?.file || '');
   const fullUrl = docUrl.startsWith('http') ? docUrl : `${process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://localhost:8000'}${docUrl}`;
   const isImage = docUrl && /\.(png|jpg|jpeg|gif|webp|svg)/i.test(docUrl);
@@ -263,20 +266,20 @@ function DocPreview({ doc }: { doc: BeneficiaryDocument }) {
     <div className="space-y-3">
       {isImage ? (
         <div className="relative w-full max-h-[60vh] min-h-[300px] rounded-xl overflow-hidden">
-          <Image src={fullUrl} alt={doc.description || 'Document'} fill className="object-contain" />
+          <Image src={fullUrl} alt={doc.description || t('hospitalAdmin.patientDetail.document')} fill className="object-contain" />
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3 py-8">
           <FileText size={48} className="text-gray-300" />
-          <p className="text-sm text-gray-500">This document cannot be previewed inline.</p>
+          <p className="text-sm text-gray-500">{t('hospitalAdmin.patientDetail.cannotPreview')}</p>
           <a href={fullUrl} target="_blank" rel="noopener noreferrer" download
             className="py-2 px-4 rounded-xl font-semibold text-sm text-white" style={{ background: '#1D75DB' }}>
-            Download
+            {t('hospitalAdmin.patientDetail.download')}
           </a>
         </div>
       )}
       {doc.description && <p className="text-xs text-gray-500 text-center">{doc.description}</p>}
-      {doc.uploaded_at && <p className="text-[10px] text-gray-400 text-center">Uploaded {formatDate(doc.uploaded_at)}</p>}
+      {doc.uploaded_at && <p className="text-[10px] text-gray-400 text-center">{t('hospitalAdmin.patientDetail.uploaded')} {formatDate(doc.uploaded_at)}</p>}
     </div>
   );
 }

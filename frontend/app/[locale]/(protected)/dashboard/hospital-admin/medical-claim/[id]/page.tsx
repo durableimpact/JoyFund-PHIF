@@ -22,8 +22,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getMedicalClaim } from '@/actions/hospital';
 import { getVoucher } from '@/actions/vouchers';
 import { useState } from 'react';
+import { useI18n } from '@/locales/client';
 
 export default function HospitalAdminMedicalClaimDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -61,7 +63,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
   }
 
   if (!claim) {
-    return <div className="text-center py-16 text-gray-400">Claim not found.</div>;
+    return <div className="text-center py-16 text-gray-400">{t('hospitalAdmin.medicalClaim.detail.claimNotFound')}</div>;
   }
 
   const items = claim.claim_items || [];
@@ -71,13 +73,13 @@ export default function HospitalAdminMedicalClaimDetailPage() {
   return (
     <>
       <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-        <ArrowLeft size={16} /> Back to Claims
+        <ArrowLeft size={16} /> {t('hospitalAdmin.medicalClaim.detail.backToClaims')}
       </button>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-            Claim Detail
+            {t('hospitalAdmin.medicalClaim.detail.title')}
             <span className={`badge text-xs ${statusColor(claim.claim_status)}`}>
               {claim.claim_status?.replace(/_/g, ' ')}
             </span>
@@ -86,7 +88,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
         </div>
         <div className="text-right">
           <p className="text-2xl font-black" style={{ color: '#1D75DB' }}>{formatXAF(totalCost)}</p>
-          <p className="text-xs text-gray-400">Total Cost</p>
+          <p className="text-xs text-gray-400">{t('hospitalAdmin.medicalClaim.detail.totalCost')}</p>
         </div>
       </div>
 
@@ -96,18 +98,18 @@ export default function HospitalAdminMedicalClaimDetailPage() {
           {/* Claim info card */}
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <FileText size={14} /> Claim Information
+              <FileText size={14} /> {t('hospitalAdmin.medicalClaim.detail.claimInfo')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Claim ID" value={`#${String(claim.id).slice(-8)}`} mono />
-              <Detail label="Status" value={<span className={`badge ${statusColor(claim.claim_status)}`}>{claim.claim_status?.replace(/_/g, ' ')}</span>} />
-              <Detail label="Total Cost" value={formatXAF(totalCost)} />
-              <Detail label="Service Description" value={claim.service_description || '—'} className="col-span-2" />
-              <Detail label="Submitted At" value={claim.submitted_at ? formatDateTime(claim.submitted_at) : '—'} />
-              <Detail label="Reviewed At" value={claim.reviewed_at ? formatDateTime(claim.reviewed_at) : '—'} />
-              <Detail label="Service Completed At" value={claim.service_completed_at ? formatDateTime(claim.service_completed_at) : '—'} />
+              <Detail label={t('hospitalAdmin.medicalClaim.detail.claimId')} value={`#${String(claim.id).slice(-8)}`} mono />
+              <Detail label={t('hospitalAdmin.medicalClaim.detail.status')} value={<span className={`badge ${statusColor(claim.claim_status)}`}>{claim.claim_status?.replace(/_/g, ' ')}</span>} />
+              <Detail label={t('hospitalAdmin.medicalClaim.detail.totalCost')} value={formatXAF(totalCost)} />
+              <Detail label={t('hospitalAdmin.medicalClaim.detail.serviceDescription')} value={claim.service_description || '—'} className="col-span-2" />
+              <Detail label={t('hospitalAdmin.medicalClaim.detail.submittedAt')} value={claim.submitted_at ? formatDateTime(claim.submitted_at) : '—'} />
+              <Detail label={t('hospitalAdmin.medicalClaim.detail.reviewedAt')} value={claim.reviewed_at ? formatDateTime(claim.reviewed_at) : '—'} />
+              <Detail label={t('hospitalAdmin.medicalClaim.detail.serviceCompletedAt')} value={claim.service_completed_at ? formatDateTime(claim.service_completed_at) : '—'} />
               {claim.rejection_reason && (
-                <Detail label="Rejection Reason" value={claim.rejection_reason} className="col-span-2" />
+                <Detail label={t('hospitalAdmin.medicalClaim.detail.rejectionReason')} value={claim.rejection_reason} className="col-span-2" />
               )}
             </div>
           </div>
@@ -115,18 +117,18 @@ export default function HospitalAdminMedicalClaimDetailPage() {
           {/* Claim Items */}
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Receipt size={14} /> Claim Items ({items.length})
+              <Receipt size={14} /> {t('hospitalAdmin.medicalClaim.detail.claimItems')} ({items.length})
             </h2>
             {items.length === 0 ? (
-              <p className="text-gray-400 text-xs">No items recorded.</p>
+              <p className="text-gray-400 text-xs">{t('hospitalAdmin.medicalClaim.detail.noItems')}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-gray-100 text-gray-400">
-                      <th className="text-left p-2">#</th>
-                      <th className="text-left p-2">Item</th>
-                      <th className="text-right p-2">Amount</th>
+                      <th className="text-left p-2">{t('hospitalAdmin.medicalClaim.detail.colHash')}</th>
+                      <th className="text-left p-2">{t('hospitalAdmin.medicalClaim.detail.colItem')}</th>
+                      <th className="text-right p-2">{t('hospitalAdmin.medicalClaim.detail.colAmount')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -141,7 +143,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
                   <tfoot className="font-semibold text-gray-500">
                     <tr>
                       <td className="p-2" />
-                      <td className="p-2 text-right">Total</td>
+                      <td className="p-2 text-right">{t('hospitalAdmin.medicalClaim.detail.total')}</td>
                       <td className="p-2 text-right" style={{ color: '#1D75DB' }}>{formatXAF(totalCost)}</td>
                     </tr>
                   </tfoot>
@@ -154,7 +156,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
           {voucherId && (
             <div className="space-y-5 border-t-2 border-[#1D75DB]/20 pt-5">
               <h2 className="text-sm font-black text-gray-900 uppercase tracking-wide flex items-center gap-2">
-                <Ticket size={14} style={{ color: '#1D75DB' }} /> Associated Voucher
+                <Ticket size={14} style={{ color: '#1D75DB' }} /> {t('hospitalAdmin.medicalClaim.detail.associatedVoucher')}
               </h2>
 
               {vLoading ? (
@@ -164,7 +166,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
                   {/* Voucher header */}
                   <div className="card">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Voucher Information</h3>
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">{t('hospitalAdmin.medicalClaim.detail.voucherInfo')}</h3>
                       <span className={`badge text-xs ${statusColor(voucher.status)}`}>
                         {voucher.status?.replace(/_/g, ' ')}
                       </span>
@@ -173,19 +175,19 @@ export default function HospitalAdminMedicalClaimDetailPage() {
                       <code className="font-mono text-sm font-bold text-gray-700 bg-gray-100 rounded-lg px-3 py-1 select-all">
                         {voucher.voucher_code}
                       </code>
-                      <button onClick={() => copyCode(voucher.voucher_code)} className="text-gray-400 hover:text-gray-600 p-1" title="Copy code">
+                      <button onClick={() => copyCode(voucher.voucher_code)} className="text-gray-400 hover:text-gray-600 p-1" title={t('hospitalAdmin.medicalClaim.detail.copyCode')}>
                         {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <Detail label="Language" value={voucher.language_preference?.toUpperCase() || 'FR'} />
-                      <Detail label="Expiry Date" value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
-                      <Detail label="Created" value={formatDateTime(voucher.created_at)} />
-                      <Detail label="Locked At" value={voucher.locked_at ? formatDateTime(voucher.locked_at) : '—'} />
-                      <Detail label="Redeemed At" value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
-                      <Detail label="Expired At" value={voucher.expired_at ? formatDateTime(voucher.expired_at) : '—'} />
+                      <Detail label={t('hospitalAdmin.medicalClaim.detail.language')} value={voucher.language_preference?.toUpperCase() || 'FR'} />
+                      <Detail label={t('hospitalAdmin.medicalClaim.detail.expiryDate')} value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
+                      <Detail label={t('hospitalAdmin.medicalClaim.detail.created')} value={formatDateTime(voucher.created_at)} />
+                      <Detail label={t('hospitalAdmin.medicalClaim.detail.lockedAt')} value={voucher.locked_at ? formatDateTime(voucher.locked_at) : '—'} />
+                      <Detail label={t('hospitalAdmin.medicalClaim.detail.redeemedAt')} value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
+                      <Detail label={t('hospitalAdmin.medicalClaim.detail.expiredAt')} value={voucher.expired_at ? formatDateTime(voucher.expired_at) : '—'} />
                       {voucher.patient_confirmation_pin && (
-                        <Detail label="Confirmation PIN" value={voucher.patient_confirmation_pin} mono />
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.confirmationPIN')} value={voucher.patient_confirmation_pin} mono />
                       )}
                     </div>
                   </div>
@@ -194,19 +196,19 @@ export default function HospitalAdminMedicalClaimDetailPage() {
                   {voucher.beneficiary && (
                     <div className="card">
                       <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <User size={14} /> Beneficiary
+                        <User size={14} /> {t('hospitalAdmin.medicalClaim.detail.beneficiary')}
                       </h3>
                       <div className="grid grid-cols-2 gap-3">
-                        <Detail label="Full Name" value={voucher.beneficiary.full_name} />
-                        <Detail label="Digital Health ID" value={voucher.beneficiary.digital_health_id || '—'} mono />
-                        <Detail label="Gender" value={voucher.beneficiary.gender} />
-                        <Detail label="Category" value={voucher.beneficiary.category} />
-                        <Detail label="Date of Birth" value={voucher.beneficiary.date_of_birth ? formatDate(voucher.beneficiary.date_of_birth) : '—'} />
-                        <Detail label="Phone" value={voucher.beneficiary.phone} />
-                        <Detail label="Region" value={voucher.beneficiary.region} />
-                        {voucher.beneficiary.city && <Detail label="City" value={voucher.beneficiary.city} />}
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.fullName')} value={voucher.beneficiary.full_name} />
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.digitalHealthId')} value={voucher.beneficiary.digital_health_id || '—'} mono />
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.gender')} value={voucher.beneficiary.gender} />
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.category')} value={voucher.beneficiary.category} />
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.dateOfBirth')} value={voucher.beneficiary.date_of_birth ? formatDate(voucher.beneficiary.date_of_birth) : '—'} />
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.phone')} value={voucher.beneficiary.phone} />
+                        <Detail label={t('hospitalAdmin.medicalClaim.detail.region')} value={voucher.beneficiary.region} />
+                        {voucher.beneficiary.city && <Detail label={t('hospitalAdmin.medicalClaim.detail.city')} value={voucher.beneficiary.city} />}
                         {voucher.beneficiary.emergency_contact_name && (
-                          <Detail label="Emergency Contact" value={`${voucher.beneficiary.emergency_contact_name} · ${voucher.beneficiary.emergency_contact_phone}`} />
+                          <Detail label={t('hospitalAdmin.medicalClaim.detail.emergencyContact')} value={`${voucher.beneficiary.emergency_contact_name} · ${voucher.beneficiary.emergency_contact_phone}`} />
                         )}
                       </div>
                     </div>
@@ -216,7 +218,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
                   {voucher.events && voucher.events.length > 0 && (
                     <div className="card">
                       <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <Activity size={14} /> Voucher Activity Timeline
+                        <Activity size={14} /> {t('hospitalAdmin.medicalClaim.detail.activityTimeline')}
                       </h3>
                       <div className="space-y-0">
                         {[...(voucher.events || [])].reverse().map((event: any, i: number, arr: any[]) => (
@@ -237,7 +239,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
                   )}
                 </>
               ) : (
-                <div className="card"><p className="text-gray-400 text-xs text-center py-8">Could not load voucher details.</p></div>
+                <div className="card"><p className="text-gray-400 text-xs text-center py-8">{t('hospitalAdmin.medicalClaim.detail.couldNotLoadVoucher')}</p></div>
               )}
             </div>
           )}
@@ -247,10 +249,10 @@ export default function HospitalAdminMedicalClaimDetailPage() {
         <div className="space-y-4">
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <ClipboardCheck size={14} /> Proof Documents ({proofs.length})
+              <ClipboardCheck size={14} /> {t('hospitalAdmin.medicalClaim.detail.proofDocuments')} ({proofs.length})
             </h2>
             {proofs.length === 0 ? (
-              <p className="text-gray-400 text-xs">No proof documents uploaded.</p>
+              <p className="text-gray-400 text-xs">{t('hospitalAdmin.medicalClaim.detail.noProofDocuments')}</p>
             ) : (
               <div className="space-y-3">
                 {proofs.map((proof: any) => (
@@ -267,7 +269,7 @@ export default function HospitalAdminMedicalClaimDetailPage() {
                         className="text-xs font-semibold hover:underline block mb-2 truncate"
                         style={{ color: '#1D75DB' }}
                       >
-                        View Document
+                        {t('hospitalAdmin.medicalClaim.detail.viewDocument')}
                       </a>
                     )}
                     <div className="flex items-center justify-between mt-1">

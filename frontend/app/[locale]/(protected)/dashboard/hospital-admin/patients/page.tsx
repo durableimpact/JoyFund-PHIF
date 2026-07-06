@@ -7,10 +7,12 @@ import { ChevronLeft, ChevronRight, Heart, Search } from 'lucide-react';
 import { listBeneficiaries } from '@/actions/beneficiaries';
 import { formatDate } from '@/lib/utils';
 import Paginator from '@/components/shared/Paginator';
+import { useI18n } from '@/locales/client';
 
 const PAGE_SIZE = 10;
 
 export default function HospitalAdminPatients() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
@@ -47,15 +49,15 @@ export default function HospitalAdminPatients() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Patients</h1>
-        <p className="text-gray-500 text-sm">{totalCount} beneficiaries at this hospital</p>
+        <h1 className="text-2xl font-black text-gray-900">{t('hospitalAdmin.patients.title')}</h1>
+        <p className="text-gray-500 text-sm">{t('hospitalAdmin.patients.total', { count: totalCount })}</p>
       </div>
 
       <div className="relative mb-5">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           className="input-field pl-10"
-          placeholder="Search by name, health ID, city..."
+          placeholder={t('hospitalAdmin.patients.searchPlaceholder')}
           value={search}
           onChange={e => setParams({ search: e.target.value, page: 1 })}
         />
@@ -66,7 +68,7 @@ export default function HospitalAdminPatients() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Beneficiary', 'Health ID', 'Location', 'Category', 'Health Issues', 'Enrolled'].map(h => (
+                {[t('hospitalAdmin.patients.colBeneficiary'), t('hospitalAdmin.patients.colHealthId'), t('hospitalAdmin.patients.colLocation'), t('hospitalAdmin.patients.colCategory'), t('hospitalAdmin.patients.colHealthIssues'), t('hospitalAdmin.patients.colEnrolled')].map(h => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -77,7 +79,7 @@ export default function HospitalAdminPatients() {
                   {[...Array(7)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
               )) : patients.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-16 text-gray-400 text-sm">No patients found</td></tr>
+                <tr><td colSpan={7} className="text-center py-16 text-gray-400 text-sm">{t('hospitalAdmin.patients.noResults')}</td></tr>
               ) : patients.map((b: any) => {
                 const issueCount = (b.health_issues || []).length;
                 return (
@@ -101,7 +103,7 @@ export default function HospitalAdminPatients() {
                           <Heart size={12} className="text-red-400" />
                           <span className="text-xs font-semibold text-gray-700">{issueCount}</span>
                         </div>
-                      ) : <span className="text-xs text-gray-400">None</span>}
+                      ) : <span className="text-xs text-gray-400">{t('hospitalAdmin.patients.none')}</span>}
                     </td>
                     <td className="p-4 text-gray-400 text-xs">{b.created_at ? formatDate(b.created_at) : '—'}</td>
                    

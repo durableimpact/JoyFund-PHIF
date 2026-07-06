@@ -9,6 +9,7 @@ import { getHospitalStaff } from '@/actions/hospital';
 import { InputPhone } from '@/components/ui/input-phone';
 import { FileUpload } from '@/components/ui/file-upload';
 import api from '@/actions/api';
+import { useI18n } from '@/locales/client';
 
 const roleColors: Record<string, string> = {
   receptionist: 'bg-blue-100 text-blue-700',
@@ -46,6 +47,7 @@ function parseBackendErrors(data: unknown): Record<string, string[]> {
 }
 
 export default function HospitalStaff() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
@@ -117,18 +119,18 @@ export default function HospitalStaff() {
             .join('\n');
           throw new Error(messages);
         }
-        const msg = responseData?.detail || responseData?.error || responseData?.message || 'Failed to add receptionist';
+        const msg = responseData?.detail || responseData?.error || responseData?.message || t('hospitalAdmin.receptionist.failedToAdd');
         throw new Error(msg);
       }
     },
     onSuccess: () => {
-      toast.success('Receptionist added successfully');
+      toast.success(t('hospitalAdmin.receptionist.addedSuccess'));
       setShowAdd(false);
       resetForm();
       queryClient.invalidateQueries({ queryKey: ['ha-staff'] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || 'Failed to add receptionist');
+      toast.error(err.message || t('hospitalAdmin.receptionist.failedToAdd'));
     },
   });
 
@@ -175,11 +177,11 @@ export default function HospitalStaff() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Receptionists</h1>
-          <p className="text-gray-500 text-sm">{staff.length} staff members</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('hospitalAdmin.receptionist.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('hospitalAdmin.receptionist.staffCount', { count: staff.length })}</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#1D75DB' }}>
-          <UserPlus size={16} /> Add Receptionist
+          <UserPlus size={16} /> {t('hospitalAdmin.receptionist.addButton')}
         </button>
       </div>
 
@@ -188,7 +190,7 @@ export default function HospitalStaff() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Staff Member', 'Email', 'Phone', 'Role', 'Status'].map(h => (
+                {[t('hospitalAdmin.receptionist.colStaff'), t('hospitalAdmin.receptionist.colEmail'), t('hospitalAdmin.receptionist.colPhone'), t('hospitalAdmin.receptionist.colRole'), t('hospitalAdmin.receptionist.colStatus')].map(h => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -199,7 +201,7 @@ export default function HospitalStaff() {
                   {[...Array(5)].map((_, j) => <td key={j} className="p-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>)}
                 </tr>
               )) : staff.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">No staff members yet</td></tr>
+                <tr><td colSpan={5} className="text-center py-16 text-gray-400 text-sm">{t('hospitalAdmin.receptionist.noStaff')}</td></tr>
               ) : staff.map((s: any) => (
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4">
@@ -219,9 +221,9 @@ export default function HospitalStaff() {
                   </td>
                   <td className="p-4">
                     {s.is_active !== false ? (
-                      <span className="badge bg-green-100 text-green-700 text-xs">Active</span>
+                      <span className="badge bg-green-100 text-green-700 text-xs">{t('hospitalAdmin.receptionist.active')}</span>
                     ) : (
-                      <span className="badge bg-gray-100 text-gray-700 text-xs">Inactive</span>
+                      <span className="badge bg-gray-100 text-gray-700 text-xs">{t('hospitalAdmin.receptionist.inactive')}</span>
                     )}
                   </td>
                 </tr>
@@ -235,39 +237,39 @@ export default function HospitalStaff() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 my-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-black text-gray-900">Add Receptionist</h2>
+              <h2 className="text-lg font-black text-gray-900">{t('hospitalAdmin.receptionist.addTitle')}</h2>
               <button onClick={() => { setShowAdd(false); resetForm(); }}><X size={20} className="text-gray-400" /></button>
             </div>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">First Name *</label>
-                  <input className={fieldClass('first_name')} placeholder="First name" value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))} onBlur={() => handleBlur('first_name')} />
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('hospitalAdmin.receptionist.firstNameLabel')}</label>
+                  <input className={fieldClass('first_name')} placeholder={t('hospitalAdmin.receptionist.firstNamePlaceholder')} value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))} onBlur={() => handleBlur('first_name')} />
                   {getFieldError('first_name') && <p className="text-[11px] text-red-500 mt-1 font-medium">{getFieldError('first_name')}</p>}
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Last Name *</label>
-                  <input className={fieldClass('last_name')} placeholder="Last name" value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))} onBlur={() => handleBlur('last_name')} />
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('hospitalAdmin.receptionist.lastNameLabel')}</label>
+                  <input className={fieldClass('last_name')} placeholder={t('hospitalAdmin.receptionist.lastNamePlaceholder')} value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))} onBlur={() => handleBlur('last_name')} />
                   {getFieldError('last_name') && <p className="text-[11px] text-red-500 mt-1 font-medium">{getFieldError('last_name')}</p>}
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Email *</label>
-                <input className={fieldClass('email')} type="email" placeholder="staff@hospital.cm" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} onBlur={() => handleBlur('email')} />
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('hospitalAdmin.receptionist.emailLabel')}</label>
+                <input className={fieldClass('email')} type="email" placeholder={t('hospitalAdmin.receptionist.emailPlaceholder')} value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} onBlur={() => handleBlur('email')} />
                 {getFieldError('email') && <p className="text-[11px] text-red-500 mt-1 font-medium">{getFieldError('email')}</p>}
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Phone</label>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('hospitalAdmin.receptionist.phoneLabel')}</label>
                 <InputPhone
                   value={form.phone_number}
                   onChange={(value) => setForm(p => ({ ...p, phone_number: value || '' }))}
                   defaultCountry="CM"
-                  placeholder="+237 6XX XXX XXX"
+                  placeholder={t('hospitalAdmin.receptionist.phonePlaceholder')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Password *</label>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('hospitalAdmin.receptionist.passwordLabel')}</label>
                   <div className="relative">
                     <input className={`${fieldClass('password')} pr-10`} type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} onBlur={() => handleBlur('password')} />
                     <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -277,7 +279,7 @@ export default function HospitalStaff() {
                   {getFieldError('password') && <p className="text-[11px] text-red-500 mt-1 font-medium">{getFieldError('password')}</p>}
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Confirm *</label>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('hospitalAdmin.receptionist.confirmLabel')}</label>
                   <div className="relative">
                     <input className={`${fieldClass('password2')} pr-10`} type={showPassword2 ? 'text' : 'password'} value={form.password2} onChange={e => setForm(p => ({ ...p, password2: e.target.value }))} onBlur={() => handleBlur('password2')} />
                     <button type="button" onClick={() => setShowPassword2(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -289,21 +291,21 @@ export default function HospitalStaff() {
               </div>
 
               <div className="border-t border-gray-100 pt-3">
-                <p className="text-xs text-gray-400 mb-3">National ID (optional)</p>
+                <p className="text-xs text-gray-400 mb-3">{t('hospitalAdmin.receptionist.nationalIdOptional')}</p>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">National ID Number</label>
-                  <input className="input-field" placeholder="e.g. 123456789" value={form.national_id_number} onChange={e => setForm(p => ({ ...p, national_id_number: e.target.value }))} />
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('hospitalAdmin.receptionist.nationalIdLabel')}</label>
+                  <input className="input-field" placeholder={t('hospitalAdmin.receptionist.nationalIdPlaceholder')} value={form.national_id_number} onChange={e => setForm(p => ({ ...p, national_id_number: e.target.value }))} />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  <FileUpload value={frontFile} onChange={setFrontFile} accept="image/*" label="Front ID Image" />
-                  <FileUpload value={backFile} onChange={setBackFile} accept="image/*" label="Back ID Image" />
+                  <FileUpload value={frontFile} onChange={setFrontFile} accept="image/*" label={t('hospitalAdmin.receptionist.frontIdImage')} />
+                  <FileUpload value={backFile} onChange={setBackFile} accept="image/*" label={t('hospitalAdmin.receptionist.backIdImage')} />
                 </div>
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button className="btn-outline flex-1" onClick={() => { setShowAdd(false); resetForm(); }}>Cancel</button>
+              <button className="btn-outline flex-1" onClick={() => { setShowAdd(false); resetForm(); }}>{t('hospitalAdmin.receptionist.cancel')}</button>
               <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#1D75DB' }} onClick={handleAdd} disabled={submitting}>
-                {submitting ? 'Adding...' : 'Add Receptionist'}
+                {submitting ? t('hospitalAdmin.receptionist.adding') : t('hospitalAdmin.receptionist.addButton')}
               </button>
             </div>
           </div>

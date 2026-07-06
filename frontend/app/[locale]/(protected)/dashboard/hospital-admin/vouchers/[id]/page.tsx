@@ -14,8 +14,10 @@ import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { getVoucher } from '@/actions/vouchers';
 import { useState } from 'react';
+import { useI18n } from '@/locales/client';
 
 export default function HospitalAdminVoucherDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -46,7 +48,7 @@ export default function HospitalAdminVoucherDetailPage() {
   }
 
   if (!voucher) {
-    return <div className="text-center py-16 text-gray-400">Voucher not found.</div>;
+    return <div className="text-center py-16 text-gray-400">{t('hospitalAdmin.voucherDetail.notFound')}</div>;
   }
 
   const events = (voucher.events || []).slice().reverse();
@@ -57,13 +59,13 @@ export default function HospitalAdminVoucherDetailPage() {
   return (
     <>
       <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold">
-        <ArrowLeft size={16} /> Back to Vouchers
+        <ArrowLeft size={16} /> {t('hospitalAdmin.voucherDetail.backToVouchers')}
       </button>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-            Voucher Detail
+            {t('hospitalAdmin.voucherDetail.title')}
             <span className={`badge text-xs ${statusColor(voucher.status)}`}>
               {voucher.status?.replace(/_/g, ' ')}
             </span>
@@ -72,7 +74,7 @@ export default function HospitalAdminVoucherDetailPage() {
             <code className="font-mono text-sm font-bold text-gray-700 bg-gray-100 rounded-lg px-3 py-1 select-all">
               {voucher.voucher_code}
             </code>
-            <button onClick={copyCode} className="text-gray-400 hover:text-gray-600 p-1" title="Copy code">
+            <button onClick={copyCode} className="text-gray-400 hover:text-gray-600 p-1" title={t('hospitalAdmin.voucherDetail.copyCode')}>
               {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
             </button>
           </div>
@@ -84,18 +86,18 @@ export default function HospitalAdminVoucherDetailPage() {
         <div className="lg:col-span-2 space-y-5">
           {/* Key details card */}
           <div className="card">
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Voucher Information</h2>
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">{t('hospitalAdmin.voucherDetail.voucherInfo')}</h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Voucher Code" value={voucher.voucher_code} mono />
-              <Detail label="Status" value={<span className={`badge ${statusColor(voucher.status)}`}>{voucher.status?.replace(/_/g, ' ')}</span>} />
-              <Detail label="Language" value={voucher.language_preference?.toUpperCase() || 'FR'} />
-              <Detail label="Expiry Date" value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
-              <Detail label="Created" value={formatDateTime(voucher.created_at)} />
-              <Detail label="Locked At" value={voucher.locked_at ? formatDateTime(voucher.locked_at) : '—'} />
-              <Detail label="Redeemed At" value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
-              <Detail label="Expired At" value={voucher.expired_at ? formatDateTime(voucher.expired_at) : '—'} />
+              <Detail label={t('hospitalAdmin.voucherDetail.voucherCode')} value={voucher.voucher_code} mono />
+              <Detail label={t('hospitalAdmin.voucherDetail.status')} value={<span className={`badge ${statusColor(voucher.status)}`}>{voucher.status?.replace(/_/g, ' ')}</span>} />
+              <Detail label={t('hospitalAdmin.voucherDetail.language')} value={voucher.language_preference?.toUpperCase() || 'FR'} />
+              <Detail label={t('hospitalAdmin.voucherDetail.expiryDate')} value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
+              <Detail label={t('hospitalAdmin.voucherDetail.created')} value={formatDateTime(voucher.created_at)} />
+              <Detail label={t('hospitalAdmin.voucherDetail.lockedAt')} value={voucher.locked_at ? formatDateTime(voucher.locked_at) : '—'} />
+              <Detail label={t('hospitalAdmin.voucherDetail.redeemedAt')} value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
+              <Detail label={t('hospitalAdmin.voucherDetail.expiredAt')} value={voucher.expired_at ? formatDateTime(voucher.expired_at) : '—'} />
               {voucher.patient_confirmation_pin && (
-                <Detail label="Confirmation PIN" value={voucher.patient_confirmation_pin} mono />
+                <Detail label={t('hospitalAdmin.voucherDetail.confirmationPIN')} value={voucher.patient_confirmation_pin} mono />
               )}
             </div>
           </div>
@@ -104,19 +106,19 @@ export default function HospitalAdminVoucherDetailPage() {
           {voucher.beneficiary && (
             <div className="card">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <User size={14} /> Beneficiary
+                <User size={14} /> {t('hospitalAdmin.voucherDetail.beneficiary')}
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <Detail label="Full Name" value={voucher.beneficiary.full_name} />
-                <Detail label="Digital Health ID" value={voucher.beneficiary.digital_health_id || '—'} mono />
-                <Detail label="Gender" value={voucher.beneficiary.gender} />
-                <Detail label="Category" value={voucher.beneficiary.category} />
-                <Detail label="Date of Birth" value={voucher.beneficiary.date_of_birth ? formatDate(voucher.beneficiary.date_of_birth) : '—'} />
-                <Detail label="Phone" value={voucher.beneficiary.phone} />
-                <Detail label="Region" value={voucher.beneficiary.region} />
-                {voucher.beneficiary.city && <Detail label="City" value={voucher.beneficiary.city} />}
-                {voucher.beneficiary.address && <Detail label="Address" value={voucher.beneficiary.address} className="col-span-2" />}
-                <Detail label="Emergency Contact" value={voucher.beneficiary.emergency_contact_name ? `${voucher.beneficiary.emergency_contact_name} · ${voucher.beneficiary.emergency_contact_phone}` : '—'} />
+                <Detail label={t('hospitalAdmin.voucherDetail.fullName')} value={voucher.beneficiary.full_name} />
+                <Detail label={t('hospitalAdmin.voucherDetail.digitalHealthId')} value={voucher.beneficiary.digital_health_id || '—'} mono />
+                <Detail label={t('hospitalAdmin.voucherDetail.gender')} value={voucher.beneficiary.gender} />
+                <Detail label={t('hospitalAdmin.voucherDetail.category')} value={voucher.beneficiary.category} />
+                <Detail label={t('hospitalAdmin.voucherDetail.dateOfBirth')} value={voucher.beneficiary.date_of_birth ? formatDate(voucher.beneficiary.date_of_birth) : '—'} />
+                <Detail label={t('hospitalAdmin.voucherDetail.phone')} value={voucher.beneficiary.phone} />
+                <Detail label={t('hospitalAdmin.voucherDetail.region')} value={voucher.beneficiary.region} />
+                {voucher.beneficiary.city && <Detail label={t('hospitalAdmin.voucherDetail.city')} value={voucher.beneficiary.city} />}
+                {voucher.beneficiary.address && <Detail label={t('hospitalAdmin.voucherDetail.address')} value={voucher.beneficiary.address} className="col-span-2" />}
+                <Detail label={t('hospitalAdmin.voucherDetail.emergencyContact')} value={voucher.beneficiary.emergency_contact_name ? `${voucher.beneficiary.emergency_contact_name} · ${voucher.beneficiary.emergency_contact_phone}` : '—'} />
               </div>
             </div>
           )}
@@ -125,15 +127,15 @@ export default function HospitalAdminVoucherDetailPage() {
           {voucher.hospital && (
             <div className="card">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <MapPin size={14} /> Hospital
+                <MapPin size={14} /> {t('hospitalAdmin.voucherDetail.hospital')}
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <Detail label="Name" value={voucher.hospital.name} />
-                <Detail label="Accreditation" value={voucher.hospital.accreditation_number || '—'} />
-                <Detail label="City" value={voucher.hospital.city} />
-                <Detail label="Region" value={voucher.hospital.region} />
-                <Detail label="Phone" value={voucher.hospital.phone_number || '—'} />
-                <Detail label="Status" value={voucher.hospital.partnership_status || '—'} />
+                <Detail label={t('hospitalAdmin.voucherDetail.hospitalName')} value={voucher.hospital.name} />
+                <Detail label={t('hospitalAdmin.voucherDetail.accreditation')} value={voucher.hospital.accreditation_number || '—'} />
+                <Detail label={t('hospitalAdmin.voucherDetail.city')} value={voucher.hospital.city} />
+                <Detail label={t('hospitalAdmin.voucherDetail.region')} value={voucher.hospital.region} />
+                <Detail label={t('hospitalAdmin.voucherDetail.phone')} value={voucher.hospital.phone_number || '—'} />
+                <Detail label={t('hospitalAdmin.voucherDetail.hospitalStatus')} value={voucher.hospital.partnership_status || '—'} />
               </div>
             </div>
           )}
@@ -142,17 +144,17 @@ export default function HospitalAdminVoucherDetailPage() {
           {fundings.length > 0 && (
             <div className="card">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Banknote size={14} /> Funding Sources ({fundings.length})
+                <Banknote size={14} /> {t('hospitalAdmin.voucherDetail.fundingSources')} ({fundings.length})
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-gray-100 text-gray-400">
-                      <th className="text-left p-2">Campaign ID</th>
-                      <th className="text-right p-2">Committed</th>
-                      <th className="text-right p-2">Utilized</th>
-                      <th className="text-right p-2">Refund</th>
-                      <th className="text-center p-2">Status</th>
+                      <th className="text-left p-2">{t('hospitalAdmin.voucherDetail.colCampaignId')}</th>
+                      <th className="text-right p-2">{t('hospitalAdmin.voucherDetail.colCommitted')}</th>
+                      <th className="text-right p-2">{t('hospitalAdmin.voucherDetail.colUtilized')}</th>
+                      <th className="text-right p-2">{t('hospitalAdmin.voucherDetail.colRefund')}</th>
+                      <th className="text-center p-2">{t('hospitalAdmin.voucherDetail.colStatus')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -172,7 +174,7 @@ export default function HospitalAdminVoucherDetailPage() {
                   </tbody>
                   <tfoot className="text-gray-500 font-semibold">
                     <tr>
-                      <td className="p-2">Totals</td>
+                      <td className="p-2">{t('hospitalAdmin.voucherDetail.totals')}</td>
                       <td className="p-2 text-right" style={{ color: '#1D75DB' }}>{formatXAF(totalCommitted)}</td>
                       <td className="p-2 text-right">{formatXAF(totalUtilized)}</td>
                       <td className="p-2" />
@@ -189,10 +191,10 @@ export default function HospitalAdminVoucherDetailPage() {
         <div className="space-y-4">
           <div className="card">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Activity size={14} /> Activity Timeline
+              <Activity size={14} /> {t('hospitalAdmin.voucherDetail.activityTimeline')}
             </h2>
             {events.length === 0 ? (
-              <p className="text-gray-400 text-xs">No events recorded.</p>
+              <p className="text-gray-400 text-xs">{t('hospitalAdmin.voucherDetail.noEvents')}</p>
             ) : (
               <div className="space-y-0">
                 {events.map((event, i) => (
@@ -215,12 +217,12 @@ export default function HospitalAdminVoucherDetailPage() {
           {/* Health Issue card */}
           {voucher.health_issue && (
             <div className="card">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Health Issue</h2>
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">{t('hospitalAdmin.voucherDetail.healthIssue')}</h2>
               <div className="space-y-2">
-                <Detail label="Category" value={voucher.health_issue.category} />
-                <Detail label="Severity" value={voucher.health_issue.severity} />
-                <Detail label="Status" value={voucher.health_issue.status} />
-                <Detail label="Description" value={voucher.health_issue.description || '—'} />
+                <Detail label={t('hospitalAdmin.voucherDetail.category')} value={voucher.health_issue.category} />
+                <Detail label={t('hospitalAdmin.voucherDetail.severity')} value={voucher.health_issue.severity} />
+                <Detail label={t('hospitalAdmin.voucherDetail.healthStatus')} value={voucher.health_issue.status} />
+                <Detail label={t('hospitalAdmin.voucherDetail.description')} value={voucher.health_issue.description || '—'} />
               </div>
             </div>
           )}

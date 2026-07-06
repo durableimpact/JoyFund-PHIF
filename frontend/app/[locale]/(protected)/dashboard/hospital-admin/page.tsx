@@ -13,8 +13,10 @@ import { formatXAF } from '@/lib/utils';
 import { getHospitalAdminInfo } from '@/actions/accounts';
 import { getHospitalDashboard, getHospitalStaff, getHospitalRedeemedDaily } from '@/actions/hospital';
 import { listVouchers } from '@/actions/vouchers';
+import { useI18n } from '@/locales/client';
 
 export default function HospitalAdminDashboard() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
@@ -30,7 +32,7 @@ export default function HospitalAdminDashboard() {
   });
 
   const hospital = profile?.hospital || currentUser?.hospital;
-  const hospitalName = hospital?.name || 'My Hospital';
+  const hospitalName = hospital?.name || t('hospitalAdmin.dashboard.myHospital');
 
   const { data: dashboard, isLoading: dLoading } = useQuery({
     queryKey: ['ha-dashboard', hospitalId, token],
@@ -62,16 +64,16 @@ export default function HospitalAdminDashboard() {
   const pendingCount = vouchers.filter((v: any) => v.status === 'PENDING_CONFIRMATION').length;
 
   const kpis = [
-    { label: 'Vouchers Redeemed',    value: redeemedCount,                             icon: CheckCircle, color: '#22C55E', sub: 'Completed treatments' },
-    { label: 'Total Vouchers',       value: vouchers.length,                           icon: Ticket,      color: '#8B5CF6', sub: 'All vouchers' },
-    { label: 'Pending Confirmations',value: pendingCount,                              icon: Clock,       color: '#f59e0b', sub: 'Awaiting PIN' },
-    { label: 'Active Staff',         value: staff.length,                              icon: Users,       color: '#1D75DB', sub: 'Receptionists' },
+    { label: t('hospitalAdmin.dashboard.kpiRedeemed'),    value: redeemedCount,        icon: CheckCircle, color: '#22C55E', sub: t('hospitalAdmin.dashboard.kpiRedeemedSub') },
+    { label: t('hospitalAdmin.dashboard.kpiTotal'),       value: vouchers.length,      icon: Ticket,      color: '#8B5CF6', sub: t('hospitalAdmin.dashboard.kpiTotalSub') },
+    { label: t('hospitalAdmin.dashboard.kpiPending'),     value: pendingCount,         icon: Clock,       color: '#f59e0b', sub: t('hospitalAdmin.dashboard.kpiPendingSub') },
+    { label: t('hospitalAdmin.dashboard.kpiStaff'),       value: staff.length,         icon: Users,       color: '#1D75DB', sub: t('hospitalAdmin.dashboard.kpiStaffSub') },
   ];
 
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Hospital Dashboard</h1>
+        <h1 className="text-2xl font-black text-gray-900">{t('hospitalAdmin.dashboard.title')}</h1>
         {hospital && (
           <p className="text-gray-500 text-sm">
             {hospital.region && `${hospital.region} · `}
@@ -99,11 +101,11 @@ export default function HospitalAdminDashboard() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Vouchers */}
         <div className="card p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Recent Vouchers</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('hospitalAdmin.dashboard.recentVouchers')}</h3>
           {dLoading ? (
             <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-12 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
           ) : vouchers.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-6">No vouchers yet</p>
+            <p className="text-gray-400 text-sm text-center py-6">{t('hospitalAdmin.dashboard.noVouchers')}</p>
           ) : vouchers.slice(0, 5).map((v: any) => (
             <div key={v.id} className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0">
               <div>
@@ -121,16 +123,16 @@ export default function HospitalAdminDashboard() {
         {hospital && (
           <div className="card p-5">
             <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <Building2 size={16} style={{ color: '#1D75DB' }} /> Hospital Info
+              <Building2 size={16} style={{ color: '#1D75DB' }} /> {t('hospitalAdmin.dashboard.hospitalInfo')}
             </h3>
             <div className="space-y-2 text-sm">
               {[
-                ['Name', hospital.name],
-                ['Accreditation', hospital.accreditation_number],
-                ['Region', hospital.region],
-                ['City', hospital.city],
-                ['Phone', hospital.phone_number],
-                ['Email', hospital.email],
+                [t('hospitalAdmin.dashboard.fieldName'), hospital.name],
+                [t('hospitalAdmin.dashboard.fieldAccreditation'), hospital.accreditation_number],
+                [t('hospitalAdmin.dashboard.fieldRegion'), hospital.region],
+                [t('hospitalAdmin.dashboard.fieldCity'), hospital.city],
+                [t('hospitalAdmin.dashboard.fieldPhone'), hospital.phone_number],
+                [t('hospitalAdmin.dashboard.fieldEmail'), hospital.email],
               ].filter(([,v]) => v).map(([k,v]) => (
                 <div key={k} className="flex justify-between">
                   <span className="text-gray-500">{k}</span>
@@ -143,11 +145,11 @@ export default function HospitalAdminDashboard() {
 
         {/* Staff Overview */}
         <div className="card p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Staff Overview</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('hospitalAdmin.dashboard.staffOverview')}</h3>
           {dLoading ? (
             <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-12 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
           ) : staff.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-4">No staff registered</p>
+            <p className="text-gray-400 text-sm text-center py-4">{t('hospitalAdmin.dashboard.noStaff')}</p>
           ) : (
             <div className="space-y-2">
               {staff.slice(0, 4).map((s: any) => (

@@ -8,12 +8,14 @@ import { getTicket } from "@/actions/support";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
+import { useI18n } from "@/locales/client";
 
 export default function HospitalAdminTicketDetailPage({
   params,
 }: {
   params: Promise<{ ticketId: string }>;
 }) {
+  const t = useI18n();
   const { ticketId } = use(params);
   const { data: session } = useSession();
   const token = (session as any)?.accessToken;
@@ -31,9 +33,9 @@ export default function HospitalAdminTicketDetailPage({
   if (!ticket) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Ticket not found</p>
+        <p className="text-gray-500">{t('hospitalAdmin.support.ticketNotFound')}</p>
         <Link href="/dashboard/hospital-admin/support" className="text-indigo-600 hover:underline">
-          Back to tickets
+          {t('hospitalAdmin.support.backToTickets')}
         </Link>
       </div>
     );
@@ -46,7 +48,7 @@ export default function HospitalAdminTicketDetailPage({
           href="/dashboard/hospital-admin/support"
           className="text-gray-400 hover:text-gray-600"
         >
-          ← Back
+          ← {t('general.back')}
         </Link>
         <div>
           <h1 className="text-2xl font-black text-gray-900">

@@ -4,8 +4,10 @@ import { TicketForm } from "@/components/support";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 export default function HospitalAdminNewTicketPage() {
+  const t = useI18n();
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -15,9 +17,9 @@ export default function HospitalAdminNewTicketPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Create Support Ticket</h1>
+          <h1 className="text-2xl font-bold">{t('hospitalAdmin.support.createTitle')}</h1>
           <p className="text-muted-foreground">
-            Describe your issue or request and we'll help you
+            {t('hospitalAdmin.support.createSubtitle')}
           </p>
         </div>
       </div>
