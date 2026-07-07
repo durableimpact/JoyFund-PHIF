@@ -8,7 +8,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { useI18n } from "@/locales/client";
-import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { WhatsappIcon } from "@hugeicons/core-free-icons";
 
 const roleDashboardMap: Record<string, string> = {
   DONOR: "/dashboard/donor",
@@ -78,34 +79,35 @@ export default function Navbar({
           : "fixed top-0 left-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm"
       } w-full z-50 px-6 md:px-12 py-4 transition-all duration-300`}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className={`flex items-center gap-1 md:gap-2 font-black text-xs sm:text-sm md:text-lg lg:text-xl tracking-tight shrink-0 whitespace-nowrap ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
+          className={`flex items-center gap-1 md:gap-2 font-black text-xs sm:text-sm md:text-lg lg:text-xl tracking-tight shrink-0 ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
         >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl overflow-hidden  shrink-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl overflow-hidden shrink-0">
             <Image
               src="/assets/joyfund-logo-half-removebg-preview.webp"
               alt="JoyFund logo"
               width={32}
               height={32}
+              loading="eager"
               className="w-full h-full object-contain"
             />
           </div>
-          <div>
+          <div className="text-lg md:text-xl">
             <span className="text-[#80B034]">Joy</span>
             <span className="text-[#3D77B9]">Fund</span>
           </div>
         </button>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
+        <div className="hidden lg:flex items-center gap-6 shrink-0">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors ${
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
                 useDark
                   ? "text-white/85 hover:text-white"
                   : "text-gray-600 hover:text-[#3D77B9]"
@@ -121,21 +123,21 @@ export default function Navbar({
         </div>
 
         {/* Desktop actions */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
           <LocaleSwitcher dark={useDark} />
           {isLoggedIn ? (
             <>
               {userRole && (
                 <Link
                   href={dashboardHref}
-                  className="bg-[#3D77B9] hover:bg-[#1530c4] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
+                  className="bg-[#3D77B9] hover:bg-[#1530c4] text-white text-xs lg:text-sm font-semibold px-3 lg:px-5 py-2 lg:py-2.5 rounded-full transition-all shadow-md hover:shadow-lg whitespace-nowrap"
                 >
                   {t("nav.dashboard")}
                 </Link>
               )}
               <button
                 onClick={handleSignOut}
-                className={`text-sm font-medium transition-colors px-3 py-2 ${
+                className={`text-xs lg:text-sm font-medium transition-colors px-2 lg:px-3 py-2 ${
                   useDark
                     ? "text-white/85 hover:text-white"
                     : "text-gray-600 hover:text-[#3D77B9]"
@@ -148,7 +150,7 @@ export default function Navbar({
             <>
               <Link
                 href="/login"
-                className={`text-sm font-medium transition-colors px-3 py-2 ${
+                className={`text-xs lg:text-sm font-medium transition-colors px-2 lg:px-3 py-2 ${
                   useDark
                     ? "text-white/85 hover:text-white"
                     : "text-gray-600 hover:text-[#3D77B9]"
@@ -158,29 +160,25 @@ export default function Navbar({
               </Link>
               <Link
                 href="/dashboard/donor/campaigns/create"
-                className="bg-[#3D77B9] hover:bg-[#1530c4] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
+                className="bg-[#3D77B9] hover:bg-[#1530c4] text-white text-xs lg:text-sm font-semibold px-3 lg:px-5 py-2 lg:py-2.5 rounded-full transition-all shadow-md hover:shadow-lg whitespace-nowrap"
               >
                 {t("nav.startCampaign")}
               </Link>
-              <a
+              <Link
                 href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={cn(
-                  "text-sm font-semibold px-5 py-2.5 rounded-full transition-all flex items-center gap-2",
-                  useDark
-                    ? "text-secondary hover:text-primary"
-                    : "text-[#25D366] hover:text-[#1fb855] ",
-                )}
+                className="hidden lg:flex text-sm bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-2.5 rounded-full transition-all items-center gap-2 whitespace-nowrap"
               >
-                {t("nav.talkWithUs")} →
-              </a>
+                {t("nav.talkWithUs")}
+                <HugeiconsIcon icon={WhatsappIcon} size={18} />
+              </Link>
             </>
           )}
         </div>
 
         {/* Mobile hamburger */}
-        <div className="flex md:hidden items-center">
+        <div className="flex md:hidden items-center gap-2">
           <LocaleSwitcher dark={useDark} />
 
           <button
@@ -251,12 +249,10 @@ export default function Navbar({
                   onClick={() => setMobileOpen(false)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={cn(
-                    "text-[#25D366] font-semibold px-5 py-3 rounded-full text-center",
-                    !scrolled && "text-white",
-                  )}
+                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-3 rounded-full text-center transition-all"
                 >
-                  {t("nav.talkWithUs")} →
+                  {t("nav.talkWithUs")}
+                  <HugeiconsIcon icon={WhatsappIcon} size={18} />
                 </a>
               </>
             )}

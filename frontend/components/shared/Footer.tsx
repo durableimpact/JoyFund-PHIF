@@ -2,6 +2,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/locales/client";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { WhatsappIcon } from "@hugeicons/core-free-icons";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -19,6 +21,7 @@ export default function Footer() {
                   alt="JoyFund logo"
                   width={32}
                   height={32}
+                  loading="eager"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -31,6 +34,15 @@ export default function Footer() {
             <p className="text-white/60 text-sm leading-relaxed max-w-xs">
               {t("footer.tagline")}
             </p>
+            <a
+              href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all mt-4"
+            >
+              {t("nav.talkWithUs")}
+              <HugeiconsIcon icon={WhatsappIcon} size={18} />
+            </a>
           </div>
           <div>
             <p className="font-semibold mb-3 text-sm">{t("footer.platform")}</p>
