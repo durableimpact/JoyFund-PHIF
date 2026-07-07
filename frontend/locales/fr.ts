@@ -726,7 +726,8 @@ export default {
   'donor.campaigns.edit.uploadHint': 'JPG, PNG ou WebP. Max 5 Mo.',
   'donor.campaigns.edit.campaignTitle': 'Titre de la campagne',
   'donor.campaigns.edit.titlePlaceholder': 'Entrez le titre de la campagne',
-  'donor.campaigns.edit.campaignDescription': 'Description',
+  'donor.campaigns.edit.campaignDescription': 'Description edit',
+
   'donor.campaigns.edit.minChars': '(min. 50 caractères)',
   'donor.campaigns.edit.descriptionPlaceholder': 'Expliquez pourquoi vous collectez des fonds…',
   'donor.campaigns.edit.characters': 'caractères',
@@ -1102,7 +1103,8 @@ export default {
   'systemAdmin.campay.disburseSubtitle': 'Envoyer de l\'argent via Mobile Money (MTN / Orange)',
   'systemAdmin.campay.amountLabel': 'Montant (XAF)',
   'systemAdmin.campay.recipientPhone': 'Téléphone du destinataire',
-  'systemAdmin.campay.descriptionLabel': 'Description',
+  'systemAdmin.campay.descriptionLabel': 'Description campay',
+
   'systemAdmin.campay.hospitalOptional': 'Hôpital (optionnel)',
   'systemAdmin.campay.cancel': 'Annuler',
   'systemAdmin.campay.processing': 'Traitement...',
@@ -1298,7 +1300,8 @@ export default {
   // Hospital Admin - Top Up
   'hospitalAdmin.topUp.title': 'Rechargement',
   'hospitalAdmin.topUp.amountLabel': 'Montant (XAF)',
-  'hospitalAdmin.topUp.descriptionLabel': 'Description',
+  'hospitalAdmin.topUp.descriptionLabel': 'Description top up',
+
   'hospitalAdmin.topUp.processing': 'Traitement...',
   'hospitalAdmin.topUp.submit': 'Soumettre le rechargement',
   'hospitalAdmin.topUp.success': 'Rechargement soumis avec succès',
@@ -1632,7 +1635,8 @@ export default {
   'support.ticketClosed': 'Ce ticket a été fermé.',
   'support.ticketDetails': 'Détails du ticket',
   'support.ticketNumberLabel': 'Numéro du ticket',
-  'support.description': 'Description',
+  'support.description': 'Description support',
+
   'support.actions': 'Actions',
   'support.assignTicket': 'Assigner le ticket',
   'support.changeStatus': 'Changer le statut',
@@ -1978,7 +1982,8 @@ export default {
   'hospitalAdmin.disbursement.detail.recipientPhone': 'Téléphone du bénéficiaire',
   'hospitalAdmin.disbursement.detail.status': 'Statut',
   'hospitalAdmin.disbursement.detail.subtitle': 'Sous-titre',
-  'hospitalAdmin.disbursement.detail.title': 'Détail du décaissement',
+  'hospitalAdmin.disbursement.detail.title': 'Détails du décaissement',
+
   'hospitalAdmin.disbursement.detail.voucherCode': 'Code du bon',
   'hospitalAdmin.disbursement.detail.voucherDetails': 'Détails du bon',
   'hospitalAdmin.disbursement.momo': 'Momo',
@@ -1986,10 +1991,13 @@ export default {
   'hospitalAdmin.disbursement.other': 'Autre',
   'hospitalAdmin.disbursement.view': 'Voir',
   'hospitalAdmin.medicalClaim.allStatus': 'Tous les statuts',
-  'hospitalAdmin.medicalClaim.colClaimId': 'ID Réclamation',
-  'hospitalAdmin.medicalClaim.colCompletedAt': 'Terminée le',
+  'hospitalAdmin.medicalClaim.colClaimId': 'ID réclamation',
+
+  'hospitalAdmin.medicalClaim.colCompletedAt': 'Terminé le',
+
   'hospitalAdmin.medicalClaim.colHospital': 'Hôpital',
-  'hospitalAdmin.medicalClaim.colSubmittedAt': 'Soumise le',
+  'hospitalAdmin.medicalClaim.colSubmittedAt': 'Soumis le',
+
   'hospitalAdmin.medicalClaim.detail.activityTimeline': "Chronologie de l'activité",
   'hospitalAdmin.medicalClaim.detail.associatedVoucher': 'Bon associé',
   'hospitalAdmin.medicalClaim.detail.backToClaims': 'Retour aux réclamations',
@@ -2027,7 +2035,8 @@ export default {
   'hospitalAdmin.medicalClaim.detail.serviceDescription': 'Description du service',
   'hospitalAdmin.medicalClaim.detail.status': 'Statut',
   'hospitalAdmin.medicalClaim.detail.submittedAt': 'Soumise le',
-  'hospitalAdmin.medicalClaim.detail.title': 'Détail de la réclamation',
+  'hospitalAdmin.medicalClaim.detail.title': 'Détails de la réclamation',
+
   'hospitalAdmin.medicalClaim.detail.total': 'Total',
   'hospitalAdmin.medicalClaim.detail.totalCost': 'Coût total',
   'hospitalAdmin.medicalClaim.detail.viewDocument': 'Voir le document',
@@ -2119,7 +2128,8 @@ export default {
   'hospitalAdmin.services.confirmDelete': 'Confirmer la suppression',
   'hospitalAdmin.services.count': 'Nombre',
   'hospitalAdmin.services.delete': 'Supprimer',
-  'hospitalAdmin.services.descriptionLabel': 'Description',
+  'hospitalAdmin.services.descriptionLabel': 'Description services',
+
   'hospitalAdmin.services.descriptionPlaceholder': 'Entrez la description',
   'hospitalAdmin.services.edit': 'Modifier',
   'hospitalAdmin.services.editTitle': 'Modifier le service',
@@ -2144,7 +2154,8 @@ export default {
   'hospitalAdmin.topUp.colAmount': 'Montant',
   'hospitalAdmin.topUp.colDate': 'Date',
   'hospitalAdmin.topUp.colReason': 'Raison',
-  'hospitalAdmin.topUp.colRequestId': 'ID de la demande',
+  'hospitalAdmin.topUp.colRequestId': 'ID demande',
+
   'hospitalAdmin.topUp.colStatus': 'Statut',
   'hospitalAdmin.topUp.createdAt': 'Créé le',
   'hospitalAdmin.topUp.detailTitle': 'Détails de la demande',
@@ -2164,7 +2175,8 @@ export default {
   'hospitalAdmin.voucherDetail.beneficiary': 'Bénéficiaire',
   'hospitalAdmin.voucherDetail.category': 'Catégorie',
   'hospitalAdmin.voucherDetail.city': 'Ville',
-  'hospitalAdmin.voucherDetail.colCampaignId': 'ID Campagne',
+  'hospitalAdmin.voucherDetail.colCampaignId': 'ID campagne',
+
   'hospitalAdmin.voucherDetail.colCommitted': 'Engagé',
   'hospitalAdmin.voucherDetail.colRefund': 'Remboursement',
   'hospitalAdmin.voucherDetail.colStatus': 'Statut',
@@ -2173,7 +2185,8 @@ export default {
   'hospitalAdmin.voucherDetail.copyCode': 'Copier le code',
   'hospitalAdmin.voucherDetail.created': 'Créé',
   'hospitalAdmin.voucherDetail.dateOfBirth': 'Date de naissance',
-  'hospitalAdmin.voucherDetail.description': 'Description',
+  'hospitalAdmin.voucherDetail.description': 'Description voucher detail',
+
   'hospitalAdmin.voucherDetail.digitalHealthId': 'ID Santé numérique',
   'hospitalAdmin.voucherDetail.emergencyContact': "Contact d'urgence",
   'hospitalAdmin.voucherDetail.expiredAt': 'Expiré le',
@@ -2221,7 +2234,8 @@ export default {
   'receptionist.vouchers.detail.claimTotal': 'Total de la réclamation',
   'receptionist.vouchers.detail.clickToUpload': 'Cliquez pour télécharger un fichier',
   'receptionist.vouchers.detail.colAmount': 'Montant',
-  'receptionist.vouchers.detail.colNum': '#',
+  'receptionist.vouchers.detail.colNum': 'Numéro',
+
   'receptionist.vouchers.detail.colService': 'Service',
   'receptionist.vouchers.detail.completeAndSubmit': 'Terminer et soumettre la réclamation',
   'receptionist.vouchers.detail.completeClaimError': 'Échec de la finalisation de la réclamation',
@@ -2415,7 +2429,8 @@ export default {
   'systemAdmin.accounts.feeDescription': 'Détient les frais de plateforme perçus sur les dons',
   'systemAdmin.accounts.name': 'Nom',
   'systemAdmin.accounts.noAccounts': 'Aucun compte trouvé',
-  'systemAdmin.accounts.title': 'Gestion des comptes',
+  'systemAdmin.accounts.title': 'Comptes',
+
   'systemAdmin.accounts.updated': 'Mis à jour',
   'systemAdmin.analytics.active': 'Actif',
   'systemAdmin.analytics.amountRaised': 'Montant collecté',
@@ -2425,7 +2440,8 @@ export default {
   'systemAdmin.analytics.closed': 'Fermé',
   'systemAdmin.analytics.completionRate': 'Taux de complétion',
   'systemAdmin.analytics.daily': 'Quotidien',
-  'systemAdmin.analytics.description': 'Description',
+  'systemAdmin.analytics.description': 'Analytique et statistiques de la plateforme',
+
   'systemAdmin.analytics.disbursements': 'Décaissements',
   'systemAdmin.analytics.donationTrends': 'Tendances des dons',
   'systemAdmin.analytics.donations': 'Dons',
@@ -2455,7 +2471,8 @@ export default {
   'systemAdmin.analytics.redeemed': 'Échangé',
   'systemAdmin.analytics.redemptionRate': "Taux d'utilisation",
   'systemAdmin.analytics.socialWorkers': 'Assistants sociaux',
-  'systemAdmin.analytics.title': 'Tableau de bord analytique',
+  'systemAdmin.analytics.title': 'Analytique',
+
   'systemAdmin.analytics.topHospitals': 'Top hôpitaux',
   'systemAdmin.analytics.topHospitalsByVouchers': 'Top hôpitaux par bons',
   'systemAdmin.analytics.totalCampaigns': 'Total des campagnes',
@@ -2491,7 +2508,8 @@ export default {
   'systemAdmin.beneficiaries.detail.creating': 'Création en cours...',
   'systemAdmin.beneficiaries.detail.critical': 'Critique',
   'systemAdmin.beneficiaries.detail.describeHealthIssue': 'Décrivez le problème de santé...',
-  'systemAdmin.beneficiaries.detail.descriptionField': 'Description',
+  'systemAdmin.beneficiaries.detail.descriptionField': 'Description detail',
+
   'systemAdmin.beneficiaries.detail.docPlaceholder': 'Entrez la description...',
   'systemAdmin.beneficiaries.detail.document': 'Document',
   'systemAdmin.beneficiaries.detail.documentPreview': 'Aperçu du document',
@@ -2545,7 +2563,8 @@ export default {
   'systemAdmin.beneficiaries.detail.summaryVouchers': 'Bons',
   'systemAdmin.beneficiaries.detail.targetAmount': 'Montant cible du bon :',
   'systemAdmin.beneficiaries.detail.updated': 'Mis à jour',
-  'systemAdmin.beneficiaries.detail.description': 'Description',
+  'systemAdmin.beneficiaries.detail.description': 'Description detail',
+
   'systemAdmin.beneficiaries.detail.healthIssues': 'Problèmes de santé',
   'systemAdmin.beneficiaries.detail.severity': 'Gravité',
   'systemAdmin.beneficiaries.detail.upload': 'Téléverser',
@@ -2586,7 +2605,8 @@ export default {
   'systemAdmin.beneficiaries.edit.previousBirths': 'Naissances précédentes',
   'systemAdmin.beneficiaries.edit.saveChanges': 'Enregistrer les modifications',
   'systemAdmin.beneficiaries.edit.saving': 'Enregistrement...',
-  'systemAdmin.beneficiaries.enrolledSuffix': 'inscrits',
+  'systemAdmin.beneficiaries.enrolledSuffix': 'inscrit',
+
   'systemAdmin.beneficiaries.title': 'Bénéficiaires',
   'systemAdmin.campaigns.campaign': 'Campagne',
   'systemAdmin.campaigns.detail.active': 'Actif',
@@ -2605,7 +2625,8 @@ export default {
   'systemAdmin.campaigns.detail.committed': 'Engagé',
   'systemAdmin.campaigns.detail.completion': 'Achèvement',
   'systemAdmin.campaigns.detail.date': 'Date',
-  'systemAdmin.campaigns.detail.description': 'Description',
+  'systemAdmin.campaigns.detail.description': 'Description detail',
+
   'systemAdmin.campaigns.detail.donation': 'Don',
   'systemAdmin.campaigns.detail.donationDetail': 'Détail du don',
   'systemAdmin.campaigns.detail.donationHistory': 'Historique des dons',
@@ -2659,16 +2680,20 @@ export default {
   'systemAdmin.campaigns.detail.viewAnalytics': "Voir les analyses",
   'systemAdmin.campaigns.detail.visibility': 'Visibilité',
   'systemAdmin.campaigns.detail.vouchersFunded': 'Bons financés',
-  'systemAdmin.campaigns.donationsLabel': 'dons',
+  'systemAdmin.campaigns.donationsLabel': 'Dons',
+
   'systemAdmin.campaigns.noCampaigns': 'Aucune campagne trouvée.',
-  'systemAdmin.campaigns.noSearchResults': 'Aucune campagne ne correspond à votre recherche.',
+  'systemAdmin.campaigns.noSearchResults': 'Aucun résultat de recherche',
+
   'systemAdmin.campaigns.progress': 'Progression',
   'systemAdmin.campaigns.searchPlaceholder': 'Rechercher des campagnes...',
   'systemAdmin.campaigns.title': 'Campagnes',
   'systemAdmin.campaigns.totalSuffix': 'total',
-  'systemAdmin.disbursements.accountPlaceholder': 'Numéro de compte',
+  'systemAdmin.disbursements.accountPlaceholder': 'Entrer le numéro de compte',
+
   'systemAdmin.disbursements.amount': 'Montant',
-  'systemAdmin.disbursements.amountPlaceholder': 'Entrez le montant',
+  'systemAdmin.disbursements.amountPlaceholder': 'Entrer le montant',
+
   'systemAdmin.disbursements.cancel': 'Annuler',
   'systemAdmin.disbursements.colActions': 'Actions',
   'systemAdmin.disbursements.colAmount': 'Montant',
@@ -2682,16 +2707,19 @@ export default {
   'systemAdmin.disbursements.failed': 'Échoué',
   'systemAdmin.disbursements.locked': 'Verrouillé',
   'systemAdmin.disbursements.notes': 'Notes',
-  'systemAdmin.disbursements.notesPlaceholder': 'Notes optionnelles...',
+  'systemAdmin.disbursements.notesPlaceholder': 'Entrer les notes',
+
   'systemAdmin.disbursements.paymentMethod': 'Mode de paiement',
   'systemAdmin.disbursements.pending': 'En attente',
-  'systemAdmin.disbursements.phonePlaceholder': 'ex. 6XXXXXXXX',
+  'systemAdmin.disbursements.phonePlaceholder': 'Entrer le numéro de téléphone',
+
   'systemAdmin.disbursements.recipientAccount': 'Compte du bénéficiaire',
   'systemAdmin.disbursements.recipientHospital': 'Hôpital bénéficiaire',
   'systemAdmin.disbursements.recipientPhone': 'Téléphone du bénéficiaire',
   'systemAdmin.disbursements.recordAndDisburse': 'Enregistrer et décaisser',
   'systemAdmin.disbursements.recordNew': 'Enregistrer un nouveau décaissement',
-  'systemAdmin.disbursements.referencePlaceholder': 'ex. TXN123456',
+  'systemAdmin.disbursements.referencePlaceholder': 'Entrer la référence',
+
   'systemAdmin.disbursements.selectHospital': 'Sélectionnez un hôpital',
   'systemAdmin.disbursements.totalDisbursed': 'Total décaissé',
   'systemAdmin.disbursements.unknown': 'Inconnu',
@@ -2719,7 +2747,8 @@ export default {
   'systemAdmin.donations.detail.phone': 'Téléphone',
   'systemAdmin.donations.detail.reference': 'Référence',
   'systemAdmin.donations.detail.status': 'Statut',
-  'systemAdmin.donations.detail.title': 'Détail du don',
+  'systemAdmin.donations.detail.title': 'Détails du don',
+
   'systemAdmin.donations.detail.updated': 'Mis à jour',
   'systemAdmin.donations.detail.yes': 'Oui',
   'systemAdmin.donations.donor': 'Donateur',
@@ -2731,7 +2760,8 @@ export default {
   'systemAdmin.feePolicies.cancel': 'Annuler',
   'systemAdmin.feePolicies.colActions': 'Actions',
   'systemAdmin.feePolicies.colCreated': 'Créé',
-  'systemAdmin.feePolicies.colDescription': 'Description',
+  'systemAdmin.feePolicies.colDescription': 'Description fee policies',
+
   'systemAdmin.feePolicies.colEscrowFee': 'Frais de séquestre',
   'systemAdmin.feePolicies.colId': 'ID',
   'systemAdmin.feePolicies.colName': 'Nom',
@@ -2739,7 +2769,8 @@ export default {
   'systemAdmin.feePolicies.colStatus': 'Statut',
   'systemAdmin.feePolicies.createBtn': 'Créer',
   'systemAdmin.feePolicies.deleteBtn': 'Supprimer',
-  'systemAdmin.feePolicies.description': 'Description',
+  'systemAdmin.feePolicies.description': 'Description fee policies',
+
   'systemAdmin.feePolicies.editBtn': 'Modifier',
   'systemAdmin.feePolicies.editTitle': 'Modifier la politique de frais',
   'systemAdmin.feePolicies.empty': 'Aucune politique de frais trouvée',
@@ -2748,7 +2779,8 @@ export default {
   'systemAdmin.feePolicies.newTitle': 'Nouvelle politique de frais',
   'systemAdmin.feePolicies.platformFee': 'Frais de plateforme (%)',
   'systemAdmin.feePolicies.name': 'Nom',
-  'systemAdmin.feePolicies.subtitle': 'Configurer les politiques de frais',
+  'systemAdmin.feePolicies.subtitle': 'Configuration des politiques de frais',
+
   'systemAdmin.feePolicies.title': 'Politiques de frais',
   'systemAdmin.feePolicies.updateBtn': 'Mettre à jour',
   'systemAdmin.feeSplits.colCreated': 'Créé',
@@ -2763,7 +2795,8 @@ export default {
   'systemAdmin.feeSplits.gross': 'Brut',
   'systemAdmin.feeSplits.platform': 'Plateforme',
   'systemAdmin.feeSplits.policy': 'Politique',
-  'systemAdmin.feeSplits.subtitle': 'Consulter les enregistrements de répartition des frais',
+  'systemAdmin.feeSplits.subtitle': 'Configuration de la répartition des frais',
+
   'systemAdmin.feeSplits.title': 'Répartition des frais',
   'systemAdmin.gateways.active': 'Actif',
   'systemAdmin.gateways.activeOption': 'Actif',
@@ -2771,7 +2804,8 @@ export default {
   'systemAdmin.gateways.cancel': 'Annuler',
   'systemAdmin.gateways.colActions': 'Actions',
   'systemAdmin.gateways.colCreated': 'Créé',
-  'systemAdmin.gateways.colDescription': 'Description',
+  'systemAdmin.gateways.colDescription': 'Description gateways',
+
   'systemAdmin.gateways.colId': 'ID',
   'systemAdmin.gateways.colName': 'Nom',
   'systemAdmin.gateways.colStatus': 'Statut',
@@ -2780,13 +2814,15 @@ export default {
   'systemAdmin.gateways.createBtn': 'Créer',
   'systemAdmin.gateways.created': 'Créé',
   'systemAdmin.gateways.deleteBtn': 'Supprimer',
-  'systemAdmin.gateways.description': 'Description',
+  'systemAdmin.gateways.description': 'Description gateways',
+
   'systemAdmin.gateways.detail.active': 'Actif',
   'systemAdmin.gateways.detail.colEventType': "Type d'événement",
   'systemAdmin.gateways.detail.colId': 'ID',
   'systemAdmin.gateways.detail.colReceivedAt': 'Reçu le',
   'systemAdmin.gateways.detail.created': 'Créé',
-  'systemAdmin.gateways.detail.description': 'Description',
+  'systemAdmin.gateways.detail.description': 'Description detail',
+
   'systemAdmin.gateways.detail.detailsSection': 'Détails de la passerelle',
   'systemAdmin.gateways.detail.event': 'Événement',
   'systemAdmin.gateways.detail.goBack': 'Retour',
@@ -2803,24 +2839,30 @@ export default {
   'systemAdmin.gateways.empty': 'Aucune passerelle trouvée',
   'systemAdmin.gateways.inactiveOption': 'Inactif',
   'systemAdmin.gateways.newTitle': 'Nouvelle passerelle',
-  'systemAdmin.gateways.subtitle': 'Gérer les configurations des passerelles',
-  'systemAdmin.gateways.title': 'Passerelles de paiement',
+  'systemAdmin.gateways.subtitle': 'Configuration des passerelles de paiement',
+
+  'systemAdmin.gateways.title': 'Passerelles',
+
   'systemAdmin.gateways.updateBtn': 'Mettre à jour',
   'systemAdmin.healthIssues.allStatus': 'Tous les statuts',
   'systemAdmin.healthIssues.cancel': 'Annuler',
   'systemAdmin.healthIssues.colActions': 'Actions',
-  'systemAdmin.healthIssues.colDescription': 'Description',
+  'systemAdmin.healthIssues.colDescription': 'Description health issues',
+
   'systemAdmin.healthIssues.createVoucherTitle': 'Créer un bon',
   'systemAdmin.healthIssues.hospitalLabel': 'Hôpital',
   'systemAdmin.healthIssues.rejectTitle': 'Rejeter le problème de santé',
-  'systemAdmin.healthIssues.rejectionPlaceholder': 'Entrez le motif du rejet...',
+  'systemAdmin.healthIssues.rejectionPlaceholder': 'Entrer la raison du rejet',
+
   'systemAdmin.healthIssues.rejectionReason': 'Motif du rejet',
   'systemAdmin.healthIssues.selectHospital': 'Sélectionnez un hôpital',
   'systemAdmin.healthIssues.totalIssues': 'problèmes au total',
   'systemAdmin.healthIssues.voucher': 'Bon',
   'systemAdmin.healthIssues.voucherStep': 'Étape',
-  'systemAdmin.healthIssues.voucherStepAllocate': 'Allouer et créer',
-  'systemAdmin.healthIssues.voucherStepCampaigns': 'Trouver des campagnes',
+  'systemAdmin.healthIssues.voucherStepAllocate': 'Allouer les fonds',
+
+  'systemAdmin.healthIssues.voucherStepCampaigns': 'Sélectionner les campagnes',
+
   'systemAdmin.healthIssues.voucherStepDetails': 'Détails du bon',
   'systemAdmin.hospitals.addHospital': 'Ajouter un hôpital',
   'systemAdmin.hospitals.create.createFailed': "Échec de la création de l'hôpital",
@@ -2855,28 +2897,35 @@ export default {
   'systemAdmin.pushNotifications.broadcastComplete': 'Diffusion terminée',
   'systemAdmin.pushNotifications.broadcastFailed': 'Échec de la diffusion',
   'systemAdmin.pushNotifications.buttonLabelPlaceholder': 'Libellé du bouton',
-  'systemAdmin.pushNotifications.emptyHint': 'Aucune notification envoyée. Envoyez votre première notification ci-dessus.',
+  'systemAdmin.pushNotifications.emptyHint': 'Aucune notification envoyée',
+
   'systemAdmin.pushNotifications.errors': 'Erreurs',
   'systemAdmin.pushNotifications.failed': 'Échoué',
   'systemAdmin.pushNotifications.imageUrl': "URL de l'image",
-  'systemAdmin.pushNotifications.imageUrlPlaceholder': 'https://exemple.com/image.png',
+  'systemAdmin.pushNotifications.imageUrlPlaceholder': "Entrer l'URL de l'image",
+
   'systemAdmin.pushNotifications.message': 'Message',
   'systemAdmin.pushNotifications.optional': 'Optionnel',
-  'systemAdmin.pushNotifications.optionalMax2': 'optionnel, max 2',
-  'systemAdmin.pushNotifications.pageSubtitle': 'Envoyer des notifications push aux utilisateurs',
+  'systemAdmin.pushNotifications.optionalMax2': 'Optionnel (max 2)',
+
+  'systemAdmin.pushNotifications.pageSubtitle': 'Sous-titre de la page',
+
   'systemAdmin.pushNotifications.pageTitle': 'Notifications push',
   'systemAdmin.pushNotifications.preparing': 'Préparation...',
   'systemAdmin.pushNotifications.previewAlt': "Image d'aperçu",
   'systemAdmin.pushNotifications.recipients': 'Destinataires',
   'systemAdmin.pushNotifications.result': 'Résultat',
   'systemAdmin.pushNotifications.role': 'Rôle',
-  'systemAdmin.pushNotifications.sendingBtn': 'Envoi en cours...',
+  'systemAdmin.pushNotifications.sendingBtn': 'Envoi...',
+
   'systemAdmin.pushNotifications.sent': 'Envoyé',
-  'systemAdmin.pushNotifications.titlePlaceholder': 'Titre de la notification',
+  'systemAdmin.pushNotifications.titlePlaceholder': 'Entrer le titre de la notification',
+
   'systemAdmin.pushNotifications.total': 'Total',
   'systemAdmin.pushNotifications.totalSubscriptions': 'abonnements au total',
   'systemAdmin.pushNotifications.url': 'URL',
-  'systemAdmin.pushNotifications.urlPlaceholder': 'https://exemple.com',
+  'systemAdmin.pushNotifications.urlPlaceholder': "Entrer l'URL",
+
   'systemAdmin.pushNotifications.user': 'Utilisateur',
   'systemAdmin.transactions.amount': 'Montant',
   'systemAdmin.transactions.currency': 'Devise',
@@ -2903,7 +2952,8 @@ export default {
   'systemAdmin.transactions.empty': 'Aucune transaction trouvée',
   'systemAdmin.transactions.gatewayTx': 'TX Passerelle',
   'systemAdmin.transactions.status': 'Statut',
-  'systemAdmin.transactions.subtitle': 'Toutes les transactions de la plateforme',
+  'systemAdmin.transactions.subtitle': 'Voir toutes les transactions',
+
   'systemAdmin.transactions.title': 'Transactions',
   'systemAdmin.transactions.type': 'Type',
   'systemAdmin.users.colCreated': 'Créé',
@@ -2915,7 +2965,8 @@ export default {
   'systemAdmin.users.distributionByRole': 'Distribution par rôle',
   'systemAdmin.users.email': 'E-mail',
   'systemAdmin.users.empty': 'Aucun utilisateur trouvé',
-  'systemAdmin.users.searchPlaceholder': 'Rechercher par nom ou e-mail...',
+  'systemAdmin.users.searchPlaceholder': 'Rechercher des utilisateurs...',
+
   'systemAdmin.users.status': 'Statut',
   'systemAdmin.users.title': 'Utilisateurs',
   'systemAdmin.users.totalUsers': 'utilisateurs au total',

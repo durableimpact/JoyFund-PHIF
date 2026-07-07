@@ -696,7 +696,8 @@ export default {
   'donor.campaigns.create.donateAmount': 'Donate {amount}',
   'donor.campaigns.create.joyFundIsLive': 'Your JoyFund is live!',
   'donor.campaigns.create.shareToCollect': 'Share it with friends and family to start collecting donations.',
-  'donor.campaigns.create.titleLabel': 'Title',
+  'donor.campaigns.create.titleLabel': 'Campaigns',
+
   'donor.campaigns.create.goalLabel': 'Goal',
   'donor.campaigns.create.statusLabel': 'Status',
   'donor.campaigns.create.linkCopied': 'Campaign link copied to clipboard!',
@@ -726,7 +727,8 @@ export default {
   'donor.campaigns.edit.uploadHint': 'JPG, PNG or WebP. Max 5 MB.',
   'donor.campaigns.edit.campaignTitle': 'Campaign title',
   'donor.campaigns.edit.titlePlaceholder': 'Enter campaign title',
-  'donor.campaigns.edit.campaignDescription': 'Description',
+  'donor.campaigns.edit.campaignDescription': 'edit description',
+
   'donor.campaigns.edit.minChars': '(min. 50 characters)',
   'donor.campaigns.edit.descriptionPlaceholder': 'Tell people why you are raising funds…',
   'donor.campaigns.edit.characters': 'characters',
@@ -1099,7 +1101,8 @@ export default {
   'systemAdmin.campay.disburseSubtitle': 'Send money via Mobile Money (MTN / Orange)',
   'systemAdmin.campay.amountLabel': 'Amount (XAF)',
   'systemAdmin.campay.recipientPhone': 'Recipient Phone',
-  'systemAdmin.campay.descriptionLabel': 'Description',
+  'systemAdmin.campay.descriptionLabel': 'Campay description',
+
   'systemAdmin.campay.hospitalOptional': 'Hospital (optional)',
   'systemAdmin.campay.cancel': 'Cancel',
   'systemAdmin.campay.processing': 'Processing...',
@@ -1171,7 +1174,8 @@ export default {
   'systemAdmin.pushNotifications.socialWorkers': 'Social Workers',
   'systemAdmin.pushNotifications.receptionists': 'Receptionists',
   'systemAdmin.pushNotifications.systemAdmins': 'System Admins',
-  'systemAdmin.pushNotifications.notificationTitle': 'Title',
+  'systemAdmin.pushNotifications.notificationTitle': 'Push Notifications',
+
   'systemAdmin.pushNotifications.notificationBody': 'Body',
   'systemAdmin.pushNotifications.sending': 'Sending...',
   'systemAdmin.pushNotifications.send': 'Send',
@@ -1295,7 +1299,8 @@ export default {
   // Hospital Admin - Top Up
   'hospitalAdmin.topUp.title': 'Top Up',
   'hospitalAdmin.topUp.amountLabel': 'Amount (XAF)',
-  'hospitalAdmin.topUp.descriptionLabel': 'Description',
+  'hospitalAdmin.topUp.descriptionLabel': 'Top-up description',
+
   'hospitalAdmin.topUp.processing': 'Processing...',
   'hospitalAdmin.topUp.submit': 'Submit Top Up',
   'hospitalAdmin.topUp.success': 'Top up submitted successfully',
@@ -1629,7 +1634,8 @@ export default {
   'support.ticketClosed': 'This ticket has been closed.',
   'support.ticketDetails': 'Ticket Details',
   'support.ticketNumberLabel': 'Ticket Number',
-  'support.description': 'Description',
+  'support.description': 'support description',
+
   'support.actions': 'Actions',
   'support.assignTicket': 'Assign Ticket',
   'support.changeStatus': 'Change Status',
@@ -2001,9 +2007,12 @@ export default {
   'hospitalAdmin.disbursement.allStatus': 'All Status',
   'hospitalAdmin.disbursement.bankTransfer': 'Bank Transfer',
   'hospitalAdmin.disbursement.cash': 'Cash',
-  'hospitalAdmin.disbursement.colActions': 'Col Actions',
-  'hospitalAdmin.disbursement.colPaymentMethod': 'Col Payment Method',
-  'hospitalAdmin.disbursement.colReference': 'Col Reference',
+  'hospitalAdmin.disbursement.colActions': 'Actions',
+
+  'hospitalAdmin.disbursement.colPaymentMethod': 'Payment Method',
+
+  'hospitalAdmin.disbursement.colReference': 'Reference',
+
   'hospitalAdmin.disbursement.detail.amount': 'Amount',
   'hospitalAdmin.disbursement.detail.claimCost': 'Claim Cost',
   'hospitalAdmin.disbursement.detail.code': 'Code',
@@ -2018,8 +2027,10 @@ export default {
   'hospitalAdmin.disbursement.detail.recipientAccount': 'Recipient Account',
   'hospitalAdmin.disbursement.detail.recipientPhone': 'Recipient Phone',
   'hospitalAdmin.disbursement.detail.status': 'Status',
-  'hospitalAdmin.disbursement.detail.subtitle': 'Subtitle',
-  'hospitalAdmin.disbursement.detail.title': 'Title',
+  'hospitalAdmin.disbursement.detail.subtitle': 'Manage detail',
+
+  'hospitalAdmin.disbursement.detail.title': 'Disbursement',
+
   'hospitalAdmin.disbursement.detail.voucherCode': 'Voucher Code',
   'hospitalAdmin.disbursement.detail.voucherDetails': 'Voucher Details',
   'hospitalAdmin.disbursement.momo': 'Momo',
@@ -2027,10 +2038,14 @@ export default {
   'hospitalAdmin.disbursement.other': 'Other',
   'hospitalAdmin.disbursement.view': 'View',
   'hospitalAdmin.medicalClaim.allStatus': 'All Status',
-  'hospitalAdmin.medicalClaim.colClaimId': 'Col Claim Id',
-  'hospitalAdmin.medicalClaim.colCompletedAt': 'Col Completed At',
-  'hospitalAdmin.medicalClaim.colHospital': 'Col Hospital',
-  'hospitalAdmin.medicalClaim.colSubmittedAt': 'Col Submitted At',
+  'hospitalAdmin.medicalClaim.colClaimId': 'Claim Id',
+
+  'hospitalAdmin.medicalClaim.colCompletedAt': 'Completed At',
+
+  'hospitalAdmin.medicalClaim.colHospital': 'Hospital',
+
+  'hospitalAdmin.medicalClaim.colSubmittedAt': 'Submitted At',
+
   'hospitalAdmin.medicalClaim.detail.activityTimeline': 'Activity Timeline',
   'hospitalAdmin.medicalClaim.detail.associatedVoucher': 'Associated Voucher',
   'hospitalAdmin.medicalClaim.detail.backToClaims': 'Back To Claims',
@@ -2041,9 +2056,12 @@ export default {
   'hospitalAdmin.medicalClaim.detail.claimInfo': 'Claim Info',
   'hospitalAdmin.medicalClaim.detail.claimItems': 'Claim Items',
   'hospitalAdmin.medicalClaim.detail.claimNotFound': 'Claim Not Found',
-  'hospitalAdmin.medicalClaim.detail.colAmount': 'Col Amount',
-  'hospitalAdmin.medicalClaim.detail.colHash': 'Col Hash',
-  'hospitalAdmin.medicalClaim.detail.colItem': 'Col Item',
+  'hospitalAdmin.medicalClaim.detail.colAmount': 'Amount',
+
+  'hospitalAdmin.medicalClaim.detail.colHash': 'Hash',
+
+  'hospitalAdmin.medicalClaim.detail.colItem': 'Item',
+
   'hospitalAdmin.medicalClaim.detail.confirmationPIN': 'Confirmation Pin',
   'hospitalAdmin.medicalClaim.detail.copyCode': 'Copy Code',
   'hospitalAdmin.medicalClaim.detail.couldNotLoadVoucher': 'Could Not Load Voucher',
@@ -2069,7 +2087,8 @@ export default {
   'hospitalAdmin.medicalClaim.detail.serviceDescription': 'Service Description',
   'hospitalAdmin.medicalClaim.detail.status': 'Status',
   'hospitalAdmin.medicalClaim.detail.submittedAt': 'Submitted At',
-  'hospitalAdmin.medicalClaim.detail.title': 'Title',
+  'hospitalAdmin.medicalClaim.detail.title': 'Medical Claim',
+
   'hospitalAdmin.medicalClaim.detail.total': 'Total',
   'hospitalAdmin.medicalClaim.detail.totalCost': 'Total Cost',
   'hospitalAdmin.medicalClaim.detail.viewDocument': 'View Document',
@@ -2115,10 +2134,14 @@ export default {
   'hospitalAdmin.patientDetail.uploaded': 'Uploaded',
   'hospitalAdmin.patientDetail.verified': 'Verified',
   'hospitalAdmin.patientDetail.yes': 'Yes',
-  'hospitalAdmin.patients.colBeneficiary': 'Col Beneficiary',
-  'hospitalAdmin.patients.colCategory': 'Col Category',
-  'hospitalAdmin.patients.colHealthIssues': 'Col Health Issues',
-  'hospitalAdmin.patients.colLocation': 'Col Location',
+  'hospitalAdmin.patients.colBeneficiary': 'Beneficiary',
+
+  'hospitalAdmin.patients.colCategory': 'Category',
+
+  'hospitalAdmin.patients.colHealthIssues': 'Health Issues',
+
+  'hospitalAdmin.patients.colLocation': 'Location',
+
   'hospitalAdmin.patients.noResults': 'No Results',
   'hospitalAdmin.patients.none': 'None',
   'hospitalAdmin.receptionist.active': 'Active',
@@ -2128,51 +2151,76 @@ export default {
   'hospitalAdmin.receptionist.adding': 'Adding',
   'hospitalAdmin.receptionist.backIdImage': 'Back Id Image',
   'hospitalAdmin.receptionist.cancel': 'Cancel',
-  'hospitalAdmin.receptionist.colPhone': 'Col Phone',
-  'hospitalAdmin.receptionist.colRole': 'Col Role',
-  'hospitalAdmin.receptionist.colStaff': 'Col Staff',
-  'hospitalAdmin.receptionist.confirmLabel': 'Confirm Label',
-  'hospitalAdmin.receptionist.emailLabel': 'Email Label',
-  'hospitalAdmin.receptionist.emailPlaceholder': 'Email Placeholder',
+  'hospitalAdmin.receptionist.colPhone': 'Phone',
+
+  'hospitalAdmin.receptionist.colRole': 'Role',
+
+  'hospitalAdmin.receptionist.colStaff': 'Staff',
+
+  'hospitalAdmin.receptionist.confirmLabel': 'Confirm',
+
+  'hospitalAdmin.receptionist.emailLabel': 'Email',
+
+  'hospitalAdmin.receptionist.emailPlaceholder': 'Enter email',
+
   'hospitalAdmin.receptionist.failedToAdd': 'Failed To Add',
-  'hospitalAdmin.receptionist.firstNameLabel': 'First Name Label',
-  'hospitalAdmin.receptionist.firstNamePlaceholder': 'First Name Placeholder',
+  'hospitalAdmin.receptionist.firstNameLabel': 'First Name',
+
+  'hospitalAdmin.receptionist.firstNamePlaceholder': 'Enter first name',
+
   'hospitalAdmin.receptionist.frontIdImage': 'Front Id Image',
   'hospitalAdmin.receptionist.inactive': 'Inactive',
-  'hospitalAdmin.receptionist.lastNameLabel': 'Last Name Label',
-  'hospitalAdmin.receptionist.lastNamePlaceholder': 'Last Name Placeholder',
-  'hospitalAdmin.receptionist.nationalIdLabel': 'National Id Label',
+  'hospitalAdmin.receptionist.lastNameLabel': 'Last Name',
+
+  'hospitalAdmin.receptionist.lastNamePlaceholder': 'Enter last name',
+
+  'hospitalAdmin.receptionist.nationalIdLabel': 'National Id',
+
   'hospitalAdmin.receptionist.nationalIdOptional': 'National Id Optional',
-  'hospitalAdmin.receptionist.nationalIdPlaceholder': 'National Id Placeholder',
+  'hospitalAdmin.receptionist.nationalIdPlaceholder': 'Enter national id',
+
   'hospitalAdmin.receptionist.noStaff': 'No Staff',
-  'hospitalAdmin.receptionist.passwordLabel': 'Password Label',
-  'hospitalAdmin.receptionist.phoneLabel': 'Phone Label',
-  'hospitalAdmin.receptionist.phonePlaceholder': 'Phone Placeholder',
+  'hospitalAdmin.receptionist.passwordLabel': 'Password',
+
+  'hospitalAdmin.receptionist.phoneLabel': 'Phone',
+
+  'hospitalAdmin.receptionist.phonePlaceholder': 'Enter phone',
+
   'hospitalAdmin.receptionist.staffCount': 'Staff Count',
   'hospitalAdmin.services.addButton': 'Add Button',
   'hospitalAdmin.services.addTitle': 'Add Title',
   'hospitalAdmin.services.available': 'Available',
   'hospitalAdmin.services.availableForBooking': 'Available For Booking',
   'hospitalAdmin.services.cancel': 'Cancel',
-  'hospitalAdmin.services.categoryLabel': 'Category Label',
-  'hospitalAdmin.services.colActions': 'Col Actions',
-  'hospitalAdmin.services.colPrice': 'Col Price',
-  'hospitalAdmin.services.colService': 'Col Service',
+  'hospitalAdmin.services.categoryLabel': 'Category',
+
+  'hospitalAdmin.services.colActions': 'Actions',
+
+  'hospitalAdmin.services.colPrice': 'Price',
+
+  'hospitalAdmin.services.colService': 'Service',
+
   'hospitalAdmin.services.confirmDelete': 'Confirm Delete',
   'hospitalAdmin.services.count': 'Count',
   'hospitalAdmin.services.delete': 'Delete',
-  'hospitalAdmin.services.descriptionLabel': 'Description Label',
-  'hospitalAdmin.services.descriptionPlaceholder': 'Description Placeholder',
+  'hospitalAdmin.services.descriptionLabel': 'Description',
+
+  'hospitalAdmin.services.descriptionPlaceholder': 'Enter description',
+
   'hospitalAdmin.services.edit': 'Edit',
   'hospitalAdmin.services.editTitle': 'Edit Title',
   'hospitalAdmin.services.failedToSave': 'Failed To Save',
   'hospitalAdmin.services.noSearchResults': 'No Search Results',
   'hospitalAdmin.services.noServices': 'No Services',
-  'hospitalAdmin.services.priceLabel': 'Price Label',
-  'hospitalAdmin.services.pricePlaceholder': 'Price Placeholder',
+  'hospitalAdmin.services.priceLabel': 'Price',
+
+  'hospitalAdmin.services.pricePlaceholder': 'Enter price',
+
   'hospitalAdmin.services.saving': 'Saving',
-  'hospitalAdmin.services.serviceNameLabel': 'Service Name Label',
-  'hospitalAdmin.services.serviceNamePlaceholder': 'Service Name Placeholder',
+  'hospitalAdmin.services.serviceNameLabel': 'Service Name',
+
+  'hospitalAdmin.services.serviceNamePlaceholder': 'Enter service name',
+
   'hospitalAdmin.services.unavailable': 'Unavailable',
   'hospitalAdmin.services.updateButton': 'Update Button',
   'hospitalAdmin.support.backToTickets': 'Back To Tickets',
@@ -2182,12 +2230,18 @@ export default {
   'hospitalAdmin.topUp.allStatus': 'All Status',
   'hospitalAdmin.topUp.amount': 'Amount',
   'hospitalAdmin.topUp.close': 'Close',
-  'hospitalAdmin.topUp.colActions': 'Col Actions',
-  'hospitalAdmin.topUp.colAmount': 'Col Amount',
-  'hospitalAdmin.topUp.colDate': 'Col Date',
-  'hospitalAdmin.topUp.colReason': 'Col Reason',
-  'hospitalAdmin.topUp.colRequestId': 'Col Request Id',
-  'hospitalAdmin.topUp.colStatus': 'Col Status',
+  'hospitalAdmin.topUp.colActions': 'Actions',
+
+  'hospitalAdmin.topUp.colAmount': 'Amount',
+
+  'hospitalAdmin.topUp.colDate': 'Date',
+
+  'hospitalAdmin.topUp.colReason': 'Reason',
+
+  'hospitalAdmin.topUp.colRequestId': 'Request Id',
+
+  'hospitalAdmin.topUp.colStatus': 'Status',
+
   'hospitalAdmin.topUp.createdAt': 'Created At',
   'hospitalAdmin.topUp.detailTitle': 'Detail Title',
   'hospitalAdmin.topUp.eventHistory': 'Event History',
@@ -2206,16 +2260,22 @@ export default {
   'hospitalAdmin.voucherDetail.beneficiary': 'Beneficiary',
   'hospitalAdmin.voucherDetail.category': 'Category',
   'hospitalAdmin.voucherDetail.city': 'City',
-  'hospitalAdmin.voucherDetail.colCampaignId': 'Col Campaign Id',
-  'hospitalAdmin.voucherDetail.colCommitted': 'Col Committed',
-  'hospitalAdmin.voucherDetail.colRefund': 'Col Refund',
-  'hospitalAdmin.voucherDetail.colStatus': 'Col Status',
-  'hospitalAdmin.voucherDetail.colUtilized': 'Col Utilized',
+  'hospitalAdmin.voucherDetail.colCampaignId': 'Campaign Id',
+
+  'hospitalAdmin.voucherDetail.colCommitted': 'Committed',
+
+  'hospitalAdmin.voucherDetail.colRefund': 'Refund',
+
+  'hospitalAdmin.voucherDetail.colStatus': 'Status',
+
+  'hospitalAdmin.voucherDetail.colUtilized': 'Utilized',
+
   'hospitalAdmin.voucherDetail.confirmationPIN': 'Confirmation Pin',
   'hospitalAdmin.voucherDetail.copyCode': 'Copy Code',
   'hospitalAdmin.voucherDetail.created': 'Created',
   'hospitalAdmin.voucherDetail.dateOfBirth': 'Date Of Birth',
-  'hospitalAdmin.voucherDetail.description': 'Description',
+  'hospitalAdmin.voucherDetail.description': 'voucher Detail description',
+
   'hospitalAdmin.voucherDetail.digitalHealthId': 'Digital Health Id',
   'hospitalAdmin.voucherDetail.emergencyContact': 'Emergency Contact',
   'hospitalAdmin.voucherDetail.expiredAt': 'Expired At',
@@ -2237,16 +2297,20 @@ export default {
   'hospitalAdmin.voucherDetail.region': 'Region',
   'hospitalAdmin.voucherDetail.severity': 'Severity',
   'hospitalAdmin.voucherDetail.status': 'Status',
-  'hospitalAdmin.voucherDetail.title': 'Title',
+  'hospitalAdmin.voucherDetail.title': 'Voucher Detail',
+
   'hospitalAdmin.voucherDetail.totals': 'Totals',
   'hospitalAdmin.voucherDetail.voucherCode': 'Voucher Code',
   'hospitalAdmin.voucherDetail.voucherInfo': 'Voucher Info',
   'hospitalAdmin.vouchers.allStatus': 'All Status',
-  'hospitalAdmin.vouchers.colCreated': 'Col Created',
+  'hospitalAdmin.vouchers.colCreated': 'Created',
+
   'hospitalAdmin.vouchers.noResults': 'No Results',
   'receptionist.vouchers.allStatus': 'All Status',
-  'receptionist.vouchers.colCreated': 'Col Created',
-  'receptionist.vouchers.colExpiry': 'Col Expiry',
+  'receptionist.vouchers.colCreated': 'Created',
+
+  'receptionist.vouchers.colExpiry': 'Expiry',
+
   'receptionist.vouchers.count': 'Count',
   'receptionist.vouchers.detail.activity': 'Activity',
   'receptionist.vouchers.detail.addAnotherService': 'Add Another Service',
@@ -2262,9 +2326,12 @@ export default {
   'receptionist.vouchers.detail.chooseService': 'Choose Service',
   'receptionist.vouchers.detail.claimTotal': 'Claim Total',
   'receptionist.vouchers.detail.clickToUpload': 'Click To Upload',
-  'receptionist.vouchers.detail.colAmount': 'Col Amount',
-  'receptionist.vouchers.detail.colNum': 'Col Num',
-  'receptionist.vouchers.detail.colService': 'Col Service',
+  'receptionist.vouchers.detail.colAmount': 'Amount',
+
+  'receptionist.vouchers.detail.colNum': 'Num',
+
+  'receptionist.vouchers.detail.colService': 'Service',
+
   'receptionist.vouchers.detail.completeAndSubmit': 'Complete And Submit',
   'receptionist.vouchers.detail.completeClaimError': 'Complete Claim Error',
   'receptionist.vouchers.detail.confirmationPin': 'Confirmation Pin',
@@ -2275,8 +2342,10 @@ export default {
   'receptionist.vouchers.detail.created': 'Created',
   'receptionist.vouchers.detail.documentProofs': 'Document Proofs',
   'receptionist.vouchers.detail.expiry': 'Expiry',
-  'receptionist.vouchers.detail.extraAmountPlaceholder': 'Extra Amount Placeholder',
-  'receptionist.vouchers.detail.extraServiceNamePlaceholder': 'Extra Service Name Placeholder',
+  'receptionist.vouchers.detail.extraAmountPlaceholder': 'Enter extra amount',
+
+  'receptionist.vouchers.detail.extraServiceNamePlaceholder': 'Enter extra service name',
+
   'receptionist.vouchers.detail.healthId': 'Health Id',
   'receptionist.vouchers.detail.hospitalServiceOrCustom': 'Hospital Service Or Custom',
   'receptionist.vouchers.detail.language': 'Language',
@@ -2293,16 +2362,20 @@ export default {
   'receptionist.vouchers.detail.requestTopUp': 'Request Top Up',
   'receptionist.vouchers.detail.selectService': 'Select Service',
   'receptionist.vouchers.detail.serviceDescription': 'Service Description',
-  'receptionist.vouchers.detail.serviceDescriptionPlaceholder': 'Service Description Placeholder',
+  'receptionist.vouchers.detail.serviceDescriptionPlaceholder': 'Enter service description',
+
   'receptionist.vouchers.detail.serviceName': 'Service Name',
-  'receptionist.vouchers.detail.serviceNamePlaceholder': 'Service Name Placeholder',
+  'receptionist.vouchers.detail.serviceNamePlaceholder': 'Enter service name',
+
   'receptionist.vouchers.detail.servicesItems': 'Services Items',
   'receptionist.vouchers.detail.submitRequest': 'Submit Request',
   'receptionist.vouchers.detail.submitting': 'Submitting',
-  'receptionist.vouchers.detail.topUpAmountPlaceholder': 'Top Up Amount Placeholder',
+  'receptionist.vouchers.detail.topUpAmountPlaceholder': 'Enter top up amount',
+
   'receptionist.vouchers.detail.topUpCancel': 'Top Up Cancel',
   'receptionist.vouchers.detail.topUpError': 'Top Up Error',
-  'receptionist.vouchers.detail.topUpReasonPlaceholder': 'Top Up Reason Placeholder',
+  'receptionist.vouchers.detail.topUpReasonPlaceholder': 'Enter top up reason',
+
   'receptionist.vouchers.detail.topUpSubmitted': 'Top Up Submitted',
   'receptionist.vouchers.detail.total': 'Total',
   'receptionist.vouchers.detail.uploadProof': 'Upload Proof',
@@ -2337,8 +2410,10 @@ export default {
   'socialWorker.beneficiaryDetail.describeHealthIssue': 'Describe Health Issue',
   'socialWorker.beneficiaryDetail.descriptionRequired': 'Description Required',
   'socialWorker.beneficiaryDetail.documentDescription': 'Document Description',
-  'socialWorker.beneficiaryDetail.documentDescriptionPlaceholder': 'Document Description Placeholder',
-  'socialWorker.beneficiaryDetail.documentLabel': 'Document Label',
+  'socialWorker.beneficiaryDetail.documentDescriptionPlaceholder': 'Enter document description',
+
+  'socialWorker.beneficiaryDetail.documentLabel': 'Document',
+
   'socialWorker.beneficiaryDetail.documentPreview': 'Document Preview',
   'socialWorker.beneficiaryDetail.documents': 'Documents',
   'socialWorker.beneficiaryDetail.download': 'Download',
@@ -2380,7 +2455,8 @@ export default {
   'socialWorker.beneficiaryDetail.region': 'Region',
   'socialWorker.beneficiaryDetail.saveChanges': 'Save Changes',
   'socialWorker.beneficiaryDetail.saving': 'Saving',
-  'socialWorker.beneficiaryDetail.selectPlaceholder': 'Select Placeholder',
+  'socialWorker.beneficiaryDetail.selectPlaceholder': 'Enter select',
+
   'socialWorker.beneficiaryDetail.severity': 'Severity',
   'socialWorker.beneficiaryDetail.severityCritical': 'Severity Critical',
   'socialWorker.beneficiaryDetail.severityHigh': 'Severity High',
@@ -2401,48 +2477,60 @@ export default {
   'socialWorker.beneficiaryDetail.verified': 'Verified',
   'socialWorker.beneficiaryDetail.yes': 'Yes',
   'socialWorker.createBeneficiary.additionalDetails': 'Additional Details',
-  'socialWorker.createBeneficiary.addressPlaceholder': 'Address Placeholder',
+  'socialWorker.createBeneficiary.addressPlaceholder': 'Enter address',
+
   'socialWorker.createBeneficiary.addressRequired': 'Address Required',
   'socialWorker.createBeneficiary.autoFilled': 'Auto Filled',
   'socialWorker.createBeneficiary.back': 'Back',
   'socialWorker.createBeneficiary.cancel': 'Cancel',
   'socialWorker.createBeneficiary.categoryRequired': 'Category Required',
-  'socialWorker.createBeneficiary.cityPlaceholder': 'City Placeholder',
+  'socialWorker.createBeneficiary.cityPlaceholder': 'Enter city',
+
   'socialWorker.createBeneficiary.cityRequired': 'City Required',
   'socialWorker.createBeneficiary.continue': 'Continue',
   'socialWorker.createBeneficiary.dateOfBirthRequired': 'Date Of Birth Required',
-  'socialWorker.createBeneficiary.ecNamePlaceholder': 'Ec Name Placeholder',
+  'socialWorker.createBeneficiary.ecNamePlaceholder': 'Enter ec name',
+
   'socialWorker.createBeneficiary.ecNameRequired': 'Ec Name Required',
-  'socialWorker.createBeneficiary.ecPhonePlaceholder': 'Ec Phone Placeholder',
+  'socialWorker.createBeneficiary.ecPhonePlaceholder': 'Enter ec phone',
+
   'socialWorker.createBeneficiary.ecPhoneRequired': 'Ec Phone Required',
   'socialWorker.createBeneficiary.ecRelationshipRequired': 'Ec Relationship Required',
   'socialWorker.createBeneficiary.email': 'Email',
-  'socialWorker.createBeneficiary.emailPlaceholder': 'Email Placeholder',
+  'socialWorker.createBeneficiary.emailPlaceholder': 'Enter email',
+
   'socialWorker.createBeneficiary.emergencyContact': 'Emergency Contact',
   'socialWorker.createBeneficiary.enrollBeneficiary': 'Enroll Beneficiary',
-  'socialWorker.createBeneficiary.fullNamePlaceholder': 'Full Name Placeholder',
+  'socialWorker.createBeneficiary.fullNamePlaceholder': 'Enter full name',
+
   'socialWorker.createBeneficiary.fullNameRequired': 'Full Name Required',
   'socialWorker.createBeneficiary.genderRequired': 'Gender Required',
   'socialWorker.createBeneficiary.latitude': 'Latitude',
   'socialWorker.createBeneficiary.locating': 'Locating',
   'socialWorker.createBeneficiary.location': 'Location',
   'socialWorker.createBeneficiary.longitude': 'Longitude',
-  'socialWorker.createBeneficiary.nationalIdPlaceholder': 'National Id Placeholder',
+  'socialWorker.createBeneficiary.nationalIdPlaceholder': 'Enter national id',
+
   'socialWorker.createBeneficiary.nationalIdRequired': 'National Id Required',
   'socialWorker.createBeneficiary.noAdditionalDetails': 'No Additional Details',
   'socialWorker.createBeneficiary.noDocuments': 'No Documents',
   'socialWorker.createBeneficiary.personalInfo': 'Personal Info',
-  'socialWorker.createBeneficiary.phonePlaceholder': 'Phone Placeholder',
+  'socialWorker.createBeneficiary.phonePlaceholder': 'Enter phone',
+
   'socialWorker.createBeneficiary.phoneRequired': 'Phone Required',
   'socialWorker.createBeneficiary.pinLocation': 'Pin Location',
   'socialWorker.createBeneficiary.previousBirths': 'Previous Births',
-  'socialWorker.createBeneficiary.previousBirthsPlaceholder': 'Previous Births Placeholder',
-  'socialWorker.createBeneficiary.regionPlaceholder': 'Region Placeholder',
+  'socialWorker.createBeneficiary.previousBirthsPlaceholder': 'Enter previous births',
+
+  'socialWorker.createBeneficiary.regionPlaceholder': 'Enter region',
+
   'socialWorker.createBeneficiary.regionRequired': 'Region Required',
-  'socialWorker.createBeneficiary.selectPlaceholder': 'Select Placeholder',
+  'socialWorker.createBeneficiary.selectPlaceholder': 'Enter select',
+
   'socialWorker.createBeneficiary.stepIndicator': 'Step Indicator',
   'socialWorker.createBeneficiary.supportingDocuments': 'Supporting Documents',
-  'socialWorker.createBeneficiary.title': 'Title',
+  'socialWorker.createBeneficiary.title': 'Create Beneficiary',
+
   'socialWorker.createBeneficiary.uploadDocuments': 'Upload Documents',
   'socialWorker.createBeneficiary.useMyLocation': 'Use My Location',
   'socialWorker.support.back': 'Back',
@@ -2458,7 +2546,8 @@ export default {
   'systemAdmin.accounts.feeDescription': 'Fee Description',
   'systemAdmin.accounts.name': 'Name',
   'systemAdmin.accounts.noAccounts': 'No Accounts',
-  'systemAdmin.accounts.title': 'Title',
+  'systemAdmin.accounts.title': 'Accounts',
+
   'systemAdmin.accounts.updated': 'Updated',
   'systemAdmin.analytics.active': 'Active',
   'systemAdmin.analytics.amountRaised': 'Amount Raised',
@@ -2468,7 +2557,8 @@ export default {
   'systemAdmin.analytics.closed': 'Closed',
   'systemAdmin.analytics.completionRate': 'Completion Rate',
   'systemAdmin.analytics.daily': 'Daily',
-  'systemAdmin.analytics.description': 'Description',
+  'systemAdmin.analytics.description': 'Platform analytics and statistics',
+
   'systemAdmin.analytics.disbursements': 'Disbursements',
   'systemAdmin.analytics.donationTrends': 'Donation Trends',
   'systemAdmin.analytics.donations': 'Donations',
@@ -2498,7 +2588,8 @@ export default {
   'systemAdmin.analytics.redeemed': 'Redeemed',
   'systemAdmin.analytics.redemptionRate': 'Redemption Rate',
   'systemAdmin.analytics.socialWorkers': 'Social Workers',
-  'systemAdmin.analytics.title': 'Title',
+  'systemAdmin.analytics.title': 'Analytics',
+
   'systemAdmin.analytics.topHospitals': 'Top Hospitals',
   'systemAdmin.analytics.topHospitalsByVouchers': 'Top Hospitals By Vouchers',
   'systemAdmin.analytics.totalCampaigns': 'Total Campaigns',
@@ -2512,7 +2603,8 @@ export default {
   'systemAdmin.analytics.users': 'Users',
   'systemAdmin.analytics.voucherAnalytics': 'Voucher Analytics',
   'systemAdmin.analytics.vouchers': 'Vouchers',
-  'systemAdmin.analytics.vouchersLabel': 'Vouchers Label',
+  'systemAdmin.analytics.vouchersLabel': 'Vouchers',
+
   'systemAdmin.analytics.weekly': 'Weekly',
   'systemAdmin.analytics.yearly': 'Yearly',
   'systemAdmin.beneficiaries.detail.active': 'Active',
@@ -2524,19 +2616,24 @@ export default {
   'systemAdmin.beneficiaries.detail.backToList': 'Back To List',
   'systemAdmin.beneficiaries.detail.cancel': 'Cancel',
   'systemAdmin.beneficiaries.detail.cannotPreview': 'Cannot Preview',
-  'systemAdmin.beneficiaries.detail.categoryField': 'Category Field',
+  'systemAdmin.beneficiaries.detail.categoryField': 'Category',
+
   'systemAdmin.beneficiaries.detail.chronic': 'Chronic',
   'systemAdmin.beneficiaries.detail.continue': 'Continue',
   'systemAdmin.beneficiaries.detail.createVoucher': 'Create Voucher',
-  'systemAdmin.beneficiaries.detail.createVoucherBtn': 'Create Voucher Btn',
+  'systemAdmin.beneficiaries.detail.createVoucherBtn': 'Create Voucher',
+
   'systemAdmin.beneficiaries.detail.createVoucherFor': 'Create Voucher For',
   'systemAdmin.beneficiaries.detail.created': 'Created',
   'systemAdmin.beneficiaries.detail.creating': 'Creating',
   'systemAdmin.beneficiaries.detail.critical': 'Critical',
   'systemAdmin.beneficiaries.detail.describeHealthIssue': 'Describe Health Issue',
-  'systemAdmin.beneficiaries.detail.description': 'Description',
-  'systemAdmin.beneficiaries.detail.descriptionField': 'Description Field',
-  'systemAdmin.beneficiaries.detail.docPlaceholder': 'Doc Placeholder',
+  'systemAdmin.beneficiaries.detail.description': 'detail description',
+
+  'systemAdmin.beneficiaries.detail.descriptionField': 'Description',
+
+  'systemAdmin.beneficiaries.detail.docPlaceholder': 'Enter doc',
+
   'systemAdmin.beneficiaries.detail.document': 'Document',
   'systemAdmin.beneficiaries.detail.documentPreview': 'Document Preview',
   'systemAdmin.beneficiaries.detail.documents': 'Documents',
@@ -2548,11 +2645,14 @@ export default {
   'systemAdmin.beneficiaries.detail.emergencyContact': 'Emergency Contact',
   'systemAdmin.beneficiaries.detail.enrollmentInfo': 'Enrollment Info',
   'systemAdmin.beneficiaries.detail.expiry': 'Expiry',
-  'systemAdmin.beneficiaries.detail.fileField': 'File Field',
-  'systemAdmin.beneficiaries.detail.healthIssueLabel': 'Health Issue Label',
+  'systemAdmin.beneficiaries.detail.fileField': 'File',
+
+  'systemAdmin.beneficiaries.detail.healthIssueLabel': 'Health Issue',
+
   'systemAdmin.beneficiaries.detail.healthIssues': 'Health Issues',
   'systemAdmin.beneficiaries.detail.high': 'High',
-  'systemAdmin.beneficiaries.detail.hospitalLabel': 'Hospital Label',
+  'systemAdmin.beneficiaries.detail.hospitalLabel': 'Hospital',
+
   'systemAdmin.beneficiaries.detail.inactive': 'Inactive',
   'systemAdmin.beneficiaries.detail.infectious': 'Infectious',
   'systemAdmin.beneficiaries.detail.low': 'Low',
@@ -2575,14 +2675,16 @@ export default {
   'systemAdmin.beneficiaries.detail.reject': 'Reject',
   'systemAdmin.beneficiaries.detail.rejectHealthIssueModal': 'Reject Health Issue Modal',
   'systemAdmin.beneficiaries.detail.rejectionReason': 'Rejection Reason',
-  'systemAdmin.beneficiaries.detail.rejectionReasonPlaceholder': 'Rejection Reason Placeholder',
+  'systemAdmin.beneficiaries.detail.rejectionReasonPlaceholder': 'Enter rejection reason',
+
   'systemAdmin.beneficiaries.detail.requested': 'Requested',
   'systemAdmin.beneficiaries.detail.selectCampaignError': 'Select Campaign Error',
   'systemAdmin.beneficiaries.detail.selectDefault': 'Select Default',
   'systemAdmin.beneficiaries.detail.selectHealthIssue': 'Select Health Issue',
   'systemAdmin.beneficiaries.detail.selectHospital': 'Select Hospital',
   'systemAdmin.beneficiaries.detail.severity': 'Severity',
-  'systemAdmin.beneficiaries.detail.severityField': 'Severity Field',
+  'systemAdmin.beneficiaries.detail.severityField': 'Severity',
+
   'systemAdmin.beneficiaries.detail.submit': 'Submit',
   'systemAdmin.beneficiaries.detail.summary': 'Summary',
   'systemAdmin.beneficiaries.detail.summaryDocuments': 'Summary Documents',
@@ -2598,9 +2700,12 @@ export default {
   'systemAdmin.beneficiaries.detail.validate': 'Validate',
   'systemAdmin.beneficiaries.detail.verified': 'Verified',
   'systemAdmin.beneficiaries.detail.verify': 'Verify',
-  'systemAdmin.beneficiaries.detail.voucherAmountLabel': 'Voucher Amount Label',
-  'systemAdmin.beneficiaries.detail.voucherAmountPlaceholder': 'Voucher Amount Placeholder',
-  'systemAdmin.beneficiaries.detail.voucherStep': 'Voucher Step',
+  'systemAdmin.beneficiaries.detail.voucherAmountLabel': 'Voucher Amount',
+
+  'systemAdmin.beneficiaries.detail.voucherAmountPlaceholder': 'Enter voucher amount',
+
+  'systemAdmin.beneficiaries.detail.voucherStep': 'Voucher',
+
   'systemAdmin.beneficiaries.detail.voucherStep1': 'Voucher Step1',
   'systemAdmin.beneficiaries.detail.voucherStep2': 'Voucher Step2',
   'systemAdmin.beneficiaries.detail.voucherStep3': 'Voucher Step3',
@@ -2629,13 +2734,16 @@ export default {
   'systemAdmin.beneficiaries.edit.region': 'Region',
   'systemAdmin.beneficiaries.edit.saveChanges': 'Save Changes',
   'systemAdmin.beneficiaries.edit.saving': 'Saving',
-  'systemAdmin.beneficiaries.enrolledSuffix': 'Enrolled Suffix',
-  'systemAdmin.beneficiaries.title': 'Title',
+  'systemAdmin.beneficiaries.enrolledSuffix': 'enrolled',
+
+  'systemAdmin.beneficiaries.title': 'Beneficiaries',
+
   'systemAdmin.campaigns.campaign': 'Campaign',
   'systemAdmin.campaigns.detail.active': 'Active',
   'systemAdmin.campaigns.detail.administrativeView': 'Administrative View',
   'systemAdmin.campaigns.detail.aggregatorFee': 'Aggregator Fee',
-  'systemAdmin.campaigns.detail.aggregatorFeeLabel': 'Aggregator Fee Label',
+  'systemAdmin.campaigns.detail.aggregatorFeeLabel': 'Aggregator Fee',
+
   'systemAdmin.campaigns.detail.allocation': 'Allocation',
   'systemAdmin.campaigns.detail.amount': 'Amount',
   'systemAdmin.campaigns.detail.anonymous': 'Anonymous',
@@ -2650,7 +2758,8 @@ export default {
   'systemAdmin.campaigns.detail.contribution': 'Contribution',
   'systemAdmin.campaigns.detail.contributions': 'Contributions',
   'systemAdmin.campaigns.detail.date': 'Date',
-  'systemAdmin.campaigns.detail.description': 'Description',
+  'systemAdmin.campaigns.detail.description': 'detail description',
+
   'systemAdmin.campaigns.detail.donation': 'Donation',
   'systemAdmin.campaigns.detail.donationDetail': 'Donation Detail',
   'systemAdmin.campaigns.detail.donationHistory': 'Donation History',
@@ -2679,7 +2788,8 @@ export default {
   'systemAdmin.campaigns.detail.paymentId': 'Payment Id',
   'systemAdmin.campaigns.detail.phone': 'Phone',
   'systemAdmin.campaigns.detail.platformFee': 'Platform Fee',
-  'systemAdmin.campaigns.detail.platformFeeLabel': 'Platform Fee Label',
+  'systemAdmin.campaigns.detail.platformFeeLabel': 'Platform Fee',
+
   'systemAdmin.campaigns.detail.private': 'Private',
   'systemAdmin.campaigns.detail.public': 'Public',
   'systemAdmin.campaigns.detail.publicView': 'Public View',
@@ -2690,7 +2800,8 @@ export default {
   'systemAdmin.campaigns.detail.settlement': 'Settlement',
   'systemAdmin.campaigns.detail.sources': 'Sources',
   'systemAdmin.campaigns.detail.statusHistory': 'Status History',
-  'systemAdmin.campaigns.detail.statusLabel': 'Status Label',
+  'systemAdmin.campaigns.detail.statusLabel': 'Status',
+
   'systemAdmin.campaigns.detail.timeline': 'Timeline',
   'systemAdmin.campaigns.detail.totalNetRaised': 'Total Net Raised',
   'systemAdmin.campaigns.detail.totalViews': 'Total Views',
@@ -2702,39 +2813,56 @@ export default {
   'systemAdmin.campaigns.detail.visibility': 'Visibility',
   'systemAdmin.campaigns.detail.vouchersFunded': 'Vouchers Funded',
   'systemAdmin.campaigns.donations': 'Donations',
-  'systemAdmin.campaigns.donationsLabel': 'Donations Label',
+  'systemAdmin.campaigns.donationsLabel': 'Donations',
+
   'systemAdmin.campaigns.noCampaigns': 'No Campaigns',
   'systemAdmin.campaigns.noSearchResults': 'No Search Results',
   'systemAdmin.campaigns.progress': 'Progress',
-  'systemAdmin.campaigns.searchPlaceholder': 'Search Placeholder',
-  'systemAdmin.campaigns.title': 'Title',
-  'systemAdmin.campaigns.totalSuffix': 'Total Suffix',
-  'systemAdmin.disbursements.accountPlaceholder': 'Account Placeholder',
+  'systemAdmin.campaigns.searchPlaceholder': 'Enter search',
+
+  'systemAdmin.campaigns.title': 'Campaigns',
+
+  'systemAdmin.campaigns.totalSuffix': 'total',
+
+  'systemAdmin.disbursements.accountPlaceholder': 'Enter account',
+
   'systemAdmin.disbursements.amount': 'Amount',
-  'systemAdmin.disbursements.amountPlaceholder': 'Amount Placeholder',
+  'systemAdmin.disbursements.amountPlaceholder': 'Enter amount',
+
   'systemAdmin.disbursements.cancel': 'Cancel',
-  'systemAdmin.disbursements.colActions': 'Col Actions',
-  'systemAdmin.disbursements.colAmount': 'Col Amount',
-  'systemAdmin.disbursements.colDate': 'Col Date',
-  'systemAdmin.disbursements.colHospital': 'Col Hospital',
-  'systemAdmin.disbursements.colMethod': 'Col Method',
-  'systemAdmin.disbursements.colReference': 'Col Reference',
-  'systemAdmin.disbursements.colStatus': 'Col Status',
-  'systemAdmin.disbursements.empty': 'Empty',
+  'systemAdmin.disbursements.colActions': 'Actions',
+
+  'systemAdmin.disbursements.colAmount': 'Amount',
+
+  'systemAdmin.disbursements.colDate': 'Date',
+
+  'systemAdmin.disbursements.colHospital': 'Hospital',
+
+  'systemAdmin.disbursements.colMethod': 'Method',
+
+  'systemAdmin.disbursements.colReference': 'Reference',
+
+  'systemAdmin.disbursements.colStatus': 'Status',
+
+  'systemAdmin.disbursements.empty': 'No disbursements found',
+
   'systemAdmin.disbursements.externalReference': 'External Reference',
   'systemAdmin.disbursements.failed': 'Failed',
   'systemAdmin.disbursements.locked': 'Locked',
   'systemAdmin.disbursements.notes': 'Notes',
-  'systemAdmin.disbursements.notesPlaceholder': 'Notes Placeholder',
+  'systemAdmin.disbursements.notesPlaceholder': 'Enter notes',
+
   'systemAdmin.disbursements.paymentMethod': 'Payment Method',
   'systemAdmin.disbursements.pending': 'Pending',
-  'systemAdmin.disbursements.phonePlaceholder': 'Phone Placeholder',
+  'systemAdmin.disbursements.phonePlaceholder': 'Enter phone',
+
   'systemAdmin.disbursements.recipientAccount': 'Recipient Account',
   'systemAdmin.disbursements.recipientHospital': 'Recipient Hospital',
   'systemAdmin.disbursements.recipientPhone': 'Recipient Phone',
   'systemAdmin.disbursements.recordAndDisburse': 'Record And Disburse',
   'systemAdmin.disbursements.recordNew': 'Record New',
-  'systemAdmin.disbursements.referencePlaceholder': 'Reference Placeholder',
+  'systemAdmin.disbursements.referencePlaceholder': 'Enter reference',
+
   'systemAdmin.disbursements.selectHospital': 'Select Hospital',
   'systemAdmin.disbursements.totalDisbursed': 'Total Disbursed',
   'systemAdmin.disbursements.unknown': 'Unknown',
@@ -2762,72 +2890,114 @@ export default {
   'systemAdmin.donations.detail.phone': 'Phone',
   'systemAdmin.donations.detail.reference': 'Reference',
   'systemAdmin.donations.detail.status': 'Status',
-  'systemAdmin.donations.detail.title': 'Title',
+  'systemAdmin.donations.detail.title': 'Donations',
+
   'systemAdmin.donations.detail.updated': 'Updated',
   'systemAdmin.donations.detail.yes': 'Yes',
   'systemAdmin.donations.donor': 'Donor',
   'systemAdmin.donations.noDonations': 'No Donations',
   'systemAdmin.donations.status': 'Status',
   'systemAdmin.feePolicies.active': 'Active',
-  'systemAdmin.feePolicies.activeOption': 'Active Option',
+  'systemAdmin.feePolicies.activeOption': 'Active',
+
   'systemAdmin.feePolicies.addPolicy': 'Add Policy',
   'systemAdmin.feePolicies.cancel': 'Cancel',
-  'systemAdmin.feePolicies.colActions': 'Col Actions',
-  'systemAdmin.feePolicies.colCreated': 'Col Created',
-  'systemAdmin.feePolicies.colDescription': 'Col Description',
-  'systemAdmin.feePolicies.colEscrowFee': 'Col Escrow Fee',
-  'systemAdmin.feePolicies.colId': 'Col Id',
-  'systemAdmin.feePolicies.colName': 'Col Name',
-  'systemAdmin.feePolicies.colPlatformFee': 'Col Platform Fee',
-  'systemAdmin.feePolicies.colStatus': 'Col Status',
-  'systemAdmin.feePolicies.createBtn': 'Create Btn',
-  'systemAdmin.feePolicies.deleteBtn': 'Delete Btn',
-  'systemAdmin.feePolicies.description': 'Description',
-  'systemAdmin.feePolicies.editBtn': 'Edit Btn',
+  'systemAdmin.feePolicies.colActions': 'Actions',
+
+  'systemAdmin.feePolicies.colCreated': 'Created',
+
+  'systemAdmin.feePolicies.colDescription': 'Description',
+
+  'systemAdmin.feePolicies.colEscrowFee': 'Escrow Fee',
+
+  'systemAdmin.feePolicies.colId': 'Id',
+
+  'systemAdmin.feePolicies.colName': 'Name',
+
+  'systemAdmin.feePolicies.colPlatformFee': 'Platform Fee',
+
+  'systemAdmin.feePolicies.colStatus': 'Status',
+
+  'systemAdmin.feePolicies.createBtn': 'Create',
+
+  'systemAdmin.feePolicies.deleteBtn': 'Delete',
+
+  'systemAdmin.feePolicies.description': 'fee Policies description',
+
+  'systemAdmin.feePolicies.editBtn': 'Edit',
+
   'systemAdmin.feePolicies.editTitle': 'Edit Title',
-  'systemAdmin.feePolicies.empty': 'Empty',
+  'systemAdmin.feePolicies.empty': 'No fee policies found',
+
   'systemAdmin.feePolicies.escrowFee': 'Escrow Fee',
-  'systemAdmin.feePolicies.inactiveOption': 'Inactive Option',
+  'systemAdmin.feePolicies.inactiveOption': 'Inactive',
+
   'systemAdmin.feePolicies.name': 'Name',
   'systemAdmin.feePolicies.newTitle': 'New Title',
   'systemAdmin.feePolicies.platformFee': 'Platform Fee',
-  'systemAdmin.feePolicies.subtitle': 'Subtitle',
-  'systemAdmin.feePolicies.title': 'Title',
-  'systemAdmin.feePolicies.updateBtn': 'Update Btn',
-  'systemAdmin.feeSplits.colCreated': 'Col Created',
-  'systemAdmin.feeSplits.colEscrow': 'Col Escrow',
-  'systemAdmin.feeSplits.colGross': 'Col Gross',
-  'systemAdmin.feeSplits.colId': 'Col Id',
-  'systemAdmin.feeSplits.colPlatform': 'Col Platform',
-  'systemAdmin.feeSplits.colPolicy': 'Col Policy',
+  'systemAdmin.feePolicies.subtitle': 'Manage fee policies',
+
+  'systemAdmin.feePolicies.title': 'Fee Policies',
+
+  'systemAdmin.feePolicies.updateBtn': 'Update',
+
+  'systemAdmin.feeSplits.colCreated': 'Created',
+
+  'systemAdmin.feeSplits.colEscrow': 'Escrow',
+
+  'systemAdmin.feeSplits.colGross': 'Gross',
+
+  'systemAdmin.feeSplits.colId': 'Id',
+
+  'systemAdmin.feeSplits.colPlatform': 'Platform',
+
+  'systemAdmin.feeSplits.colPolicy': 'Policy',
+
   'systemAdmin.feeSplits.created': 'Created',
-  'systemAdmin.feeSplits.empty': 'Empty',
+  'systemAdmin.feeSplits.empty': 'No fee splits found',
+
   'systemAdmin.feeSplits.escrow': 'Escrow',
   'systemAdmin.feeSplits.gross': 'Gross',
   'systemAdmin.feeSplits.platform': 'Platform',
   'systemAdmin.feeSplits.policy': 'Policy',
-  'systemAdmin.feeSplits.subtitle': 'Subtitle',
-  'systemAdmin.feeSplits.title': 'Title',
+  'systemAdmin.feeSplits.subtitle': 'Manage fee splits',
+
+  'systemAdmin.feeSplits.title': 'Fee Splits',
+
   'systemAdmin.gateways.active': 'Active',
-  'systemAdmin.gateways.activeOption': 'Active Option',
+  'systemAdmin.gateways.activeOption': 'Active',
+
   'systemAdmin.gateways.addGateway': 'Add Gateway',
   'systemAdmin.gateways.cancel': 'Cancel',
-  'systemAdmin.gateways.colActions': 'Col Actions',
-  'systemAdmin.gateways.colCreated': 'Col Created',
-  'systemAdmin.gateways.colDescription': 'Col Description',
-  'systemAdmin.gateways.colId': 'Col Id',
-  'systemAdmin.gateways.colName': 'Col Name',
-  'systemAdmin.gateways.colStatus': 'Col Status',
-  'systemAdmin.gateways.createBtn': 'Create Btn',
+  'systemAdmin.gateways.colActions': 'Actions',
+
+  'systemAdmin.gateways.colCreated': 'Created',
+
+  'systemAdmin.gateways.colDescription': 'Description',
+
+  'systemAdmin.gateways.colId': 'Id',
+
+  'systemAdmin.gateways.colName': 'Name',
+
+  'systemAdmin.gateways.colStatus': 'Status',
+
+  'systemAdmin.gateways.createBtn': 'Create',
+
   'systemAdmin.gateways.created': 'Created',
-  'systemAdmin.gateways.deleteBtn': 'Delete Btn',
-  'systemAdmin.gateways.description': 'Description',
+  'systemAdmin.gateways.deleteBtn': 'Delete',
+
+  'systemAdmin.gateways.description': 'gateways description',
+
   'systemAdmin.gateways.detail.active': 'Active',
-  'systemAdmin.gateways.detail.colEventType': 'Col Event Type',
-  'systemAdmin.gateways.detail.colId': 'Col Id',
-  'systemAdmin.gateways.detail.colReceivedAt': 'Col Received At',
+  'systemAdmin.gateways.detail.colEventType': 'Event Type',
+
+  'systemAdmin.gateways.detail.colId': 'Id',
+
+  'systemAdmin.gateways.detail.colReceivedAt': 'Received At',
+
   'systemAdmin.gateways.detail.created': 'Created',
-  'systemAdmin.gateways.detail.description': 'Description',
+  'systemAdmin.gateways.detail.description': 'detail description',
+
   'systemAdmin.gateways.detail.detailsSection': 'Details Section',
   'systemAdmin.gateways.detail.event': 'Event',
   'systemAdmin.gateways.detail.goBack': 'Go Back',
@@ -2839,30 +3009,41 @@ export default {
   'systemAdmin.gateways.detail.status': 'Status',
   'systemAdmin.gateways.detail.updated': 'Updated',
   'systemAdmin.gateways.detail.webhookEvents': 'Webhook Events',
-  'systemAdmin.gateways.editBtn': 'Edit Btn',
+  'systemAdmin.gateways.editBtn': 'Edit',
+
   'systemAdmin.gateways.editTitle': 'Edit Title',
-  'systemAdmin.gateways.empty': 'Empty',
-  'systemAdmin.gateways.inactiveOption': 'Inactive Option',
+  'systemAdmin.gateways.empty': 'No gateways found',
+
+  'systemAdmin.gateways.inactiveOption': 'Inactive',
+
   'systemAdmin.gateways.name': 'Name',
   'systemAdmin.gateways.newTitle': 'New Title',
   'systemAdmin.gateways.status': 'Status',
-  'systemAdmin.gateways.subtitle': 'Subtitle',
-  'systemAdmin.gateways.title': 'Title',
-  'systemAdmin.gateways.updateBtn': 'Update Btn',
+  'systemAdmin.gateways.subtitle': 'Manage gateways',
+
+  'systemAdmin.gateways.title': 'Gateways',
+
+  'systemAdmin.gateways.updateBtn': 'Update',
+
   'systemAdmin.healthIssues.allStatus': 'All Status',
   'systemAdmin.healthIssues.cancel': 'Cancel',
-  'systemAdmin.healthIssues.colActions': 'Col Actions',
-  'systemAdmin.healthIssues.colDescription': 'Col Description',
+  'systemAdmin.healthIssues.colActions': 'Actions',
+
+  'systemAdmin.healthIssues.colDescription': 'Description',
+
   'systemAdmin.healthIssues.createVoucherTitle': 'Create Voucher Title',
-  'systemAdmin.healthIssues.hospitalLabel': 'Hospital Label',
+  'systemAdmin.healthIssues.hospitalLabel': 'Hospital',
+
   'systemAdmin.healthIssues.reject': 'Reject',
   'systemAdmin.healthIssues.rejectTitle': 'Reject Title',
-  'systemAdmin.healthIssues.rejectionPlaceholder': 'Rejection Placeholder',
+  'systemAdmin.healthIssues.rejectionPlaceholder': 'Enter rejection',
+
   'systemAdmin.healthIssues.rejectionReason': 'Rejection Reason',
   'systemAdmin.healthIssues.selectHospital': 'Select Hospital',
   'systemAdmin.healthIssues.totalIssues': 'Total Issues',
   'systemAdmin.healthIssues.voucher': 'Voucher',
-  'systemAdmin.healthIssues.voucherStep': 'Voucher Step',
+  'systemAdmin.healthIssues.voucherStep': 'Voucher',
+
   'systemAdmin.healthIssues.voucherStepAllocate': 'Voucher Step Allocate',
   'systemAdmin.healthIssues.voucherStepCampaigns': 'Voucher Step Campaigns',
   'systemAdmin.healthIssues.voucherStepDetails': 'Voucher Step Details',
@@ -2870,7 +3051,8 @@ export default {
   'systemAdmin.hospitals.create.createFailed': 'Create Failed',
   'systemAdmin.hospitals.create.createdSuccess': 'Created Success',
   'systemAdmin.hospitals.detail.active': 'Active',
-  'systemAdmin.hospitals.detail.activeLabel': 'Active Label',
+  'systemAdmin.hospitals.detail.activeLabel': 'Active',
+
   'systemAdmin.hospitals.detail.address': 'Address',
   'systemAdmin.hospitals.detail.backToList': 'Back To List',
   'systemAdmin.hospitals.detail.editHospital': 'Edit Hospital',
@@ -2887,23 +3069,28 @@ export default {
   'systemAdmin.hospitals.edit.notFound': 'Not Found',
   'systemAdmin.hospitals.edit.updateFailed': 'Update Failed',
   'systemAdmin.hospitals.edit.updatedSuccess': 'Updated Success',
-  'systemAdmin.hospitals.title': 'Title',
+  'systemAdmin.hospitals.title': 'Hospitals',
+
   'systemAdmin.hospitals.total': 'Total',
   'systemAdmin.logs.refresh': 'Refresh',
   'systemAdmin.pushNotifications.actionButtons': 'Action Buttons',
-  'systemAdmin.pushNotifications.actionIdPlaceholder': 'Action Id Placeholder',
+  'systemAdmin.pushNotifications.actionIdPlaceholder': 'Enter action id',
+
   'systemAdmin.pushNotifications.addActionButton': 'Add Action Button',
   'systemAdmin.pushNotifications.allUsers': 'All Users',
   'systemAdmin.pushNotifications.body': 'Body',
-  'systemAdmin.pushNotifications.bodyPlaceholder': 'Body Placeholder',
+  'systemAdmin.pushNotifications.bodyPlaceholder': 'Enter body',
+
   'systemAdmin.pushNotifications.broadcastComplete': 'Broadcast Complete',
   'systemAdmin.pushNotifications.broadcastFailed': 'Broadcast Failed',
-  'systemAdmin.pushNotifications.buttonLabelPlaceholder': 'Button Label Placeholder',
+  'systemAdmin.pushNotifications.buttonLabelPlaceholder': 'Enter button label',
+
   'systemAdmin.pushNotifications.emptyHint': 'Empty Hint',
   'systemAdmin.pushNotifications.errors': 'Errors',
   'systemAdmin.pushNotifications.failed': 'Failed',
   'systemAdmin.pushNotifications.imageUrl': 'Image Url',
-  'systemAdmin.pushNotifications.imageUrlPlaceholder': 'Image Url Placeholder',
+  'systemAdmin.pushNotifications.imageUrlPlaceholder': 'Enter image url',
+
   'systemAdmin.pushNotifications.message': 'Message',
   'systemAdmin.pushNotifications.optional': 'Optional',
   'systemAdmin.pushNotifications.optionalMax2': 'Optional Max2',
@@ -2914,13 +3101,16 @@ export default {
   'systemAdmin.pushNotifications.recipients': 'Recipients',
   'systemAdmin.pushNotifications.result': 'Result',
   'systemAdmin.pushNotifications.role': 'Role',
-  'systemAdmin.pushNotifications.sendingBtn': 'Sending Btn',
+  'systemAdmin.pushNotifications.sendingBtn': 'Sending',
+
   'systemAdmin.pushNotifications.sent': 'Sent',
-  'systemAdmin.pushNotifications.titlePlaceholder': 'Title Placeholder',
+  'systemAdmin.pushNotifications.titlePlaceholder': 'Enter title',
+
   'systemAdmin.pushNotifications.total': 'Total',
   'systemAdmin.pushNotifications.totalSubscriptions': 'Total Subscriptions',
   'systemAdmin.pushNotifications.url': 'Url',
-  'systemAdmin.pushNotifications.urlPlaceholder': 'Url Placeholder',
+  'systemAdmin.pushNotifications.urlPlaceholder': 'Enter url',
+
   'systemAdmin.pushNotifications.user': 'User',
   'systemAdmin.transactions.amount': 'Amount',
   'systemAdmin.transactions.currency': 'Currency',
@@ -2939,29 +3129,41 @@ export default {
   'systemAdmin.transactions.detail.sourceAccount': 'Source Account',
   'systemAdmin.transactions.detail.status': 'Status',
   'systemAdmin.transactions.detail.statusHistory': 'Status History',
-  'systemAdmin.transactions.detail.title': 'Title',
+  'systemAdmin.transactions.detail.title': 'Transactions',
+
   'systemAdmin.transactions.detail.transactionType': 'Transaction Type',
   'systemAdmin.transactions.detail.updated': 'Updated',
   'systemAdmin.transactions.detail.viewGateway': 'View Gateway',
   'systemAdmin.transactions.direction': 'Direction',
-  'systemAdmin.transactions.empty': 'Empty',
+  'systemAdmin.transactions.empty': 'No transactions found',
+
   'systemAdmin.transactions.gatewayTx': 'Gateway Tx',
   'systemAdmin.transactions.status': 'Status',
-  'systemAdmin.transactions.subtitle': 'Subtitle',
-  'systemAdmin.transactions.title': 'Title',
+  'systemAdmin.transactions.subtitle': 'Manage transactions',
+
+  'systemAdmin.transactions.title': 'Transactions',
+
   'systemAdmin.transactions.type': 'Type',
-  'systemAdmin.users.colCreated': 'Col Created',
-  'systemAdmin.users.colEmail': 'Col Email',
-  'systemAdmin.users.colName': 'Col Name',
-  'systemAdmin.users.colRole': 'Col Role',
-  'systemAdmin.users.colVerified': 'Col Verified',
+  'systemAdmin.users.colCreated': 'Created',
+
+  'systemAdmin.users.colEmail': 'Email',
+
+  'systemAdmin.users.colName': 'Name',
+
+  'systemAdmin.users.colRole': 'Role',
+
+  'systemAdmin.users.colVerified': 'Verified',
+
   'systemAdmin.users.createUser': 'Create User',
   'systemAdmin.users.distributionByRole': 'Distribution By Role',
   'systemAdmin.users.email': 'Email',
-  'systemAdmin.users.empty': 'Empty',
-  'systemAdmin.users.searchPlaceholder': 'Search Placeholder',
+  'systemAdmin.users.empty': 'No users found',
+
+  'systemAdmin.users.searchPlaceholder': 'Enter search',
+
   'systemAdmin.users.status': 'Status',
-  'systemAdmin.users.title': 'Title',
+  'systemAdmin.users.title': 'Users',
+
   'systemAdmin.users.totalUsers': 'Total Users',
 
 } as const;
