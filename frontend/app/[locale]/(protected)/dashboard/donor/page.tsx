@@ -3,12 +3,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, TrendingUp, Users, Heart, History } from "lucide-react";
-import CampaignDashboardCard from "@/components/dashboard/cards/CampaignDashboardCard";
+import { Plus, ArrowRight, Heart, ArrowUpRight } from "lucide-react";
 import { formatXAF } from "@/lib/utils";
 import { getMyCampaigns, getMyDonations } from "@/actions/campaigns";
 import { getDonorDashboard } from "@/actions/accounts";
 import { useI18n } from "@/locales/client";
+
+function getGreeting(t: any) {
+  const h = new Date().getHours();
+  if (h < 12) return t("dashboard.donor.greetingMorning");
+  if (h < 17) return t("dashboard.donor.greetingAfternoon");
+  return t("dashboard.donor.greetingEvening");
+}
 
 export default function DonorDashboardPage() {
   const router = useRouter();
@@ -20,18 +26,11 @@ export default function DonorDashboardPage() {
 
   const [campaigns, setCampaigns] = useState<CampaignList[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
-  const [campaignsError, setCampaignsError] = useState(false);
-  const [campaignsErrorMsg, setCampaignsErrorMsg] = useState<string | null>(
-    null,
-  );
-
   const [donations, setDonations] = useState<any[]>([]);
   const [donationsLoading, setDonationsLoading] = useState(true);
-
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
       router.replace("/login?redirect=/dashboard");
@@ -40,36 +39,26 @@ export default function DonorDashboardPage() {
 
   useEffect(() => {
     if (!token) return;
-    let cancelled = false;
-
-    async function fetchData() {
+    let off = false;
+    (async () => {
       try {
         const data = await getMyCampaigns(token);
-        if (!cancelled) setCampaigns(Array.isArray(data) ? data : []);
-      } catch (err) {
-        if (!cancelled) {
-          setCampaignsError(true);
-          setCampaignsErrorMsg(String(err));
-        }
-      } finally {
-        if (!cancelled) setCampaignsLoading(false);
+        if (!off) setCampaigns(Array.isArray(data) ? data : []);
+      } catch {}
+      finally {
+        if (!off) setCampaignsLoading(false);
       }
-    }
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
+    })();
+    return () => { off = true; };
   }, [token]);
 
   useEffect(() => {
     if (!token) return;
-    let cancelled = false;
-
-    async function fetchData() {
+    let off = false;
+    (async () => {
       try {
         const data = await getMyDonations(token);
-        if (!cancelled) {
+        if (!off) {
           setDonations(
             (data as any)?.json?.results ||
               (data as any)?.results ||
@@ -80,268 +69,236 @@ export default function DonorDashboardPage() {
                   : []),
           );
         }
-      } catch {
-        // ignore
-      } finally {
-        if (!cancelled) setDonationsLoading(false);
+      } catch {}
+      finally {
+        if (!off) setDonationsLoading(false);
       }
-    }
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
+    })();
+    return () => { off = true; };
   }, [token]);
 
   useEffect(() => {
     if (!token || !donorProfileId) return;
-    let cancelled = false;
-
-    async function fetchData() {
+    let off = false;
+    (async () => {
       try {
         const data = await getDonorDashboard(donorProfileId, token);
-        if (!cancelled) setDashboardData(data);
-      } catch {
-        // ignore
-      } finally {
-        if (!cancelled) setDashboardLoading(false);
+        if (!off) setDashboardData(data);
+      } catch {}
+      finally {
+        if (!off) setDashboardLoading(false);
       }
-    }
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
+    })();
+    return () => { off = true; };
   }, [token, donorProfileId]);
 
   const loading = campaignsLoading || donationsLoading || dashboardLoading;
 
   const userInfo = (session?.user?.userInfo as DonorInfo | undefined);
-  const displayName = [userInfo?.first_name, userInfo?.last_name].filter(Boolean).join(" ") || session?.user?.name;
+  const firstName = userInfo?.first_name || session?.user?.name?.split(" ")[0] || t("dashboard.donor.there");
 
   const totalRaised =
     dashboardData?.total_raised ??
     campaigns.reduce((s, c) => s + (c.total_net_raised || 0), 0);
-  const totalContributors = dashboardData?.my_campaigns ?? campaigns.length;
+  const campaignCount = dashboardData?.my_campaigns ?? campaigns.length;
   const totalDonated =
     donations.reduce((s, d) => s + Number(d.amount ?? 0), 0);
   const livesImpacted = dashboardData?.lives_impacted ?? 0;
 
-  const stats = [
-    {
-      label: "Total Raised",
-      value: formatXAF(totalRaised),
-      icon: TrendingUp,
-      color: "var(--primary)",
-    },
-    {
-      label: "My JoyFunds",
-      value: totalContributors,
-      icon: Heart,
-      color: "var(--secondary)",
-    },
-    {
-      label: "Lives Impacted",
-      value: livesImpacted,
-      icon: Users,
-      color: "var(--success)",
-    },
-    {
-      label: "I've Donated",
-      value: formatXAF(totalDonated),
-      icon: Heart,
-      color: "#471DDB",
-    },
-  ];
-
   return (
-    <div className="h-full" style={{ background: "var(--background)" }}>
-      <div className="pb-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-start justify-between mb-8">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">{t("dashboard.donor.welcomeBack")}</p>
-              <h1 className="text-2xl font-black text-[#1A1A2E]">
-                {displayName}
-              </h1>
+    <div className="min-h-[calc(100vh-4rem)]">
+      {/* ── Greeting hero ── */}
+      <section className="container mx-auto pt-6 pb-8 px-4 animate-slide-up" style={{ animationDelay: "0ms", animationFillMode: "forwards" }}>
+        <p className="text-sm text-gray-400 mb-1 font-medium tracking-wide">{getGreeting(t)}</p>
+        <h1 className="font-display text-4xl sm:text-5xl leading-[1.1] text-[var(--text)] mb-4">
+          {firstName}.
+        </h1>
+        {!loading && totalRaised > 0 && (
+          <p className="text-base text-gray-500 leading-relaxed">
+            {t("dashboard.donor.youHaveRaised")}{" "}
+            <span className="font-semibold text-[var(--text)]">{formatXAF(totalRaised)}</span>{" "}
+            {t("dashboard.donor.soFarAcross")}{" "}
+            <span className="font-semibold text-[var(--text)]">{campaignCount}</span>{" "}
+            {campaignCount === 1 ? t("dashboard.donor.fund") : t("dashboard.donor.funds")}.
+          </p>
+        )}
+        {!loading && totalRaised === 0 && campaigns.length === 0 && (
+          <p className="text-base text-gray-500 leading-relaxed">
+            {t("dashboard.donor.startFirstJoyFund")}
+          </p>
+        )}
+        <Link
+          href="/dashboard/donor/campaigns/create"
+          className="btn-primary text-sm mt-5"
+        >
+          <Plus size={16} /> {t("dashboard.donor.newJoyFund")}
+        </Link>
+      </section>
+
+      {/* ── Stat strip ── */}
+      <section className="container mx-auto px-4 pb-10 animate-slide-up" style={{ animationDelay: "80ms", animationFillMode: "forwards" }}>
+        <div className="flex items-center gap-0 border-y border-gray-200/80">
+          {[
+            { label: t("dashboard.donor.statRaised"), value: loading ? "—" : formatXAF(totalRaised), highlight: true },
+            { label: t("dashboard.donor.statFunds"), value: loading ? "—" : String(campaignCount) },
+            { label: t("dashboard.donor.statLives"), value: loading ? "—" : String(livesImpacted) },
+            { label: t("dashboard.donor.statDonated"), value: loading ? "—" : formatXAF(totalDonated) },
+          ].map((stat, i) => (
+            <div key={stat.label} className="flex-1 py-4 px-4 first:pl-0 last:pr-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 mb-1">{stat.label}</p>
+              <p className={`font-display text-lg sm:text-xl ${stat.highlight ? "text-[var(--text)]" : "text-gray-700"}`}>
+                {stat.value}
+              </p>
             </div>
-            <Link
-              href="/dashboard/donor/campaigns/create"
-              className="btn-primary text-sm"
-            >
-              <Plus size={16} /> {t("dashboard.donor.newJoyFund")}
-            </Link>
-          </div>
+          ))}
+        </div>
+      </section>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            {stats.map((s) => (
-              <div key={s.label} className="card p-5">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
-                  style={{ background: s.color + "15" }}
+      {/* ── Campaigns + Recent gifts ── */}
+      <section className="container mx-auto px-4 pb-16">
+        <div className="grid md:grid-cols-[1fr_280px] gap-10">
+          {/* Campaigns */}
+          <div className="min-w-0 animate-slide-up" style={{ animationDelay: "160ms", animationFillMode: "forwards" }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-display text-xl text-[var(--text)]">
+                {t("dashboard.donor.myJoyFunds")}
+              </h2>
+              <Link
+                href="/dashboard/donor/campaigns"
+                className="flex items-center gap-1 text-xs font-semibold text-[var(--primary)] hover:underline"
+              >
+                {t("dashboard.donor.all")} <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            {campaignsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-20 bg-white/60 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--accent-warm)]/10 flex items-center justify-center mx-auto mb-4">
+                  <Heart size={20} className="text-[var(--accent-warm)]" />
+                </div>
+                <h3 className="font-semibold text-[var(--text)] mb-1.5 text-sm">
+                  {t("dashboard.donor.noCampaigns")}
+                </h3>
+                <p className="text-gray-400 text-xs mb-5 max-w-[260px] mx-auto leading-relaxed">
+                  {t("dashboard.donor.noCampaignsHint")}
+                </p>
+                <Link
+                  href="/dashboard/donor/campaigns/create"
+                  className="btn-primary text-sm !py-2.5 !px-5"
                 >
-                  <s.icon size={18} style={{ color: s.color }} />
-                </div>
-                <div className="text-xl font-black" style={{ color: s.color }}>
-                  {loading ? (
-                    <span className="inline-block w-10 h-5 bg-gray-100 rounded animate-pulse" />
-                  ) : (
-                    s.value
-                  )}
-                </div>
-                <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                  <Plus size={14} /> {t("dashboard.donor.startJoyFund")}
+                </Link>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-2">
+                {campaigns.slice(0, 4).map((c) => {
+                  const progress = c.progress_percentage || 0;
+                  return (
+                    <Link
+                      key={c.id}
+                      href={`/dashboard/donor/campaigns/${c.id}`}
+                      className="group block bg-white rounded-xl border border-gray-100 p-4 transition-all hover:border-gray-200 hover:shadow-sm"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-sm text-[var(--text)] truncate pr-2">
+                          {c.title}
+                        </h3>
+                        <ArrowUpRight size={14} className="text-gray-300 group-hover:text-[var(--primary)] transition-colors shrink-0" />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[var(--primary)] transition-all duration-700"
+                            style={{ width: `${Math.min(progress, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] font-semibold text-gray-500 tabular-nums shrink-0">
+                          {formatXAF(Number(c.total_net_raised || 0))}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            {campaigns.length > 4 && (
+              <Link
+                href="/dashboard/donor/campaigns"
+                className="mt-3 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-[var(--primary)] hover:underline"
+              >
+                {t("dashboard.donor.viewAllFunds", { count: campaignCount })} <ArrowRight size={11} />
+              </Link>
+            )}
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* My Campaigns */}
-            <div className="md:col-span-2">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-black text-[#1A1A2E]">
-                  My JoyFunds
-                </h2>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/dashboard/donor/campaigns"
-                    className="text-xs font-semibold"
-                    style={{ color: "var(--primary)" }}
-                  >
-                    All
-                  </Link>
-                  <Link
-                    href="/dashboard/donor/campaigns/create"
-                    className="text-xs font-semibold"
-                    style={{ color: "var(--primary)" }}
-                  >
-                    + New
-                  </Link>
-                </div>
-              </div>
-              {campaignsLoading ? (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {[1, 2].map((i) => (
-                    <div
-                      key={i}
-                      className="card h-44 animate-pulse bg-gray-50"
-                    />
+          {/* Recent gifts */}
+          <div className="animate-slide-up" style={{ animationDelay: "240ms", animationFillMode: "forwards" }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-display text-xl text-[var(--text)]">
+                {t("dashboard.donor.recentGifts")}
+              </h2>
+              <Link
+                href="/dashboard/donor/donations"
+                className="flex items-center gap-1 text-xs font-semibold text-[var(--primary)] hover:underline"
+              >
+                {t("dashboard.donor.all")} <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+              {donationsLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-8 bg-gray-50 rounded-lg animate-pulse" />
                   ))}
                 </div>
-              ) : campaignsError ? (
-                <div className="card p-10 text-center">
-                  <Heart size={32} className="mx-auto mb-3 text-red-200" />
-                  <h3 className="font-bold text-[#1A1A2E] mb-2">
-                    Unable to load campaigns
-                  </h3>
-                  <p className="text-gray-500 text-sm mb-4">
-                    {campaignsErrorMsg || "Please try refreshing the page"}
-                  </p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="btn-primary"
-                  >
-                    Refresh Page
-                  </button>
-                </div>
-              ) : campaigns.length === 0 ? (
-                <div className="card p-10 text-center">
-                  <Heart size={32} className="mx-auto mb-3 text-gray-200" />
-                  <h3 className="font-bold text-[#1A1A2E] mb-2">
-                    No campaigns yet
-                  </h3>
-                  <p className="text-gray-500 text-sm mb-4">
-                    Turn your next celebration into impact for Cameroonian
-                    mothers.
-                  </p>
+              ) : donations.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-gray-400 text-xs mb-2">{t("dashboard.donor.noDonations")}</p>
                   <Link
-                    href="/dashboard/donor/campaigns/create"
-                    className="btn-primary"
+                    href="/explore"
+                    className="text-xs font-semibold text-[var(--primary)] hover:underline"
                   >
-                    Start a JoyFund
+                    {t("dashboard.donor.exploreCampaigns")}
                   </Link>
                 </div>
               ) : (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {campaigns.slice(0, 3).map((c) => (
-                    <CampaignDashboardCard key={c.id} campaign={c} />
+                <div className="space-y-0">
+                  {donations.slice(0, 6).map((d: any, i: number) => (
+                    <div
+                      key={d.id}
+                      className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-[var(--accent-warm)]/10 flex items-center justify-center shrink-0">
+                        <Heart size={10} className="text-[var(--accent-warm)]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500 truncate">
+                          <span className="font-semibold text-[var(--text)]">{formatXAF(Number(d.amount ?? 0))}</span>
+                          {" "}{t("dashboard.donor.to")}{" "}
+                          <span className="font-medium text-gray-600">{t("dashboard.donor.campaignLabel")} #{d.campaign_id?.slice(0, 8)}</span>
+                        </p>
+                      </div>
+                      <span className="text-[10px] text-gray-300 shrink-0 tabular-nums">
+                        {d.created_at
+                          ? new Date(d.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                          : "—"}
+                      </span>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
-
-            {/* Recent Donations */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-black text-[#1A1A2E]">
-                  Recent Gifts
-                </h2>
-                <Link
-                  href="/dashboard/donor/donations"
-                  className="text-xs font-semibold flex items-center gap-1"
-                  style={{ color: "var(--primary)" }}
-                >
-                  <History size={12} /> All
-                </Link>
-              </div>
-              <div className="card p-4 space-y-3">
-                {loading ? (
-                  [1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-10 bg-gray-100 rounded-xl animate-pulse"
-                    />
-                  ))
-                ) : donations.length === 0 ? (
-                  <div className="text-center py-6 text-gray-400 text-sm">
-                    <p>No donations yet</p>
-                    <Link
-                      href="/explore"
-                      className="text-xs font-semibold mt-1 block"
-                      style={{ color: "var(--primary)" }}
-                    >
-                      Explore campaigns
-                    </Link>
-                  </div>
-                ) : (
-                  donations.slice(0, 6).map((d: any) => (
-                    <div
-                      key={d.id}
-                      className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0"
-                    >
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                        style={{ background: "var(--primary)" }}
-                      >
-                        <Heart size={11} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-800 truncate">
-                          Campaign #{d.campaign_id}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {d.created_at
-                            ? new Date(d.created_at).toLocaleDateString(
-                                "en-US",
-                                { month: "short", day: "numeric" },
-                              )
-                            : "—"}
-                        </p>
-                      </div>
-                      <span
-                        className="text-xs font-bold shrink-0"
-                        style={{ color: "var(--primary)" }}
-                      >
-                        {formatXAF(Number(d.amount ?? 0))}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

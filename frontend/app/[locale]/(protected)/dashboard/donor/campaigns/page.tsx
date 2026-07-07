@@ -4,19 +4,9 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Plus, Loader2, ArrowLeft, ChevronRight } from "lucide-react";
-import Navbar from "@/components/shared/Navbar";
 import { getMyCampaigns } from "@/actions/campaigns";
 import { formatXAF } from "@/lib/utils";
 import { useI18n } from "@/locales/client";
-
-const statusStyle: Record<string, { label: string; className: string }> = {
-  ACTIVE: { label: "Active", className: "text-emerald-700 bg-emerald-50" },
-  DRAFT: { label: "Draft", className: "text-gray-600 bg-gray-100" },
-  FUNDED: { label: "Funded", className: "text-blue-700 bg-blue-50" },
-  CLOSED: { label: "Closed", className: "text-red-700 bg-red-50" },
-  INACTIVE: { label: "Inactive", className: "text-orange-700 bg-orange-50" },
-  CANCELLED: { label: "Cancelled", className: "text-red-700 bg-red-50" },
-};
 
 export default function CampaignsPage() {
   const router = useRouter();
@@ -26,6 +16,15 @@ export default function CampaignsPage() {
 
   const [campaigns, setCampaigns] = useState<CampaignList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const statusStyle: Record<string, { label: string; className: string }> = {
+    ACTIVE: { label: t("dashboard.donor.statusActive"), className: "text-emerald-700 bg-emerald-50" },
+    DRAFT: { label: t("dashboard.donor.statusDraft"), className: "text-gray-600 bg-gray-100" },
+    FUNDED: { label: t("dashboard.donor.statusFunded"), className: "text-blue-700 bg-blue-50" },
+    CLOSED: { label: t("dashboard.donor.statusClosed"), className: "text-red-700 bg-red-50" },
+    INACTIVE: { label: t("dashboard.donor.statusInactive"), className: "text-orange-700 bg-orange-50" },
+    CANCELLED: { label: t("dashboard.donor.statusCancelled"), className: "text-red-700 bg-red-50" },
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -55,11 +54,8 @@ export default function CampaignsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen" style={{ background: "var(--background)" }}>
-        <Navbar />
-        <div className="flex items-center justify-center pt-40">
-          <Loader2 size={24} className="animate-spin text-gray-300" />
-        </div>
+      <div className="flex items-center justify-center py-40">
+        <Loader2 size={24} className="animate-spin text-gray-300" />
       </div>
     );
   }
@@ -69,9 +65,8 @@ export default function CampaignsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
-      <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 pt-20 pb-24">
+      <main className="container mx-auto px-4 pt-10 pb-24">
         {/* ── Header ── */}
         <header className="mb-10">
           <button
@@ -79,18 +74,18 @@ export default function CampaignsPage() {
             className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-8"
           >
             <ArrowLeft size={14} />
-            Back
+            {t("general.back")}
           </button>
           <div className="flex items-end justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--primary)' }}>
-                My JoyFunds
+                {t("dashboard.donor.myJoyFunds")}
               </p>
               <h1 className="text-3xl font-black text-[#1A1A2E] leading-tight">
-                Campaigns
+                {t("dashboard.donor.campaignsTitle")}
               </h1>
               <p className="text-gray-400 text-sm mt-2">
-                Track progress and manage your JoyFund campaigns
+                {t("dashboard.donor.trackProgressDesc")}
               </p>
             </div>
             <Link
@@ -98,7 +93,7 @@ export default function CampaignsPage() {
               className="text-sm font-bold shrink-0 transition-colors"
               style={{ color: 'var(--primary)' }}
             >
-              + New JoyFund
+              + {t("dashboard.donor.newJoyFund")}
             </Link>
           </div>
         </header>
@@ -107,15 +102,15 @@ export default function CampaignsPage() {
         {!isLoading && campaigns.length > 0 && (
           <div className="grid grid-cols-3 gap-0 mb-10 pb-8 border-b border-gray-200">
             <div className="text-center first:text-left">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Total campaigns</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">{t("dashboard.donor.totalCampaigns")}</p>
               <p className="text-4xl font-black text-[#1A1A2E]">{campaigns.length}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Active now</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">{t("dashboard.donor.activeNow")}</p>
               <p className="text-4xl font-black" style={{ color: 'var(--primary)' }}>{activeCount}</p>
             </div>
             <div className="text-center last:text-right">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Total raised</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">{t("dashboard.donor.statRaised")}</p>
               <p className="text-4xl font-black text-[#1A1A2E]">{formatXAF(totalRaised)} <span className="text-lg">XAF</span></p>
             </div>
           </div>
@@ -124,23 +119,23 @@ export default function CampaignsPage() {
         {/* ── Campaigns ── */}
         {campaigns.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-gray-500 mb-4">You haven&apos;t created any campaigns yet.</p>
+            <p className="text-gray-500 mb-4">{t("dashboard.donor.noCampaignsCreated")}</p>
             <Link
               href="/dashboard/donor/campaigns/create"
               className="text-sm font-bold"
               style={{ color: 'var(--primary)' }}
             >
-              Create your first JoyFund →
+              {t("dashboard.donor.createFirstJoyFund")}
             </Link>
           </div>
         ) : (
           <div>
             {/* Table header */}
             <div className="grid grid-cols-12 gap-4 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-200">
-              <div className="col-span-5">Campaign</div>
-              <div className="col-span-2">Status</div>
-              <div className="col-span-3">Progress</div>
-              <div className="col-span-2 text-right">Raised</div>
+              <div className="col-span-5">{t("dashboard.donor.tableCampaign")}</div>
+              <div className="col-span-2">{t("dashboard.donor.tableStatus")}</div>
+              <div className="col-span-3">{t("dashboard.donor.tableProgress")}</div>
+              <div className="col-span-2 text-right">{t("dashboard.donor.tableRaised")}</div>
             </div>
 
             {campaigns.map((campaign: any) => {
@@ -189,7 +184,7 @@ export default function CampaignsPage() {
                   <div className="col-span-2 flex items-center justify-end gap-2">
                     <div className="text-right">
                       <p className="text-sm font-bold text-[#1A1A2E]">{formatXAF(raised)}</p>
-                      <p className="text-[10px] text-gray-400">of {formatXAF(goal)} XAF</p>
+                      <p className="text-[10px] text-gray-400">{t("dashboard.donor.goalOf", { amount: formatXAF(goal) })}</p>
                     </div>
                     <ChevronRight size={14} className="text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" />
                   </div>

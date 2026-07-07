@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react';
 import { useMutation } from '@tanstack/react-query';
 import { Check, ArrowLeft, ArrowRight, Share2, Heart, GraduationCap, Star, Briefcase, Gift, Calendar, Loader2, ImagePlus, X, Phone } from 'lucide-react';
 import Image from 'next/image';
-import Navbar from '@/components/shared/Navbar';
 import { formatXAF } from '@/lib/utils';
 import { createCampaign, donateToCampaign } from '@/actions/campaigns';
 import { useForm } from 'react-hook-form';
@@ -271,7 +270,7 @@ function CreateCampaignContent() {
   return (
     <div className="h-full" style={{ background: 'var(--background)' }}>
       <div className="pt-24 pb-16 px-4">
-        <div className="max-w-lg mx-auto">
+        <div className="container mx-auto">
           {step < 5 && (
             <div className="flex items-center gap-4 mb-8">
               <button

@@ -8,7 +8,7 @@ function layout({children}: PropsWithChildren) {
     <ProtectedRoute requiredRole={"DONOR"}>
       <div className="min-h-screen flex-1 flex flex-col bg-background">
         <DonorNavbar />
-        <main className="p-4 lg:p-6 flex-1 max-w-7xl mx-auto">
+        <main className="p-4 lg:p-6 flex-1 container mx-auto">
           <VerificationBanner />
           {children}
         </main>

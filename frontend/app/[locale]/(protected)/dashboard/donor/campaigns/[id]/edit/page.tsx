@@ -143,7 +143,7 @@ export default function EditCampaignPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <div className=" pb-16 px-4">
-        <div className="max-w-2xl mx-auto">
+        <div className="container mx-auto">
           <button
             onClick={() => router.back()}
             className="flex items-center gap-1 text-gray-500 text-sm mb-6 hover:text-gray-700"
