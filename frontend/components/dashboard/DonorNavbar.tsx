@@ -95,6 +95,7 @@ export default function DonorNavbar() {
               alt="JoyFund"
               width={64}
               height={64}
+              loading="eager"
               className="w-full h-full object-contain"
             />
           </div>

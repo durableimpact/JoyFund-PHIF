@@ -108,6 +108,7 @@ export default function DashboardShell({
               alt="JoyFund logo"
               width={32}
               height={32}
+              loading="eager"
               className="w-full h-full object-contain"
             />
           </div>
