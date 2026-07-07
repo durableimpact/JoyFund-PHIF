@@ -8,26 +8,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://joy-fund.com'
   const apiUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://localhost:8000'
 
+  const locales = ['en', 'fr']
+
   // Standard static pages
-  const routes = [
+  const staticPaths = [
     '',
     '/about',
     '/explore',
-    '/campaign',
-    '/login',
-    '/register',
     '/trust-and-transparency',
-    '/provider',
     '/privacy',
     '/terms',
     '/pricing',
     '/countries',
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: route === '' ? 1 : 0.8,
-  }))
+    '/leaderboard',
+  ]
+
+  const routes = locales.flatMap((locale) =>
+    staticPaths.map((route) => ({
+      url: `${baseUrl}/${locale}${route}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: route === '' ? 1 : 0.8,
+    }))
+  )
 
   // Fetch up to 1000 campaigns for dynamic routes
   let campaignsSitemap: MetadataRoute.Sitemap = []
@@ -46,12 +49,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const data = await res.json()
       const campaigns = data.results || []
       
-      campaignsSitemap = campaigns.map((campaign: any) => ({
-        url: `${baseUrl}/campaign/${campaign.id}`,
-        lastModified: new Date(campaign.updated_at || campaign.created_at || new Date()),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
-      }))
+      campaignsSitemap = campaigns.flatMap((campaign: any) =>
+        locales.map((locale) => ({
+          url: `${baseUrl}/${locale}/campaign/${campaign.id}`,
+          lastModified: new Date(campaign.updated_at || campaign.created_at || new Date()),
+          changeFrequency: 'weekly' as const,
+          priority: 0.6,
+        }))
+      )
     }
   } catch (error) {
     console.log('Sitemap: API unreachable during generation, using static routes only.')
