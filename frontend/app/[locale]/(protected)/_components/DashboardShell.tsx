@@ -17,6 +17,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { LocaleSwitcher } from "@/components/shared/LocaleSwitcher";
+import { useI18n } from "@/locales/client";
 
 export interface NavItem {
   label: string;
@@ -52,6 +53,7 @@ export default function DashboardShell({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
+  const t = useI18n();
   const showSidebar = !hideSidebar;
   const mainContainerClass = showSidebar
     ? "flex-1 lg:ml-60 flex flex-col min-h-screen"
@@ -141,10 +143,11 @@ export default function DashboardShell({
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
+          const localePath = pathname.replace(/^\/[^/]+/, "");
           const isRoot = /^\/dashboard\/[^/]+$/.test(item.href);
           const active = isRoot
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
+            ? localePath === item.href
+            : localePath.startsWith(item.href);
           return (
             <Link
               key={item.href}
@@ -288,11 +291,11 @@ export default function DashboardShell({
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push(profilePath)}>
                 <User size={16} />
-                Profile
+                {t("dashboard.sidebar.profile")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push(devicesPath)}>
                 <Shield size={16} />
-                Security & Devices
+                {t("dashboard.sidebar.devices")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -305,7 +308,7 @@ export default function DashboardShell({
                 ) : (
                   <LogOut size={16} />
                 )}
-                Sign out
+                {t("nav.signOut")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
