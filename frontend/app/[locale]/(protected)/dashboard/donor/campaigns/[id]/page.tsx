@@ -227,8 +227,8 @@ export default function CampaignDetailPage() {
                           <LineChart data={chartData.series} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
                             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                             <XAxis dataKey="date" tickLine={false} axisLine={false} tickFormatter={(v: string) => new Date(v).toLocaleDateString("en", { month: "short", day: "numeric" })} fontSize={11} tickMargin={8} />
-                            <YAxis tickLine={false} axisLine={false} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} fontSize={11} tickMargin={8} width={36} />
-                            <ChartTooltip content={<ChartTooltipContent formatter={(v) => [formatXAF(Number(v)), ""]} labelFormatter={(l) => new Date(String(l)).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })} />} />
+                            <YAxis tickLine={false} axisLine={false} domain={[0, (dataMax: number) => Math.max(dataMax * 1.2, 1000)]} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : v.toLocaleString()} fontSize={11} tickMargin={8} width={36} />
+                            <ChartTooltip content={<ChartTooltipContent formatter={(v) => [formatXAF(Number(v)), ""]} labelFormatter={(l) => new Date(String(l)).toLocaleDateString("en", { month: "short", day: "numeric" })} />} />
                             <Line type="monotone" dataKey="total_amount" stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
                           </LineChart>
                         </ChartContainer>
@@ -292,7 +292,7 @@ export default function CampaignDetailPage() {
                             <LineChart data={chartData.series} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
                               <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                               <XAxis dataKey="date" tickLine={false} axisLine={false} tickFormatter={(v: string) => new Date(v).toLocaleDateString("en", { month: "short", day: "numeric" })} fontSize={11} tickMargin={8} />
-                              <YAxis tickLine={false} axisLine={false} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} fontSize={11} tickMargin={8} width={36} />
+                              <YAxis tickLine={false} axisLine={false} domain={[0, (dataMax: number) => Math.max(dataMax * 1.2, 1000)]} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : v.toLocaleString()} fontSize={11} tickMargin={8} width={36} />
                               <ChartTooltip content={<ChartTooltipContent formatter={(v) => [formatXAF(Number(v)), ""]} labelFormatter={(l) => new Date(String(l)).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })} />} />
                               <Line type="monotone" dataKey="total_amount" stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
                             </LineChart>
