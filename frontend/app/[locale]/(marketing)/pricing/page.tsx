@@ -106,6 +106,22 @@ export default function PricingPage() {
             <div className="text-right" style={{ color: 'var(--primary)' }}>{t('pricing.goesToCampaign')}</div>
           </div>
 
+          {/* Table rows */}
+          {EXAMPLE_AMOUNTS.map((amount) => {
+            const campay = Math.round(amount * campayFeePct / 100);
+            const afterCampay = amount - campay;
+            const platform = Math.round(afterCampay * platformFeePct / 100);
+            const net = afterCampay - platform;
+            return (
+              <div key={amount} className="grid grid-cols-4 gap-4 py-4 border-b border-gray-100 text-sm">
+                <div className="font-bold text-[#1A1A2E]">{formatXaf(amount)} XAF</div>
+                <div className="text-right text-gray-500">-{formatXaf(campay)}</div>
+                <div className="text-right text-gray-500">-{formatXaf(platform)}</div>
+                <div className="text-right font-bold" style={{ color: 'var(--primary)' }}>{formatXaf(net)}</div>
+              </div>
+            );
+          })}
+
           {/* Custom amount input row */}
           <div className="grid grid-cols-4 gap-4 py-4 border-b border-gray-200 text-sm bg-gray-50">
             <div className="flex items-center gap-1">
@@ -116,7 +132,7 @@ export default function PricingPage() {
                 placeholder={t('pricing.customPlaceholder')}
                 value={customAmount}
                 onChange={(e) => setCustomAmount(e.target.value)}
-                className="w-full font-bold text-[#1A1A2E] bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D75DB] transition-colors"
+                className="w-full font-bold text-[#1A1A2E] bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D75DB] transition-colors [appearance-none] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
               />
               <span className="text-xs text-gray-400 shrink-0">XAF</span>
             </div>
@@ -134,22 +150,6 @@ export default function PricingPage() {
               </>
             )}
           </div>
-
-          {/* Table rows */}
-          {EXAMPLE_AMOUNTS.map((amount) => {
-            const campay = Math.round(amount * campayFeePct / 100);
-            const afterCampay = amount - campay;
-            const platform = Math.round(afterCampay * platformFeePct / 100);
-            const net = afterCampay - platform;
-            return (
-              <div key={amount} className="grid grid-cols-4 gap-4 py-4 border-b border-gray-100 text-sm">
-                <div className="font-bold text-[#1A1A2E]">{formatXaf(amount)} XAF</div>
-                <div className="text-right text-gray-500">-{formatXaf(campay)}</div>
-                <div className="text-right text-gray-500">-{formatXaf(platform)}</div>
-                <div className="text-right font-bold" style={{ color: 'var(--primary)' }}>{formatXaf(net)}</div>
-              </div>
-            );
-          })}
 
           <p className="text-xs text-gray-400 mt-3">
             * {t('pricing.supportsHealthcare')}
