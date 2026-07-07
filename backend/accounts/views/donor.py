@@ -119,19 +119,10 @@ class DonorUpdateView(UpdateAPIView):
         responses={200: DonorDetailSerializer},
         operation_description="Partially update a Donor profile. Only accessible by the donor or a SYSTEM_ADMIN.",
     )
-    @invalidate_cache('donor_list')
+    @invalidate_cache('donor_list', 'donor_info')
     def patch(self, request, *args, **kwargs):
-        """Invalidates the donor list cache when a donor is updated."""
-        response = super().patch(request, *args, **kwargs)
-        
-        # Also invalidate the detail cache for this specific donor
-        donor_id = kwargs.get('id')
-        if donor_id:
-            # Note: Individual detail caches use auto-generated keys, 
-            # but they'll expire naturally based on timeout
-            pass
-        
-        return response
+        """Invalidates the donor list and donor info caches when a donor is updated."""
+        return super().patch(request, *args, **kwargs)
 
 
 class DonorPublicSummaryView(APIView):

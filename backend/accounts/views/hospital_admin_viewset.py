@@ -41,6 +41,7 @@ class HospitalAdminViewSet(
     - PATCH  /api/accounts/hospital-admins/{id}/     - Update hospital admin (owner or SYSTEM_ADMIN)
     """
     cache_group = "hospital_admins"
+    extra_cache_prefixes = ["hospital_admin_info"]
     
     queryset = HospitalAdmin.objects.select_related('user', 'enrolled_by__user', 'hospital').all().order_by('-user__created_at')
     lookup_field = 'id'

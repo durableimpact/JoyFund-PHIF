@@ -39,6 +39,7 @@ class SystemAdminViewSet(
     - PATCH  /api/accounts/system-admins/{id}/     - Update system admin (owner or SYSTEM_ADMIN)
     """
     cache_group = "system_admins"
+    extra_cache_prefixes = ["system_admin_info"]
 
     queryset = SystemAdmin.objects.select_related('user').all().order_by('-user__created_at')
     lookup_field = 'id'

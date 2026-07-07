@@ -43,6 +43,7 @@ class SocialWorkerViewSet(
     - PATCH  /api/accounts/social-workers/{id}/     - Update social worker
     """
     cache_group = "social_workers"
+    extra_cache_prefixes = ["social_worker_info"]
 
     queryset = SocialWorker.objects.select_related('user', 'enrolled_by__user').all().order_by('-user__created_at')
     lookup_field = 'id'

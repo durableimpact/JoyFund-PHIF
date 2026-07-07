@@ -46,6 +46,7 @@ class ReceptionistViewSet(
     ViewSet for Receptionist management.
     """
     cache_group = "receptionists"
+    extra_cache_prefixes = ["receptionist_info"]
     lookup_field = 'id'
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ReceptionistFilter
@@ -60,6 +61,8 @@ class ReceptionistViewSet(
         queryset = Receptionist.objects.select_related('user', 'enrolled_by__user', 'hospital').all().order_by('-user__created_at')
         if self.request.user.role == Role.SYSTEM_ADMIN:
             return queryset
+        if self.request.user.role == Role.RECEPTIONIST:
+            return queryset.filter(user=self.request.user)
         return queryset.filter(enrolled_by__user=self.request.user)
 
     def get_permissions(self):

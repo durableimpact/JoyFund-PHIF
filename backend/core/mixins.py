@@ -9,14 +9,26 @@ class CacheInvalidationMixin:
     """
     Mixin for DRF ViewSets/APIViews to automatically cache list/retrieve and invalidate caches on modifications.
     Requires a `cache_group` attribute defined on the subclass.
+
+    Set ``extra_cache_prefixes`` to a list of key prefixes (e.g. ``['receptionist_info']``)
+    used by ``accounts.utils.cache_response`` so they are also cleared on update/create/delete.
     """
     cache_group = None
+    extra_cache_prefixes = []
 
     def _invalidate_cache(self):
         """Helper to invalidate the cache group and log a debug message."""
         if self.cache_group:
             logger.debug(f"Invalidating cache group: {self.cache_group}")
             invalidate_group(self.cache_group)
+
+        for prefix in self.extra_cache_prefixes:
+            pattern = f"view_cache:{prefix}:*"
+            try:
+                cache.delete_pattern(pattern)
+                logger.debug(f"Invalidated info cache prefix: {prefix}")
+            except AttributeError:
+                cache.delete(f"view_cache:{prefix}")
 
     def _cached_action(self, action_func, request, *args, **kwargs):
         if not self.cache_group:
