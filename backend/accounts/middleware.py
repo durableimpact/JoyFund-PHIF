@@ -38,7 +38,7 @@ class DeviceTrackingMiddleware(MiddlewareMixin):
             return
 
         from accounts.models import UserDevice
-        from accounts.utils.user_agent import parse_user_agent
+        from accounts.utils.user_agent import parse_user_agent, is_unknown_device
 
         try:
             device = UserDevice.objects.filter(
@@ -59,18 +59,19 @@ class DeviceTrackingMiddleware(MiddlewareMixin):
                 UserDevice.objects.filter(id=device.id).update(**updates)
             else:
                 info = parse_user_agent(user_agent)
-                device_kwargs = {
-                    "user": request.user,
-                    "device_name": info["device_name"],
-                    "device_type": info["device_type"],
-                    "browser": info["browser"],
-                    "os": info["os"],
-                    "ip_address": ip,
-                    "user_agent": user_agent,
-                }
-                auth = getattr(request, "auth", None)
-                if auth:
-                    device_kwargs["access_token"] = auth
-                UserDevice.objects.create(**device_kwargs)
+                if not is_unknown_device(info):
+                    device_kwargs = {
+                        "user": request.user,
+                        "device_name": info["device_name"],
+                        "device_type": info["device_type"],
+                        "browser": info["browser"],
+                        "os": info["os"],
+                        "ip_address": ip,
+                        "user_agent": user_agent,
+                    }
+                    auth = getattr(request, "auth", None)
+                    if auth:
+                        device_kwargs["access_token"] = auth
+                    UserDevice.objects.create(**device_kwargs)
         except Exception:
             pass

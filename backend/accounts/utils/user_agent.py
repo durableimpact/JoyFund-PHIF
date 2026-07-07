@@ -63,6 +63,10 @@ def _detect_device_type(ua: str) -> str:
     return "Desktop"
 
 
+def is_unknown_device(device_info: dict) -> bool:
+    return device_info.get("browser") == "Unknown" and device_info.get("os") == "Unknown"
+
+
 def _extract_version(ua: str, prefix: str) -> str:
     idx = ua.find(prefix)
     if idx == -1:

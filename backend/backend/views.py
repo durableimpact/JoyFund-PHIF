@@ -154,7 +154,7 @@ def oauth2_token_view(request):
     from oauth2_provider.models import AccessToken
     from django.http import QueryDict
     from accounts.models import UserDevice
-    from accounts.utils.user_agent import parse_user_agent
+    from accounts.utils.user_agent import parse_user_agent, is_unknown_device
     
     try:
         # Get the underlying Django request from the DRF Request object
@@ -214,28 +214,29 @@ def oauth2_token_view(request):
                             ip = _get_client_ip(django_request)
                             device_info = parse_user_agent(user_agent_str)
                             
-                            device, created = UserDevice.objects.update_or_create(
-                                user=token_obj.user,
-                                user_agent=user_agent_str,
-                                ip_address=ip,
-                                defaults={
-                                    'device_name': device_info['device_name'],
-                                    'device_type': device_info['device_type'],
-                                    'browser': device_info['browser'],
-                                    'os': device_info['os'],
-                                    'access_token': token_obj,
-                                },
-                            )
-
-                            if created and UserDevice.objects.filter(
-                                user=token_obj.user,
-                            ).exclude(id=device.id).exists():
-                                _send_new_device_notification(
-                                    token_obj.user,
-                                    device_info,
-                                    ip,
-                                    user_agent_str,
+                            if not is_unknown_device(device_info):
+                                device, created = UserDevice.objects.update_or_create(
+                                    user=token_obj.user,
+                                    user_agent=user_agent_str,
+                                    ip_address=ip,
+                                    defaults={
+                                        'device_name': device_info['device_name'],
+                                        'device_type': device_info['device_type'],
+                                        'browser': device_info['browser'],
+                                        'os': device_info['os'],
+                                        'access_token': token_obj,
+                                    },
                                 )
+
+                                if created and UserDevice.objects.filter(
+                                    user=token_obj.user,
+                                ).exclude(id=device.id).exists():
+                                    _send_new_device_notification(
+                                        token_obj.user,
+                                        device_info,
+                                        ip,
+                                        user_agent_str,
+                                    )
                         
                         return Response(response_data, status=200)
                 
