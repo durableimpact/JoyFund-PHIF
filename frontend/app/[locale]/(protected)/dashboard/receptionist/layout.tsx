@@ -13,61 +13,35 @@ import {
 import { useSession } from "next-auth/react";
 import DashboardShell, { NavItem } from "../../_components/DashboardShell";
 import { ProtectedRoute } from "@/components/protected-route";
-
-const NAV: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard/receptionist",
-    icon: <LayoutDashboard size={16} />,
-  },
-  {
-    label: "Process Voucher",
-    href: "/dashboard/receptionist/process",
-    icon: <Search size={16} />,
-  },
-  {
-    label: "Vouchers",
-    href: "/dashboard/receptionist/vouchers",
-    icon: <Ticket size={16} />,
-  },
-  {
-    label: "My Claims",
-    href: "/dashboard/receptionist/claims",
-    icon: <ClipboardCheck size={16} />,
-  },
-  {
-    label: "Security",
-    href: "/dashboard/receptionist/devices",
-    icon: <Shield size={16} />,
-  },
-  {
-    label: "Support",
-    href: "/dashboard/receptionist/support",
-    icon: <HelpCircle size={16} />,
-  },
-  {
-    label: "Profile",
-    href: "/dashboard/receptionist/profile",
-    icon: <User size={16} />,
-  },
-];
+import { useI18n } from "@/locales/client";
 
 export default function ReceptionistLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = useI18n();
   const { data: session } = useSession();
   const userInfo = (session?.user as any)?.userInfo;
   const hospitalName = userInfo?.hospital?.name;
+
+  const NAV: NavItem[] = [
+    { label: t('dashboard.sidebar.overview'), href: "/dashboard/receptionist", icon: <LayoutDashboard size={16} /> },
+    { label: t('receptionist.dashboard.processVoucher'), href: "/dashboard/receptionist/process", icon: <Search size={16} /> },
+    { label: t('dashboard.sidebar.vouchers'), href: "/dashboard/receptionist/vouchers", icon: <Ticket size={16} /> },
+    { label: t('receptionist.claims.title'), href: "/dashboard/receptionist/claims", icon: <ClipboardCheck size={16} /> },
+    { label: t('dashboard.sidebar.security'), href: "/dashboard/receptionist/devices", icon: <Shield size={16} /> },
+    { label: t('dashboard.sidebar.support'), href: "/dashboard/receptionist/support", icon: <HelpCircle size={16} /> },
+    { label: t('dashboard.sidebar.profile'), href: "/dashboard/receptionist/profile", icon: <User size={16} /> },
+  ];
 
   return (
     <ProtectedRoute requiredRole={"RECEPTIONIST"}>
       <DashboardShell
         navItems={NAV}
         accentColor="#1D75DB"
-        brandLabel="Receptionist"
-        brandSub="Patient intake & claims"
+        brandLabel={t('systemAdmin.users.tabReceptionists')}
+        brandSub={t('receptionist.dashboard.title')}
         hospitalName={hospitalName}
       >
         {children}
