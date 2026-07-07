@@ -29,37 +29,39 @@ import {
 } from "@/components/ui/dropdown-menu";
 import NotificationsPanel from "@/components/shared/NotificationsPanel";
 import { LocaleSwitcher } from "../shared/LocaleSwitcher";
-
-const NAV_LINKS = [
-  {
-    label: "Dashboard",
-    href: "/dashboard/donor",
-    icon: <LayoutDashboard size={16} />,
-  },
-  {
-    label: "My Campaigns",
-    href: "/dashboard/donor/campaigns",
-    icon: <Heart size={16} />,
-  },
-  {
-    label: "My Donations",
-    href: "/dashboard/donor/donations",
-    icon: <History size={16} />,
-  },
-  {
-    label: "Support",
-    href: "/dashboard/donor/support",
-    icon: <HelpCircle size={16} />,
-  },
-];
+import { useI18n } from "@/locales/client";
 
 export default function DonorNavbar() {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
+  const t = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  const NAV_LINKS = [
+    {
+      label: t("dashboard.sidebar.overview"),
+      href: "/dashboard/donor",
+      icon: <LayoutDashboard size={16} />,
+    },
+    {
+      label: t("dashboard.donor.myCampaigns"),
+      href: "/dashboard/donor/campaigns",
+      icon: <Heart size={16} />,
+    },
+    {
+      label: t("dashboard.donor.myDonations"),
+      href: "/dashboard/donor/donations",
+      icon: <History size={16} />,
+    },
+    {
+      label: t("dashboard.sidebar.support"),
+      href: "/dashboard/donor/support",
+      icon: <HelpCircle size={16} />,
+    },
+  ];
 
   const userInfo = (session?.user as any)?.userInfo;
   const initials =
@@ -74,7 +76,7 @@ export default function DonorNavbar() {
             .toUpperCase()
         : "U";
   const displayName =
-    userInfo?.first_name || session?.user?.name?.split(" ")[0] || "User";
+    userInfo?.first_name || session?.user?.name?.split(" ")[0] || t("general.user");
 
   const handleLogout = async () => {
     setSigningOut(true);
@@ -159,13 +161,13 @@ export default function DonorNavbar() {
                 onClick={() => router.push("/dashboard/donor/profile")}
               >
                 <User size={16} />
-                Profile
+                {t("dashboard.sidebar.profile")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push("/dashboard/donor/devices")}
               >
                 <Shield size={16} />
-                Security & Devices
+                {t("dashboard.donor.securityDevices")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -178,7 +180,7 @@ export default function DonorNavbar() {
                 ) : (
                   <LogOut size={16} />
                 )}
-                Sign out
+                {t("nav.signOut")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

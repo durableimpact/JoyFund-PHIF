@@ -1,5 +1,8 @@
+"use client";
+
 import { forwardRef } from "react";
 import { formatXAF } from "@/lib/utils";
+import { useI18n } from "@/locales/client";
 
 interface DonationShareCardProps {
   donorName: string;
@@ -11,6 +14,7 @@ interface DonationShareCardProps {
 
 const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
   ({ donorName, totalDonations, totalAmount, averageDonation, campaignCount }, ref) => {
+    const t = useI18n();
     return (
       <div
         ref={ref}
@@ -84,10 +88,10 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
           {/* Title */}
           <div style={{ marginBottom: 48, position: "relative", zIndex: 1 }}>
             <p style={{ fontSize: 24, opacity: 0.6, margin: "0 0 8px 0", fontWeight: 600 }}>
-              {donorName}&apos;s Generosity
+              {t("dashboard.donor.shareCardGenerosity", { name: donorName })}
             </p>
             <p style={{ fontSize: 56, fontWeight: 800, margin: 0, lineHeight: 1.15, letterSpacing: -1 }}>
-              Making a real{"\n"}difference
+              {t("dashboard.donor.shareCardHeadline")}
             </p>
           </div>
 
@@ -95,17 +99,17 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
           <div style={{ display: "flex", gap: 24, marginBottom: 48, position: "relative", zIndex: 1 }}>
             <StatBox
               value={campaignCount.toLocaleString()}
-              label="Total Campaigns"
+              label={t("dashboard.donor.shareCardTotalCampaigns")}
               accent="#1DB1DB"
             />
             <StatBox
               value={formatXAF(totalAmount)}
-              label="Total Donated"
+              label={t("dashboard.donor.shareCardTotalDonated")}
               accent="#80B034"
             />
             <StatBox
               value={formatXAF(averageDonation)}
-              label="Average Donation"
+              label={t("dashboard.donor.shareCardAverageDonation")}
               accent="#3D77B9"
             />
           </div>
@@ -135,11 +139,11 @@ const DonationShareCard = forwardRef<HTMLDivElement, DonationShareCardProps>(
               }}
             >
               <span style={{ fontSize: 26, fontWeight: 800 }}>
-                Turn your joy into care →
+                {t("dashboard.donor.shareCardCTA")}
               </span>
             </div>
             <span style={{ fontSize: 20, opacity: 0.4, fontWeight: 600 }}>
-              {totalDonations} donation{totalDonations !== 1 ? "s" : ""} given
+              {t("dashboard.donor.shareCardDonationsGiven", { count: totalDonations })}
             </span>
           </div>
         </div>

@@ -6,8 +6,10 @@ import { useSession } from "next-auth/react";
 import { X, Mail, Loader2 } from "lucide-react";
 import { resendVerificationEmail } from "@/actions/accounts";
 import { toast } from "sonner";
+import { useI18n } from "@/locales/client";
 
 export default function VerificationBanner() {
+  const t = useI18n();
   const { data: session } = useSession();
   const router = useRouter();
   const [dismissed, setDismissed] = useState(false);
@@ -24,11 +26,11 @@ export default function VerificationBanner() {
     setResending(true);
     try {
       await resendVerificationEmail(email);
-      toast.success("Verification code sent to your email.");
+      toast.success(t("dashboard.verification.codeSent"));
       sessionStorage.setItem("temp_email", email);
       router.push("/verify-email");
     } catch {
-      toast.error("Failed to send verification email. Please try again.");
+      toast.error(t("dashboard.verification.failedSend"));
     } finally {
       setResending(false);
     }
@@ -38,8 +40,7 @@ export default function VerificationBanner() {
     <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
       <Mail size={18} className="text-amber-600 shrink-0" />
       <p className="text-sm text-amber-800 flex-1">
-        Your account is not verified. Please verify your email to access all
-        features.
+        {t("dashboard.verification.subtitle")}
       </p>
       <button
         onClick={handleResend}
@@ -49,7 +50,7 @@ export default function VerificationBanner() {
         {resending ? (
           <Loader2 size={12} className="animate-spin" />
         ) : null}
-        Verify Now
+        {t("dashboard.verification.sendCode")}
       </button>
       <button
         onClick={() => setDismissed(true)}
