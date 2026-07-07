@@ -33,6 +33,7 @@ import { useI18n } from "@/locales/client";
 
 export default function DonorNavbar() {
   const pathname = usePathname();
+  const localePath = pathname.replace(/^\/[^/]+/, "");
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
@@ -113,8 +114,8 @@ export default function DonorNavbar() {
           {NAV_LINKS.map((link) => {
             const isRoot = /^\/dashboard\/[^/]+$/.test(link.href);
             const active = isRoot
-              ? pathname === link.href
-              : pathname.startsWith(link.href);
+              ? localePath === link.href
+              : localePath.startsWith(link.href);
             return (
               <Link
                 key={link.href}
@@ -202,8 +203,8 @@ export default function DonorNavbar() {
           {NAV_LINKS.map((link) => {
             const isRoot = /^\/dashboard\/[^/]+$/.test(link.href);
             const active = isRoot
-              ? pathname === link.href
-              : pathname.startsWith(link.href);
+              ? localePath === link.href
+              : localePath.startsWith(link.href);
             return (
               <Link
                 key={link.href}
