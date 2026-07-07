@@ -33,6 +33,7 @@ interface SelectedAllocation {
 }
 
 export default function AdminVouchers() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = session?.accessToken || session?.user?.accessToken;
   const queryClient = useQueryClient();
@@ -116,7 +117,7 @@ export default function AdminVouchers() {
         campaign_allocations: valid.map((a) =>
           a.mode === "percentage"
             ? { campaign_id: a.campaign_id, percentage: Number(a.value) }
-            : { campaign_id: a.campaign_id, amount: Number(a.value) },
+            : { campaign_id: a.campaign_id, amount: Number(a.value) }
         ),
       });
     },
@@ -189,14 +190,14 @@ export default function AdminVouchers() {
   const handleCreateVoucher = () => {
     setCreateError("");
     if (selectedAllocations.length === 0) {
-      setCreateError("Select at least one campaign allocation.");
+      setCreateError(t('systemAdmin.vouchers.selectAtLeastOne'));
       return;
     }
 
     const hasInvalid = selectedAllocations.some((a) => Number(a.value) <= 0);
     if (hasInvalid) {
       setCreateError(
-        "Every selected campaign must have a valid amount or percentage.",
+        t('systemAdmin.vouchers.enterAmount'),
       );
       return;
     }
@@ -213,7 +214,7 @@ export default function AdminVouchers() {
 
     if (usesAmount && totalAllocatedAmount < numericRequestedAmount) {
       setCreateError(
-        "Total allocation must be at least the requested voucher amount.",
+        t('systemAdmin.vouchers.allocationExceeds'),
       );
       return;
     }
@@ -226,16 +227,16 @@ export default function AdminVouchers() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-900">
-            Voucher Management
+            {t('systemAdmin.vouchers.title')}
           </h1>
-          <p className="text-gray-500 text-sm">{totalCount} total vouchers</p>
+          <p className="text-gray-500 text-sm">{t('systemAdmin.vouchers.subtitle', { count: totalCount })}</p>
         </div>
         <button
           onClick={handleOpenCreate}
           className="btn-admin text-sm flex items-center gap-2"
           style={{ background: "#471DDB" }}
         >
-          <Plus size={16} /> Create Voucher
+          <Plus size={16} /> {t('systemAdmin.vouchers.create')}
         </button>
       </div>
 
@@ -247,7 +248,7 @@ export default function AdminVouchers() {
           />
           <input
             className="input-field pl-10"
-            placeholder="Search by code or beneficiary..."
+            placeholder={t('systemAdmin.vouchers.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setParams({ search: e.target.value, page: 1 });
@@ -263,7 +264,7 @@ export default function AdminVouchers() {
         >
           {STATUS_FILTERS.map((s) => (
             <option key={s} value={s}>
-              {s === "all" ? "All Status" : s.replace(/_/g, " ")}
+              {s === "all" ? t('systemAdmin.vouchers.allStatus') : s.replace(/_/g, " ")}
             </option>
           ))}
         </select>
@@ -275,12 +276,12 @@ export default function AdminVouchers() {
             <thead>
               <tr className="border-b border-gray-100">
                 {[
-                  "Code",
-                  "Beneficiary",
-                  "Hospital",
-                  "Status",
-                  "Expiry",
-                  "Created",
+                  t('systemAdmin.vouchers.colCode'),
+                  t('systemAdmin.vouchers.colBeneficiary'),
+                  t('systemAdmin.vouchers.colHospital'),
+                  t('systemAdmin.vouchers.colStatus'),
+                  t('systemAdmin.vouchers.colExpiry'),
+                  t('systemAdmin.vouchers.colCreated'),
                 ].map((h) => (
                   <th
                     key={h}
@@ -308,7 +309,7 @@ export default function AdminVouchers() {
                     colSpan={6}
                     className="text-center py-16 text-gray-400 text-sm"
                   >
-                    No vouchers found
+                    {t('systemAdmin.vouchers.empty')}
                   </td>
                 </tr>
               ) : (
@@ -359,7 +360,7 @@ export default function AdminVouchers() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 my-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-gray-900">
-                Create Voucher
+                {t('systemAdmin.vouchers.createVoucher')}
               </h2>
               <button onClick={() => setShowCreate(false)}>
                 <X size={20} className="text-gray-400" />
@@ -368,9 +369,9 @@ export default function AdminVouchers() {
 
             <div className="grid grid-cols-3 gap-2 mb-5">
               {[
-                { id: 1, label: "Voucher Details" },
-                { id: 2, label: "Find Campaigns" },
-                { id: 3, label: "Allocate & Create" },
+                { id: 1, label: t('systemAdmin.vouchers.step1Title') },
+                { id: 2, label: t('systemAdmin.vouchers.step2Title') },
+                { id: 3, label: t('systemAdmin.vouchers.step3Title') },
               ].map((step) => (
                 <div
                   key={step.id}
@@ -381,7 +382,7 @@ export default function AdminVouchers() {
                   }`}
                   style={createStep >= step.id ? { background: "#471DDB" } : {}}
                 >
-                  Step {step.id}: {step.label}
+                  {step.label}
                 </div>
               ))}
             </div>
@@ -397,14 +398,14 @@ export default function AdminVouchers() {
               <div className="space-y-3">
                 <div>
                   <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                    Health Issue (VALIDATED) *
+                    {t('systemAdmin.vouchers.healthIssueLabel')}
                   </label>
                   <select
                     className="input-field"
                     value={healthIssueId}
                     onChange={(e) => setHealthIssueId(e.target.value)}
                   >
-                    <option value="">— Select health issue —</option>
+                    <option value="">{t('systemAdmin.vouchers.selectHealthIssue')}</option>
                     {validatedHealthIssues.map((h) => (
                       <option key={h.id} value={h.id}>
                         {h.description}
@@ -414,14 +415,14 @@ export default function AdminVouchers() {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                    Hospital *
+                    {t('systemAdmin.vouchers.hospitalLabel')}
                   </label>
                   <select
                     className="input-field"
                     value={hospitalId}
                     onChange={(e) => setHospitalId(e.target.value)}
                   >
-                    <option value="">— Select hospital —</option>
+                    <option value="">{t('systemAdmin.vouchers.selectHospital')}</option>
                     {hospitals.map((h) => (
                       <option key={h.id} value={h.id}>
                         {h.name} · {h.city}
@@ -431,7 +432,7 @@ export default function AdminVouchers() {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                    Voucher Amount (XAF) *
+                    {t('systemAdmin.vouchers.amountLabel')}
                   </label>
                   <input
                     className="input-field"
@@ -447,7 +448,7 @@ export default function AdminVouchers() {
                     className="btn-outline flex-1"
                     onClick={() => setShowCreate(false)}
                   >
-                    Cancel
+                    {t('systemAdmin.vouchers.cancel')}
                   </button>
                   <button
                     className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
@@ -455,7 +456,7 @@ export default function AdminVouchers() {
                     disabled={!canMoveToFundingStep}
                     onClick={() => setCreateStep(2)}
                   >
-                    Continue
+                    {t('systemAdmin.vouchers.continue')}
                   </button>
                 </div>
               </div>
@@ -464,7 +465,7 @@ export default function AdminVouchers() {
             {createStep === 2 && (
               <div className="space-y-3">
                 <div className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-800">
-                  Target voucher amount:{" "}
+                  {t('systemAdmin.vouchers.targetAmount')}{" "}
                   <span className="font-bold">
                     {formatXAF(numericRequestedAmount)}
                   </span>
@@ -472,7 +473,7 @@ export default function AdminVouchers() {
                 <div className="max-h-64 overflow-y-auto border border-gray-100 rounded-xl p-2 space-y-2">
                   {campaigns.length === 0 ? (
                     <div className="text-xs text-gray-500 p-3">
-                      No campaigns available.
+                      {t('systemAdmin.vouchers.noCampaignsFound')}
                     </div>
                   ) : (
                     campaigns.map((campaign) => (
@@ -498,7 +499,7 @@ export default function AdminVouchers() {
                     className="btn-outline flex-1"
                     onClick={() => setCreateStep(1)}
                   >
-                    Back
+                    {t('systemAdmin.vouchers.back')}
                   </button>
                   <button
                     className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
@@ -506,7 +507,7 @@ export default function AdminVouchers() {
                     disabled={selectedAllocations.length === 0}
                     onClick={() => setCreateStep(3)}
                   >
-                    Continue
+                    {t('systemAdmin.vouchers.continue')}
                   </button>
                 </div>
               </div>
@@ -515,8 +516,7 @@ export default function AdminVouchers() {
             {createStep === 3 && (
               <div className="space-y-3">
                 <div className="rounded-xl bg-gray-50 p-3 text-xs text-gray-700">
-                  Allocate funds from selected campaigns. You can use fixed
-                  amount or percentage per campaign.
+                  {t('systemAdmin.vouchers.allocateFrom')}
                 </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {selectedAllocations.map((allocation) => {
@@ -540,8 +540,8 @@ export default function AdminVouchers() {
                               })
                             }
                           >
-                            <option value="amount">Amount (XAF)</option>
-                            <option value="percentage">Percentage (%)</option>
+                            <option value="amount">{t('systemAdmin.vouchers.amountInput')}</option>
+                            <option value="percentage">{t('systemAdmin.vouchers.percentageInput')}</option>
                           </select>
                           <input
                             className="input-field flex-1"
@@ -570,16 +570,13 @@ export default function AdminVouchers() {
 
                 <div className="rounded-xl border border-gray-200 p-3 text-xs space-y-1">
                   <div>
-                    Requested amount:{" "}
+                    {t('systemAdmin.vouchers.targetAmount')}{" "}
                     <span className="font-bold">
                       {formatXAF(numericRequestedAmount)}
                     </span>
                   </div>
                   <div>
-                    Total allocated:{" "}
-                    <span className="font-bold">
-                      {formatXAF(Math.floor(totalAllocatedAmount))}
-                    </span>
+                    {t('systemAdmin.vouchers.totalAllocated', { amount: formatXAF(Math.floor(totalAllocatedAmount)) })}
                   </div>
                   <div>
                     Total percentage:{" "}
@@ -600,7 +597,7 @@ export default function AdminVouchers() {
                     className="btn-outline flex-1"
                     onClick={() => setCreateStep(2)}
                   >
-                    Back
+                    {t('systemAdmin.vouchers.back')}
                   </button>
                   <button
                     className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60"
@@ -609,8 +606,8 @@ export default function AdminVouchers() {
                     disabled={createVoucherMutation.isPending}
                   >
                     {createVoucherMutation.isPending
-                      ? "Creating…"
-                      : "Create Voucher"}
+                      ? t('systemAdmin.vouchers.creating')
+                      : t('systemAdmin.vouchers.createVoucher')}
                   </button>
                 </div>
               </div>
