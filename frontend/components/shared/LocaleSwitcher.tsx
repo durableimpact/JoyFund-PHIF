@@ -30,7 +30,7 @@ export function LocaleSwitcher({
       aria-label={`Switch language to ${currentLocale === "en" ? "French" : "English"}`}
     >
       <Languages size={16} />
-      <span>{currentLocale === "en" ? "FR" : "EN"}</span>
+      <span>{currentLocale.toLocaleUpperCase()}</span>
     </button>
   );
 }

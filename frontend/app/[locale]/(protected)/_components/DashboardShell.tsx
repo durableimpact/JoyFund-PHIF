@@ -16,6 +16,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { LocaleSwitcher } from "@/components/shared/LocaleSwitcher";
 
 export interface NavItem {
   label: string;
@@ -111,13 +112,13 @@ export default function DashboardShell({
             />
           </div>
           <div>
-            {/* <p className="font-black text-white text-sm leading-tight">
+            <p className="font-black text-white text-sm leading-tight">
               JoyFund
-            </p> */}
-            <div className="font-black text-sm leading-tight">
+            </p>
+            {/* <div className="font-black text-sm leading-tight">
               <span className="text-[#80B034]">Joy</span>
               <span className="text-[#3D77B9]">Fund</span>
-            </div>
+            </div> */}
             {brandSub && <p className="text-white/60 text-xs">{brandSub}</p>}
           </div>
         </Link>
@@ -150,7 +151,7 @@ export default function DashboardShell({
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 active
-                  ? "bg-white/20 text-white"
+                  ? "bg-white text-gray-900 shadow-sm"
                   : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
@@ -259,6 +260,7 @@ export default function DashboardShell({
 
           {headerExtra}
 
+          <LocaleSwitcher/>
           <NotificationsPanel />
 
           {/* User dropdown */}

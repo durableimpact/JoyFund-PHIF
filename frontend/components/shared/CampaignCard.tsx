@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { Users } from 'lucide-react';
+import { useI18n } from '@/locales/client';
 
 export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
+  const t = useI18n();
   const raisedXAF = Number(campaign.total_net_raised) || 0;
   const goalXAF = Number(campaign.goal) || 100000;
   const pct = campaign.progress_percentage || 0;
@@ -17,7 +19,7 @@ export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
           <div className="relative h-32 w-full overflow-hidden">
             <img
               src={coverImage}
-              alt="Campaign cover"
+              alt={t('campaignCard.coverAlt')}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
             />
           </div>
@@ -41,7 +43,7 @@ export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
           <div className="mb-3">
             <div className="flex justify-between items-center mb-1.5">
               <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>
-                {/* {formatXAF(raisedXAF)} */} {raisedXAF.toLocaleString()} XAF
+                {/* {formatXAF(raisedXAF)} */} {raisedXAF.toLocaleString()} {t('campaignCard.currency')}
               </span>
               <span className="text-xs text-gray-400">{pct.toFixed(2)}%</span>
             </div>
@@ -49,7 +51,7 @@ export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
               <div className="progress-fill" style={{ width: `${pct}%` }} />
             </div>
             <div className="flex justify-between mt-1.5">
-              <span className="text-xs text-gray-400">Goal: {/* {formatXAF(goalXAF)} */} {goalXAF.toLocaleString()} XAF</span>
+              <span className="text-xs text-gray-400">{t('campaignCard.goalPrefix')} {/* {formatXAF(goalXAF)} */} {goalXAF.toLocaleString()} {t('campaignCard.currency')}</span>
             </div>
           </div>
         </div>
@@ -60,14 +62,14 @@ export default function CampaignCard({ campaign }: { campaign: CampaignList }) {
         <div className="flex items-center justify-between pt-3 border-t border-gray-50">
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <Users size={12} />
-            <span>{contributors} contributors</span>
+            <span>{contributors} {t('campaignCard.contributors')}</span>
           </div>
           <Link
             href={`/campaign/${campaign.id}/donate`}
             className="text-xs font-semibold text-white px-3 py-1 rounded-full hover:opacity-90 transition-opacity"
             style={{ backgroundColor: 'var(--primary)' }}
           >
-            Give a Gift →
+            {t('campaignCard.giveGift')}
           </Link>
         </div>
       </div>
