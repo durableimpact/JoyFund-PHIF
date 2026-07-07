@@ -11,6 +11,7 @@ import Paginator from "@/components/shared/Paginator";
 const PAGE_SIZE = 20;
 
 export default function FeeSplitsPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 
@@ -34,8 +35,8 @@ export default function FeeSplitsPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Fee Splits</h1>
-          <p className="text-gray-500 text-sm">Breakdown of platform fees across transactions</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.feeSplits.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('systemAdmin.feeSplits.subtitle')}</p>
         </div>
       </div>
 
@@ -45,16 +46,16 @@ export default function FeeSplitsPage() {
             <Loader2 className="w-6 h-6 text-[#471DDB] animate-spin" />
           </div>
         ) : !splits.length ? (
-          <p className="text-gray-400 text-sm text-center py-12">No fee splits recorded yet</p>
+          <p className="text-gray-400 text-sm text-center py-12">{t('systemAdmin.feeSplits.empty')}</p>
         ) : (<>
           <div className="md:hidden space-y-3">
             {splits.map((s) => (
               <div key={s.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Gross</span><span className="font-semibold text-gray-900">{formatXAF(s.gross_amount)}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Escrow</span><span className="font-semibold text-[#1DB1DB]">{formatXAF(s.escrow_amount)}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Platform</span><span className="font-semibold text-[#471DDB]">{formatXAF(s.platform_amount)}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Policy</span><span className="text-gray-600">{s.fee_policy_name}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-500">Created</span><span className="text-gray-400 text-xs">{formatDate(s.created_at)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.feeSplits.gross')}</span><span className="font-semibold text-gray-900">{formatXAF(s.gross_amount)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.feeSplits.escrow')}</span><span className="font-semibold text-[#1DB1DB]">{formatXAF(s.escrow_amount)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.feeSplits.platform')}</span><span className="font-semibold text-[#471DDB]">{formatXAF(s.platform_amount)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.feeSplits.policy')}</span><span className="text-gray-600">{s.fee_policy_name}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.feeSplits.created')}</span><span className="text-gray-400 text-xs">{formatDate(s.created_at)}</span></div>
               </div>
             ))}
           </div>
@@ -62,7 +63,7 @@ export default function FeeSplitsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {["#", "Gross Amount", "Escrow Amount", "Platform Amount", "Fee Policy", "Created"].map(h => (
+                  {[t('systemAdmin.feeSplits.colId'), t('systemAdmin.feeSplits.colGross'), t('systemAdmin.feeSplits.colEscrow'), t('systemAdmin.feeSplits.colPlatform'), t('systemAdmin.feeSplits.colPolicy'), t('systemAdmin.feeSplits.colCreated')].map(h => (
                     <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>

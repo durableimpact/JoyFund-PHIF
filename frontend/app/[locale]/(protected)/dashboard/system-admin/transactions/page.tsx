@@ -15,6 +15,7 @@ const TYPE_FILTERS = ["all", "DONATION", "PLATFORM_FEE", "DISBURSEMENT", "REFUND
 const PAGE_SIZE = 20;
 
 export default function TransactionsPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const [params, setParams] = useUrlSearchParams(
@@ -47,8 +48,8 @@ export default function TransactionsPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Transactions</h1>
-          <p className="text-gray-500 text-sm">All platform financial transactions</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.transactions.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('systemAdmin.transactions.subtitle')}</p>
         </div>
       </div>
 
@@ -59,20 +60,20 @@ export default function TransactionsPage() {
           <input
             value={search}
             onChange={e => setParams({ search: e.target.value, page: 1 })}
-            placeholder="Search transactions..."
+            placeholder={t('systemAdmin.transactions.searchPlaceholder')}
             className="text-sm bg-transparent border-none outline-none w-full"
           />
         </div>
         <select value={typeFilter} onChange={e => setParams({ typeFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
-          {TYPE_FILTERS.map(t => (
-            <option key={t} value={t}>{t === "all" ? "All Types" : t.replace(/_/g, " ")}</option>
+          {TYPE_FILTERS.map(type => (
+            <option key={type} value={type}>{type === "all" ? t('systemAdmin.transactions.allTypes') : type.replace(/_/g, " ")}</option>
           ))}
         </select>
         <select value={statusFilter} onChange={e => setParams({ statusFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
           {STATUS_FILTERS.map(s => (
-            <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>
+            <option key={s} value={s}>{s === "all" ? t('systemAdmin.transactions.allStatuses') : s}</option>
           ))}
         </select>
       </div>
@@ -81,20 +82,20 @@ export default function TransactionsPage() {
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><Skeleton className="h-6 w-6 rounded" /></div>
         ) : !rows.length ? (
-          <p className="text-gray-400 text-sm text-center py-12">No transactions found</p>
+          <p className="text-gray-400 text-sm text-center py-12">{t('systemAdmin.transactions.empty')}</p>
         ) : (
           <>
             {/* Mobile: card layout */}
             <div className="md:hidden space-y-3">
               {rows.map((t) => (
                 <Link key={t.id} href={`/dashboard/system-admin/transactions/${t.id}`} className="block border border-gray-100 rounded-xl p-4 space-y-2 hover:border-[#471DDB]/30 transition-colors">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Type</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{t.type_display}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Direction</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.direction === "IN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{t.direction_display}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Amount</span><span className="font-bold text-gray-900">{formatXAF(t.amount)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Currency</span><span className="text-gray-600">{t.currency}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" : t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{t.status_display}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Gateway TX</span><span className="text-gray-400 font-mono text-xs truncate max-w-[140px]">{t.gateway_transaction_id || "—"}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="text-gray-400 text-xs">{formatDate(t.created_at)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.type')}</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{t.type_display}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.direction')}</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.direction === "IN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{t.direction_display}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.amount')}</span><span className="font-bold text-gray-900">{formatXAF(t.amount)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.currency')}</span><span className="text-gray-600">{t.currency}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.status')}</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" : t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{t.status_display}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.gatewayTx')}</span><span className="text-gray-400 font-mono text-xs truncate max-w-[140px]">{t.gateway_transaction_id || "—"}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.date')}</span><span className="text-gray-400 text-xs">{formatDate(t.created_at)}</span></div>
                 </Link>
               ))}
             </div>
@@ -103,7 +104,16 @@ export default function TransactionsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["ID", "Type", "Direction", "Amount", "Currency", "Status", "Gateway TX ID", "Date"].map(h => (
+                    {[
+                      t('systemAdmin.transactions.colId'),
+                      t('systemAdmin.transactions.colType'),
+                      t('systemAdmin.transactions.colDirection'),
+                      t('systemAdmin.transactions.colAmount'),
+                      t('systemAdmin.transactions.colCurrency'),
+                      t('systemAdmin.transactions.colStatus'),
+                      t('systemAdmin.transactions.colGatewayTx'),
+                      t('systemAdmin.transactions.colDate'),
+                    ].map(h => (
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>

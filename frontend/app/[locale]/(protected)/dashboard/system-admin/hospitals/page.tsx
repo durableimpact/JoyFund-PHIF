@@ -23,6 +23,7 @@ import Paginator from "@/components/shared/Paginator";
 const PAGE_SIZE = 10;
 
 export default function AdminHospitals() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token =
     session?.accessToken ||
@@ -57,15 +58,15 @@ export default function AdminHospitals() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Hospitals</h1>
-          <p className="text-gray-500 text-sm">{totalCount} total hospitals</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.hospitals.title')}</h1>
+          <p className="text-gray-500 text-sm">{totalCount} {t('systemAdmin.hospitals.total')}</p>
         </div>
         <Link
           href="/dashboard/system-admin/hospitals/create"
           className="btn-admin text-sm flex items-center gap-2"
           style={{ background: "#471DDB" }}
         >
-          <Plus size={16} /> Add Hospital
+          <Plus size={16} /> {t('systemAdmin.hospitals.addHospital')}
         </Link>
       </div>
 
@@ -76,7 +77,7 @@ export default function AdminHospitals() {
         />
         <input
           className="input-field pl-10"
-          placeholder="Search by name, city, region, or email…"
+          placeholder={t('systemAdmin.hospitals.searchPlaceholder')}
           value={search}
           onChange={(e) => setParams({ search: e.target.value, page: 1 })}
         />
@@ -87,7 +88,7 @@ export default function AdminHospitals() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {["Name", "Location", "Contact", "Status", "Created"].map(
+                {[t('systemAdmin.hospitals.colName'), t('systemAdmin.hospitals.colLocation'), t('systemAdmin.hospitals.colContact'), t('systemAdmin.hospitals.colStatus'), t('systemAdmin.hospitals.colCreated')].map(
                   (h) => (
                     <th
                       key={h}
@@ -116,8 +117,8 @@ export default function AdminHospitals() {
                     className="text-center py-16 text-gray-400 text-sm"
                   >
                     {search
-                      ? "No hospitals matching your search"
-                      : "No hospitals yet"}
+                      ? t('systemAdmin.hospitals.notFound')
+                      : t('systemAdmin.hospitals.empty')}
                   </td>
                 </tr>
               ) : (

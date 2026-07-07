@@ -9,6 +9,7 @@ import { getGateway, listWebhookEvents } from "@/actions/payments";
 import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function GatewayDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -37,8 +38,8 @@ export default function GatewayDetailPage() {
   if (!gateway) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-400 text-sm">Gateway not found</p>
-        <button onClick={() => router.back()} className="mt-4 text-sm font-semibold text-[#471DDB]">Go back</button>
+        <p className="text-gray-400 text-sm">{t('systemAdmin.gateways.detail.notFound')}</p>
+        <button onClick={() => router.back()} className="mt-4 text-sm font-semibold text-[#471DDB]">{t('systemAdmin.gateways.detail.goBack')}</button>
       </div>
     );
   }
@@ -56,7 +57,7 @@ export default function GatewayDetailPage() {
             <h1 className="text-xl sm:text-2xl font-black text-gray-900">{gateway.name}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${gateway.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {gateway.is_active ? "Active" : "Inactive"}
+                {gateway.is_active ? t('systemAdmin.gateways.detail.active') : t('systemAdmin.gateways.detail.inactive')}
               </span>
               <span className="text-gray-300 text-xs">•</span>
               <span className="text-gray-500 text-xs font-medium">ID: {gateway.id}</span>
@@ -71,29 +72,29 @@ export default function GatewayDetailPage() {
           <div className="w-10 h-10 rounded-xl bg-[#471DDB]/10 flex items-center justify-center">
             <Globe size={20} className="text-[#471DDB]" />
           </div>
-          <h3 className="font-bold text-gray-900">Gateway Details</h3>
+          <h3 className="font-bold text-gray-900">{t('systemAdmin.gateways.detail.detailsSection')}</h3>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
           <div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">Name</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">{t('systemAdmin.gateways.detail.name')}</p>
             <p className="text-sm font-semibold text-gray-900">{gateway.name}</p>
           </div>
           <div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">Description</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">{t('systemAdmin.gateways.detail.description')}</p>
             <p className="text-sm text-gray-600">{gateway.description || "—"}</p>
           </div>
           <div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">Status</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">{t('systemAdmin.gateways.detail.status')}</p>
             <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${gateway.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-              {gateway.is_active ? "Active" : "Inactive"}
+              {gateway.is_active ? t('systemAdmin.gateways.detail.active') : t('systemAdmin.gateways.detail.inactive')}
             </span>
           </div>
           <div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">Created</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">{t('systemAdmin.gateways.detail.created')}</p>
             <p className="text-sm text-gray-600">{formatDate(gateway.created_at)}</p>
           </div>
           <div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">Updated</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">{t('systemAdmin.gateways.detail.updated')}</p>
             <p className="text-sm text-gray-600">{formatDate(gateway.updated_at)}</p>
           </div>
         </div>
@@ -105,7 +106,7 @@ export default function GatewayDetailPage() {
           <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
             <Zap size={20} />
           </div>
-          <h3 className="font-bold text-gray-900">Webhook Events</h3>
+          <h3 className="font-bold text-gray-900">{t('systemAdmin.gateways.detail.webhookEvents')}</h3>
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded-md">{webhooks.length}</span>
         </div>
 
@@ -114,7 +115,7 @@ export default function GatewayDetailPage() {
         ) : !webhooks.length ? (
           <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
             <Zap size={32} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-sm text-gray-500">No webhook events for this gateway yet.</p>
+            <p className="text-sm text-gray-500">{t('systemAdmin.gateways.detail.noWebhooks')}</p>
           </div>
         ) : (
           <>
@@ -122,8 +123,8 @@ export default function GatewayDetailPage() {
             <div className="md:hidden space-y-3">
               {webhooks.map((w) => (
                 <div key={w.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Event</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">{w.event_type}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Received</span><span className="text-gray-400 text-xs">{formatDate(w.received_at)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.gateways.detail.event')}</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">{w.event_type}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.gateways.detail.received')}</span><span className="text-gray-400 text-xs">{formatDate(w.received_at)}</span></div>
                 </div>
               ))}
             </div>
@@ -132,7 +133,7 @@ export default function GatewayDetailPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["ID", "Event Type", "Received At"].map(h => (
+                    {[t('systemAdmin.gateways.detail.colId'), t('systemAdmin.gateways.detail.colEventType'), t('systemAdmin.gateways.detail.colReceivedAt')].map(h => (
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                     ))}
                   </tr>

@@ -25,12 +25,12 @@ import {
 } from "lucide-react";
 import { getAdminUserDetail } from "@/actions/accounts";
 
-const ROLE_LABELS: Record<string, string> = {
-  SYSTEM_ADMIN: "System Admin",
-  HOSPITAL_ADMIN: "Hospital Admin",
-  SOCIAL_WORKER: "Social Worker",
-  RECEPTIONIST: "Receptionist",
-  DONOR: "Donor",
+const ROLE_LABELS_RAW: Record<string, string> = {
+  SYSTEM_ADMIN: "systemAdmin.users.tabSystemAdmins",
+  HOSPITAL_ADMIN: "systemAdmin.users.tabHospitalAdmins",
+  SOCIAL_WORKER: "systemAdmin.users.tabSocialWorkers",
+  RECEPTIONIST: "systemAdmin.users.tabReceptionists",
+  DONOR: "systemAdmin.users.tabDonors",
 };
 
 const ROLE_COLORS: Record<string, string> = {
@@ -122,6 +122,14 @@ function StatCard({
 }
 
 export default function UserDetailPage() {
+  const t = useI18n();
+  const ROLE_LABELS: Record<string, string> = {
+    SYSTEM_ADMIN: t('systemAdmin.users.tabSystemAdmins'),
+    HOSPITAL_ADMIN: t('systemAdmin.users.tabHospitalAdmins'),
+    SOCIAL_WORKER: t('systemAdmin.users.tabSocialWorkers'),
+    RECEPTIONIST: t('systemAdmin.users.tabReceptionists'),
+    DONOR: t('systemAdmin.users.tabDonors'),
+  };
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -154,7 +162,7 @@ export default function UserDetailPage() {
 
   if (!data) {
     return (
-      <div className="text-center py-16 text-gray-400">User not found.</div>
+      <div className="text-center py-16 text-gray-400">{t('systemAdmin.users.detail.notFound')}</div>
     );
   }
 
@@ -167,7 +175,7 @@ export default function UserDetailPage() {
         onClick={() => router.back()}
         className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold"
       >
-        <ArrowLeft size={16} /> Back to Users
+        <ArrowLeft size={16} /> {t('systemAdmin.users.detail.backToUsers')}
       </button>
 
       {/* Header */}
@@ -204,15 +212,15 @@ export default function UserDetailPage() {
           {/* Profile Card */}
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <User size={14} /> Profile
+              <User size={14} /> {t('systemAdmin.users.detail.profile')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="First Name" value={u.first_name} />
-              <Detail label="Last Name" value={u.last_name} />
-              <Detail label="Email" value={u.email} className="col-span-2" />
-              <Detail label="Phone" value={u.phone_number} />
+              <Detail label={t('systemAdmin.users.detail.firstName')} value={u.first_name} />
+              <Detail label={t('systemAdmin.users.detail.lastName')} value={u.last_name} />
+              <Detail label={t('systemAdmin.users.detail.email')} value={u.email} className="col-span-2" />
+              <Detail label={t('systemAdmin.users.detail.phone')} value={u.phone_number} />
               <Detail
-                label="Role"
+                label={t('systemAdmin.users.detail.role')}
                 value={
                   <span className={`badge ${ROLE_COLORS[userRole]}`}>
                     {ROLE_LABELS[userRole]}
@@ -220,35 +228,35 @@ export default function UserDetailPage() {
                 }
               />
               <Detail
-                label="Verified"
+                label={t('systemAdmin.users.detail.verified')}
                 value={
                   u.is_verified ? (
                     <span className="flex items-center gap-1 text-emerald-600 text-sm font-semibold">
-                      <Check size={14} /> Verified
+                      <Check size={14} /> {t('systemAdmin.users.detail.verified')}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1 text-gray-400 text-sm">
-                      <X size={14} /> Pending
+                      <X size={14} /> {t('systemAdmin.users.detail.pending')}
                     </span>
                   )
                 }
               />
               <Detail
-                label="Active"
+                label={t('systemAdmin.users.detail.active')}
                 value={
                   u.is_active ? (
                     <span className="text-emerald-600 text-sm font-semibold">
-                      Active
+                      {t('systemAdmin.users.detail.active')}
                     </span>
                   ) : (
                     <span className="text-red-500 text-sm font-semibold">
-                      Inactive
+                      {t('systemAdmin.users.detail.inactive')}
                     </span>
                   )
                 }
               />
-              <Detail label="Joined" value={formatDate(u.created_at)} />
-              <Detail label="Last Updated" value={formatDate(u.updated_at)} />
+              <Detail label={t('systemAdmin.users.detail.joined')} value={formatDate(u.created_at)} />
+              <Detail label={t('systemAdmin.users.detail.lastUpdated')} value={formatDate(u.updated_at)} />
             </div>
           </div>
 
@@ -259,38 +267,38 @@ export default function UserDetailPage() {
             profile?.national_id_number && (
               <div className="card p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <Shield size={14} /> Identification
+                  <Shield size={14} /> {t('systemAdmin.users.detail.identification')}
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
                   <Detail
-                    label="National ID #"
+                    label={t('systemAdmin.users.detail.nationalId')}
                     value={profile.national_id_number}
                     mono
                   />
                   {profile.front_national_id_image && (
                     <Detail
-                      label="Front of ID"
+                      label={t('systemAdmin.users.detail.frontOfId')}
                       value={
                         <a
                           href={profile.front_national_id_image}
                           target="_blank"
                           className="text-blue-600 hover:underline text-xs"
                         >
-                          View Image
+                          {t('systemAdmin.users.detail.viewImage')}
                         </a>
                       }
                     />
                   )}
                   {profile.back_national_id_image && (
                     <Detail
-                      label="Back of ID"
+                      label={t('systemAdmin.users.detail.backOfId')}
                       value={
                         <a
                           href={profile.back_national_id_image}
                           target="_blank"
                           className="text-blue-600 hover:underline text-xs"
                         >
-                          View Image
+                          {t('systemAdmin.users.detail.viewImage')}
                         </a>
                       }
                     />
@@ -303,24 +311,24 @@ export default function UserDetailPage() {
           {userRole === "SOCIAL_WORKER" && profile && (
             <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Briefcase size={14} /> Assignment
+                <Briefcase size={14} /> {t('systemAdmin.users.detail.assignment')}
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <Detail label="Organization" value={profile.organization} />
+                <Detail label={t('systemAdmin.users.detail.organization')} value={profile.organization} />
                 <Detail
-                  label="Region Assigned"
+                  label={t('systemAdmin.users.detail.regionAssigned')}
                   value={profile.region_assigned}
                 />
                 <Detail
-                  label="Approved"
+                  label={t('systemAdmin.users.detail.approved')}
                   value={
                     profile.is_approved ? (
                       <span className="text-emerald-600 text-sm font-semibold">
-                        Approved
+                        {t('systemAdmin.users.detail.approved')}
                       </span>
                     ) : (
                       <span className="text-amber-600 text-sm font-semibold">
-                        Pending
+                        {t('systemAdmin.users.detail.pending')}
                       </span>
                     )
                   }
@@ -333,16 +341,16 @@ export default function UserDetailPage() {
             data.hospital_info && (
               <div className="card p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <Building2 size={14} /> Hospital Assignment
+                  <Building2 size={14} /> {t('systemAdmin.users.detail.hospitalAssignment')}
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
                   <Detail
-                    label="Hospital"
+                    label={t('systemAdmin.users.detail.hospital')}
                     value={data.hospital_info.name}
                   />
-                  <Detail label="City" value={data.hospital_info.city} />
+                  <Detail label={t('systemAdmin.users.detail.city')} value={data.hospital_info.city} />
                   <Detail
-                    label="Status"
+                    label={t('systemAdmin.users.detail.status')}
                     value={
                       <StatusBadge
                         status={data.hospital_info.partnership_status}
@@ -356,10 +364,10 @@ export default function UserDetailPage() {
           {userRole === "SYSTEM_ADMIN" && (
             <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Shield size={14} /> System Admin
+                <Shield size={14} /> {t('systemAdmin.users.detail.systemAdmin')}
               </h2>
               <p className="text-xs text-gray-500">
-                Full platform access with all permissions.
+                {t('systemAdmin.users.detail.systemAdminDesc')}
               </p>
             </div>
           )}
@@ -369,29 +377,29 @@ export default function UserDetailPage() {
             <>
               <div className="card p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <TrendingUp size={14} /> Donor Stats
+                  <TrendingUp size={14} /> {t('systemAdmin.users.detail.donorStats')}
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <StatCard
-                    label="Total Raised"
+                    label={t('systemAdmin.users.detail.totalRaised')}
                     value={formatXAF(data.donor_stats.total_raised)}
                     icon={TrendingUp}
                     color="#471DDB"
                   />
                   <StatCard
-                    label="Campaigns"
+                    label={t('systemAdmin.users.detail.campaigns')}
                     value={data.donor_stats.my_campaigns}
                     icon={FileText}
                     color="#1DB1DB"
                   />
                   <StatCard
-                    label="Contributors"
+                    label={t('systemAdmin.users.detail.contributors')}
                     value={data.donor_stats.contributors}
                     icon={Users}
                     color="#1CDBC9"
                   />
                   <StatCard
-                    label="Lives Impacted"
+                    label={t('systemAdmin.users.detail.livesImpacted')}
                     value={data.donor_stats.lives_impacted}
                     icon={Heart}
                     color="#ef4444"
@@ -402,7 +410,7 @@ export default function UserDetailPage() {
               {data.campaigns.length > 0 && (
                 <div className="card p-5">
                   <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                    <FileText size={14} /> Campaigns
+                    <FileText size={14} /> {t('systemAdmin.users.detail.campaigns')}
                   </h2>
                   <div className="space-y-3">
                     {data.campaigns.map((c) => (
@@ -441,25 +449,25 @@ export default function UserDetailPage() {
               {data.recent_donations.length > 0 && (
                 <div className="card p-5">
                   <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                    <HandHeart size={14} /> Recent Donations
+                    <HandHeart size={14} /> {t('systemAdmin.users.detail.recentDonations')}
                   </h2>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-xs text-gray-400 border-b border-gray-100">
                           <th className="text-left py-2 font-medium">
-                            Campaign
+                            {t('systemAdmin.users.detail.campaigns')}
                           </th>
                           <th className="text-left py-2 font-medium">
-                            Donor
+                            {t('systemAdmin.users.detail.donor')}
                           </th>
                           <th className="text-right py-2 font-medium">
-                            Amount
+                            {t('systemAdmin.users.detail.amount')}
                           </th>
                           <th className="text-center py-2 font-medium">
-                            Status
+                            {t('systemAdmin.users.detail.status')}
                           </th>
-                          <th className="text-right py-2 font-medium">Date</th>
+                          <th className="text-right py-2 font-medium">{t('systemAdmin.users.detail.date')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -498,35 +506,35 @@ export default function UserDetailPage() {
             <>
               <div className="card p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <Building2 size={14} /> Hospital Stats
+                  <Building2 size={14} /> {t('systemAdmin.users.detail.hospitalStats')}
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   <StatCard
-                    label="Vouchers Redeemed"
+                    label={t('systemAdmin.users.detail.vouchersRedeemed')}
                     value={data.hospital_stats.redeemed_vouchers}
                     icon={CheckCircle}
                     color="#1CDBC9"
                   />
                   <StatCard
-                    label="Vouchers Issued"
+                    label={t('systemAdmin.users.detail.vouchersIssued')}
                     value={data.hospital_stats.issued_vouchers}
                     icon={Ticket}
                     color="#471DDB"
                   />
                   <StatCard
-                    label="Total Claims"
+                    label={t('systemAdmin.users.detail.totalClaims')}
                     value={data.hospital_stats.total_claims}
                     icon={FileText}
                     color="#1DB1DB"
                   />
                   <StatCard
-                    label="Pending Claims"
+                    label={t('systemAdmin.users.detail.pendingClaims')}
                     value={data.hospital_stats.pending_claims}
                     icon={Clock}
                     color="#f59e0b"
                   />
                   <StatCard
-                    label="Staff"
+                    label={t('systemAdmin.users.detail.staff')}
                     value={data.hospital_stats.number_of_staff}
                     icon={Users}
                     color="#8b5cf6"
@@ -537,7 +545,7 @@ export default function UserDetailPage() {
               {data.hospital_receptionists.length > 0 && (
                 <div className="card p-5">
                   <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                    <Users size={14} /> Enrolled Receptionists
+                    <Users size={14} /> {t('systemAdmin.users.detail.enrolledReceptionists')}
                   </h2>
                   <div className="space-y-2">
                     {data.hospital_receptionists.map((rec) => (
@@ -554,7 +562,7 @@ export default function UserDetailPage() {
                         <span
                           className={`badge text-[10px] ${rec.is_active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}
                         >
-                          {rec.is_active ? "Active" : "Inactive"}
+                          {rec.is_active ? t('systemAdmin.users.detail.active') : t('systemAdmin.users.detail.inactive')}
                         </span>
                       </div>
                     ))}
@@ -569,17 +577,17 @@ export default function UserDetailPage() {
             <>
               <div className="card p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <Heart size={14} /> Social Worker Stats
+                  <Heart size={14} /> {t('systemAdmin.users.detail.socialWorkerStats')}
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <StatCard
-                    label="Enrolled"
+                    label={t('systemAdmin.users.detail.enrolled')}
                     value={data.social_worker_stats.enrolled}
                     icon={Users}
                     color="#471DDB"
                   />
                   <StatCard
-                    label="Awaiting Match"
+                    label={t('systemAdmin.users.detail.awaitingMatch')}
                     value={data.social_worker_stats.awaiting_match}
                     icon={Clock}
                     color="#f59e0b"
@@ -591,7 +599,7 @@ export default function UserDetailPage() {
                     color="#1CDBC9"
                   />
                   <StatCard
-                    label="Care Received"
+                    label={t('systemAdmin.users.detail.careReceived')}
                     value={data.social_worker_stats.care_received}
                     icon={CheckCircle}
                     color="#10b981"
@@ -602,17 +610,15 @@ export default function UserDetailPage() {
               {data.beneficiaries.length > 0 && (
                 <div className="card p-5">
                   <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                    <Users size={14} /> Enrolled Beneficiaries
+                    <Users size={14} /> {t('systemAdmin.users.detail.enrolledBeneficiaries')}
                   </h2>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-xs text-gray-400 border-b border-gray-100">
-                          <th className="text-left py-2 font-medium">Name</th>
-                          <th className="text-left py-2 font-medium">ID</th>
-                          <th className="text-left py-2 font-medium">
-                            Category
-                          </th>
+                          <th className="text-left py-2 font-medium">{t('systemAdmin.users.detail.name')}</th>
+                          <th className="text-left py-2 font-medium">{t('systemAdmin.users.detail.id')}</th>
+                          <th className="text-left py-2 font-medium">{t('systemAdmin.users.detail.category')}</th>
                           <th className="text-left py-2 font-medium">
                             Region
                           </th>
@@ -665,7 +671,7 @@ export default function UserDetailPage() {
               {data.health_issues.length > 0 && (
                 <div className="card p-5">
                   <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                    <Heart size={14} /> Reported Health Issues
+                    <Heart size={14} /> {t('systemAdmin.users.detail.reportedHealthIssues')}
                   </h2>
                   <div className="space-y-2">
                     {data.health_issues.map((hi) => (
@@ -702,7 +708,7 @@ export default function UserDetailPage() {
             <>
               <div className="card p-5">
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <FileText size={14} /> Receptionist Stats
+                  <FileText size={14} /> {t('systemAdmin.users.detail.receptionistStats')}
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <StatCard
@@ -718,25 +724,25 @@ export default function UserDetailPage() {
                     color="#471DDB"
                   />
                   <StatCard
-                    label="Pending"
+                    label={t('systemAdmin.users.detail.pending')}
                     value={data.receptionist_stats.pending_claims}
                     icon={Clock}
                     color="#f59e0b"
                   />
                   <StatCard
-                    label="Approved"
+                    label={t('systemAdmin.users.detail.approvedClaims')}
                     value={data.receptionist_stats.approved_claims}
                     icon={Check}
                     color="#10b981"
                   />
                   <StatCard
-                    label="Rejected"
+                    label={t('systemAdmin.users.detail.rejectedClaims')}
                     value={data.receptionist_stats.rejected_claims}
                     icon={XCircle}
                     color="#ef4444"
                   />
                   <StatCard
-                    label="Proofs Uploaded"
+                    label={t('systemAdmin.users.detail.proofsUploaded')}
                     value={data.receptionist_stats.uploaded_proofs}
                     icon={FileText}
                     color="#8b5cf6"
@@ -747,7 +753,7 @@ export default function UserDetailPage() {
               {data.submitted_claims.length > 0 && (
                 <div className="card p-5">
                   <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                    <FileText size={14} /> Submitted Claims
+                    <FileText size={14} /> {t('systemAdmin.users.detail.submittedClaims')}
                   </h2>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -805,29 +811,29 @@ export default function UserDetailPage() {
           {userRole === "SYSTEM_ADMIN" && data.system_admin_stats && (
             <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Shield size={14} /> Admin Activity
+                <Shield size={14} /> {t('systemAdmin.users.detail.adminActivity')}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <StatCard
-                  label="Enrolled Admins"
+                  label={t('systemAdmin.users.detail.enrolledAdmins')}
                   value={data.system_admin_stats.enrolled_admins}
                   icon={Building2}
                   color="#471DDB"
                 />
                 <StatCard
-                  label="Enrolled SWs"
+                  label={t('systemAdmin.users.detail.enrolledSWs')}
                   value={data.system_admin_stats.enrolled_social_workers}
                   icon={Users}
                   color="#1CDBC9"
                 />
                 <StatCard
-                  label="Validated Issues"
+                  label={t('systemAdmin.users.detail.validatedIssues')}
                   value={data.system_admin_stats.validated_health_issues}
                   icon={Heart}
                   color="#f59e0b"
                 />
                 <StatCard
-                  label="Reviewed Claims"
+                  label={t('systemAdmin.users.detail.reviewedClaims')}
                   value={data.system_admin_stats.reviewed_claims}
                   icon={FileText}
                   color="#1DB1DB"
@@ -840,7 +846,7 @@ export default function UserDetailPage() {
           {devices.length > 0 && (
             <div className="card p-5">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Smartphone size={14} /> Devices & Sessions
+                <Smartphone size={14} /> {t('systemAdmin.users.detail.devicesSessions')}
               </h2>
               <div className="space-y-2">
                 {devices.map((d) => (
@@ -852,7 +858,7 @@ export default function UserDetailPage() {
                       <Smartphone size={14} className="text-gray-400" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {d.device_name || d.browser || "Unknown Device"}
+                          {d.device_name || d.browser || t('systemAdmin.users.detail.unknownDevice')}
                         </p>
                         <p className="text-[10px] text-gray-400">
                           {d.os} &middot; {d.browser} &middot; {d.ip_address}
@@ -887,48 +893,48 @@ export default function UserDetailPage() {
         <div className="space-y-4">
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
-              Account Status
+              {t('systemAdmin.users.detail.accountStatus')}
             </h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Verified</span>
+                <span className="text-xs text-gray-500">{t('systemAdmin.users.detail.verified')}</span>
                 {u.is_verified ? (
                   <span className="badge bg-emerald-100 text-emerald-700 text-[10px]">
-                    Yes
+                    {t('systemAdmin.users.detail.yes')}
                   </span>
                 ) : (
                   <span className="badge bg-gray-100 text-gray-500 text-[10px]">
-                    No
+                    {t('systemAdmin.users.detail.no')}
                   </span>
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Active</span>
+                <span className="text-xs text-gray-500">{t('systemAdmin.users.detail.active')}</span>
                 {u.is_active ? (
                   <span className="badge bg-emerald-100 text-emerald-700 text-[10px]">
-                    Yes
+                    {t('systemAdmin.users.detail.yes')}
                   </span>
                 ) : (
                   <span className="badge bg-red-100 text-red-600 text-[10px]">
-                    No
+                    {t('systemAdmin.users.detail.no')}
                   </span>
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Role</span>
+                <span className="text-xs text-gray-500">{t('systemAdmin.users.detail.role')}</span>
                 <span className={`badge text-[10px] ${ROLE_COLORS[userRole]}`}>
                   {ROLE_LABELS[userRole]}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Joined</span>
+                <span className="text-xs text-gray-500">{t('systemAdmin.users.detail.joined')}</span>
                 <span className="text-xs text-gray-700">
                   {formatDate(u.created_at)}
                 </span>
               </div>
               {devices.length > 0 && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Devices</span>
+                  <span className="text-xs text-gray-500">{t('systemAdmin.users.detail.devicesSessions')}</span>
                   <span className="text-xs text-gray-700">
                     {devices.length}
                   </span>

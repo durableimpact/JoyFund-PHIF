@@ -12,6 +12,7 @@ import HospitalForm, { HospitalFormData } from "../../_components/HospitalForm";
 import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function EditHospitalPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const { data: session } = useSession();
   const token =
@@ -57,12 +58,12 @@ export default function EditHospitalPage() {
         lng: data.lng ? Math.round(data.lng * 1e6) / 1e6 : undefined,
       });
 
-      toast.success("Hospital updated successfully");
+      toast.success(t('systemAdmin.hospitals.edit.updatedSuccess'));
       queryClient.invalidateQueries({ queryKey: ["hospitals"] });
       queryClient.invalidateQueries({ queryKey: ["hospital", id] });
       router.push(`/dashboard/system-admin/hospitals/${id}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to update hospital";
+      const msg = err instanceof Error ? err.message : t('systemAdmin.hospitals.edit.updateFailed');
       toast.error(msg);
     } finally {
       setIsLoading(false);
@@ -77,7 +78,7 @@ export default function EditHospitalPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-gray-500">Hospital not found</p>
+          <p className="text-gray-500">{t('systemAdmin.hospitals.edit.notFound')}</p>
         </div>
       </div>
     );

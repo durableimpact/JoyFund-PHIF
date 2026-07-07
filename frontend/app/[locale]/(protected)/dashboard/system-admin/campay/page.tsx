@@ -16,6 +16,7 @@ import { getCampayBalance, campayDisburse, getCampayTransactionStatus } from '@/
 import { listHospitals } from '@/actions/hospital';
 
 export default function CampayPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const queryClient = useQueryClient();
@@ -68,11 +69,11 @@ export default function CampayPage() {
 
   function handleDisburseSubmit(e: React.FormEvent) {
     e.preventDefault(); setFormError('');
-    if (!amount || parseFloat(amount) <= 0) return setFormError('Enter a valid amount');
-    if (!phone) return setFormError('Enter recipient phone number');
-    if (!description) return setFormError('Enter a description');
+    if (!amount || parseFloat(amount) <= 0) return setFormError(t('systemAdmin.campay.invalidAmount'));
+    if (!phone) return setFormError(t('systemAdmin.campay.invalidPhone'));
+    if (!description) return setFormError(t('systemAdmin.campay.enterDescription'));
     const cleaned = phone.replace(/[\s\+]/g, '');
-    if (!cleaned.startsWith('237') || cleaned.length !== 12) return setFormError('Phone must be 237XXXXXXXXX (12 digits)');
+    if (!cleaned.startsWith('237') || cleaned.length !== 12) return setFormError(t('systemAdmin.campay.phoneFormat'));
     disburseMutation.mutate({
       amount: parseFloat(amount),
       phone: cleaned,
@@ -83,7 +84,7 @@ export default function CampayPage() {
 
   async function handleLookup(e: React.FormEvent) {
     e.preventDefault(); setTxLookupError(''); setTxStatus(null);
-    if (!txRef.trim()) return setTxLookupError('Enter a transaction reference');
+    if (!txRef.trim()) return setTxLookupError(t('systemAdmin.campay.enterReference'));
     setTxLoading(true);
     try {
       const result = await getCampayTransactionStatus(token, txRef.trim());
@@ -112,8 +113,8 @@ export default function CampayPage() {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">CamPay</h1>
-          <p className="text-gray-500 text-sm">Mobile Money wallet balance and disbursements</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.campay.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('systemAdmin.campay.subtitle')}</p>
         </div>
         {/* Disburse button hidden — Campay API withdrawals currently unauthorized */}
         {/* <button
@@ -128,7 +129,7 @@ export default function CampayPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
         <div className="card flex items-center justify-between p-5">
           <div>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Total Balance</p>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.totalBalance')}</p>
             <h3 className="text-2xl font-black text-gray-900">
               {loadingBalance ? <Loader2 className="animate-spin text-gray-400 size-5" /> : fmtXAF(balance?.total_balance)}
             </h3>
@@ -137,7 +138,7 @@ export default function CampayPage() {
         </div>
         <div className="card flex items-center justify-between p-5">
           <div>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">MTN Balance</p>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.mtnBalance')}</p>
             <h3 className="text-2xl font-black text-gray-900">
               {loadingBalance ? <Loader2 className="animate-spin text-gray-400 size-5" /> : fmtXAF(balance?.mtn_balance)}
             </h3>
@@ -146,7 +147,7 @@ export default function CampayPage() {
         </div>
         <div className="card flex items-center justify-between p-5">
           <div>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Orange Balance</p>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.orangeBalance')}</p>
             <h3 className="text-2xl font-black text-gray-900">
               {loadingBalance ? <Loader2 className="animate-spin text-gray-400 size-5" /> : fmtXAF(balance?.orange_balance)}
             </h3>
@@ -156,10 +157,10 @@ export default function CampayPage() {
       </div>
 
       <div className="card p-5 mb-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">Transaction Status Lookup</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-3">{t('systemAdmin.campay.lookupTitle')}</h2>
         <form onSubmit={handleLookup} className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
           <div className="flex-1 w-full">
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Campay Reference</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.campay.referenceLabel')}</label>
             <input
               type="text" className="input-field text-sm font-mono w-full"
               placeholder="e.g. bcedde9b-62a7-..."
@@ -172,7 +173,7 @@ export default function CampayPage() {
             style={{ background: '#471DDB' }}
           >
             {txLoading && <Loader2 size={14} className="animate-spin" />}
-            Look Up
+            {t('systemAdmin.campay.lookupButton')}
           </button>
         </form>
 
@@ -185,23 +186,23 @@ export default function CampayPage() {
         {txStatus && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Status</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.status')}</p>
               <span className={`badge text-xs ${statusColor(txStatus.status)}`}>{txStatus.status}</span>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Amount</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.amount')}</p>
               <p className="text-sm font-bold text-gray-900">{txStatus.amount} {txStatus.currency}</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Operator</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.operator')}</p>
               <p className="text-sm font-semibold text-gray-900">{txStatus.operator || '—'}</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Code</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.code')}</p>
               <p className="text-sm font-mono text-gray-900">{txStatus.code || '—'}</p>
             </div>
             <div className="col-span-2 sm:col-span-4 bg-gray-50 rounded-xl p-3">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Operator Reference</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">{t('systemAdmin.campay.operatorRef')}</p>
               <p className="text-sm font-mono text-gray-900">{txStatus.operator_reference || '—'}</p>
             </div>
           </div>
@@ -214,8 +215,8 @@ export default function CampayPage() {
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2 rounded-lg bg-purple-50 text-purple-600"><Landmark size={18} /></div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">Disburse via CamPay</h2>
-                <p className="text-xs text-gray-400">Send money via Mobile Money (MTN / Orange)</p>
+                <h2 className="text-lg font-bold text-gray-900">{t('systemAdmin.campay.disburseTitle')}</h2>
+                <p className="text-xs text-gray-400">{t('systemAdmin.campay.disburseSubtitle')}</p>
               </div>
             </div>
 
@@ -227,34 +228,34 @@ export default function CampayPage() {
 
             <form onSubmit={handleDisburseSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Amount (XAF)</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.campay.amountLabel')}</label>
                 <input type="number" min="1" step="0.01" className="input-field text-sm" placeholder="e.g. 5000" value={amount} onChange={e => setAmount(e.target.value)} required />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Recipient Phone</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.campay.recipientPhone')}</label>
                 <input type="tel" className="input-field text-sm font-mono" placeholder="2376XXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} required />
                 <p className="text-[10px] text-gray-400 mt-1">Cameroon number starting with 237 (e.g. 237670000000)</p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Description</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.campay.descriptionLabel')}</label>
                 <input type="text" className="input-field text-sm" placeholder="Reason for disbursement" value={description} onChange={e => setDescription(e.target.value)} required />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Hospital (optional)</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.campay.hospitalOptional')}</label>
                 <select className="input-field text-sm" value={selectedHospital} onChange={e => setSelectedHospital(e.target.value)}>
-                  <option value="">No hospital association</option>
+                  <option value="">{t('systemAdmin.campay.noHospital')}</option>
                   {hospitals.map(h => <option key={h.id} value={h.id}>{h.name} ({h.city})</option>)}
                 </select>
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowDisburseForm(false)} className="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50">Cancel</button>
+                <button type="button" onClick={() => setShowDisburseForm(false)} className="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50">{t('systemAdmin.campay.cancel')}</button>
                 <button type="submit" disabled={disburseMutation.isPending} className="px-4 py-2 text-white rounded-xl text-sm font-semibold hover:opacity-90 flex items-center gap-2" style={{ background: '#471DDB' }}>
                   {disburseMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-                  {disburseMutation.isPending ? 'Processing...' : 'Disburse'}
+                  {disburseMutation.isPending ? t('systemAdmin.campay.processing') : t('systemAdmin.campay.disburse')}
                 </button>
               </div>
             </form>

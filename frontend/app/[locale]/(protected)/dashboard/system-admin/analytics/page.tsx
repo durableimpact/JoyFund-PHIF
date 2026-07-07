@@ -449,7 +449,7 @@ export default function AdminAnalytics() {
         {/* Daily Activity */}
         <div className="card p-6">
           <h3 className="font-bold text-gray-900 mb-4">
-            Daily Activity (Last 14 Days)
+            {t('systemAdmin.analytics.dailyActivity')}
           </h3>
           {isLoading ? (
             <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />

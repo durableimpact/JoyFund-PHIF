@@ -38,6 +38,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export default function TransactionDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -57,8 +58,8 @@ export default function TransactionDetailPage() {
   if (isError || !tx) {
     return (
       <div className="text-center py-20 px-4">
-        <p className="text-gray-400 text-sm">Transaction not found</p>
-        <button onClick={() => router.back()} className="mt-4 text-sm font-semibold text-[#471DDB]">Go back</button>
+        <p className="text-gray-400 text-sm">{t('systemAdmin.transactions.detail.notFound')}</p>
+        <button onClick={() => router.back()} className="mt-4 text-sm font-semibold text-[#471DDB]">{t('systemAdmin.transactions.detail.goBack')}</button>
       </div>
     );
   }
@@ -72,7 +73,7 @@ export default function TransactionDetailPage() {
           <ArrowLeft size={20} className="text-gray-600" />
         </button>
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-black text-gray-900">Transaction Details</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-gray-900">{t('systemAdmin.transactions.detail.title')}</h1>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusColors[tx.status] || "text-gray-600 bg-gray-50 border-gray-100"}`}>
               {tx.status}
@@ -91,39 +92,39 @@ export default function TransactionDetailPage() {
           </div>
           <div>
             <p className="text-4xl font-black">{formatXAF(tx.amount)}</p>
-            <p className="text-sm text-gray-400 font-medium">{tx.currency} &middot; {tx.direction === "IN" ? "Incoming" : "Outgoing"}</p>
+            <p className="text-sm text-gray-400 font-medium">{tx.currency} &middot; {tx.direction === "IN" ? t('systemAdmin.transactions.detail.incoming') : t('systemAdmin.transactions.detail.outgoing')}</p>
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <Field label="Transaction Type">
+          <Field label={t('systemAdmin.transactions.detail.transactionType')}>
             <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${typeColors[tx.type] || "bg-gray-100 text-gray-700"}`}>{fmtLabel(tx.type)}</span>
           </Field>
-          <Field label="Status">
+          <Field label={t('systemAdmin.transactions.detail.status')}>
             <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[tx.status] || "bg-gray-50 text-gray-600 border border-gray-100"}`}>{fmtLabel(tx.status)}</span>
           </Field>
-          <Field label="Direction">
-            <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${directionColors[tx.direction] || "bg-gray-100 text-gray-700"}`}>{tx.direction === "IN" ? "Incoming" : "Outgoing"}</span>
+          <Field label={t('systemAdmin.transactions.detail.direction')}>
+            <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${directionColors[tx.direction] || "bg-gray-100 text-gray-700"}`}>{tx.direction === "IN" ? t('systemAdmin.transactions.detail.incoming') : t('systemAdmin.transactions.detail.outgoing')}</span>
           </Field>
-          <Field label="Gateway Transaction ID">
+          <Field label={t('systemAdmin.transactions.detail.gatewayTxId')}>
             <p className="text-sm font-mono text-gray-700 break-all">{tx.gateway_transaction_id || "&mdash;"}</p>
           </Field>
           {tx.gateway_id && (
-            <Field label="Gateway">
+            <Field label={t('systemAdmin.transactions.detail.gateway')}>
               <Link href={`/dashboard/system-admin/gateways/${tx.gateway_id}`} className="text-sm font-semibold text-[#471DDB] hover:underline inline-flex items-center gap-1">
-                View Gateway <ExternalLink size={12} />
+                {t('systemAdmin.transactions.detail.viewGateway')} <ExternalLink size={12} />
               </Link>
             </Field>
           )}
           {tx.donation_id && (
-            <Field label="Donation ID">
+            <Field label={t('systemAdmin.transactions.detail.donationId')}>
               <p className="text-sm font-mono text-gray-700 break-all">{tx.donation_id}</p>
             </Field>
           )}
-          <Field label="Created">
+          <Field label={t('systemAdmin.transactions.detail.created')}>
             <p className="text-sm text-gray-700">{formatDateTime(tx.created_at)}</p>
           </Field>
-          <Field label="Updated">
+          <Field label={t('systemAdmin.transactions.detail.updated')}>
             <p className="text-sm text-gray-700">{formatDateTime(tx.updated_at)}</p>
           </Field>
         </div>
@@ -131,12 +132,12 @@ export default function TransactionDetailPage() {
         {(tx.source_id || tx.destination_id) && (
           <div className="mt-6 pt-6 border-t border-gray-100 grid sm:grid-cols-2 gap-6">
             {tx.source_id && (
-              <Field label="Source Account">
+              <Field label={t('systemAdmin.transactions.detail.sourceAccount')}>
                 <p className="text-sm font-mono text-gray-700 break-all">{tx.source_id}</p>
               </Field>
             )}
             {tx.destination_id && (
-              <Field label="Destination Account">
+              <Field label={t('systemAdmin.transactions.detail.destinationAccount')}>
                 <p className="text-sm font-mono text-gray-700 break-all">{tx.destination_id}</p>
               </Field>
             )}
@@ -147,7 +148,7 @@ export default function TransactionDetailPage() {
       {/* Metadata */}
       {tx.metadata && Object.keys(tx.metadata).length > 0 && (
         <div className="card p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Metadata</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('systemAdmin.transactions.detail.metadata')}</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {Object.entries(tx.metadata).map(([key, value]) => (
               <div key={key} className="p-3 bg-gray-50 rounded-xl">
@@ -164,7 +165,7 @@ export default function TransactionDetailPage() {
         <div className="card p-6">
           <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
             <Clock size={18} className="text-[#471DDB]" />
-            Status History
+            {t('systemAdmin.transactions.detail.statusHistory')}
           </h3>
           <div className="space-y-4 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
             {tx.events.map((event, idx) => (

@@ -21,17 +21,18 @@ import {
 import { sendTestPush, getPushTaskStatus } from "@/actions/notifications";
 import { getUsers } from "@/actions/accounts";
 
-const ROLE_OPTIONS: { label: string; value: USER_ROLE }[] = [
-  { label: "Donors", value: "DONOR" },
-  { label: "Hospital Admins", value: "HOSPITAL_ADMIN" },
-  { label: "Social Workers", value: "SOCIAL_WORKER" },
-  { label: "Receptionists", value: "RECEPTIONIST" },
-  { label: "System Admins", value: "SYSTEM_ADMIN" },
+const ROLE_OPTIONS_RAW: { labelKey: string; value: USER_ROLE }[] = [
+  { labelKey: "systemAdmin.pushNotifications.donors", value: "DONOR" },
+  { labelKey: "systemAdmin.pushNotifications.hospitalAdmins", value: "HOSPITAL_ADMIN" },
+  { labelKey: "systemAdmin.pushNotifications.socialWorkers", value: "SOCIAL_WORKER" },
+  { labelKey: "systemAdmin.pushNotifications.receptionists", value: "RECEPTIONIST" },
+  { labelKey: "systemAdmin.pushNotifications.systemAdmins", value: "SYSTEM_ADMIN" },
 ];
 
 type TargetMode = "all" | "roles" | "users";
 
 export default function PushNotificationsPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token =
     session?.accessToken ||
@@ -42,6 +43,8 @@ export default function PushNotificationsPage() {
   const [url, setUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [actions, setActions] = useState<PushAction[]>([]);
+  const ROLE_OPTIONS = ROLE_OPTIONS_RAW.map(r => ({ label: t(r.labelKey as any, {}), value: r.value }));
+
   const [targetMode, setTargetMode] = useState<TargetMode>("all");
   const [selectedRoles, setSelectedRoles] = useState<USER_ROLE[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -176,10 +179,10 @@ export default function PushNotificationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900">
-            Push Notifications
+            {t('systemAdmin.pushNotifications.pageTitle')}
           </h1>
           <p className="text-gray-500 text-sm">
-            Send web push notifications to users
+            {t('systemAdmin.pushNotifications.pageSubtitle')}
           </p>
         </div>
       </div>
@@ -189,24 +192,24 @@ export default function PushNotificationsPage() {
           {/* Message Content */}
           <div className="card p-6 space-y-4">
             <h2 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-              <Bell size={16} /> Message
+              <Bell size={16} /> {t('systemAdmin.pushNotifications.message')}
             </h2>
 
             <div>
-              <label className="label-field">Title</label>
+              <label className="label-field">{t('systemAdmin.pushNotifications.title')}</label>
               <input
                 className="input-field w-full"
-                placeholder="Notification title"
+                placeholder={t('systemAdmin.pushNotifications.titlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="label-field">Body</label>
+              <label className="label-field">{t('systemAdmin.pushNotifications.body')}</label>
               <textarea
                 className="input-field w-full min-h-[100px] resize-y"
-                placeholder="Notification message body"
+                placeholder={t('systemAdmin.pushNotifications.bodyPlaceholder')}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
               />
@@ -214,11 +217,11 @@ export default function PushNotificationsPage() {
 
             <div>
               <label className="label-field">
-                URL <span className="text-gray-400 font-normal">(optional)</span>
+                {t('systemAdmin.pushNotifications.url')} <span className="text-gray-400 font-normal">({t('systemAdmin.pushNotifications.optional')})</span>
               </label>
               <input
                 className="input-field w-full"
-                placeholder="https://joy-fund.com/..."
+                placeholder={t('systemAdmin.pushNotifications.urlPlaceholder')}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />
@@ -226,11 +229,11 @@ export default function PushNotificationsPage() {
 
             <div>
               <label className="label-field">
-                Image URL <span className="text-gray-400 font-normal">(optional)</span>
+                {t('systemAdmin.pushNotifications.imageUrl')} <span className="text-gray-400 font-normal">({t('systemAdmin.pushNotifications.optional')})</span>
               </label>
               <input
                 className="input-field w-full"
-                placeholder="https://joy-fund.com/campaign-cover.jpg"
+                placeholder={t('systemAdmin.pushNotifications.imageUrlPlaceholder')}
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
               />
@@ -239,7 +242,7 @@ export default function PushNotificationsPage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageUrl}
-                    alt="Preview"
+                    alt={t('systemAdmin.pushNotifications.previewAlt')}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
@@ -251,14 +254,14 @@ export default function PushNotificationsPage() {
 
             <div>
               <label className="label-field">
-                Action Buttons <span className="text-gray-400 font-normal">(optional, max 2)</span>
+                {t('systemAdmin.pushNotifications.actionButtons')} <span className="text-gray-400 font-normal">({t('systemAdmin.pushNotifications.optionalMax2')})</span>
               </label>
               <div className="space-y-2">
                 {actions.map((action, idx) => (
                   <div key={idx} className="flex gap-2 items-center">
                     <input
                       className="input-field flex-1"
-                      placeholder="Action ID (e.g. open)"
+                      placeholder={t('systemAdmin.pushNotifications.actionIdPlaceholder')}
                       value={action.action}
                       onChange={(e) => {
                         const next = [...actions];
@@ -268,7 +271,7 @@ export default function PushNotificationsPage() {
                     />
                     <input
                       className="input-field flex-1"
-                      placeholder="Button label (e.g. View Campaign)"
+                      placeholder={t('systemAdmin.pushNotifications.buttonLabelPlaceholder')}
                       value={action.title}
                       onChange={(e) => {
                         const next = [...actions];
@@ -289,7 +292,7 @@ export default function PushNotificationsPage() {
                     onClick={() => setActions([...actions, { action: "", title: "" }])}
                     className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#471DDB] transition-colors"
                   >
-                    <Plus size={12} /> Add action button
+                    <Plus size={12} /> {t('systemAdmin.pushNotifications.addActionButton')}
                   </button>
                 )}
               </div>
@@ -299,7 +302,7 @@ export default function PushNotificationsPage() {
           {/* Target Selection */}
           <div className="card p-6 space-y-4">
             <h2 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-              <Users size={16} /> Recipients
+              <Users size={16} /> {t('systemAdmin.pushNotifications.recipients')}
             </h2>
 
             <div className="flex flex-wrap gap-2">
@@ -458,13 +461,13 @@ export default function PushNotificationsPage() {
               <Send size={16} />
             )}
             {mutation.isPending
-              ? "Sending..."
-              : `Send Notification${
+              ? t('systemAdmin.pushNotifications.sendingBtn')
+              : `${t('systemAdmin.pushNotifications.sendNotification')}${
                   targetMode === "users"
-                    ? ` (${selectedUserIds.length} user${selectedUserIds.length !== 1 ? "s" : ""})`
+                    ? ` (${selectedUserIds.length} ${t('systemAdmin.pushNotifications.user')}${selectedUserIds.length !== 1 ? "s" : ""})`
                     : targetMode === "roles"
-                      ? ` (${selectedRoles.length} role${selectedRoles.length !== 1 ? "s" : ""})`
-                      : " (All Users)"
+                      ? ` (${selectedRoles.length} ${t('systemAdmin.pushNotifications.role')}${selectedRoles.length !== 1 ? "s" : ""})`
+                      : ` (${t('systemAdmin.pushNotifications.allUsers')})`
                 }`}
           </button>
         </div>
@@ -486,14 +489,14 @@ export default function PushNotificationsPage() {
           {mutation.data && !mutation.data.async && (
             <div className="card p-5 space-y-3">
               <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                <Check size={16} className="text-emerald-500" /> Result
+                <Check size={16} className="text-emerald-500" /> {t('systemAdmin.pushNotifications.result')}
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-emerald-50 rounded-xl p-3 text-center">
                   <div className="text-2xl font-black text-emerald-600">
                     {(mutation.data.result as TestPushSyncResponse).sent}
                   </div>
-                  <div className="text-[10px] text-emerald-700 font-medium">Sent</div>
+                  <div className="text-[10px] text-emerald-700 font-medium">{t('systemAdmin.pushNotifications.sent')}</div>
                 </div>
                 <div className={`rounded-xl p-3 text-center ${
                   (mutation.data.result as TestPushSyncResponse).failed > 0 ? "bg-red-50" : "bg-gray-50"
@@ -505,12 +508,12 @@ export default function PushNotificationsPage() {
                   </div>
                   <div className={`text-[10px] font-medium ${
                     (mutation.data.result as TestPushSyncResponse).failed > 0 ? "text-red-700" : "text-gray-500"
-                  }`}>Failed</div>
+                  }`}>{t('systemAdmin.pushNotifications.failed')}</div>
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-xs text-gray-500">
-                  {(mutation.data.result as TestPushSyncResponse).total_subscriptions} total subscriptions
+                  {(mutation.data.result as TestPushSyncResponse).total_subscriptions} {t('systemAdmin.pushNotifications.totalSubscriptions')}
                 </div>
               </div>
             </div>
@@ -520,7 +523,7 @@ export default function PushNotificationsPage() {
           {taskStatus && taskStatus.status !== "COMPLETED" && taskStatus.status !== "FAILED" && (
             <div className="card p-5 space-y-3">
               <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                <Loader2 size={16} className="animate-spin text-[#471DDB]" /> Sending...
+                <Loader2 size={16} className="animate-spin text-[#471DDB]" /> {t('systemAdmin.pushNotifications.sending')}
               </h3>
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div
@@ -535,23 +538,23 @@ export default function PushNotificationsPage() {
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-gray-50 rounded-xl p-2">
                   <div className="text-lg font-black text-gray-900">{taskStatus.total}</div>
-                  <div className="text-[10px] text-gray-500">Total</div>
+                  <div className="text-[10px] text-gray-500">{t('systemAdmin.pushNotifications.total')}</div>
                 </div>
                 <div className="bg-emerald-50 rounded-xl p-2">
                   <div className="text-lg font-black text-emerald-600">{taskStatus.sent}</div>
-                  <div className="text-[10px] text-emerald-700">Sent</div>
+                  <div className="text-[10px] text-emerald-700">{t('systemAdmin.pushNotifications.sent')}</div>
                 </div>
                 <div className={`rounded-xl p-2 ${taskStatus.failed > 0 ? "bg-red-50" : "bg-gray-50"}`}>
                   <div className={`text-lg font-black ${taskStatus.failed > 0 ? "text-red-600" : "text-gray-400"}`}>
                     {taskStatus.failed}
                   </div>
-                  <div className={`text-[10px] ${taskStatus.failed > 0 ? "text-red-700" : "text-gray-500"}`}>Failed</div>
+                  <div className={`text-[10px] ${taskStatus.failed > 0 ? "text-red-700" : "text-gray-500"}`}>{t('systemAdmin.pushNotifications.failed')}</div>
                 </div>
               </div>
               <div className="text-[10px] text-gray-400 text-center">
                 {taskStatus.total > 0
                   ? `${taskStatus.sent + taskStatus.failed} / ${taskStatus.total} processed`
-                  : "Preparing..."}
+                  : t('systemAdmin.pushNotifications.preparing')}
               </div>
             </div>
           )}
@@ -563,29 +566,29 @@ export default function PushNotificationsPage() {
             }`}>
               <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
                 {taskStatus.status === "COMPLETED" ? (
-                  <><Check size={16} className="text-emerald-500" /> Broadcast Complete</>
+                  <><Check size={16} className="text-emerald-500" /> {t('systemAdmin.pushNotifications.broadcastComplete')}</>
                 ) : (
-                  <><X size={16} className="text-red-500" /> Broadcast Failed</>
+                  <><X size={16} className="text-red-500" /> {t('systemAdmin.pushNotifications.broadcastFailed')}</>
                 )}
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-emerald-50 rounded-xl p-3 text-center">
                   <div className="text-2xl font-black text-emerald-600">{taskStatus.sent}</div>
-                  <div className="text-[10px] text-emerald-700 font-medium">Sent</div>
+                  <div className="text-[10px] text-emerald-700 font-medium">{t('systemAdmin.pushNotifications.sent')}</div>
                 </div>
                 <div className={`rounded-xl p-3 text-center ${taskStatus.failed > 0 ? "bg-red-50" : "bg-gray-50"}`}>
                   <div className={`text-2xl font-black ${taskStatus.failed > 0 ? "text-red-600" : "text-gray-400"}`}>
                     {taskStatus.failed}
                   </div>
                   <div className={`text-[10px] font-medium ${taskStatus.failed > 0 ? "text-red-700" : "text-gray-500"}`}>
-                    Failed
+                    {t('systemAdmin.pushNotifications.failed')}
                   </div>
                 </div>
               </div>
 
               {taskStatus.errors && taskStatus.errors.length > 0 && (
                 <div className="bg-red-50 rounded-xl p-3 max-h-32 overflow-y-auto">
-                  <div className="text-[10px] font-semibold text-red-700 mb-1">Errors</div>
+                  <div className="text-[10px] font-semibold text-red-700 mb-1">{t('systemAdmin.pushNotifications.errors')}</div>
                   {taskStatus.errors.map((err, i) => (
                     <div key={i} className="text-[10px] text-red-600 mt-0.5">{err}</div>
                   ))}
@@ -598,8 +601,7 @@ export default function PushNotificationsPage() {
             <div className="card p-5 text-center">
               <Bell size={32} className="mx-auto text-gray-300 mb-2" />
               <div className="text-xs text-gray-400">
-                Fill in the message and click Send to deliver a push
-                notification
+                {t('systemAdmin.pushNotifications.emptyHint')}
               </div>
             </div>
           )}

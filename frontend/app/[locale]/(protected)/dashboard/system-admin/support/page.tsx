@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { SupportPageSkeleton } from "@/components/shared/PageSkeletons";
 
 export default function SystemAdminSupportPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken;
 
@@ -44,9 +45,9 @@ export default function SystemAdminSupportPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Support Tickets</h1>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.support.title')}</h1>
           <p className="text-gray-500 text-sm">
-            Manage and respond to user support requests
+            {t('systemAdmin.support.subtitle')}
           </p>
         </div>
       </div>

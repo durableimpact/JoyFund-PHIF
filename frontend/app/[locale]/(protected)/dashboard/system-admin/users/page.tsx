@@ -14,12 +14,12 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { PieChart, Pie, Cell } from "recharts";
 
 const TABS = [
-  { key: "all" as const, label: "All Users" },
-  { key: "SYSTEM_ADMIN" as const, label: "System Admins" },
-  { key: "HOSPITAL_ADMIN" as const, label: "Hospital Admins" },
-  { key: "SOCIAL_WORKER" as const, label: "Social Workers" },
-  { key: "RECEPTIONIST" as const, label: "Receptionists" },
-  { key: "DONOR" as const, label: "Donors" },
+  { key: "all" as const, labelKey: "systemAdmin.users.tabAll" },
+  { key: "SYSTEM_ADMIN" as const, labelKey: "systemAdmin.users.tabSystemAdmins" },
+  { key: "HOSPITAL_ADMIN" as const, labelKey: "systemAdmin.users.tabHospitalAdmins" },
+  { key: "SOCIAL_WORKER" as const, labelKey: "systemAdmin.users.tabSocialWorkers" },
+  { key: "RECEPTIONIST" as const, labelKey: "systemAdmin.users.tabReceptionists" },
+  { key: "DONOR" as const, labelKey: "systemAdmin.users.tabDonors" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -27,6 +27,7 @@ type TabKey = (typeof TABS)[number]["key"];
 const VALID_TAB_KEYS = TABS.map((t) => t.key) as readonly string[];
 
 export default function UsersPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token =
     session?.accessToken ||
@@ -122,15 +123,15 @@ export default function UsersPage() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">User Management</h1>
-          <p className="text-gray-500 text-sm">{totalCount} total users</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.users.title')}</h1>
+          <p className="text-gray-500 text-sm">{totalCount} {t('systemAdmin.users.totalUsers')}</p>
         </div>
         <Link
           href="/dashboard/system-admin/users/create"
           className="btn-admin text-sm flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start"
           style={{ background: "#471DDB" }}
         >
-          <Plus size={16} /> Create User
+          <Plus size={16} /> {t('systemAdmin.users.createUser')}
         </Link>
       </div>
 
@@ -139,8 +140,8 @@ export default function UsersPage() {
         <div className="card p-5 mb-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="flex-1 min-w-0">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">User Distribution by Role</h2>
-              <p className="text-2xl font-black text-gray-900">{roleSummary.total_users} <span className="text-sm font-medium text-gray-400">total users</span></p>
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.users.distributionByRole')}</h2>
+              <p className="text-2xl font-black text-gray-900">{roleSummary.total_users} <span className="text-sm font-medium text-gray-400">{t('systemAdmin.users.totalUsers')}</span></p>
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {roleSummary.roles.map((r) => (
                   <div key={r.role} className="flex items-center gap-1.5 text-xs">
@@ -184,18 +185,18 @@ export default function UsersPage() {
 
       {/* Tabs - Horizontal Scrollable on Mobile */}
       <div className="flex gap-2 mb-5 overflow-x-auto pb-2 sm:pb-0 snap-x snap-mandatory">
-        {TABS.map((t) => (
+        {TABS.map((tabItem) => (
           <button
-            key={t.key}
-            onClick={() => handleTabChange(t.key)}
+            key={tabItem.key}
+            onClick={() => handleTabChange(tabItem.key)}
             className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap snap-center ${
-              tab === t.key
+              tab === tabItem.key
                 ? "text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
-            style={tab === t.key ? { background: "#471DDB" } : {}}
+            style={tab === tabItem.key ? { background: "#471DDB" } : {}}
           >
-            {t.label}
+            {t(tabItem.labelKey as any)}
           </button>
         ))}
       </div>
@@ -208,7 +209,7 @@ export default function UsersPage() {
         />
         <input
           className="input-field pl-10 w-full"
-          placeholder="Search by name or email…"
+          placeholder={t('systemAdmin.users.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -220,7 +221,7 @@ export default function UsersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {["Name", "Email", "Role", "Verified", "Created"].map((h) => (
+                {[t('systemAdmin.users.colName'), t('systemAdmin.users.colEmail'), t('systemAdmin.users.colRole'), t('systemAdmin.users.colVerified'), t('systemAdmin.users.colCreated')].map((h) => (
                   <th
                     key={h}
                     className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide"
@@ -246,7 +247,7 @@ export default function UsersPage() {
                     colSpan={5}
                     className="text-center py-16 text-gray-400 text-sm"
                   >
-                    No users found
+                    {t('systemAdmin.users.empty')}
                   </td>
                 </tr>
               ) : (
@@ -279,10 +280,10 @@ export default function UsersPage() {
                     <td className="p-4">
                       {u.is_verified ? (
                         <span className="text-emerald-600 text-xs font-semibold">
-                          Verified
+                          {t('systemAdmin.users.verified')}
                         </span>
                       ) : (
-                        <span className="text-gray-400 text-xs">Pending</span>
+                        <span className="text-gray-400 text-xs">{t('systemAdmin.users.pending')}</span>
                       )}
                     </td>
                     <td className="p-4 text-gray-400 text-xs">
@@ -309,7 +310,7 @@ export default function UsersPage() {
           </div>
         ) : users.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">
-            No users found
+            {t('systemAdmin.users.notFound')}
           </div>
         ) : (
           users.map((u: UnifiedUser, i: number) => (
@@ -341,7 +342,7 @@ export default function UsersPage() {
 
                 {/* Email */}
                 <div className="border-t border-gray-100 pt-2">
-                  <p className="text-[10px] text-gray-500 mb-1">Email</p>
+                    <p className="text-[10px] text-gray-500 mb-1">{t('systemAdmin.users.email')}</p>
                   <p className="text-xs text-gray-700 truncate">
                     {u.email || "—"}
                   </p>
@@ -350,17 +351,17 @@ export default function UsersPage() {
                 {/* Verified Status and Created Date */}
                 <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
                   <div>
-                    <p className="text-[10px] text-gray-500 mb-0.5">Status</p>
+                    <p className="text-[10px] text-gray-500 mb-0.5">{t('systemAdmin.users.status')}</p>
                     {u.is_verified ? (
                       <span className="text-emerald-600 text-xs font-semibold">
-                        ✓ Verified
+                        {t('systemAdmin.users.verified')}
                       </span>
                     ) : (
-                      <span className="text-gray-400 text-xs">Pending</span>
+                      <span className="text-gray-400 text-xs">{t('systemAdmin.users.pending')}</span>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] text-gray-500 mb-0.5">Created</p>
+                    <p className="text-[10px] text-gray-500 mb-0.5">{t('systemAdmin.users.created')}</p>
                     <p className="text-xs text-gray-600">
                       {u.created_at ? formatDate(u.created_at) : "—"}
                     </p>
@@ -375,11 +376,14 @@ export default function UsersPage() {
         {totalPages > 1 && (
           <div className="card p-4 flex flex-col items-center gap-3">
             <span className="text-xs text-gray-600 text-center">
-              Showing {(page - 1) * pageSize + 1} to{" "}
-              {Math.min(page * pageSize, totalCount)} of {totalCount}
+              {t('systemAdmin.users.showingRange', {
+                from: (page - 1) * pageSize + 1,
+                of: Math.min(page * pageSize, totalCount),
+                total: totalCount
+              })}
             </span>
             <span className="text-sm font-medium text-gray-700">
-              Page {page} of {totalPages}
+              {t('systemAdmin.users.pageInfo', { current: page, total: totalPages })}
             </span>
             <div className="flex gap-2 w-full">
               <button
@@ -388,14 +392,14 @@ export default function UsersPage() {
                 className="flex-1 p-2 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1"
               >
                 <ChevronLeft size={16} />
-                <span className="text-xs font-medium">Previous</span>
+                <span className="text-xs font-medium">{t('systemAdmin.users.previous')}</span>
               </button>
               <button
                 disabled={page === totalPages || users.length === 0}
                 onClick={nextPage}
                 className="flex-1 p-2 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1"
               >
-                <span className="text-xs font-medium">Next</span>
+                <span className="text-xs font-medium">{t('systemAdmin.users.next')}</span>
                 <ChevronRight size={16} />
               </button>
             </div>

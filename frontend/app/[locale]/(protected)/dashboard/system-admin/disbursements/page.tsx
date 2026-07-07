@@ -43,17 +43,19 @@ import {
   markDisbursementFailed
 } from '@/actions/disbursement';
 
-const PAYMENT_METHODS = [
-  { value: 'MOMO', label: 'Mobile Money (MoMo)' },
-  { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
-  { value: 'CASH', label: 'Cash' },
-  { value: 'OTHER', label: 'Other' },
+const PAYMENT_METHODS_RAW = [
+  { value: 'MOMO', labelKey: 'systemAdmin.disbursements.mobileMoney' },
+  { value: 'BANK_TRANSFER', labelKey: 'systemAdmin.disbursements.bankTransfer' },
+  { value: 'CASH', labelKey: 'systemAdmin.disbursements.cash' },
+  { value: 'OTHER', labelKey: 'systemAdmin.disbursements.other' },
 ] as const;
 
 export default function DisbursementsPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const queryClient = useQueryClient();
+  const PAYMENT_METHODS = PAYMENT_METHODS_RAW.map(m => ({ value: m.value, label: t(m.labelKey as any, {}) }));
 
   const [urlParams, setUrlParams] = useUrlSearchParams(
     { search: '', statusTab: 'ALL' },
@@ -158,8 +160,8 @@ export default function DisbursementsPage() {
     
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Disbursements</h1>
-          <p className="text-gray-500 text-sm">Manage and record hospital disbursements</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.disbursements.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('systemAdmin.disbursements.subtitle')}</p>
         </div>
         <button onClick={() => { resetForm(); setShowRecordModal(true); }} className="btn-admin text-sm flex items-center gap-2" style={{ background: '#471DDB' }}>
           <Plus size={16} /> Record Disbursement
@@ -167,9 +169,9 @@ export default function DisbursementsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-        <StatCard label="Total Disbursed" value={statistics?.total_disbursed} loading={loadingStats} icon={<TrendingUp size={20} />} color="emerald" />
-        <StatCard label="Pending" value={statistics?.total_pending} loading={loadingStats} icon={<Clock size={20} />} color="amber" />
-        <StatCard label="Failed" value={statistics?.total_failed} loading={loadingStats} icon={<AlertCircle size={20} />} color="red" />
+        <StatCard label={t('systemAdmin.disbursements.totalDisbursed')} value={statistics?.total_disbursed} loading={loadingStats} icon={<TrendingUp size={20} />} color="emerald" />
+        <StatCard label={t('systemAdmin.disbursements.pending')} value={statistics?.total_pending} loading={loadingStats} icon={<Clock size={20} />} color="amber" />
+        <StatCard label={t('systemAdmin.disbursements.failed')} value={statistics?.total_failed} loading={loadingStats} icon={<AlertCircle size={20} />} color="red" />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-5">
@@ -193,7 +195,7 @@ export default function DisbursementsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
-                {['Hospital', 'Amount', 'Method', 'Reference', 'Status', 'Date', 'Actions'].map(h => (
+                {[t('systemAdmin.disbursements.colHospital'), t('systemAdmin.disbursements.colAmount'), t('systemAdmin.disbursements.colMethod'), t('systemAdmin.disbursements.colReference'), t('systemAdmin.disbursements.colStatus'), t('systemAdmin.disbursements.colDate'), t('systemAdmin.disbursements.colActions')].map(h => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -202,10 +204,10 @@ export default function DisbursementsPage() {
               {loadingList ? (
                 <tr><td colSpan={7} className="text-center py-16"><Skeleton className="h-5 w-5 rounded mx-auto" /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-16 text-gray-400 text-sm">No disbursements found</td></tr>
+                <tr><td colSpan={7} className="text-center py-16 text-gray-400 text-sm">{t('systemAdmin.disbursements.empty')}</td></tr>
               ) : filtered.map(d => (
                 <tr key={d.id} className="border-b border-gray-50 hover:bg-gray-50/70">
-                  <td className="p-4"><div className="font-semibold text-gray-900 text-sm">{d.hospital_name || 'Unknown'}</div></td>
+                  <td className="p-4"><div className="font-semibold text-gray-900 text-sm">{d.hospital_name || t('systemAdmin.disbursements.unknown')}</div></td>
                   <td className="p-4 font-bold text-gray-900 text-xs">{fmtXAF(d.amount)}</td>
                   <td className="p-4 text-xs text-gray-700">{d.payment_method_display || d.payment_method}</td>
                   <td className="p-4 text-xs text-gray-500 font-mono">{d.external_reference || '—'}</td>
@@ -217,7 +219,7 @@ export default function DisbursementsPage() {
                         <button onClick={() => completeMutation.mutate(d.id)} disabled={completeMutation.isPending} className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Completed"><CheckCircle size={18} /></button>
                         <button onClick={() => failMutation.mutate(d.id)} disabled={failMutation.isPending} className="p-1 text-red-600 hover:bg-red-50 rounded-lg" title="Failed"><XCircle size={18} /></button>
                       </div>
-                    ) : <span className="text-xs text-gray-400 italic">Locked</span>}
+                    ) : <span className="text-xs text-gray-400 italic">{t('systemAdmin.disbursements.locked')}</span>}
                   </td>
                 </tr>
               ))}
@@ -229,23 +231,23 @@ export default function DisbursementsPage() {
       {showRecordModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="card w-full max-w-lg shadow-2xl p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Record New Disbursement</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">{t('systemAdmin.disbursements.recordNew')}</h2>
             <form onSubmit={handleRecordSubmit} className="space-y-4">
               {formError && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold flex items-center gap-2"><AlertCircle size={14} /> {formError}</div>}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Recipient Hospital</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.disbursements.recipientHospital')}</label>
                 <select className="input-field text-sm" value={selectedHospital} onChange={e => setSelectedHospital(e.target.value)} required>
-                  <option value="">Select a hospital...</option>
+                  <option value="">{t('systemAdmin.disbursements.selectHospital')}</option>
                   {hospitals.map(h => <option key={h.id} value={h.id}>{h.name} ({h.city})</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Amount (XAF)</label>
-                  <input type="number" min="1" className="input-field text-sm" placeholder="e.g. 50000" value={amount} onChange={e => setAmount(e.target.value)} required />
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.disbursements.amount')}</label>
+                  <input type="number" min="1" className="input-field text-sm" placeholder={t('systemAdmin.disbursements.amountPlaceholder')} value={amount} onChange={e => setAmount(e.target.value)} required />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Payment Method</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.disbursements.paymentMethod')}</label>
                   <select className="input-field text-sm" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value as any)}>
                     {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                   </select>
@@ -253,26 +255,26 @@ export default function DisbursementsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Recipient Phone</label>
-                  <input type="text" className="input-field text-sm font-mono" placeholder="+237..." value={recipientPhone} onChange={e => setRecipientPhone(e.target.value)} />
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.disbursements.recipientPhone')}</label>
+                  <input type="text" className="input-field text-sm font-mono" placeholder={t('systemAdmin.disbursements.phonePlaceholder')} value={recipientPhone} onChange={e => setRecipientPhone(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Recipient Account</label>
-                  <input type="text" className="input-field text-sm font-mono" placeholder="Bank acc / info" value={recipientAccount} onChange={e => setRecipientAccount(e.target.value)} />
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.disbursements.recipientAccount')}</label>
+                  <input type="text" className="input-field text-sm font-mono" placeholder={t('systemAdmin.disbursements.accountPlaceholder')} value={recipientAccount} onChange={e => setRecipientAccount(e.target.value)} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">External Reference</label>
-                <input type="text" className="input-field text-sm font-mono" placeholder="e.g. TXN-998822" value={externalReference} onChange={e => setExternalReference(e.target.value)} />
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.disbursements.externalReference')}</label>
+                <input type="text" className="input-field text-sm font-mono" placeholder={t('systemAdmin.disbursements.referencePlaceholder')} value={externalReference} onChange={e => setExternalReference(e.target.value)} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Notes</label>
-                <textarea className="input-field text-sm min-h-[80px]" placeholder="Add details..." value={notes} onChange={e => setNotes(e.target.value)} />
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.disbursements.notes')}</label>
+                <textarea className="input-field text-sm min-h-[80px]" placeholder={t('systemAdmin.disbursements.notesPlaceholder')} value={notes} onChange={e => setNotes(e.target.value)} />
               </div>
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowRecordModal(false)} className="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50">Cancel</button>
+                <button type="button" onClick={() => setShowRecordModal(false)} className="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50">{t('systemAdmin.disbursements.cancel')}</button>
                 <button type="submit" disabled={createMutation.isPending} className="px-4 py-2 text-white rounded-xl text-sm font-semibold hover:opacity-90 flex items-center gap-2" style={{ background: '#471DDB' }}>
-                  {createMutation.isPending && <Loader2 size={16} className="animate-spin" />} Record & Disburse
+                  {createMutation.isPending && <Loader2 size={16} className="animate-spin" />} {t('systemAdmin.disbursements.recordAndDisburse')}
                 </button>
               </div>
             </form>

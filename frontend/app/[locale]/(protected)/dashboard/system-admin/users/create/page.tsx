@@ -91,6 +91,7 @@ function getSteps(role: RoleValue) {
 }
 
 export default function AdminCreateUser() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
 

@@ -49,7 +49,7 @@ export default function AdminDashboard() {
     (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const currentUser = (session?.user as any)?.userInfo;
   const [period, setPeriod] = useState("month");
-  const periodLabel = period === "day" ? "Last 7 days" : period === "week" ? "Last 7 days" : period === "year" ? "Last 365 days" : "Last 30 days";
+  const periodLabel = period === "day" ? t("dashboard.admin.last7Days") : period === "week" ? t("dashboard.admin.last7Days") : period === "year" ? t("dashboard.admin.last365Days") : t("dashboard.admin.last30Days");
   const { data: overview, isLoading: oLoading } = useQuery({
     queryKey: ["admin-overview", token, period],
     queryFn: async () => await getAdminOverview(token, { period }),
@@ -130,10 +130,10 @@ export default function AdminDashboard() {
               onChange={(e) => setPeriod(e.target.value)}
               className="text-sm font-medium text-gray-700 bg-transparent border-none outline-none cursor-pointer"
             >
-              <option value="day">Daily</option>
-              <option value="week">Weekly</option>
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
+              <option value="day">{t("dashboard.admin.dailyLabel")}</option>
+              <option value="week">{t("dashboard.admin.weeklyLabel")}</option>
+              <option value="month">{t("dashboard.admin.monthlyLabel")}</option>
+              <option value="year">{t("dashboard.admin.yearlyLabel")}</option>
             </select>
           </div>
           <Link
@@ -174,55 +174,55 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               {
-                label: "Accounts",
+                label: t("dashboard.sidebar.accounts"),
                 href: "/dashboard/system-admin/accounts",
                 icon: <Wallet size={20} />,
                 color: "#471DDB",
               },
               {
-                label: "Transactions",
+                label: t("dashboard.sidebar.transactions"),
                 href: "/dashboard/system-admin/transactions",
                 icon: <ArrowLeftRight size={20} />,
                 color: "#1DB1DB",
               },
               {
-                label: "Fee Splits",
+                label: t("dashboard.admin.feeSplits"),
                 href: "/dashboard/system-admin/fee-splits",
                 icon: <Percent size={20} />,
                 color: "#1CDBC9",
               },
               {
-                label: "Fee Policies",
+                label: t("dashboard.admin.feePolicies"),
                 href: "/dashboard/system-admin/fee-policies",
                 icon: <Receipt size={20} />,
                 color: "#f59e0b",
               },
               {
-                label: "Gateways",
+                label: t("dashboard.sidebar.gateways"),
                 href: "/dashboard/system-admin/gateways",
                 icon: <Globe size={20} />,
                 color: "#1D38DB",
               },
               {
-                label: "Hospitals",
+                label: t("dashboard.sidebar.hospitals"),
                 href: "/dashboard/system-admin/hospitals",
                 icon: <Building2 size={20} />,
                 color: "#1D38DB",
               },
               {
-                label: "Vouchers",
+                label: t("dashboard.sidebar.vouchers"),
                 href: "/dashboard/system-admin/vouchers",
                 icon: <Ticket size={20} />,
                 color: "#471DDB",
               },
               {
-                label: "Beneficiaries",
+                label: t("dashboard.sidebar.beneficiaries"),
                 href: "/dashboard/system-admin/beneficiaries",
                 icon: <Users size={20} />,
                 color: "#1DB1DB",
               },
               {
-                label: "Logs",
+                label: t("dashboard.sidebar.logs"),
                 href: "/dashboard/system-admin/logs",
                 icon: <FileText size={20} />,
                 color: "#1CDBC9",
@@ -246,14 +246,14 @@ export default function AdminDashboard() {
           {/* Donation Trends Chart */}
           <div className="card p-5">
             <h3 className="font-bold text-gray-900 mb-4">
-              Donation Trends ({period === "day" ? "Last 7 Days" : period === "week" ? "Last 7 Days" : period === "year" ? "Last 365 Days" : "Last 30 Days"})
+              {t("dashboard.admin.donationTrends")} ({periodLabel})
             </h3>
             {loading ? (
               <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
             ) : (
               <ChartContainer
                 config={{
-                  amount: { label: "Donations", color: "#471DDB" },
+                  amount: { label: t("dashboard.admin.donationsLabel"), color: "#471DDB" },
                 }}
                 className="h-64 w-full aspect-auto"
               >
@@ -300,14 +300,14 @@ export default function AdminDashboard() {
           {/* User Registrations Chart */}
           <div className="card p-5">
             <h3 className="font-bold text-gray-900 mb-4">
-              User Registrations ({period === "day" ? "Last 7 Days" : period === "week" ? "Last 7 Days" : period === "year" ? "Last 365 Days" : "Last 30 Days"})
+              {t("dashboard.admin.userRegistrations")} ({periodLabel})
             </h3>
             {loading ? (
               <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
             ) : (
               <ChartContainer
                 config={{
-                  users: { label: "New Users", color: "#1DB1DB" },
+                  users: { label: t("dashboard.admin.newUsersLabel"), color: "#1DB1DB" },
                 }}
                 className="h-64 w-full aspect-auto"
               >
@@ -350,17 +350,17 @@ export default function AdminDashboard() {
         <div className="space-y-5">
           {/* Platform Summary */}
           <div className="card p-5">
-            <h3 className="font-bold text-gray-900 mb-4">Platform Summary</h3>
+            <h3 className="font-bold text-gray-900 mb-4">{t("dashboard.admin.platformSummary")}</h3>
             <div className="space-y-3">
               {[
-                ["Total Campaigns", overview?.total_campaigns?.current ?? 0],
-                ["Total Donations", overview?.total_donations?.current ?? 0],
+                [t("dashboard.admin.totalCampaigns"), overview?.total_campaigns?.current ?? 0],
+                [t("dashboard.admin.totalDonations"), overview?.total_donations?.current ?? 0],
                 [
-                  "Total Beneficiaries",
+                  t("dashboard.admin.totalBeneficiaries"),
                   overview?.total_beneficiaries?.current ?? 0,
                 ],
-                ["Total Vouchers", overview?.total_vouchers?.current ?? 0],
-                ["Partner Hospitals", overview?.total_hospitals?.current ?? 0],
+                [t("dashboard.admin.totalVouchers"), overview?.total_vouchers?.current ?? 0],
+                [t("dashboard.admin.partnerHospitals"), overview?.total_hospitals?.current ?? 0],
               ].map(([label, value]) => (
                 <div
                   key={label as string}
@@ -377,7 +377,7 @@ export default function AdminDashboard() {
           {/* Voucher & Beneficiary metrics */}
           <div className="card p-5">
             <h3 className="font-bold text-gray-900 mb-4">
-              Voucher & Beneficiary
+              {t("dashboard.admin.voucherBeneficiary")}
             </h3>
             {loading ? (
               <div className="space-y-2">
@@ -392,15 +392,15 @@ export default function AdminDashboard() {
               <div className="space-y-3">
                 {[
                   [
-                    "Total Beneficiaries",
+                    t("dashboard.admin.totalBeneficiariesShort"),
                     bv?.total_beneficiaries?.current ?? 0,
                   ],
                   [
-                    "Vouchers Generated",
+                    t("dashboard.admin.vouchersGenerated"),
                     bv?.total_vouchers_generated?.current ?? 0,
                   ],
                   [
-                    "Vouchers Redeemed",
+                    t("dashboard.admin.vouchersRedeemed"),
                     bv?.total_vouchers_redeemed?.current ?? 0,
                   ],
                 ].map(([label, value]) => (
@@ -420,13 +420,13 @@ export default function AdminDashboard() {
           {/* Top hospitals */}
           <div className="card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-900">Top Hospitals</h3>
+              <h3 className="font-bold text-gray-900">{t("dashboard.admin.topHospitals")}</h3>
               <Link
                 href="/dashboard/system-admin/hospitals"
                 className="text-xs font-semibold"
                 style={{ color: "#471DDB" }}
               >
-                Manage
+                {t("dashboard.admin.manage")}
               </Link>
             </div>
             {loading ? (

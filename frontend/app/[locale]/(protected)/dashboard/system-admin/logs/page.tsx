@@ -50,6 +50,7 @@ type LogTab = "activity" | "requests" | "errors";
 const PAGE_SIZE = 15;
 
 export default function AdminLogs() {
+  const t = useI18n();
   const { data: session } = useSession();
   const [params, setParams] = useUrlSearchParams(
     { tab: "activity", page: 1, userId: "" },
@@ -212,16 +213,16 @@ export default function AdminLogs() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">System Logs</h1>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.logs.title')}</h1>
           <p className="text-gray-500 text-sm">
-            Platform activity, API requests, and errors
+            {t('systemAdmin.logs.subtitle')}
           </p>
         </div>
         <button
           onClick={refetch}
           className="btn-outline text-sm flex items-center gap-2"
         >
-          <RefreshCw size={14} /> Refresh
+          <RefreshCw size={14} /> {t('systemAdmin.logs.refresh')}
         </button>
       </div>
 
@@ -308,44 +309,35 @@ export default function AdminLogs() {
             <Table className="text-sm">
               <TableHeader>
                 <TableRow className="border-b border-gray-100">
-                  {tab === "activity" &&
-                    ["User", "Action", "Level", "Description", "Time"].map(
-                      (h) => (
-                        <TableHead
-                          key={h}
-                          className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide"
-                        >
-                          {h}
-                        </TableHead>
-                      ),
-                    )}
-                  {tab === "requests" &&
-                    [
-                      "Method",
-                      "Path",
-                      "View Name",
-                      "Action",
-                      "Status",
-                      "Duration",
-                      "IP",
-                      "Time",
-                    ].map((h) => (
-                      <TableHead
-                        key={h}
-                        className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide"
-                      >
-                        {h}
-                      </TableHead>
-                    ))}
-                  {tab === "errors" &&
-                    ["Type", "Message", "Path", "Time"].map((h) => (
-                      <TableHead
-                        key={h}
-                        className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide"
-                      >
-                        {h}
-                      </TableHead>
-                    ))}
+                  {tab === "activity" && (
+                    <>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.logs.colUser')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.logs.colAction')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Level</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.logs.colDetails')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.users.detail.date')}</TableHead>
+                    </>
+                  )}
+                  {tab === "requests" && (
+                    <>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.logs.colAction')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.logs.colDetails')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.users.detail.name')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.logs.colAction')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.users.detail.status')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.users.detail.date')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">IP</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Time</TableHead>
+                    </>
+                  )}
+                  {tab === "errors" && (
+                    <>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.users.detail.status')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('systemAdmin.logs.colDetails')}</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Path</TableHead>
+                      <TableHead className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Time</TableHead>
+                    </>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>

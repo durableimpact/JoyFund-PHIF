@@ -9,6 +9,7 @@ import { createHospital } from "@/actions/hospital";
 import HospitalForm, { HospitalFormData } from "../_components/HospitalForm";
 
 export default function CreateHospitalPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token =
     session?.accessToken ||
@@ -45,11 +46,11 @@ export default function CreateHospitalPage() {
         is_active: true,
       });
 
-      toast.success("Hospital created successfully");
+      toast.success(t('systemAdmin.hospitals.create.createdSuccess'));
       queryClient.invalidateQueries({ queryKey: ["hospitals"] });
       router.push("/dashboard/system-admin/hospitals");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to create hospital";
+      const msg = err instanceof Error ? err.message : t('systemAdmin.hospitals.create.createFailed');
       toast.error(msg);
     } finally {
       setIsLoading(false);

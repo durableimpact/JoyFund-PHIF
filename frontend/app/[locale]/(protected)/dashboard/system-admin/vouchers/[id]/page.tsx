@@ -17,6 +17,7 @@ import { getVoucher } from '@/actions/vouchers';
 import { useState } from 'react';
 
 export default function VoucherDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -95,14 +96,14 @@ export default function VoucherDetailPage() {
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Voucher Information</h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Voucher Code" value={voucher.voucher_code} mono />
-              <Detail label="Status" value={<span className={`badge ${statusColor(voucher.status)}`}>{voucher.status?.replace(/_/g, ' ')}</span>} />
-              <Detail label="Language" value={voucher.language_preference?.toUpperCase() || 'FR'} />
-              <Detail label="Expiry Date" value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
-              <Detail label="Created" value={formatDateTime(voucher.created_at)} />
-              <Detail label="Redeemed At" value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
+              <Detail label={t('systemAdmin.vouchers.detail.code')} value={voucher.voucher_code} mono />
+              <Detail label={t('systemAdmin.users.detail.status')} value={<span className={`badge ${statusColor(voucher.status)}`}>{voucher.status?.replace(/_/g, ' ')}</span>} />
+              <Detail label={t('systemAdmin.users.detail.role')} value={voucher.language_preference?.toUpperCase() || 'FR'} />
+              <Detail label={t('systemAdmin.vouchers.detail.expiry')} value={voucher.expiry_date ? formatDate(voucher.expiry_date) : '—'} />
+              <Detail label={t('systemAdmin.vouchers.detail.created')} value={formatDateTime(voucher.created_at)} />
+              <Detail label={t('systemAdmin.vouchers.detail.created')} value={voucher.redeemed_at ? formatDateTime(voucher.redeemed_at) : '—'} />
               {voucher.patient_confirmation_pin && (
-                <Detail label="Confirmation PIN" value={voucher.patient_confirmation_pin} mono />
+                <Detail label={t('systemAdmin.vouchers.detail.code')} value={voucher.patient_confirmation_pin} mono />
               )}
             </div>
           </div>
@@ -114,14 +115,14 @@ export default function VoucherDetailPage() {
                 <User size={14} /> Beneficiary
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <Detail label="Full Name" value={voucher.beneficiary.full_name} />
-                <Detail label="Digital Health ID" value={voucher.beneficiary.digital_health_id || '—'} mono />
-                <Detail label="Gender" value={voucher.beneficiary.gender} />
-                <Detail label="Category" value={voucher.beneficiary.category} />
-                <Detail label="Phone" value={voucher.beneficiary.phone} />
-                <Detail label="Region" value={voucher.beneficiary.region} />
-                {voucher.beneficiary.city && <Detail label="City" value={voucher.beneficiary.city} />}
-                {voucher.beneficiary.address && <Detail label="Address" value={voucher.beneficiary.address} className="col-span-2" />}
+                <Detail label={t('systemAdmin.users.detail.name')} value={voucher.beneficiary.full_name} />
+                <Detail label={t('systemAdmin.users.detail.id')} value={voucher.beneficiary.digital_health_id || '—'} mono />
+                <Detail label={t('systemAdmin.users.detail.role')} value={voucher.beneficiary.gender} />
+                <Detail label={t('systemAdmin.users.detail.category')} value={voucher.beneficiary.category} />
+                <Detail label={t('systemAdmin.users.detail.phone')} value={voucher.beneficiary.phone} />
+                <Detail label={t('systemAdmin.users.detail.region')} value={voucher.beneficiary.region} />
+                {voucher.beneficiary.city && <Detail label={t('systemAdmin.users.detail.city')} value={voucher.beneficiary.city} />}
+                {voucher.beneficiary.address && <Detail label={t('systemAdmin.users.detail.region')} value={voucher.beneficiary.address} className="col-span-2" />}
               </div>
             </div>
           )}
@@ -133,10 +134,10 @@ export default function VoucherDetailPage() {
                 <MapPin size={14} /> Hospital
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <Detail label="Name" value={voucher.hospital.name} />
-                <Detail label="City" value={voucher.hospital.city} />
-                <Detail label="Region" value={voucher.hospital.region} />
-                <Detail label="Status" value={voucher.hospital.partnership_status} />
+                <Detail label={t('systemAdmin.users.detail.name')} value={voucher.hospital.name} />
+                <Detail label={t('systemAdmin.users.detail.city')} value={voucher.hospital.city} />
+                <Detail label={t('systemAdmin.users.detail.region')} value={voucher.hospital.region} />
+                <Detail label={t('systemAdmin.users.detail.status')} value={voucher.hospital.partnership_status} />
               </div>
             </div>
           )}
@@ -216,11 +217,11 @@ export default function VoucherDetailPage() {
           <div className="card p-5">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Health Issue</h2>
               <div className="space-y-2">
-                <Detail label="Category" value={voucher.health_issue.category} />
-                <Detail label="Severity" value={voucher.health_issue.severity} />
-                <Detail label="Status" value={voucher.health_issue.status} />
+                <Detail label={t('systemAdmin.users.detail.category')} value={voucher.health_issue.category} />
+                <Detail label={t('systemAdmin.users.detail.status')} value={voucher.health_issue.severity} />
+                <Detail label={t('systemAdmin.users.detail.status')} value={voucher.health_issue.status} />
                 {voucher.health_issue.description && (
-                  <Detail label="Description" value={voucher.health_issue.description} />
+                  <Detail label={t('systemAdmin.users.detail.status')} value={voucher.health_issue.description} />
                 )}
               </div>
             </div>

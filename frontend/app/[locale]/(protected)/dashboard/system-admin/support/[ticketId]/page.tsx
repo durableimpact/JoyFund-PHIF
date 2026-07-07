@@ -15,6 +15,7 @@ export default function SystemAdminTicketDetailPage({
 }: {
   params: Promise<{ ticketId: string }>;
 }) {
+  const t = useI18n();
   const { ticketId } = use(params);
   const { data: session } = useSession();
   const token = (session as any)?.accessToken;
@@ -32,9 +33,9 @@ export default function SystemAdminTicketDetailPage({
   if (!ticket) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Ticket not found</p>
+        <p className="text-gray-500">{t('systemAdmin.support.ticketNotFound')}</p>
         <Link href="/dashboard/system-admin/support" className="text-indigo-600 hover:underline">
-          Back to tickets
+          {t('systemAdmin.support.backToTickets')}
         </Link>
       </div>
     );
@@ -47,11 +48,11 @@ export default function SystemAdminTicketDetailPage({
           href="/dashboard/system-admin/support"
           className="text-gray-400 hover:text-gray-600"
         >
-          ← Back
+          {t('systemAdmin.support.back')}
         </Link>
         <div>
           <h1 className="text-2xl font-black text-gray-900">
-            Ticket {ticket.ticket_number}
+            {t('systemAdmin.support.ticketLabel', { number: ticket.ticket_number })}
           </h1>
           <p className="text-gray-500 text-sm">{ticket.subject}</p>
         </div>

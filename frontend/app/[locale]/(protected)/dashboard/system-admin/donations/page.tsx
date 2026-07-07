@@ -14,6 +14,7 @@ const METHOD_FILTERS = ["all", "MTN", "ORANGE"];
 const PAGE_SIZE = 20;
 
 export default function AdminDonationsPage() {
+  const t = useI18n();
   const [params, setParams] = useUrlSearchParams(
     { search: "", statusFilter: "all", methodFilter: "all", page: 1 },
     { page: Number }
@@ -43,8 +44,8 @@ export default function AdminDonationsPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Donations</h1>
-          <p className="text-gray-500 text-sm">All platform donations and payments</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.donations.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('systemAdmin.donations.subtitle')}</p>
         </div>
       </div>
 
@@ -54,20 +55,20 @@ export default function AdminDonationsPage() {
           <input
             value={search}
             onChange={e => setParams({ search: e.target.value, page: 1 })}
-            placeholder="Search donor or campaign..."
+            placeholder={t('systemAdmin.donations.searchPlaceholder')}
             className="text-sm bg-transparent border-none outline-none w-full"
           />
         </div>
         <select value={statusFilter} onChange={e => setParams({ statusFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
           {STATUS_FILTERS.map(s => (
-            <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>
+            <option key={s} value={s}>{s === "all" ? t('systemAdmin.donations.allStatuses') : s}</option>
           ))}
         </select>
         <select value={methodFilter} onChange={e => setParams({ methodFilter: e.target.value, page: 1 })}
           className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none w-full sm:w-auto">
           {METHOD_FILTERS.map(m => (
-            <option key={m} value={m}>{m === "all" ? "All Methods" : m}</option>
+            <option key={m} value={m}>{m === "all" ? t('systemAdmin.donations.allMethods') : m}</option>
           ))}
         </select>
       </div>
@@ -76,17 +77,18 @@ export default function AdminDonationsPage() {
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><Skeleton className="h-6 w-6 rounded" /></div>
         ) : !rows.length ? (
-          <p className="text-gray-400 text-sm text-center py-12">No donations found</p>
+          <p className="text-gray-400 text-sm text-center py-12">{t('systemAdmin.donations.noDonations')}</p>
         ) : (
           <>
             <div className="md:hidden space-y-3">
               {rows.map((d: any) => (
                 <Link key={d.id} href={`/dashboard/system-admin/donations/${d.id}`} className="block border border-gray-100 rounded-xl p-4 space-y-2 hover:border-[#471DDB]/30 transition-colors">
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Campaign</span><span className="font-medium text-gray-900 truncate max-w-[200px]">{d.campaign_title}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Donor</span><span className="text-gray-900">{d.donor_name || "Anonymous"}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Amount</span><span className="font-bold text-gray-900">{formatXAF(d.amount)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${d.status === "SUCCESS" ? "bg-green-100 text-green-700" : d.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{d.status}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="text-gray-400 text-xs">{formatDate(d.created_at)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.donations.campaign')}</span><span className="font-medium text-gray-900 truncate max-w-[200px]">{d.campaign_title}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.donations.donor')}</span><span className="text-gray-900">{d.donor_name || t('systemAdmin.donations.anonymous')}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.donations.amount')}</span><span className="font-bold text-gray-900">{formatXAF(d.amount)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.donations.status')}</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${d.status === "SUCCESS" ? "bg-green-100 text-green-700" : d.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{d.status}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.donations.date')}</span><span className="text-gray-400 text-xs">{formatDate(d.created_at)}</span></div>
                 </Link>
               ))}
             </div>
@@ -95,7 +97,7 @@ export default function AdminDonationsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {["Campaign", "Donor", "Amount", "Status", "Date"].map(h => (
+                    {[t('systemAdmin.donations.campaign'), t('systemAdmin.donations.donor'), t('systemAdmin.donations.amount'), t('systemAdmin.donations.status'), t('systemAdmin.donations.date')].map(h => (
                       <th key={h} className="text-left pb-3 font-semibold text-gray-500 text-xs uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -104,7 +106,7 @@ export default function AdminDonationsPage() {
                   {rows.map((d: any) => (
                     <tr key={d.id} className="border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => window.location.href = `/dashboard/system-admin/donations/${d.id}`}>
                       <td className="py-3 font-medium text-gray-900 max-w-[200px] truncate">{d.campaign_title}</td>
-                      <td className="py-3 text-gray-600">{d.donor_name || "Anonymous"}</td>
+                      <td className="py-3 text-gray-600">{d.donor_name || t('systemAdmin.donations.anonymous')}</td>
                       <td className="py-3 font-bold text-gray-900">{formatXAF(d.amount)}</td>
                       <td className="py-3">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${

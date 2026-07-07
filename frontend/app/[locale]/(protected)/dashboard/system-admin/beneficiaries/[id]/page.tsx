@@ -263,14 +263,14 @@ export default function AdminBeneficiaryDetailPage() {
               <User size={14} /> {t('systemAdmin.beneficiaries.detail.personalInfo')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Full Name" value={beneficiary.full_name} />
-              <Detail label="Gender" value={beneficiary.gender} />
-              <Detail label="Category" value={beneficiary.category} />
-              <Detail label="Date of Birth" value={formatDate(beneficiary.date_of_birth)} />
-              <Detail label="National ID" value={beneficiary.national_id_number} mono />
-              <Detail label="Phone" value={beneficiary.phone} />
-              {beneficiary.email && <Detail label="Email" value={beneficiary.email} />}
-              {beneficiary.number_of_previous_births != null && <Detail label="Previous Births" value={String(beneficiary.number_of_previous_births)} />}
+              <Detail label={t('systemAdmin.users.detail.name')} value={beneficiary.full_name} />
+              <Detail label={t('systemAdmin.users.detail.role')} value={beneficiary.gender} />
+              <Detail label={t('systemAdmin.beneficiaries.detail.category')} value={beneficiary.category} />
+              <Detail label={t('systemAdmin.users.detail.joined')} value={formatDate(beneficiary.date_of_birth)} />
+              <Detail label={t('systemAdmin.users.detail.nationalId')} value={beneficiary.national_id_number} mono />
+              <Detail label={t('systemAdmin.beneficiaries.detail.phone')} value={beneficiary.phone} />
+              {beneficiary.email && <Detail label={t('systemAdmin.users.detail.email')} value={beneficiary.email} />}
+              {beneficiary.number_of_previous_births != null && <Detail label={t('systemAdmin.users.detail.totalClaims')} value={String(beneficiary.number_of_previous_births)} />}
             </div>
           </div>
 
@@ -279,9 +279,9 @@ export default function AdminBeneficiaryDetailPage() {
               <MapPin size={14} /> {t('systemAdmin.beneficiaries.detail.location')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Region" value={beneficiary.region} />
-              <Detail label="City" value={beneficiary.city} />
-              <Detail label="Address" value={beneficiary.address} className="col-span-2" />
+              <Detail label={t('systemAdmin.beneficiaries.detail.location')} value={beneficiary.region} />
+              <Detail label={t('systemAdmin.users.detail.city')} value={beneficiary.city} />
+              <Detail label={t('systemAdmin.users.detail.region')} value={beneficiary.address} className="col-span-2" />
             </div>
           </div>
 
@@ -290,9 +290,9 @@ export default function AdminBeneficiaryDetailPage() {
               <Phone size={14} /> {t('systemAdmin.beneficiaries.detail.emergencyContact')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Name" value={beneficiary.emergency_contact_name || '—'} />
-              <Detail label="Phone" value={beneficiary.emergency_contact_phone || '—'} />
-              <Detail label="Relationship" value={beneficiary.emergency_contact_relationship || '—'} />
+              <Detail label={t('systemAdmin.users.detail.name')} value={beneficiary.emergency_contact_name || '—'} />
+              <Detail label={t('systemAdmin.beneficiaries.detail.phone')} value={beneficiary.emergency_contact_phone || '—'} />
+              <Detail label={t('systemAdmin.users.detail.role')} value={beneficiary.emergency_contact_relationship || '—'} />
             </div>
           </div>
 
@@ -474,36 +474,36 @@ export default function AdminBeneficiaryDetailPage() {
             <textarea className="input-field min-h-[80px]" value={hiDescription} onChange={e => setHiDescription(e.target.value)} placeholder={t('systemAdmin.beneficiaries.detail.describeHealthIssue')} />
           </div>
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setShowHiForm(false)} className="btn-outline flex-1">Cancel</button>
+            <button onClick={() => setShowHiForm(false)} className="btn-outline flex-1">{t('systemAdmin.beneficiaries.detail.cancel')}</button>
             <button onClick={() => createHiMutation.mutate()} disabled={createHiMutation.isPending || !hiCategory || !hiSeverity || !hiDescription}
               className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#471DDB' }}>
-              {createHiMutation.isPending && <Loader2 size={16} className="animate-spin" />} Submit
+              {createHiMutation.isPending && <Loader2 size={16} className="animate-spin" />} {t('systemAdmin.beneficiaries.detail.submit')}
             </button>
           </div>
         </div>
       </Modal>}
 
       {previewDoc && (
-        <Modal title={previewDoc.description || 'Document Preview'} onClose={() => setPreviewDoc(null)}>
+        <Modal title={previewDoc.description || t('systemAdmin.beneficiaries.detail.documentPreview')} onClose={() => setPreviewDoc(null)}>
           <DocPreview doc={previewDoc} />
         </Modal>
       )}
 
-      {showDocUpload && <Modal title="Upload Document" onClose={() => setShowDocUpload(false)}>
+      {showDocUpload && <Modal title={t('systemAdmin.beneficiaries.detail.uploadDocument')} onClose={() => setShowDocUpload(false)}>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">File *</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.beneficiaries.detail.fileField')}</label>
             <input type="file" accept="image/*,.pdf" onChange={e => setDocFile(e.target.files?.[0] || null)} className="text-xs" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Description</label>
-            <input className="input-field" value={docDescription} onChange={e => setDocDescription(e.target.value)} placeholder="e.g. National ID photo" />
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.beneficiaries.detail.description')}</label>
+            <input className="input-field" value={docDescription} onChange={e => setDocDescription(e.target.value)} placeholder={t('systemAdmin.beneficiaries.detail.docPlaceholder')} />
           </div>
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setShowDocUpload(false)} className="btn-outline flex-1">Cancel</button>
+            <button onClick={() => setShowDocUpload(false)} className="btn-outline flex-1">{t('systemAdmin.beneficiaries.detail.cancel')}</button>
             <button onClick={() => uploadDocMutation.mutate()} disabled={uploadDocMutation.isPending || !docFile}
               className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#471DDB' }}>
-              {uploadDocMutation.isPending && <Loader2 size={16} className="animate-spin" />} Upload
+              {uploadDocMutation.isPending && <Loader2 size={16} className="animate-spin" />} {t('systemAdmin.beneficiaries.detail.upload')}
             </button>
           </div>
         </div>
@@ -512,17 +512,17 @@ export default function AdminBeneficiaryDetailPage() {
       {showEdit && <EditBeneficiaryModal beneficiary={beneficiary} onClose={() => setShowEdit(false)} onSave={(fd) => editMutation.mutate(fd)} saving={editMutation.isPending} />}
 
       {rejectHiId !== null && (
-        <Modal title="Reject Health Issue" onClose={() => { setRejectHiId(null); setRejectReason(''); }}>
+        <Modal title={t('systemAdmin.beneficiaries.detail.rejectHealthIssueModal')} onClose={() => { setRejectHiId(null); setRejectReason(''); }}>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Rejection Reason *</label>
-              <textarea className="input-field min-h-[100px]" value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Explain why this health issue is being rejected..." required />
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.beneficiaries.detail.rejectionReason')}</label>
+              <textarea className="input-field min-h-[100px]" value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder={t('systemAdmin.beneficiaries.detail.rejectionReasonPlaceholder')} required />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setRejectHiId(null); setRejectReason(''); }} className="btn-outline flex-1">Cancel</button>
+              <button onClick={() => { setRejectHiId(null); setRejectReason(''); }} className="btn-outline flex-1">{t('systemAdmin.beneficiaries.detail.cancel')}</button>
               <button onClick={() => rejectHiMutation.mutate(rejectHiId)} disabled={rejectHiMutation.isPending || !rejectReason.trim()}
                 className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#DC2626' }}>
-                {rejectHiMutation.isPending && <Loader2 size={16} className="animate-spin" />} Reject
+                {rejectHiMutation.isPending && <Loader2 size={16} className="animate-spin" />} {t('systemAdmin.beneficiaries.detail.reject')}
               </button>
             </div>
           </div>
@@ -533,52 +533,52 @@ export default function AdminBeneficiaryDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 my-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-black text-gray-900">Create Voucher for {beneficiary.full_name}</h2>
+              <h2 className="text-lg font-black text-gray-900">{t('systemAdmin.beneficiaries.detail.createVoucherFor')} {beneficiary.full_name}</h2>
               <button onClick={() => setShowVoucherCreate(false)}><X size={20} className="text-gray-400" /></button>
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-5">
-              {[{ id: 1, label: 'Voucher Details' }, { id: 2, label: 'Find Campaigns' }, { id: 3, label: 'Allocate & Create' }].map(step => (
+              {[{ id: 1, label: t('systemAdmin.beneficiaries.detail.voucherStep1') }, { id: 2, label: t('systemAdmin.beneficiaries.detail.voucherStep2') }, { id: 3, label: t('systemAdmin.beneficiaries.detail.voucherStep3') }].map(step => (
                 <div key={step.id} className={`rounded-xl border px-3 py-2 text-center text-xs font-semibold ${voucherStep >= step.id ? 'text-white border-transparent' : 'text-gray-500 border-gray-200 bg-gray-50'}`}
                   style={voucherStep >= step.id ? { background: '#471DDB' } : {}}>
-                  Step {step.id}: {step.label}
+                  {t('systemAdmin.beneficiaries.detail.voucherStep')} {step.id}: {step.label}
                 </div>
               ))}
             </div>
 
             {validatedHiForVoucher.length === 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-xs text-amber-700">
-                No VALIDATED health issues found. Validate a health issue before creating a voucher.
+                {t('systemAdmin.beneficiaries.detail.noValidatedHi')}
               </div>
             )}
 
             {voucherStep === 1 && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Health Issue (VALIDATED) *</label>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('systemAdmin.beneficiaries.detail.healthIssueLabel')}</label>
                   <select className="input-field" value={voucherHealthIssueId} onChange={e => setVoucherHealthIssueId(e.target.value)}>
-                    <option value="">— Select health issue —</option>
+                    <option value="">{t('systemAdmin.beneficiaries.detail.selectHealthIssue')}</option>
                     {validatedHiForVoucher.map(h => (
                       <option key={h.id} value={h.id}>{h.category} — {h.description}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Hospital *</label>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('systemAdmin.beneficiaries.detail.hospitalLabel')}</label>
                   <select className="input-field" value={voucherHospitalId} onChange={e => setVoucherHospitalId(e.target.value)}>
-                    <option value="">— Select hospital —</option>
+                    <option value="">{t('systemAdmin.beneficiaries.detail.selectHospital')}</option>
                     {hospitals.map(h => <option key={h.id} value={h.id}>{h.name} · {h.city}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Voucher Amount (XAF) *</label>
-                  <input className="input-field" type="number" min={1} placeholder="e.g. 60000" value={voucherAmount} onChange={e => setVoucherAmount(e.target.value)} />
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('systemAdmin.beneficiaries.detail.voucherAmountLabel')}</label>
+                  <input className="input-field" type="number" min={1} placeholder={t('systemAdmin.beneficiaries.detail.voucherAmountPlaceholder')} value={voucherAmount} onChange={e => setVoucherAmount(e.target.value)} />
                 </div>
                 <div className="flex gap-3 mt-2">
-                  <button className="btn-outline flex-1" onClick={() => setShowVoucherCreate(false)}>Cancel</button>
+                  <button className="btn-outline flex-1" onClick={() => setShowVoucherCreate(false)}>{t('systemAdmin.beneficiaries.detail.cancel')}</button>
                   <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
                     disabled={!voucherHealthIssueId || !voucherHospitalId || numericVoucherAmount <= 0}
-                    onClick={() => setVoucherStep(2)}>Continue</button>
+                    onClick={() => setVoucherStep(2)}>{t('systemAdmin.beneficiaries.detail.continue')}</button>
                 </div>
               </div>
             )}
@@ -586,11 +586,11 @@ export default function AdminBeneficiaryDetailPage() {
             {voucherStep === 2 && (
               <div className="space-y-3">
                 <div className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-800">
-                  Target voucher amount: <span className="font-bold">{formatXAF(numericVoucherAmount)}</span>
+                  {t('systemAdmin.beneficiaries.detail.targetAmount')} <span className="font-bold">{formatXAF(numericVoucherAmount)}</span>
                 </div>
                 <div className="max-h-64 overflow-y-auto border border-gray-100 rounded-xl p-2 space-y-2">
                   {campaigns.length === 0 ? (
-                    <div className="text-xs text-gray-500 p-3">No campaigns available.</div>
+                    <div className="text-xs text-gray-500 p-3">{t('systemAdmin.beneficiaries.detail.noCampaigns')}</div>
                   ) : campaigns.map(campaign => (
                     <button key={campaign.id} type="button"
                       className={`w-full text-left border rounded-xl px-3 py-2 transition ${selectedVoucherCampaignIds.has(campaign.id) ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50'}`}
@@ -606,10 +606,10 @@ export default function AdminBeneficiaryDetailPage() {
                   ))}
                 </div>
                 <div className="flex gap-3 mt-2">
-                  <button className="btn-outline flex-1" onClick={() => setVoucherStep(1)}>Back</button>
+                  <button className="btn-outline flex-1" onClick={() => setVoucherStep(1)}>{t('systemAdmin.beneficiaries.detail.back')}</button>
                   <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
                     disabled={voucherAllocations.length === 0}
-                    onClick={() => setVoucherStep(3)}>Continue</button>
+                    onClick={() => setVoucherStep(3)}>{t('systemAdmin.beneficiaries.detail.continue')}</button>
                 </div>
               </div>
             )}
@@ -617,7 +617,7 @@ export default function AdminBeneficiaryDetailPage() {
             {voucherStep === 3 && (
               <div className="space-y-3">
                 <div className="rounded-xl bg-gray-50 p-3 text-xs text-gray-700">
-                  Allocate funds from selected campaigns. Use fixed amount or percentage per campaign.
+                  {t('systemAdmin.beneficiaries.detail.allocateHint')}
                 </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {voucherAllocations.map(allocation => {
@@ -628,8 +628,8 @@ export default function AdminBeneficiaryDetailPage() {
                         <div className="flex gap-2">
                           <select className="input-field w-40" value={allocation.mode}
                             onChange={e => setVoucherAllocations(prev => prev.map(a => a.campaign_id === allocation.campaign_id ? { ...a, mode: e.target.value as 'amount' | 'percentage', value: '' } : a))}>
-                            <option value="amount">Amount (XAF)</option>
-                            <option value="percentage">Percentage (%)</option>
+                            <option value="amount">{t('systemAdmin.beneficiaries.detail.amountMode')}</option>
+                            <option value="percentage">{t('systemAdmin.beneficiaries.detail.percentageMode')}</option>
                           </select>
                           <input className="input-field flex-1" type="number" min={1} max={allocation.mode === 'percentage' ? 100 : undefined}
                             placeholder={allocation.mode === 'percentage' ? 'e.g. 35' : 'e.g. 20000'}
@@ -641,23 +641,23 @@ export default function AdminBeneficiaryDetailPage() {
                   })}
                 </div>
                 <div className="rounded-xl border border-gray-200 p-3 text-xs space-y-1">
-                  <div>Requested: <span className="font-bold">{formatXAF(numericVoucherAmount)}</span></div>
-                  <div>Allocated: <span className="font-bold">{formatXAF(Math.floor(totalAllocated))}</span></div>
-                  <div>Percentage: <span className="font-bold">{totalPercentage.toFixed(2)}%</span></div>
+                  <div>{t('systemAdmin.beneficiaries.detail.requested')} <span className="font-bold">{formatXAF(numericVoucherAmount)}</span></div>
+                  <div>{t('systemAdmin.beneficiaries.detail.allocated')} <span className="font-bold">{formatXAF(Math.floor(totalAllocated))}</span></div>
+                  <div>{t('systemAdmin.beneficiaries.detail.percentage')} <span className="font-bold">{totalPercentage.toFixed(2)}%</span></div>
                 </div>
                 {voucherError && <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700">{voucherError}</div>}
                 <div className="flex gap-3 mt-2">
-                  <button className="btn-outline flex-1" onClick={() => setVoucherStep(2)}>Back</button>
+                  <button className="btn-outline flex-1" onClick={() => setVoucherStep(2)}>{t('systemAdmin.beneficiaries.detail.back')}</button>
                   <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
                     onClick={() => {
                       setVoucherError('');
-                      if (voucherAllocations.length === 0) { setVoucherError('Select at least one campaign.'); return; }
-                      if (voucherAllocations.some(a => Number(a.value) <= 0)) { setVoucherError('Every campaign needs a valid amount.'); return; }
-                      if (totalPercentage > 100) { setVoucherError('Total percentage cannot exceed 100%.'); return; }
+                      if (voucherAllocations.length === 0) { setVoucherError(t('systemAdmin.beneficiaries.detail.selectCampaignError')); return; }
+                      if (voucherAllocations.some(a => Number(a.value) <= 0)) { setVoucherError(t('systemAdmin.beneficiaries.detail.validAmountError')); return; }
+                      if (totalPercentage > 100) { setVoucherError(t('systemAdmin.beneficiaries.detail.percentageError')); return; }
                       createVoucherMutation.mutate();
                     }}
                     disabled={createVoucherMutation.isPending}>
-                    {createVoucherMutation.isPending ? 'Creating...' : 'Create Voucher'}
+                    {createVoucherMutation.isPending ? t('systemAdmin.beneficiaries.detail.creating') : t('systemAdmin.beneficiaries.detail.createVoucher')}
                   </button>
                 </div>
               </div>
@@ -753,37 +753,37 @@ function EditBeneficiaryModal({ beneficiary, onClose, onSave, saving }: { benefi
   };
 
   return (
-    <Modal title="Edit Beneficiary" onClose={onClose}>
+    <Modal title={t('systemAdmin.beneficiaries.detail.editBeneficiaryModal')} onClose={onClose}>
       <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Full Name" value={full_name} onChange={setFullName} />
-          <Field label="Date of Birth" type="date" value={date_of_birth} onChange={setDob} />
-          <SelectField label="Gender" value={gender} onChange={setGender} options={[
-            { value: 'MALE', label: 'Male' }, { value: 'FEMALE', label: 'Female' }, { value: 'OTHER', label: 'Other' },
+          <Field label={t('systemAdmin.beneficiaries.edit.fullName')} value={full_name} onChange={setFullName} />
+          <Field label={t('systemAdmin.beneficiaries.edit.dateOfBirth')} type="date" value={date_of_birth} onChange={setDob} />
+          <SelectField label={t('systemAdmin.beneficiaries.edit.gender')} value={gender} onChange={setGender} options={[
+            { value: 'MALE', label: t('systemAdmin.beneficiaries.edit.male') }, { value: 'FEMALE', label: t('systemAdmin.beneficiaries.edit.female') }, { value: 'OTHER', label: t('systemAdmin.beneficiaries.edit.otherGender') },
           ]} />
-          <SelectField label="Category" value={category} onChange={setCategory} options={[
-            { value: 'MATERNAL', label: 'Pregnant Woman' }, { value: 'ELDERLY', label: 'Elderly' }, { value: 'OTHER', label: 'Other' },
+          <SelectField label={t('systemAdmin.beneficiaries.edit.category')} value={category} onChange={setCategory} options={[
+            { value: 'MATERNAL', label: t('systemAdmin.beneficiaries.edit.pregnantWoman') }, { value: 'ELDERLY', label: t('systemAdmin.beneficiaries.edit.elderly') }, { value: 'OTHER', label: t('systemAdmin.beneficiaries.edit.otherCategory') },
           ]} />
-          <Field label="Phone" value={phone} onChange={setPhone} />
-          <Field label="Email" value={email} onChange={setEmail} />
-          <div className="col-span-2"><Field label="National ID" value={national_id_number} onChange={setNid} /></div>
-          <Field label="Previous Births" type="number" value={previousBirths} onChange={setPrevBirths} />
+          <Field label={t('systemAdmin.beneficiaries.edit.phone')} value={phone} onChange={setPhone} />
+          <Field label={t('systemAdmin.beneficiaries.edit.email')} value={email} onChange={setEmail} />
+          <div className="col-span-2"><Field label={t('systemAdmin.beneficiaries.edit.nationalId')} value={national_id_number} onChange={setNid} /></div>
+          <Field label={t('systemAdmin.beneficiaries.edit.previousBirths')} type="number" value={previousBirths} onChange={setPrevBirths} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Region" value={region} onChange={setRegion} />
-          <Field label="City" value={city} onChange={setCity} />
-          <div className="col-span-2"><Field label="Address" value={address} onChange={setAddress} /></div>
+          <Field label={t('systemAdmin.beneficiaries.edit.region')} value={region} onChange={setRegion} />
+          <Field label={t('systemAdmin.beneficiaries.edit.city')} value={city} onChange={setCity} />
+          <div className="col-span-2"><Field label={t('systemAdmin.beneficiaries.edit.address')} value={address} onChange={setAddress} /></div>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <Field label="EC Name" value={ecName} onChange={setEcName} />
-          <Field label="EC Phone" value={ecPhone} onChange={setEcPhone} />
-          <Field label="EC Relationship" value={ecRel} onChange={setEcRel} />
+          <Field label={t('systemAdmin.beneficiaries.edit.ecName')} value={ecName} onChange={setEcName} />
+          <Field label={t('systemAdmin.beneficiaries.edit.ecPhone')} value={ecPhone} onChange={setEcPhone} />
+          <Field label={t('systemAdmin.beneficiaries.edit.ecRelationship')} value={ecRel} onChange={setEcRel} />
         </div>
       </div>
       <div className="flex gap-3 pt-4">
-        <button onClick={onClose} className="btn-outline flex-1">Cancel</button>
+        <button onClick={onClose} className="btn-outline flex-1">{t('systemAdmin.beneficiaries.edit.cancel')}</button>
         <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}>
-          {saving ? 'Saving…' : 'Save Changes'}
+          {saving ? t('systemAdmin.beneficiaries.edit.saving') : t('systemAdmin.beneficiaries.edit.saveChanges')}
         </button>
       </div>
     </Modal>
@@ -804,15 +804,15 @@ function DocPreview({ doc }: { doc: BeneficiaryDocument }) {
       ) : (
         <div className="flex flex-col items-center gap-3 py-8">
           <FileText size={48} className="text-gray-300" />
-          <p className="text-sm text-gray-500">This document cannot be previewed inline.</p>
+          <p className="text-sm text-gray-500">{t('systemAdmin.beneficiaries.detail.cannotPreview')}</p>
           <a href={fullUrl} target="_blank" rel="noopener noreferrer" download
             className="py-2 px-4 rounded-xl font-semibold text-sm text-white" style={{ background: '#471DDB' }}>
-            Download
+            {t('systemAdmin.beneficiaries.detail.download')}
           </a>
         </div>
       )}
       {doc.description && <p className="text-xs text-gray-500 text-center">{doc.description}</p>}
-      {doc.uploaded_at && <p className="text-[10px] text-gray-400 text-center">Uploaded {formatDate(doc.uploaded_at)}</p>}
+      {doc.uploaded_at && <p className="text-[10px] text-gray-400 text-center">{t('systemAdmin.beneficiaries.detail.uploaded')} {formatDate(doc.uploaded_at)}</p>}
     </div>
   );
 }

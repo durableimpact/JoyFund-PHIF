@@ -20,6 +20,7 @@ type StaffTab = "admins" | "receptionists" | "all";
 const PARTNERSHIP_STATUSES = ["PENDING", "ACTIVE", "INACTIVE", "REJECTED"] as const;
 
 export default function HospitalDetailPage() {
+  const t = useI18n();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -65,7 +66,7 @@ export default function HospitalDetailPage() {
 
   if (!hospital) {
     return (
-      <div className="text-center py-16 text-gray-400">Hospital not found.</div>
+      <div className="text-center py-16 text-gray-400">{t('systemAdmin.hospitals.detail.notFound')}</div>
     );
   }
 
@@ -119,7 +120,7 @@ export default function HospitalDetailPage() {
         onClick={() => router.back()}
         className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm font-semibold"
       >
-        <ArrowLeft size={16} /> Back to Hospitals
+        <ArrowLeft size={16} /> {t('systemAdmin.hospitals.detail.backToList')}
       </button>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
@@ -137,7 +138,7 @@ export default function HospitalDetailPage() {
             className="btn-admin text-sm flex items-center gap-2"
             style={{ background: "#471DDB" }}
           >
-            <Pencil size={16} /> Edit Hospital
+            <Pencil size={16} /> {t('systemAdmin.hospitals.detail.editHospital')}
           </Link>
         </div>
       </div>
@@ -145,7 +146,7 @@ export default function HospitalDetailPage() {
       {/* Status Management Bar */}
       <div className="card p-4 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Partnership</span>
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t('systemAdmin.hospitals.detail.partnership')}</span>
           <select
             value={hospital.partnership_status || "PENDING"}
             onChange={(e) => handleStatusChange(e.target.value)}
@@ -164,7 +165,7 @@ export default function HospitalDetailPage() {
         </div>
         <div className="h-4 w-px bg-gray-200 hidden sm:block" />
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Active</span>
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t('systemAdmin.hospitals.detail.activeLabel')}</span>
           <button
             type="button"
             role="switch"
@@ -182,7 +183,7 @@ export default function HospitalDetailPage() {
             />
           </button>
           <span className="text-xs font-semibold text-gray-600">
-            {hospital.is_active ? "Active" : "Inactive"}
+            {hospital.is_active ? t('systemAdmin.hospitals.detail.active') : t('systemAdmin.hospitals.detail.inactive')}
           </span>
         </div>
       </div>
@@ -192,12 +193,12 @@ export default function HospitalDetailPage() {
         <div className="lg:col-span-2 space-y-5">
           <div className="card p-6">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
-              Hospital Information
+              {t('systemAdmin.hospitals.detail.hospitalInfo')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <Detail label="Name" value={hospital.name} />
+              <Detail label={t('systemAdmin.hospitals.detail.name')} value={hospital.name} />
               <Detail
-                label="Status"
+                label={t('systemAdmin.hospitals.detail.status')}
                 value={
                   <span
                     className={`badge ${statusColor(hospital.partnership_status)}`}
@@ -207,57 +208,57 @@ export default function HospitalDetailPage() {
                 }
               />
               <Detail
-                label="Accreditation #"
+                label={t('systemAdmin.hospitals.detail.accreditation')}
                 value={hospital.accreditation_number}
                 mono
               />
-              <Detail label="Licence #" value={hospital.licence_number} mono />
-              <Detail label="Region" value={hospital.region} />
-              <Detail label="City" value={hospital.city} />
-              <Detail label="Phone" value={hospital.phone_number} />
-              <Detail label="Email" value={hospital.email} />
+              <Detail label={t('systemAdmin.hospitals.detail.licence')} value={hospital.licence_number} mono />
+              <Detail label={t('systemAdmin.hospitals.detail.region')} value={hospital.region} />
+              <Detail label={t('systemAdmin.hospitals.detail.city')} value={hospital.city} />
+              <Detail label={t('systemAdmin.hospitals.detail.phone')} value={hospital.phone_number} />
+              <Detail label={t('systemAdmin.hospitals.detail.email')} value={hospital.email} />
               {hospital.website && (
                 <Detail
-                  label="Website"
+                  label={t('systemAdmin.hospitals.detail.website')}
                   value={hospital.website}
                   className="col-span-2"
                 />
               )}
               <Detail
-                label="Address"
+                label={t('systemAdmin.hospitals.detail.address')}
                 value={hospital.address}
                 className="col-span-2"
               />
-              <Detail label="Created" value={formatDate(hospital.created_at)} />
-              <Detail label="Updated" value={formatDate(hospital.updated_at)} />
+              <Detail label={t('systemAdmin.hospitals.detail.created')} value={formatDate(hospital.created_at)} />
+              <Detail label={t('systemAdmin.hospitals.detail.updated')} value={formatDate(hospital.updated_at)} />
             </div>
           </div>
 
           {/* Payment Details */}
           <div className="card p-6">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <CreditCard size={14} /> Payment Details
+              <CreditCard size={14} /> {t('systemAdmin.hospitals.detail.paymentDetails')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               {hospital.momo_number && (
                 <>
                   <Detail
-                    label="MoMo Number"
+                    label={t('systemAdmin.hospitals.detail.momoNumber')}
                     value={hospital.momo_number}
                     mono
                   />
-                  <Detail label="MoMo Name" value={hospital.momo_name || "—"} />
+                  <Detail label={t('systemAdmin.hospitals.detail.momoName')} value={hospital.momo_name || "—"} />
                 </>
               )}
               {hospital.orange_number && (
                 <>
                   <Detail
-                    label="Orange Number"
+                    label={t('systemAdmin.hospitals.detail.phone')}
                     value={hospital.orange_number}
                     mono
                   />
                   <Detail
-                    label="Orange Name"
+                    label={t('systemAdmin.hospitals.detail.name')}
                     value={hospital.orange_name || "—"}
                   />
                 </>
@@ -265,17 +266,17 @@ export default function HospitalDetailPage() {
               {hospital.bank_account_number && (
                 <>
                   <Detail
-                    label="Bank Account #"
+                    label={t('systemAdmin.users.detail.id')}
                     value={hospital.bank_account_number}
                     mono
                   />
                   <Detail
-                    label="Bank Account Name"
+                    label={t('systemAdmin.hospitals.detail.name')}
                     value={hospital.bank_account_name || "—"}
                   />
-                  <Detail label="Bank Name" value={hospital.bank_name || "—"} />
+                  <Detail label={t('systemAdmin.hospitals.detail.name')} value={hospital.bank_name || "—"} />
                   <Detail
-                    label="Bank Branch"
+                    label={t('systemAdmin.users.detail.region')}
                     value={hospital.bank_branch || "—"}
                   />
                 </>

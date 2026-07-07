@@ -32,6 +32,7 @@ const PAGE_SIZE = 15;
 type AllocationMode = 'amount' | 'percentage';
 
 export default function HealthIssuesPage() {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken || (session?.user as any)?.accessToken;
   const queryClient = useQueryClient();
@@ -182,8 +183,8 @@ export default function HealthIssuesPage() {
     <>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Health Issues</h1>
-          <p className="text-gray-500 text-sm">{totalCount} total issues</p>
+          <h1 className="text-2xl font-black text-gray-900">{t('systemAdmin.healthIssues.title')}</h1>
+          <p className="text-gray-500 text-sm">{totalCount} {t('systemAdmin.healthIssues.totalIssues')}</p>
         </div>
       </div>
 
@@ -192,7 +193,7 @@ export default function HealthIssuesPage() {
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             className="input-field pl-10"
-            placeholder="Search by description or beneficiary..."
+            placeholder={t('systemAdmin.healthIssues.searchPlaceholder')}
             value={search}
             onChange={e => { setParams({ search: e.target.value, page: 1 }); }}
           />
@@ -203,7 +204,7 @@ export default function HealthIssuesPage() {
           onChange={e => { setParams({ filter: e.target.value, page: 1 }); }}
         >
           {STATUS_FILTERS.map(s => (
-            <option key={s} value={s}>{s === 'all' ? 'All Status' : s}</option>
+            <option key={s} value={s}>{s === 'all' ? t('systemAdmin.healthIssues.allStatus') : s}</option>
           ))}
         </select>
       </div>
@@ -213,7 +214,7 @@ export default function HealthIssuesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Beneficiary', 'Category', 'Severity', 'Status', 'Description', 'Date', 'Actions'].map(h => (
+                {[t('systemAdmin.healthIssues.colBeneficiary'), t('systemAdmin.healthIssues.colCategory'), t('systemAdmin.healthIssues.colSeverity'), t('systemAdmin.healthIssues.colStatus'), t('systemAdmin.healthIssues.colDescription'), t('systemAdmin.healthIssues.colDate'), t('systemAdmin.healthIssues.colActions')].map(h => (
                   <th key={h} className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
@@ -230,7 +231,7 @@ export default function HealthIssuesPage() {
               ) : healthIssues.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-16 text-gray-400 text-sm">
-                    No health issues found
+                    {t('systemAdmin.healthIssues.empty')}
                   </td>
                 </tr>
               ) : (
@@ -264,14 +265,14 @@ export default function HealthIssuesPage() {
                               className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors flex items-center gap-1"
                               title="Validate"
                             >
-                              <CheckCircle size={11} /> Validate
+                              <CheckCircle size={11} /> {t('systemAdmin.healthIssues.validate')}
                             </button>
                             <button
                               onClick={() => { setRejectId(hi.id!); setRejectReason(''); }}
                               className="text-[10px] font-bold px-2 py-1 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors flex items-center gap-1"
                               title="Reject"
                             >
-                              <XCircle size={11} /> Reject
+                              <XCircle size={11} /> {t('systemAdmin.healthIssues.reject')}
                             </button>
                           </>
                         )}
@@ -280,9 +281,9 @@ export default function HealthIssuesPage() {
                             onClick={() => openVoucherCreate(hi.id!)}
                             className="text-[10px] font-bold px-2 py-1 rounded-lg text-white hover:opacity-90 transition-colors flex items-center gap-1"
                             style={{ background: '#471DDB' }}
-                            title="Create Voucher"
+                            title={t('systemAdmin.healthIssues.createVoucher')}
                           >
-                            <Ticket size={11} /> Voucher
+                            <Ticket size={11} /> {t('systemAdmin.healthIssues.voucher')}
                           </button>
                         )}
                       </div>
@@ -304,20 +305,20 @@ export default function HealthIssuesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-black text-gray-900">Reject Health Issue</h2>
+              <h2 className="text-lg font-black text-gray-900">{t('systemAdmin.healthIssues.rejectTitle')}</h2>
               <button onClick={() => { setRejectId(null); setRejectReason(''); }}><X size={20} className="text-gray-400" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Rejection Reason *</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{t('systemAdmin.healthIssues.rejectionReason')}</label>
                 <textarea className="input-field min-h-[100px]" value={rejectReason} onChange={e => setRejectReason(e.target.value)}
-                  placeholder="Explain why this health issue is being rejected..." required />
+                  placeholder={t('systemAdmin.healthIssues.rejectionPlaceholder')} required />
               </div>
               <div className="flex gap-3 pt-2">
-                <button onClick={() => { setRejectId(null); setRejectReason(''); }} className="btn-outline flex-1">Cancel</button>
+                <button onClick={() => { setRejectId(null); setRejectReason(''); }} className="btn-outline flex-1">{t('systemAdmin.healthIssues.cancel')}</button>
                 <button onClick={() => rejectMutation.mutate()} disabled={rejectMutation.isPending || !rejectReason.trim()}
                   className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60 flex items-center justify-center gap-2" style={{ background: '#DC2626' }}>
-                  {rejectMutation.isPending && <Loader2 size={16} className="animate-spin" />} Reject
+                  {rejectMutation.isPending && <Loader2 size={16} className="animate-spin" />} {t('systemAdmin.healthIssues.reject')}
                 </button>
               </div>
             </div>
@@ -330,15 +331,15 @@ export default function HealthIssuesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 my-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-black text-gray-900">Create Voucher</h2>
+              <h2 className="text-lg font-black text-gray-900">{t('systemAdmin.healthIssues.createVoucherTitle')}</h2>
               <button onClick={() => setShowVoucherCreate(false)}><X size={20} className="text-gray-400" /></button>
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-5">
-              {[{ id: 1, label: 'Details' }, { id: 2, label: 'Campaigns' }, { id: 3, label: 'Allocate' }].map(step => (
+              {[{ id: 1, label: t('systemAdmin.healthIssues.voucherStepDetails') }, { id: 2, label: t('systemAdmin.healthIssues.voucherStepCampaigns') }, { id: 3, label: t('systemAdmin.healthIssues.voucherStepAllocate') }].map(step => (
                 <div key={step.id} className={`rounded-xl border px-3 py-2 text-center text-xs font-semibold ${voucherStep >= step.id ? 'text-white border-transparent' : 'text-gray-500 border-gray-200 bg-gray-50'}`}
                   style={voucherStep >= step.id ? { background: '#471DDB' } : {}}>
-                  Step {step.id}: {step.label}
+                  {t('systemAdmin.healthIssues.voucherStep')} {step.id}: {step.label}
                 </div>
               ))}
             </div>
@@ -346,9 +347,9 @@ export default function HealthIssuesPage() {
             {voucherStep === 1 && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Hospital *</label>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('systemAdmin.healthIssues.hospitalLabel')}</label>
                   <select className="input-field" value={voucherHospitalId} onChange={e => setVoucherHospitalId(e.target.value)}>
-                    <option value="">— Select hospital —</option>
+                    <option value="">{t('systemAdmin.healthIssues.selectHospital')}</option>
                     {hospitals.map(h => <option key={h.id} value={h.id}>{h.name} · {h.city}</option>)}
                   </select>
                 </div>
@@ -360,7 +361,7 @@ export default function HealthIssuesPage() {
                   <button className="btn-outline flex-1" onClick={() => setShowVoucherCreate(false)}>Cancel</button>
                   <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
                     disabled={!voucherHiId || !voucherHospitalId || numericVoucherAmount <= 0}
-                    onClick={() => setVoucherStep(2)}>Continue</button>
+                    onClick={() => setVoucherStep(2)}>{t('systemAdmin.vouchers.continue')}</button>
                 </div>
               </div>
             )}
@@ -391,7 +392,7 @@ export default function HealthIssuesPage() {
                   <button className="btn-outline flex-1" onClick={() => setVoucherStep(1)}>Back</button>
                   <button className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-60" style={{ background: '#471DDB' }}
                     disabled={voucherAllocations.length === 0}
-                    onClick={() => setVoucherStep(3)}>Continue</button>
+                    onClick={() => setVoucherStep(3)}>{t('systemAdmin.vouchers.continue')}</button>
                 </div>
               </div>
             )}
@@ -410,8 +411,8 @@ export default function HealthIssuesPage() {
                         <div className="flex gap-2">
                           <select className="input-field w-40" value={allocation.mode}
                             onChange={e => setVoucherAllocations(prev => prev.map(a => a.campaign_id === allocation.campaign_id ? { ...a, mode: e.target.value as AllocationMode, value: '' } : a))}>
-                            <option value="amount">Amount (XAF)</option>
-                            <option value="percentage">Percentage (%)</option>
+                            <option value="amount">{t('systemAdmin.vouchers.amountInput')}</option>
+                            <option value="percentage">{t('systemAdmin.vouchers.percentageInput')}</option>
                           </select>
                           <input className="input-field flex-1" type="number" min={1} max={allocation.mode === 'percentage' ? 100 : undefined}
                             placeholder={allocation.mode === 'percentage' ? 'e.g. 35' : 'e.g. 20000'}
