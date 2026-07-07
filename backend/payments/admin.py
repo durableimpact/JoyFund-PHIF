@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.html import format_html
+from django.utils.html import format_html, mark_safe
 
 from .models import (
     Account,
@@ -45,10 +45,10 @@ class FeePolicyAdmin(admin.ModelAdmin):
 
     def active_badge(self, obj):
         if obj.is_active:
-            return format_html(
+            return mark_safe(
                 '<span style="color:green;font-weight:bold;">✔ Active</span>'
             )
-        return format_html('<span style="color:#999;">Inactive</span>')
+        return mark_safe('<span style="color:#999;">Inactive</span>')
 
     active_badge.short_description = "Status"
 
