@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import { cookies } from "next/headers";
 import "./globals.css";
@@ -18,21 +18,9 @@ import InstallPWA from "@/components/pwa/InstallPWA";
 import { AuthErrorHandler } from "@/components/auth/AuthErrorHandler";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const montserrat = localFont({
+  src: "./../public/font/Montserrat-VariableFont_wght.ttf",
+  variable: "--font-montserrat",
   display: "swap",
 });
 
@@ -135,7 +123,7 @@ export default async function RootLayout({
       lang={locale}
       suppressHydrationWarning
       suppressContentEditableWarning
-      className={cn("h-full", plusJakartaSans.variable, spaceGrotesk.variable)}
+      className={cn("h-full", montserrat.variable)}
     >
       <head>
         <meta
@@ -187,7 +175,6 @@ export default async function RootLayout({
         suppressContentEditableWarning
         className={cn(
           "min-h-full flex flex-col antialiased font-sans",
-          geistMono.variable,
         )}
       >
         {/* Google Tag Manager (noscript) - Only in production */}
