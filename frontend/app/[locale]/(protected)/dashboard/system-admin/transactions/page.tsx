@@ -87,15 +87,15 @@ export default function TransactionsPage() {
           <>
             {/* Mobile: card layout */}
             <div className="md:hidden space-y-3">
-              {rows.map((t) => (
-                <Link key={t.id} href={`/dashboard/system-admin/transactions/${t.id}`} className="block border border-gray-100 rounded-xl p-4 space-y-2 hover:border-[#471DDB]/30 transition-colors">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.type')}</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{t.type_display}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.direction')}</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.direction === "IN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{t.direction_display}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.amount')}</span><span className="font-bold text-gray-900">{formatXAF(t.amount)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.currency')}</span><span className="text-gray-600">{t.currency}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.status')}</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" : t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{t.status_display}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.gatewayTx')}</span><span className="text-gray-400 font-mono text-xs truncate max-w-[140px]">{t.gateway_transaction_id || "—"}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.date')}</span><span className="text-gray-400 text-xs">{formatDate(t.created_at)}</span></div>
+              {rows.map((txn) => (
+                <Link key={txn.id} href={`/dashboard/system-admin/transactions/${txn.id}`} className="block border border-gray-100 rounded-xl p-4 space-y-2 hover:border-[#471DDB]/30 transition-colors">
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.type')}</span><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{txn.type_display}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.direction')}</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${txn.direction === "IN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{txn.direction_display}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.amount')}</span><span className="font-bold text-gray-900">{formatXAF(txn.amount)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.currency')}</span><span className="text-gray-600">{txn.currency}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.status')}</span><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${txn.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" : txn.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{txn.status_display}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.gatewayTx')}</span><span className="text-gray-400 font-mono text-xs truncate max-w-[140px]">{txn.gateway_transaction_id || "—"}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">{t('systemAdmin.transactions.date')}</span><span className="text-gray-400 text-xs">{formatDate(txn.created_at)}</span></div>
                 </Link>
               ))}
             </div>
@@ -119,32 +119,32 @@ export default function TransactionsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((t) => (
-                    <tr key={t.id} className="border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => window.location.href = `/dashboard/system-admin/transactions/${t.id}`}>
-                      <td className="py-3 text-gray-400 font-mono text-xs">{t.id.slice(0, 8)}...</td>
+                  {rows.map((txn) => (
+                    <tr key={txn.id} className="border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => window.location.href = `/dashboard/system-admin/transactions/${txn.id}`}>
+                      <td className="py-3 text-gray-400 font-mono text-xs">{txn.id.slice(0, 8)}...</td>
                       <td className="py-3">
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                          {t.type_display}
+                          {txn.type_display}
                         </span>
                       </td>
                       <td className="py-3">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${t.direction === "IN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                          {t.direction_display}
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${txn.direction === "IN" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                          {txn.direction_display}
                         </span>
                       </td>
-                      <td className="py-3 font-bold text-gray-900">{formatXAF(t.amount)}</td>
-                      <td className="py-3 text-gray-600">{t.currency}</td>
+                      <td className="py-3 font-bold text-gray-900">{formatXAF(txn.amount)}</td>
+                      <td className="py-3 text-gray-600">{txn.currency}</td>
                       <td className="py-3">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          t.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" :
-                          t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" :
+                          txn.status === "SUCCESSFUL" ? "bg-green-100 text-green-700" :
+                          txn.status === "PENDING" ? "bg-yellow-100 text-yellow-700" :
                           "bg-red-100 text-red-700"
                         }`}>
-                          {t.status_display}
+                          {txn.status_display}
                         </span>
                       </td>
-                      <td className="py-3 text-gray-400 font-mono text-xs max-w-[100px] truncate">{t.gateway_transaction_id || "—"}</td>
-                      <td className="py-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(t.created_at)}</td>
+                      <td className="py-3 text-gray-400 font-mono text-xs max-w-[100px] truncate">{txn.gateway_transaction_id || "—"}</td>
+                      <td className="py-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(txn.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>

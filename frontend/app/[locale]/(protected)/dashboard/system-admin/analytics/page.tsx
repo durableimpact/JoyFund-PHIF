@@ -55,6 +55,7 @@ function GrowthBadge({
   indicator?: GrowthIndicator | FinancialGrowthIndicator;
   isCurrency?: boolean;
 }) {
+  const t = useI18n();
   if (!indicator) return null;
   const { change_percent, direction } = indicator;
   if (change_percent === null || change_percent === undefined) {
