@@ -129,9 +129,10 @@ function DonatePage() {
 
   const platformFeePct = Number(feePolicy?.platform_fee_percentage ?? 5);
   const paymentAggregatorFee = Math.round(amount * 0.02);
-  const operationsFee = Math.round(amount * platformFeePct / 100);
+  const afterAggregator = amount - paymentAggregatorFee;
+  const operationsFee = Math.round(afterAggregator * platformFeePct / 100);
   const totalFees = paymentAggregatorFee + operationsFee;
-  const netContribution = Math.max(amount - totalFees, 0);
+  const netContribution = Math.max(afterAggregator - operationsFee, 0);
 
   // Use mutation for donation
   const donateMutation = useMutation({
@@ -590,7 +591,7 @@ function DonatePage() {
             </button>
 
             <p className="text-center text-xs text-gray-400 leading-relaxed">
-              2% covers the payment aggregator, {platformFeePct}% supports operations, and {100 - 2 - platformFeePct}%
+              2% goes to Campay, {platformFeePct}% to operations (on post-aggregator amount), and {100 - 2 - platformFeePct}%
               goes to healthcare.
             </p>
           </form>

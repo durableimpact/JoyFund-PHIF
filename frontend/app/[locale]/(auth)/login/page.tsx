@@ -53,7 +53,7 @@ function LoginPageContent() {
       // Prefer explicit error checking — some providers may return 200
       // even when authentication failed. Check `error` first.
       if (result?.error) {
-        let errorMsg = "Invalid email or password.";
+        let errorMsg = t("auth.login.invalidEmailOrPassword");
 
         if (typeof result.error === "string") {
           // Try to parse JSON errors returned from the backend
@@ -67,15 +67,13 @@ function LoginPageContent() {
             // Not JSON — map common NextAuth error codes to user-friendly messages
             switch (result.error) {
               case "CredentialsSignin":
-                errorMsg =
-                  "Invalid email or password. Please check your credentials and try again.";
+                errorMsg = t("auth.login.invalidEmailOrPassword");
                 break;
               case "OAuthAccountNotLinked":
-                errorMsg =
-                  "An account with that email already exists. Please sign in using the original provider.";
+                errorMsg = t("auth.login.accountExists");
                 break;
               case "SessionRequired":
-                errorMsg = "Your session has expired. Please sign in again.";
+                errorMsg = t("auth.login.sessionExpired");
                 break;
               default:
                 // Fallback to the raw string but make it presentable
@@ -102,7 +100,7 @@ function LoginPageContent() {
       }
 
       // Success
-      toast.success("Signed in successfully.");
+      toast.success(t("auth.login.signedIn"));
       console.log("[login] Sign in successful, redirecting...");
 
       const destination = result?.url
@@ -118,7 +116,7 @@ function LoginPageContent() {
       window.location.replace(destination);
     } catch (error) {
       console.error("[login] Unexpected error:", error);
-      const message = "Connection error. Please try again.";
+      const message = t("auth.login.connectionError");
       setError(message);
       toast.error(message);
     } finally {

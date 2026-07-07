@@ -107,21 +107,21 @@ export default function RegisterPage() {
             "[register] Account created but auto-login failed:",
             signInResult.error,
           );
-          toast.info("Account created! Please sign in with your credentials.");
+          toast.info(t("auth.register.accountCreated"));
           router.push("/login");
         } else if (signInResult?.ok) {
           // Successfully signed in
-          toast.success("Welcome! You're now logged in.");
+          toast.success(t("auth.register.welcomeSignedIn"));
           router.push("/dashboard/donor");
         } else {
           // Unexpected response
           console.warn("[register] Unexpected sign-in response:", signInResult);
-          toast.info("Account created! Please sign in with your credentials.");
+          toast.info(t("auth.register.accountCreated"));
           router.push("/login");
         }
       } catch (signInError: unknown) {
         console.error("[register] Auto-login error:", signInError);
-        toast.info("Account created! Please sign in with your credentials.");
+        toast.info(t("auth.register.accountCreated"));
         router.push("/login");
       }
       reset();
@@ -162,7 +162,7 @@ export default function RegisterPage() {
           }
         }
       } else {
-        setGeneralError("Registration failed. Please try again.");
+        setGeneralError(t("auth.register.registrationError"));
       }
 
       const banner =
@@ -173,7 +173,7 @@ export default function RegisterPage() {
             : Array.isArray(errorData)
               ? errorData[0]
               : null)) ||
-        "Registration failed. Please try again.";
+        t("auth.register.registrationError");
       toast.error(String(banner));
     } finally {
       setLoading(false);

@@ -32,10 +32,10 @@ export default function PricingPage() {
   });
 
   const platformFeePct = Number(feePolicy?.platform_fee_percentage ?? 5);
-  const escrowFeePct = Number(feePolicy?.escrow_fee_percentage ?? 0);
   const campayFeePct = 2;
-  const pctToCampaign = 100 - campayFeePct - platformFeePct - escrowFeePct;
+  const pctToCampaign = 100 - campayFeePct - platformFeePct;
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>('');
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
@@ -74,7 +74,7 @@ export default function PricingPage() {
 
         {/* ── Fee breakdown ── */}
         <section className="mb-16">
-          <div className="grid grid-cols-4 gap-0 text-center border-y border-gray-200">
+          <div className="grid grid-cols-3 gap-0 text-center border-y border-gray-200">
             <div className="py-8 px-4">
               <p className="text-3xl font-black text-[#1A1A2E] mb-1">{campayFeePct}%</p>
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{t('pricing.campayFee')}</p>
@@ -84,11 +84,6 @@ export default function PricingPage() {
               <p className="text-3xl font-black text-[#1A1A2E] mb-1">{platformFeePct}%</p>
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{t('pricing.platformFee')}</p>
               <p className="text-xs text-gray-500 leading-relaxed">{t('pricing.platformFeeDesc')}</p>
-            </div>
-            <div className="py-8 px-4 border-r border-gray-200">
-              <p className="text-3xl font-black text-[#1A1A2E] mb-1">{escrowFeePct}%</p>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Escrow</p>
-              <p className="text-xs text-gray-500 leading-relaxed">Secure fund holding until care is delivered</p>
             </div>
             <div className="py-8 px-4">
               <p className="text-3xl font-black mb-1" style={{ color: 'var(--primary)' }}>{pctToCampaign}%</p>
@@ -104,26 +99,53 @@ export default function PricingPage() {
           <p className="text-gray-500 text-sm mb-8">{t('pricing.calculatorSubtitle')}</p>
 
           {/* Table header */}
-          <div className="grid grid-cols-5 gap-4 py-3 border-b border-gray-200 text-xs font-bold uppercase tracking-widest text-gray-400">
+          <div className="grid grid-cols-4 gap-4 py-3 border-b border-gray-200 text-xs font-bold uppercase tracking-widest text-gray-400">
             <div>{t('pricing.donation')}</div>
             <div className="text-right">Campay</div>
             <div className="text-right">Platform</div>
-            <div className="text-right">Escrow</div>
             <div className="text-right" style={{ color: 'var(--primary)' }}>{t('pricing.goesToCampaign')}</div>
+          </div>
+
+          {/* Custom amount input row */}
+          <div className="grid grid-cols-4 gap-4 py-4 border-b border-gray-200 text-sm bg-gray-50">
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min="0"
+                step="100"
+                placeholder={t('pricing.customPlaceholder')}
+                value={customAmount}
+                onChange={(e) => setCustomAmount(e.target.value)}
+                className="w-full font-bold text-[#1A1A2E] bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D75DB] transition-colors"
+              />
+              <span className="text-xs text-gray-400 shrink-0">XAF</span>
+            </div>
+            {customAmount && Number(customAmount) > 0 ? (
+              <>
+                <div className="text-right text-gray-500 flex items-center justify-end">-{formatXaf(Math.round(Number(customAmount) * campayFeePct / 100))}</div>
+                <div className="text-right text-gray-500 flex items-center justify-end">-{formatXaf(Math.round((Number(customAmount) - Math.round(Number(customAmount) * campayFeePct / 100)) * platformFeePct / 100))}</div>
+                <div className="text-right font-bold flex items-center justify-end" style={{ color: 'var(--primary)' }}>{formatXaf((Number(customAmount) - Math.round(Number(customAmount) * campayFeePct / 100)) - Math.round((Number(customAmount) - Math.round(Number(customAmount) * campayFeePct / 100)) * platformFeePct / 100))}</div>
+              </>
+            ) : (
+              <>
+                <div className="text-right text-gray-300 flex items-center justify-end">-</div>
+                <div className="text-right text-gray-300 flex items-center justify-end">-</div>
+                <div className="text-right text-gray-300 flex items-center justify-end">-</div>
+              </>
+            )}
           </div>
 
           {/* Table rows */}
           {EXAMPLE_AMOUNTS.map((amount) => {
             const campay = Math.round(amount * campayFeePct / 100);
-            const platform = Math.round(amount * platformFeePct / 100);
-            const escrow = Math.round(amount * escrowFeePct / 100);
-            const net = amount - campay - platform - escrow;
+            const afterCampay = amount - campay;
+            const platform = Math.round(afterCampay * platformFeePct / 100);
+            const net = afterCampay - platform;
             return (
-              <div key={amount} className="grid grid-cols-5 gap-4 py-4 border-b border-gray-100 text-sm">
+              <div key={amount} className="grid grid-cols-4 gap-4 py-4 border-b border-gray-100 text-sm">
                 <div className="font-bold text-[#1A1A2E]">{formatXaf(amount)} XAF</div>
                 <div className="text-right text-gray-500">-{formatXaf(campay)}</div>
                 <div className="text-right text-gray-500">-{formatXaf(platform)}</div>
-                <div className="text-right text-gray-500">-{formatXaf(escrow)}</div>
                 <div className="text-right font-bold" style={{ color: 'var(--primary)' }}>{formatXaf(net)}</div>
               </div>
             );
@@ -141,9 +163,9 @@ export default function PricingPage() {
             {[
               { step: '1', bold: t('pricing.step1'), desc: t('pricing.step1Desc') },
               { step: '2', bold: `${formatXaf(Math.round(5000 * campayFeePct / 100))} XAF ${t('pricing.step2')}`, desc: t('pricing.step2Desc') },
-              { step: '3', bold: t('pricing.step3', { amount: formatXaf(Math.round(5000 * platformFeePct / 100)), pct: platformFeePct }), desc: t('pricing.step3Desc') },
-              { step: '4', bold: `${formatXaf(Math.round(5000 * escrowFeePct / 100))} XAF — Escrow (${escrowFeePct}%)`, desc: 'Held securely until care is confirmed' },
-              { step: '5', bold: t('pricing.step4', { amount: formatXaf(5000 - Math.round(5000 * campayFeePct / 100) - Math.round(5000 * platformFeePct / 100) - Math.round(5000 * escrowFeePct / 100)), pct: pctToCampaign }), desc: t('pricing.step4Desc') },
+              { step: '3', bold: `${formatXaf(5000 - Math.round(5000 * campayFeePct / 100))} XAF arrives at JoyFund`, desc: 'The post-aggregator amount is what JoyFund receives' },
+              { step: '4', bold: t('pricing.step3', { amount: formatXaf(Math.round((5000 - Math.round(5000 * campayFeePct / 100)) * platformFeePct / 100)), pct: platformFeePct }), desc: t('pricing.step3Desc') },
+              { step: '5', bold: t('pricing.step4', { amount: formatXaf((5000 - Math.round(5000 * campayFeePct / 100)) - Math.round((5000 - Math.round(5000 * campayFeePct / 100)) * platformFeePct / 100)), pct: pctToCampaign }), desc: t('pricing.step4Desc') },
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-4 py-4 border-t border-gray-200">
                 <span className="text-xs font-bold text-gray-400 mt-0.5 w-5 shrink-0">{item.step}</span>
