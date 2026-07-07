@@ -2,8 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useI18n } from "@/locales/client";
-import {
-  Heart,
+import {  Heart,
   ArrowRight,
   ChevronRight,
   ChevronDown,
@@ -21,7 +20,6 @@ import {
   Building2,
 } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
-import { Helmet } from "react-helmet-async";
 import CampaignCard from "@/components/shared/CampaignCard";
 import { listCampaigns, getPlatformStats } from "@/actions/campaigns";
 import { useEffect, useState } from "react";
@@ -111,23 +109,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>JoyFund</title>
-        <meta name="description" content={t("hero.subtitle")} />
-        <link rel="canonical" href="https://joy-fund.com" />
-        <meta property="og:title" content="JoyFund" />
-        <meta property="og:description" content={t("hero.subtitle")} />
-        <meta property="og:url" content="https://joy-fund.com" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://joy-fund.com/og-image.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="JoyFund" />
-        <meta name="twitter:description" content={t("hero.subtitle")} />
-        <meta
-          name="twitter:image"
-          content="https://joy-fund.com/og-image.png"
-        />
-      </Helmet>
       <Navbar transparent />
 
       {/* ── Hero ── */}

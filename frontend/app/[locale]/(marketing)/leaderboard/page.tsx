@@ -5,7 +5,6 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Trophy, TrendingUp, ExternalLink, Loader2, User, ArrowUpDown } from 'lucide-react';
 import Navbar from '@/components/shared/Navbar';
-import { Helmet } from 'react-helmet-async';
 import { getCampaignLeaderboard } from '@/actions/campaigns';
 import { useI18n } from '@/locales/client';
 
@@ -93,22 +92,6 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Campaign Leaderboard - Top JoyFund Campaigns</title>
-        <meta name="description" content="See the top-performing JoyFund campaigns making the biggest impact on maternal healthcare in Cameroon." />
-        <link rel="canonical" href="https://joy-fund.com/leaderboard" />
-        <meta property="og:title" content="JoyFund Campaign Leaderboard" />
-        <meta property="og:description" content="Celebrating the campaigns making the biggest impact on maternal healthcare in Cameroon." />
-        <meta property="og:url" content="https://joy-fund.com/leaderboard" />
-        <meta property="og:type" content="website" />
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: "JoyFund Campaign Leaderboard",
-          url: "https://joy-fund.com/leaderboard",
-          description: "Top-performing JoyFund campaigns making the biggest impact on maternal healthcare."
-        })}</script>
-      </Helmet>
       <Navbar />
 
       <main className="relative">

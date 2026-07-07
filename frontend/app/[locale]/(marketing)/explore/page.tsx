@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import Navbar from "@/components/shared/Navbar";
-import { Helmet } from "react-helmet-async";
 import CampaignCard from "@/components/shared/CampaignCard";
 import { listCampaigns } from "@/actions/campaigns";
 import { useI18n } from "@/locales/client";
@@ -50,35 +49,6 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
-      <Helmet>
-        <title>Donate to Maternal Health Campaigns | JoyFund</title>
-        <meta
-          name="description"
-          content="Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money."
-        />
-        <link rel="canonical" href="https://joy-fund.com/explore" />
-        <meta
-          property="og:title"
-          content="Donate to Maternal Health Campaigns | JoyFund"
-        />
-        <meta
-          property="og:description"
-          content="Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money."
-        />
-        <meta property="og:url" content="https://joy-fund.com/explore" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://joy-fund.com/og-image.png" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CollectionPage",
-            name: "Donate to Maternal Health Campaigns",
-            url: "https://joy-fund.com/explore",
-            description:
-              "Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money.",
-          })}
-        </script>
-      </Helmet>
       <Navbar />
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">

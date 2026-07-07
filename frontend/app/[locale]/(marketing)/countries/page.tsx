@@ -1,6 +1,5 @@
 'use client';
 import Navbar from '@/components/shared/Navbar';
-import { Helmet } from 'react-helmet-async';
 import { Globe, MapPin, CheckCircle, Phone, Building2, Shield, ArrowRight } from 'lucide-react';
 import { useI18n } from '@/locales/client';
 import Link from 'next/link';
@@ -27,23 +26,6 @@ export default function SupportedCountriesPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <Helmet>
-        <title>Supported Countries | JoyFund</title>
-        <meta name="description" content="JoyFund currently operates in Cameroon, supporting maternal healthcare through transparent community crowdfunding. Learn about our coverage and payment methods." />
-        <link rel="canonical" href="https://joy-fund.com/countries" />
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          "name": "Supported Countries | JoyFund",
-          "url": "https://joy-fund.com/countries",
-          "description": "JoyFund currently operates in Cameroon, supporting maternal healthcare through transparent community crowdfunding.",
-          "publisher": {
-            "@type": "Organization",
-            "name": "JoyFund",
-            "url": "https://joy-fund.com"
-          }
-        })}</script>
-      </Helmet>
       <Navbar />
 
       <main className="max-w-3xl mx-auto px-4 pt-32 pb-24">

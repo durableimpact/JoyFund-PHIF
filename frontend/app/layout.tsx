@@ -32,9 +32,9 @@ const jsonLd = {
       "@id": "https://joy-fund.com/#organization",
       name: "JoyFund",
       description:
-        "A transparent crowdfunding platform pooling community resources for maternal healthcare and safe deliveries for vulnerable women across Cameroon.",
+        "A transparent crowdfunding platform pooling community resources for maternal healthcare and safe deliveries for vulnerable women across Cameroon. Also known as Joy fund.",
       url: "https://joy-fund.com",
-      logo: "https://joy-fund.com/logo.png",
+      logo: "https://joy-fund.com/assets/joyfund-logo-half-removebg-preview.png",
       foundingLocation: {
         "@type": "Place",
         name: "Cameroon",
@@ -56,36 +56,29 @@ const jsonLd = {
 export const metadata: Metadata = {
   title: {
     default: "JoyFund",
-    template: "%s",
+    template: "%s | JoyFund",
   },
   description:
     "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
+  keywords: [
+    "Joy fund",
+    "JoyFund",
+    "crowdfunding",
+    "maternal healthcare",
+    "safe deliveries",
+    "Cameroon",
+    "MTN MoMo",
+    "Orange Money",
+    "community health",
+    "fundraising",
+    "nonprofit",
+    "donations",
+    "birthday fundraiser",
+    "wedding fundraiser",
+  ],
   metadataBase: new URL("https://joy-fund.com"),
   verification: {
     google: "OyspcSNhwrr5zCVrvp1J0iPhdZEvX2iAAl3nuEkiUZo",
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    siteName: "JoyFund",
-    title: "JoyFund",
-    description:
-      "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "JoyFund",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "JoyFund",
-    description:
-      "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
-    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
   icons: {
@@ -126,10 +119,6 @@ export default async function RootLayout({
       className={cn("h-full", montserrat.variable)}
     >
       <head>
-        <meta
-          name="google-site-verification"
-          content="3Td7-qGUvMTtrrQ-0rVom8KwPSNikh9eLKgGzZMpCdk"
-        />
         <link
           rel="apple-touch-icon"
           sizes="180x180"

@@ -1,6 +1,5 @@
 'use client';
 import Navbar from '@/components/shared/Navbar';
-import { Helmet } from 'react-helmet-async';
 import Link from 'next/link';
 import { ShieldCheck, ArrowRight, HeartPulse, Building2, CheckCircle2, Lock } from 'lucide-react';
 import { useI18n } from '@/locales/client';
@@ -9,15 +8,6 @@ export default function TrustAndTransparencyPage() {
   const t = useI18n();
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <Helmet>
-        <title>Trust & Transparency | JoyFund Cameroon</title>
-        <meta name="description" content="Discover how JoyFund guarantees 100% transparency. Our fraud-proof voucher system ensures your donations directly fund maternal healthcare in Cameroon." />
-        <link rel="canonical" href="https://joy-fund.com/trust-and-transparency" />
-        <meta property="og:title" content="Trust & Transparency | JoyFund" />
-        <meta property="og:description" content="Our fraud-proof voucher system ensures your donations directly fund safe deliveries in Cameroon." />
-        <meta property="og:url" content="https://joy-fund.com/trust-and-transparency" />
-        <meta property="og:type" content="website" />
-      </Helmet>
       
       <Navbar />
       

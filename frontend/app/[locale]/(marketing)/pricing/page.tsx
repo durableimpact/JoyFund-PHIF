@@ -1,7 +1,6 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/shared/Navbar';
-import { Helmet } from 'react-helmet-async';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { getCurrentFeePolicy } from '@/actions/payments';
 import { useState } from 'react';
@@ -39,23 +38,6 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <Helmet>
-        <title>Pricing & Fees | JoyFund</title>
-        <meta name="description" content="Understand how JoyFund fees work. See exactly where your donation goes — transparent pricing for maternal healthcare crowdfunding in Cameroon." />
-        <link rel="canonical" href="https://joy-fund.com/pricing" />
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          "name": "Pricing & Fees | JoyFund",
-          "url": "https://joy-fund.com/pricing",
-          "description": "Transparent pricing and fee breakdown for JoyFund donations.",
-          "publisher": {
-            "@type": "Organization",
-            "name": "JoyFund",
-            "url": "https://joy-fund.com"
-          }
-        })}</script>
-      </Helmet>
       <Navbar />
 
       <main className="max-w-3xl mx-auto px-4 pt-32 pb-24">

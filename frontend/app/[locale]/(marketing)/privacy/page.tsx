@@ -1,6 +1,5 @@
 'use client';
 import Navbar from '@/components/shared/Navbar';
-import { Helmet } from 'react-helmet-async';
 import { Shield, CheckCircle } from 'lucide-react';
 import { useI18n } from '@/locales/client';
 
@@ -14,26 +13,6 @@ export default function PrivacyPage() {
   const t = useI18n();
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Privacy Policy | JoyFund</title>
-        <meta
-          name="description"
-          content="JoyFund's Privacy Policy — how we collect, use, and protect your personal data in compliance with GDPR and US data protection laws."
-        />
-        <script type="application/ld+json">{JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'WebPage',
-          name: 'Privacy Policy | JoyFund',
-          url: 'https://joy-fund.com/privacy',
-          description:
-            'Privacy Policy for JoyFund maternal healthcare crowdfunding platform.',
-          publisher: {
-            '@type': 'Organization',
-            name: 'JoyFund',
-            url: 'https://joy-fund.com',
-          },
-        })}</script>
-      </Helmet>
       <Navbar />
 
       <main className="relative">

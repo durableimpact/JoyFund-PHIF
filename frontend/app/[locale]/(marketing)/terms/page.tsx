@@ -1,6 +1,5 @@
 'use client';
 import Navbar from '@/components/shared/Navbar';
-import { Helmet } from 'react-helmet-async';
 import { Scale, Mail } from 'lucide-react';
 import { useI18n } from '@/locales/client';
 
@@ -8,26 +7,6 @@ export default function TermsPage() {
   const t = useI18n();
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Terms of Service | JoyFund</title>
-        <meta
-          name="description"
-          content="Read the Terms of Service for JoyFund — your rights and responsibilities on our maternal healthcare crowdfunding platform."
-        />
-        <script type="application/ld+json">{JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'WebPage',
-          name: 'Terms of Service | JoyFund',
-          url: 'https://joy-fund.com/terms',
-          description:
-            'Terms of Service for JoyFund maternal healthcare crowdfunding platform.',
-          publisher: {
-            '@type': 'Organization',
-            name: 'JoyFund',
-            url: 'https://joy-fund.com',
-          },
-        })}</script>
-      </Helmet>
       <Navbar />
 
       <main className="relative">

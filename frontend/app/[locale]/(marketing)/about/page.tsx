@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/shared/Navbar";
 import {
   Heart,
@@ -76,15 +75,6 @@ export default function AboutPage() {
   const t = useI18n();
   return (
     <div className="min-h-screen bg-white">
-      <Helmet>
-        <title>About JoyFund</title>
-        <meta
-          name="description"
-          content="JoyFund turns Cameroon's culture of celebration and community mutual aid into a transparent People's Health Fund for vulnerable mothers and elderly people."
-        />
-        <link rel="canonical" href="https://joy-fund.com/about" />
-      </Helmet>
-
       <Navbar />
 
       {/* ════════════════════════════════════════════════════════════════
