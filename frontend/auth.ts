@@ -227,6 +227,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (session.role) token.role = session.role;
         if (session.id) token.id = session.id;
         if (session.userInfo) token.userInfo = session.userInfo;
+      }
+
+      // Re-fetch userInfo when session is updated (e.g. after profile edit)
+      if (trigger === "update" && token.accessToken && token.role) {
+        try {
+          const INFO_ENDPOINTS: Record<string, string> = {
+            DONOR: "/api/accounts/donor/info/",
+            SYSTEM_ADMIN: "/api/accounts/system-admin/info/",
+            HOSPITAL_ADMIN: "/api/accounts/hospital-admin/info/",
+            RECEPTIONIST: "/api/accounts/receptionist/info/",
+            SOCIAL_WORKER: "/api/accounts/social-worker/info/",
+          };
+          const endpoint = INFO_ENDPOINTS[token.role as string];
+          if (endpoint) {
+            const freshUserInfo = await fetchFromAPI<any>(endpoint, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token.accessToken}` },
+            });
+            if (freshUserInfo) {
+              token.userInfo = freshUserInfo;
+              console.log("[auth] Re-fetched userInfo after session update");
+            }
+          }
+        } catch (err) {
+          console.error("[auth] Failed to re-fetch userInfo:", err);
+        }
         return token;
       }
 

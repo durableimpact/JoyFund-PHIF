@@ -91,9 +91,9 @@ export default function UserProfile() {
       if (phone !== (info.phone_number || "")) data.phone_number = phone;
       if (Object.keys(data).length === 0) { setEditing(false); return; }
       await updateProfile(info.role, profile.id, data);
+      await update({});
       toast.success(t("dashboard.donor.profileUpdated"));
       setEditing(false);
-      await update();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : t("dashboard.donor.failedUpdateProfile"));
     } finally { setSaving(false); }
@@ -140,7 +140,7 @@ export default function UserProfile() {
       toast.success(t("dashboard.donor.emailVerified"));
       setVerificationStep("closed");
       setVerificationCode("");
-      await update();
+      await update({});
     } catch (e) {
       const errorData = typeof e === "string" ? JSON.parse(e) : e;
       const msg = errorData?.detail || errorData?.error || t("dashboard.donor.invalidVerificationCode");
