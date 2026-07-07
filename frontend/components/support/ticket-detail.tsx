@@ -10,6 +10,7 @@ import { TicketConversation } from "./ticket-conversation";
 import { assignTicket, changeTicketStatus, closeTicket, listSystemAdmins } from "@/actions/support";
 import { toast } from "sonner";
 import { Loader2, UserPlus, XCircle, CheckCircle, X } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 interface TicketDetailProps {
   ticket: SupportTicket;
@@ -22,6 +23,7 @@ export function TicketDetail({
   isSystemAdmin = false,
   basePath = "/dashboard",
 }: TicketDetailProps) {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken;
   const queryClient = useQueryClient();
@@ -47,10 +49,10 @@ export function TicketDetail({
       setShowAssignDialog(false);
       setSelectedAdmin("");
       queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
-      toast.success("Ticket assigned successfully");
+      toast.success(t('support.ticketAssigned'));
     },
     onError: (error: Error) => {
-      toast.error("Failed to assign ticket", { description: error.message });
+      toast.error(t('support.failedAssign'), { description: error.message });
     },
   });
 
@@ -66,10 +68,10 @@ export function TicketDetail({
       setResolutionNotes("");
       queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
       queryClient.invalidateQueries({ queryKey: ["support-ticket", currentTicket.id] });
-      toast.success("Status updated successfully");
+      toast.success(t('support.statusUpdated'));
     },
     onError: (error: Error) => {
-      toast.error("Failed to update status", { description: error.message });
+      toast.error(t('support.failedUpdateStatus'), { description: error.message });
     },
   });
 
@@ -82,10 +84,10 @@ export function TicketDetail({
       setResolutionNotes("");
       queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
       queryClient.invalidateQueries({ queryKey: ["support-ticket", currentTicket.id] });
-      toast.success("Ticket closed successfully");
+      toast.success(t('support.ticketClosedSuccess'));
     },
     onError: (error: Error) => {
-      toast.error("Failed to close ticket", { description: error.message });
+      toast.error(t('support.failedClose'), { description: error.message });
     },
   });
 
@@ -103,12 +105,12 @@ export function TicketDetail({
         <div className="space-y-4">
           <div className="card">
             <div className="p-4 border-b border-gray-100">
-              <h3 className="font-black text-gray-900">Ticket Details</h3>
+              <h3 className="font-black text-gray-900">{t('support.ticketDetails')}</h3>
             </div>
             <div className="p-4 space-y-4">
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  Ticket Number
+                  {t('support.ticketNumberLabel')}
                 </p>
                 <p className="font-mono text-sm">
                   {currentTicket.ticket_number}
@@ -116,13 +118,13 @@ export function TicketDetail({
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  Subject
+                  {t('support.subject')}
                 </p>
                 <p className="text-sm">{currentTicket.subject}</p>
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  Description
+                  {t('support.description')}
                 </p>
                 <p className="whitespace-pre-wrap text-sm text-gray-700">
                   {currentTicket.description}
@@ -131,7 +133,7 @@ export function TicketDetail({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Status
+                    {t('support.status')}
                   </p>
                   <div className="mt-1">
                     <TicketStatusBadge status={currentTicket.status} />
@@ -139,7 +141,7 @@ export function TicketDetail({
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Priority
+                    {t('support.priority')}
                   </p>
                   <div className="mt-1">
                     <TicketPriorityBadge priority={currentTicket.priority} />
@@ -148,13 +150,13 @@ export function TicketDetail({
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  Category
+                  {t('support.category')}
                 </p>
                 <p className="text-sm">{currentTicket.category}</p>
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  Created By
+                  {t('support.createdBy')}
                 </p>
                 <p className="text-sm">
                   {currentTicket.created_by_full_name}
@@ -165,17 +167,17 @@ export function TicketDetail({
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  Assigned To
+                  {t('support.assignedTo')}
                 </p>
                 <p className="text-sm">
                   {currentTicket.assigned_to_full_name || (
-                    <span className="text-gray-400">Unassigned</span>
+                    <span className="text-gray-400">{t('support.unassigned')}</span>
                   )}
                 </p>
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  Created
+                  {t('support.created')}
                 </p>
                 <p className="text-sm">
                   {format(new Date(currentTicket.created_at), "PPpp")}
@@ -184,7 +186,7 @@ export function TicketDetail({
               {currentTicket.resolved_at && (
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Resolved
+                    {t('support.resolved')}
                   </p>
                   <p className="text-sm">
                     {format(new Date(currentTicket.resolved_at), "PPpp")}
@@ -194,7 +196,7 @@ export function TicketDetail({
               {currentTicket.closed_at && (
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Closed
+                    {t('support.closed')}
                   </p>
                   <p className="text-sm">
                     {format(new Date(currentTicket.closed_at), "PPpp")}
@@ -207,7 +209,7 @@ export function TicketDetail({
           {isSystemAdmin && currentTicket.status !== "CLOSED" && (
             <div className="card">
               <div className="p-4 border-b border-gray-100">
-                <h3 className="font-black text-gray-900">Actions</h3>
+                <h3 className="font-black text-gray-900">{t('support.actions')}</h3>
               </div>
               <div className="p-4 space-y-2">
                 <button
@@ -215,21 +217,21 @@ export function TicketDetail({
                   className="btn-outline w-full justify-start flex items-center gap-2"
                 >
                   <UserPlus size={16} />
-                  Assign Ticket
+                  {t('support.assignTicket')}
                 </button>
                 <button
                   onClick={() => setShowStatusDialog(true)}
                   className="btn-outline w-full justify-start flex items-center gap-2"
                 >
                   <CheckCircle size={16} />
-                  Change Status
+                  {t('support.changeStatus')}
                 </button>
                 <button
                   onClick={() => setShowCloseDialog(true)}
                   className="btn-outline w-full justify-start flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
                 >
                   <XCircle size={16} />
-                  Close Ticket
+                  {t('support.closeTicket')}
                 </button>
               </div>
             </div>
@@ -238,7 +240,7 @@ export function TicketDetail({
           {currentTicket.resolution_notes && (
             <div className="card">
               <div className="p-4 border-b border-gray-100">
-                <h3 className="font-black text-gray-900">Resolution Notes</h3>
+                <h3 className="font-black text-gray-900">{t('support.resolutionNotes')}</h3>
               </div>
               <div className="p-4">
                 <p className="whitespace-pre-wrap text-sm text-gray-700">
@@ -256,7 +258,7 @@ export function TicketDetail({
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-gray-900">
-                Assign Ticket
+                {t('support.assignTicket')}
               </h2>
               <button onClick={() => setShowAssignDialog(false)}>
                 <X size={20} className="text-gray-400" />
@@ -265,14 +267,14 @@ export function TicketDetail({
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                  Assign to Admin *
+                  {t('support.assignToAdmin')}
                 </label>
                 <select
                   className="input-field w-full"
                   value={selectedAdmin}
                   onChange={(e) => setSelectedAdmin(e.target.value)}
                 >
-                  <option value="">— Select admin —</option>
+                  <option value="">{t('support.selectAdmin')}</option>
                   {admins.map((admin) => (
                     <option key={admin.id} value={admin.id}>
                       {admin.first_name && admin.last_name
@@ -287,7 +289,7 @@ export function TicketDetail({
                   onClick={() => setShowAssignDialog(false)}
                   className="btn-outline flex-1"
                 >
-                  Cancel
+                  {t('support.cancel')}
                 </button>
                 <button
                   onClick={() => assignMutation.mutate()}
@@ -297,7 +299,7 @@ export function TicketDetail({
                   {assignMutation.isPending && (
                     <Loader2 size={16} className="animate-spin" />
                   )}
-                  Assign
+                  {t('support.assign')}
                 </button>
               </div>
             </div>
@@ -311,7 +313,7 @@ export function TicketDetail({
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-gray-900">
-                Change Status
+                {t('support.changeStatus')}
               </h2>
               <button onClick={() => setShowStatusDialog(false)}>
                 <X size={20} className="text-gray-400" />
@@ -320,7 +322,7 @@ export function TicketDetail({
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                  New Status
+                  {t('support.newStatusLabel')}
                 </label>
                 <select
                   className="input-field w-full"
@@ -329,19 +331,19 @@ export function TicketDetail({
                     setNewStatus(e.target.value as TicketStatus)
                   }
                 >
-                  <option value="OPEN">Open</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="WAITING_FOR_USER">Waiting for User</option>
-                  <option value="RESOLVED">Resolved</option>
+                  <option value="OPEN">{t('support.open')}</option>
+                  <option value="IN_PROGRESS">{t('support.inProgress')}</option>
+                  <option value="WAITING_FOR_USER">{t('support.waitingForUser')}</option>
+                  <option value="RESOLVED">{t('support.resolved')}</option>
                 </select>
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                  Resolution Notes
+                  {t('support.resolutionNotes')}
                 </label>
                 <textarea
                   className="input-field w-full min-h-[80px]"
-                  placeholder="Optional notes..."
+                  placeholder={t('support.optionalNotes')}
                   value={resolutionNotes}
                   onChange={(e) => setResolutionNotes(e.target.value)}
                 />
@@ -351,7 +353,7 @@ export function TicketDetail({
                   onClick={() => setShowStatusDialog(false)}
                   className="btn-outline flex-1"
                 >
-                  Cancel
+                  {t('support.cancel')}
                 </button>
                 <button
                   onClick={() => statusMutation.mutate()}
@@ -361,7 +363,7 @@ export function TicketDetail({
                   {statusMutation.isPending && (
                     <Loader2 size={16} className="animate-spin" />
                   )}
-                  Update Status
+                  {t('support.updateStatus')}
                 </button>
               </div>
             </div>
@@ -375,7 +377,7 @@ export function TicketDetail({
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-gray-900">
-                Close Ticket
+                {t('support.closeTicket')}
               </h2>
               <button onClick={() => setShowCloseDialog(false)}>
                 <X size={20} className="text-gray-400" />
@@ -383,16 +385,15 @@ export function TicketDetail({
             </div>
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                Are you sure you want to close this ticket? This action cannot
-                be undone.
+                {t('support.closeConfirm')}
               </p>
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                  Resolution Notes
+                  {t('support.resolutionNotes')}
                 </label>
                 <textarea
                   className="input-field w-full min-h-[80px]"
-                  placeholder="Optional resolution notes..."
+                  placeholder={t('support.optionalResolutionNotes')}
                   value={resolutionNotes}
                   onChange={(e) => setResolutionNotes(e.target.value)}
                 />
@@ -402,7 +403,7 @@ export function TicketDetail({
                   onClick={() => setShowCloseDialog(false)}
                   className="btn-outline flex-1"
                 >
-                  Cancel
+                  {t('support.cancel')}
                 </button>
                 <button
                   onClick={() => closeMutation.mutate()}
@@ -412,7 +413,7 @@ export function TicketDetail({
                   {closeMutation.isPending && (
                     <Loader2 size={16} className="animate-spin" />
                   )}
-                  Close Ticket
+                  {t('support.closeTicket')}
                 </button>
               </div>
             </div>

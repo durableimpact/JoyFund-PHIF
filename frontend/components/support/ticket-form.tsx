@@ -7,35 +7,37 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTicket } from "@/actions/support";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 interface TicketFormProps {
   basePath?: string;
 }
 
-const CATEGORIES = [
-  { value: "GENERAL", label: "General Inquiry" },
-  { value: "BUG_REPORT", label: "Bug Report" },
-  { value: "FEATURE_REQUEST", label: "Feature Request" },
-  { value: "ACCOUNT_ISSUE", label: "Account Issue" },
-  { value: "PAYMENT_ISSUE", label: "Payment Issue" },
-  { value: "VOUCHER_ISSUE", label: "Voucher Issue" },
-  { value: "HOSPITAL_ISSUE", label: "Hospital Issue" },
-  { value: "BENEFICIARY_ISSUE", label: "Beneficiary Issue" },
-  { value: "OTHER", label: "Other" },
-];
-
-const PRIORITIES = [
-  { value: "LOW", label: "Low" },
-  { value: "MEDIUM", label: "Medium" },
-  { value: "HIGH", label: "High" },
-  { value: "URGENT", label: "Urgent" },
-];
-
 export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
+  const t = useI18n();
   const router = useRouter();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken;
   const queryClient = useQueryClient();
+
+  const CATEGORIES = [
+    { value: "GENERAL", label: t('support.general') },
+    { value: "BUG_REPORT", label: t('support.bugReport') },
+    { value: "FEATURE_REQUEST", label: t('support.featureRequest') },
+    { value: "ACCOUNT_ISSUE", label: t('support.accountIssue') },
+    { value: "PAYMENT_ISSUE", label: t('support.paymentIssue') },
+    { value: "VOUCHER_ISSUE", label: t('support.voucherIssue') },
+    { value: "HOSPITAL_ISSUE", label: t('support.hospitalIssue') },
+    { value: "BENEFICIARY_ISSUE", label: t('support.beneficiaryIssue') },
+    { value: "OTHER", label: t('support.other') },
+  ];
+
+  const PRIORITIES = [
+    { value: "LOW", label: t('support.low') },
+    { value: "MEDIUM", label: t('support.medium') },
+    { value: "HIGH", label: t('support.high') },
+    { value: "URGENT", label: t('support.urgent') },
+  ];
 
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
@@ -47,14 +49,14 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
     mutationFn: () =>
       createTicket(token, { subject, description, category, priority }),
     onSuccess: (ticket) => {
-      toast.success("Ticket created successfully", {
-        description: `Ticket ${ticket.ticket_number} has been created.`,
+      toast.success(t('support.ticketCreated'), {
+        description: t('support.ticketCreatedDesc', { number: ticket.ticket_number }),
       });
       queryClient.invalidateQueries({ queryKey: ["my-tickets"] });
       router.push(`${basePath}/support/${ticket.id}`);
     },
     onError: (error: Error) => {
-      toast.error("Failed to create ticket", {
+      toast.error(t('support.failedCreate'), {
         description: error.message,
       });
     },
@@ -63,9 +65,9 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
     if (subject.length < 5)
-      newErrors.subject = "Subject must be at least 5 characters";
+      newErrors.subject = t('support.subjectMinLength');
     if (description.length < 10)
-      newErrors.description = "Description must be at least 10 characters";
+      newErrors.description = t('support.descriptionMinLength');
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -80,17 +82,17 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
     <div className="card">
       <div className="p-6 border-b border-gray-100">
         <h2 className="text-lg font-black text-gray-900">
-          Create Support Ticket
+          {t('support.createTicket')}
         </h2>
       </div>
       <form onSubmit={onSubmit} className="p-6 space-y-6">
         <div>
           <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-            Subject *
+            {t('support.subjectLabel')}
           </label>
           <input
             className="input-field w-full"
-            placeholder="Brief description of your issue"
+            placeholder={t('support.subjectPlaceholder')}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
           />
@@ -98,17 +100,17 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
             <p className="text-xs text-red-500 mt-1">{errors.subject}</p>
           )}
           <p className="text-xs text-gray-400 mt-1">
-            A short summary of your issue or request.
+            {t('support.subjectHint')}
           </p>
         </div>
 
         <div>
           <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-            Description *
+            {t('support.descriptionLabel')}
           </label>
           <textarea
             className="input-field w-full min-h-[120px]"
-            placeholder="Please describe your issue in detail..."
+            placeholder={t('support.descriptionPlaceholder')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -116,15 +118,14 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
             <p className="text-xs text-red-500 mt-1">{errors.description}</p>
           )}
           <p className="text-xs text-gray-400 mt-1">
-            Provide as much detail as possible to help us resolve your issue
-            quickly.
+            {t('support.descriptionHint')}
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-              Category
+              {t('support.categoryLabel')}
             </label>
             <select
               className="input-field w-full"
@@ -141,7 +142,7 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
 
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-              Priority
+              {t('support.priorityLabel')}
             </label>
             <select
               className="input-field w-full"
@@ -163,7 +164,7 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
             className="btn-outline"
             onClick={() => router.back()}
           >
-            Cancel
+            {t('support.cancel')}
           </button>
           <button
             type="submit"
@@ -173,10 +174,10 @@ export function TicketForm({ basePath = "/dashboard" }: TicketFormProps) {
             {createMutation.isPending ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Creating...
+                {t('support.creating')}
               </>
             ) : (
-              "Create Ticket"
+              t('support.createTicket')
             )}
           </button>
         </div>

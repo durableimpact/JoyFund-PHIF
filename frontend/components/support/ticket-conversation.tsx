@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { sendTicketMessage } from "@/actions/support";
 import { toast } from "sonner";
 import { Loader2, Send, Lock } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 interface TicketConversationProps {
   ticket: SupportTicket;
@@ -19,6 +20,7 @@ export function TicketConversation({
   isSystemAdmin = false,
   basePath = "/dashboard",
 }: TicketConversationProps) {
+  const t = useI18n();
   const { data: session } = useSession();
   const token = (session as any)?.accessToken;
   const queryClient = useQueryClient();
@@ -47,10 +49,10 @@ export function TicketConversation({
       setNewMessage("");
       setIsInternal(false);
       queryClient.invalidateQueries({ queryKey: ["support-ticket", ticket.id] });
-      toast.success("Message sent");
+      toast.success(t('support.messageSent'));
     },
     onError: (error: Error) => {
-      toast.error("Failed to send message", {
+      toast.error(t('support.failedSendMessage'), {
         description: error.message,
       });
     },
@@ -68,14 +70,14 @@ export function TicketConversation({
   return (
     <div className="card">
       <div className="p-4 border-b border-gray-100">
-        <h3 className="font-black text-gray-900">Conversation</h3>
+        <h3 className="font-black text-gray-900">{t('support.conversation')}</h3>
       </div>
       <div className="p-0">
         <div ref={scrollRef} className="h-[400px] overflow-y-auto px-4 py-4">
           <div className="space-y-4">
             {messages.length === 0 ? (
               <p className="text-center text-sm text-gray-400">
-                No messages yet. Start the conversation.
+                {t('support.noMessages')}
               </p>
             ) : (
               messages.map((message) => {
@@ -110,7 +112,7 @@ export function TicketConversation({
                         {message.is_internal && (
                           <span className="flex items-center gap-1 text-xs text-gray-400">
                             <Lock className="h-3 w-3" />
-                            Internal Note
+                            {t('support.internalNote')}
                           </span>
                         )}
                       </div>
@@ -150,7 +152,7 @@ export function TicketConversation({
                     className="h-4 w-4"
                   />
                   <Lock className="h-4 w-4" />
-                  Internal note (only visible to admins)
+                  {t('support.internalNoteLabel')}
                 </label>
               </div>
             )}
@@ -159,8 +161,8 @@ export function TicketConversation({
                 className="input-field flex-1 min-h-[60px] resize-none"
                 placeholder={
                   isInternal
-                    ? "Write an internal note..."
-                    : "Type your message..."
+                    ? t('support.writeInternalNote')
+                    : t('support.typeMessage')
                 }
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
@@ -186,7 +188,7 @@ export function TicketConversation({
           </div>
         ) : (
           <div className="border-t border-gray-100 p-4 text-center text-sm text-gray-400">
-            This ticket has been closed.
+            {t('support.ticketClosed')}
           </div>
         )}
       </div>

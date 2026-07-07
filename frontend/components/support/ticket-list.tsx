@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { TicketStatusBadge } from "./ticket-status-badge";
 import { TicketPriorityBadge } from "./ticket-priority-badge";
 import { Search, Plus } from "lucide-react";
+import { useI18n } from "@/locales/client";
 
 interface TicketListProps {
   tickets: SupportTicket[];
@@ -20,6 +21,7 @@ export function TicketList({
   basePath = "/dashboard",
   showCreatedBy = true,
 }: TicketListProps) {
+  const t = useI18n();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -43,7 +45,7 @@ export function TicketList({
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               className="input-field pl-9"
-              placeholder="Search tickets..."
+              placeholder={t('support.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -53,35 +55,35 @@ export function TicketList({
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="all">All Status</option>
-            <option value="OPEN">Open</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="WAITING_FOR_USER">Waiting</option>
-            <option value="RESOLVED">Resolved</option>
-            <option value="CLOSED">Closed</option>
+            <option value="all">{t('support.allStatus')}</option>
+            <option value="OPEN">{t('support.open')}</option>
+            <option value="IN_PROGRESS">{t('support.inProgress')}</option>
+            <option value="WAITING_FOR_USER">{t('support.waiting')}</option>
+            <option value="RESOLVED">{t('support.resolved')}</option>
+            <option value="CLOSED">{t('support.closed')}</option>
           </select>
           <select
             className="input-field w-auto"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
-            <option value="all">All Categories</option>
-            <option value="GENERAL">General</option>
-            <option value="BUG_REPORT">Bug Report</option>
-            <option value="FEATURE_REQUEST">Feature Request</option>
-            <option value="ACCOUNT_ISSUE">Account Issue</option>
-            <option value="PAYMENT_ISSUE">Payment Issue</option>
-            <option value="VOUCHER_ISSUE">Voucher Issue</option>
-            <option value="HOSPITAL_ISSUE">Hospital Issue</option>
-            <option value="BENEFICIARY_ISSUE">Beneficiary Issue</option>
-            <option value="OTHER">Other</option>
+            <option value="all">{t('support.allCategories')}</option>
+            <option value="GENERAL">{t('support.general')}</option>
+            <option value="BUG_REPORT">{t('support.bugReport')}</option>
+            <option value="FEATURE_REQUEST">{t('support.featureRequest')}</option>
+            <option value="ACCOUNT_ISSUE">{t('support.accountIssue')}</option>
+            <option value="PAYMENT_ISSUE">{t('support.paymentIssue')}</option>
+            <option value="VOUCHER_ISSUE">{t('support.voucherIssue')}</option>
+            <option value="HOSPITAL_ISSUE">{t('support.hospitalIssue')}</option>
+            <option value="BENEFICIARY_ISSUE">{t('support.beneficiaryIssue')}</option>
+            <option value="OTHER">{t('support.other')}</option>
           </select>
         </div>
         {showCreateButton && (
           <Link href={`${basePath}/support/new`}>
             <button className="btn-primary flex items-center gap-2">
               <Plus size={16} />
-              New Ticket
+              {t('support.newTicket')}
             </button>
           </Link>
         )}
@@ -93,14 +95,14 @@ export function TicketList({
             <thead>
               <tr className="border-b border-gray-100">
                 {[
-                  "Ticket #",
-                  "Subject",
-                  "Category",
-                  "Priority",
-                  "Status",
-                  ...(showCreatedBy ? ["Created By"] : []),
-                  "Assigned To",
-                  "Created",
+                  t('support.ticketNumber'),
+                  t('support.subject'),
+                  t('support.category'),
+                  t('support.priority'),
+                  t('support.status'),
+                  ...(showCreatedBy ? [t('support.createdBy')] : []),
+                  t('support.assignedTo'),
+                  t('support.created'),
                 ].map((h) => (
                   <th
                     key={h}
@@ -118,7 +120,7 @@ export function TicketList({
                     colSpan={showCreatedBy ? 8 : 7}
                     className="text-center py-16 text-gray-400 text-sm"
                   >
-                    No tickets found.
+                    {t('support.noTicketsFound')}
                   </td>
                 </tr>
               ) : (
@@ -154,7 +156,7 @@ export function TicketList({
                     )}
                     <td className="p-4 text-gray-700">
                       {ticket.assigned_to_full_name || (
-                        <span className="text-gray-400">Unassigned</span>
+                        <span className="text-gray-400">{t('support.unassigned')}</span>
                       )}
                     </td>
                     <td className="p-4 text-xs text-gray-400">
