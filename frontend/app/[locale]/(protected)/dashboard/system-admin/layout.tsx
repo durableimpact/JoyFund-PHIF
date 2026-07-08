@@ -53,6 +53,7 @@ export default function SystemAdminLayout({
     { label: t('dashboard.sidebar.logs'), href: "/dashboard/system-admin/logs", icon: <FileText size={16} /> },
     { label: t('dashboard.sidebar.users'), href: "/dashboard/system-admin/users", icon: <Users size={16} /> },
     { label: t('dashboard.sidebar.security'), href: "/dashboard/system-admin/devices", icon: <Shield size={16} /> },
+    { label: t('dashboard.sidebar.notifications'), href: "/dashboard/system-admin/notifications", icon: <Bell size={16} /> },
     { label: t('dashboard.sidebar.pushNotifications'), href: "/dashboard/system-admin/push-notifications", icon: <Bell size={16} /> },
     { label: t('dashboard.sidebar.profile'), href: "/dashboard/system-admin/profile", icon: <User size={16} /> },
   ];

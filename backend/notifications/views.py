@@ -1,5 +1,4 @@
 from django.utils.decorators import method_decorator
-from core.mixins import CacheInvalidationMixin
 from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
@@ -78,9 +77,6 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.is_read = True
         notification.save()
         
-        # Invalidate caches
-        self._invalidate_cache()
-        
         self._invalidate_unread_count_cache(request.user.id)
         
         serializer = self.get_serializer(notification)
@@ -98,9 +94,6 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.is_read = False
         notification.save()
         
-        # Invalidate caches
-        self._invalidate_cache()
-        
         self._invalidate_unread_count_cache(request.user.id)
         
         serializer = self.get_serializer(notification)
@@ -116,8 +109,6 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         """Mark all notifications as read for the current user."""
         count = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         
-        # Invalidate all caches
-        self._invalidate_cache()
         self._invalidate_unread_count_cache(request.user.id)
         
         return Response({'message': f'{count} notifications marked as read'}, status=status.HTTP_200_OK)
@@ -178,9 +169,6 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         user_id = notification.user.id
         notification_id = notification.id
         notification.delete()
-        
-        # Invalidate caches
-        self._invalidate_cache()
         
         self._invalidate_unread_count_cache(user_id)
         

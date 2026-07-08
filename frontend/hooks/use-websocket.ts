@@ -89,20 +89,19 @@ export function useWebSocket({
         setIsConnecting(false);
         onClose?.(event.code, event.reason);
 
+        if (event.code === 1000) return;
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+          const delay = Math.min(reconnectInterval * Math.pow(1.5, reconnectAttemptsRef.current), 30000);
           reconnectTimerRef.current = setTimeout(() => {
             reconnectAttemptsRef.current++;
             connect();
-          }, reconnectInterval);
+          }, delay);
         }
       };
 
-      ws.onerror = (event) => {
-        onError?.(event);
-      };
-    } catch (err) {
+      ws.onerror = () => {};
+    } catch {
       setIsConnecting(false);
-      console.error("[WS] Connection error:", err);
     }
   }, [enabled, buildUrl, onMessage, onOpen, onClose, onError, reconnectInterval, maxReconnectAttempts]);
 

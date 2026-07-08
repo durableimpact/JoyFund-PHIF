@@ -8,6 +8,7 @@ import {
   Ticket,
   User,
   Shield,
+  Bell,
   HelpCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -30,6 +31,7 @@ export default function ReceptionistLayout({
     { label: t('receptionist.dashboard.processVoucher'), href: "/dashboard/receptionist/process", icon: <Search size={16} /> },
     { label: t('dashboard.sidebar.vouchers'), href: "/dashboard/receptionist/vouchers", icon: <Ticket size={16} /> },
     { label: t('receptionist.claims.title'), href: "/dashboard/receptionist/claims", icon: <ClipboardCheck size={16} /> },
+    { label: t('dashboard.sidebar.notifications'), href: "/dashboard/receptionist/notifications", icon: <Bell size={16} /> },
     { label: t('dashboard.sidebar.security'), href: "/dashboard/receptionist/devices", icon: <Shield size={16} /> },
     { label: t('dashboard.sidebar.support'), href: "/dashboard/receptionist/support", icon: <HelpCircle size={16} /> },
     { label: t('dashboard.sidebar.profile'), href: "/dashboard/receptionist/profile", icon: <User size={16} /> },

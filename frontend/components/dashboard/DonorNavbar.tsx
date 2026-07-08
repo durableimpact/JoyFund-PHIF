@@ -17,6 +17,7 @@ import {
   X,
   Loader2,
   HelpCircle,
+  Bell,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -56,6 +57,11 @@ export default function DonorNavbar() {
       label: t("dashboard.donor.myDonations"),
       href: "/dashboard/donor/donations",
       icon: <History size={16} />,
+    },
+    {
+      label: t("dashboard.sidebar.notifications"),
+      href: "/dashboard/donor/notifications",
+      icon: <Bell size={16} />,
     },
     {
       label: t("dashboard.sidebar.support"),

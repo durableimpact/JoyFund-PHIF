@@ -176,6 +176,7 @@ export default {
   'dashboard.sidebar.security': 'Sécurité',
   'dashboard.sidebar.pushNotifications': 'Notifications push',
   'dashboard.sidebar.disbursements': 'Décaissements',
+  'dashboard.sidebar.notifications': 'Notifications',
 
   // Locale switcher
   'locale.en': 'English',
@@ -1955,6 +1956,16 @@ export default {
   'dashboard.admin.feePolicies': 'Politiques de frais',
   'dashboard.admin.feeSplits': 'Répartitions de frais',
   'dashboard.sidebar.accounts': 'Comptes',
+
+  // Dashboard - Notifications Page
+  'dashboard.notifications.title': 'Notifications',
+  'dashboard.notifications.subtitle': 'Restez informé de vos activités',
+  'dashboard.notifications.markAllRead': 'Tout marquer comme lu',
+  'dashboard.notifications.empty': 'Aucune notification pour le moment',
+  'dashboard.notifications.visit': 'Visiter',
+  'dashboard.notifications.markRead': 'Marquer comme lu',
+  'dashboard.notifications.markUnread': 'Marquer comme non lu',
+  'dashboard.notifications.delete': 'Supprimer',
   'donor.support.back': 'Retour',
   'donor.support.backToTickets': 'Retour aux tickets',
   'donor.support.createTicket': 'Créer un ticket',

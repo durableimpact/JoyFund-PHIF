@@ -12,6 +12,7 @@ import {
   Stethoscope,
   User,
   Shield,
+  Bell,
   HelpCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -38,6 +39,7 @@ export default function HospitalAdminLayout({
     { label: t('hospitalAdmin.medicalClaim.title'), href: "/dashboard/hospital-admin/medical-claim", icon: <ClipboardCheck size={16} /> },
     { label: t('hospitalAdmin.topUp.title'), href: "/dashboard/hospital-admin/top-up", icon: <Repeat size={16} /> },
     { label: t('dashboard.sidebar.disbursements'), href: "/dashboard/hospital-admin/disbursement", icon: <FileText size={16} /> },
+    { label: t('dashboard.sidebar.notifications'), href: "/dashboard/hospital-admin/notifications", icon: <Bell size={16} /> },
     { label: t('dashboard.sidebar.security'), href: "/dashboard/hospital-admin/devices", icon: <Shield size={16} /> },
     { label: t('dashboard.sidebar.support'), href: "/dashboard/hospital-admin/support", icon: <HelpCircle size={16} /> },
     { label: t('dashboard.sidebar.profile'), href: "/dashboard/hospital-admin/profile", icon: <User size={16} /> },
