@@ -140,11 +140,11 @@ export const proxy: NextProxy = async (request, event) => {
     }
   }
 
-  return i18nResponse;
+  return NextResponse.next();
 };
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|monitoring|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|monitoring|favicon.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

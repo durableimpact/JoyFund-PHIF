@@ -9,10 +9,10 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: [
         '/dashboard/',
-        '/profile/',
+        '/login/',
+        '/register/',
         '/api/',
-        '/(protected)/',
-        '/unauthorized',
+        '/unauthorized/',
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

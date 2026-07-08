@@ -81,6 +81,37 @@ export const metadata: Metadata = {
     google: "OyspcSNhwrr5zCVrvp1J0iPhdZEvX2iAAl3nuEkiUZo",
   },
   robots: { index: true, follow: true },
+  alternates: {
+    canonical: "https://joy-fund.com/en",
+    languages: {
+      en: "https://joy-fund.com/en",
+      fr: "https://joy-fund.com/fr",
+      "x-default": "https://joy-fund.com/en",
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "JoyFund",
+    title: "JoyFund",
+    description:
+      "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "JoyFund - Crowdfunding for maternal healthcare in Cameroon",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "JoyFund",
+    description:
+      "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries.",
+    images: ["/og-image.png"],
+  },
   icons: {
     icon: [
       {
