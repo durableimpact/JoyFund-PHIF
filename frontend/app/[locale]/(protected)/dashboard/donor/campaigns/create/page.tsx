@@ -3,9 +3,10 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useMutation } from '@tanstack/react-query';
-import { Check, ArrowLeft, ArrowRight, Share2, Heart, GraduationCap, Star, Briefcase, Gift, Calendar, Loader2, ImagePlus, X, Phone } from 'lucide-react';
+import { Check, ArrowLeft, ArrowRight, Share2, Heart, GraduationCap, Star, Briefcase, Gift, Calendar, Loader2, ImagePlus, X, Phone, Users } from 'lucide-react';
 import Image from 'next/image';
 import { formatXAF } from '@/lib/utils';
+import { InputPhone } from '@/components/ui/input-phone';
 import { createCampaign, donateToCampaign } from '@/actions/campaigns';
 import { useForm } from 'react-hook-form';
 import { useI18n } from '@/locales/client';
@@ -57,6 +58,12 @@ function CreateCampaignContent() {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [publishedCampaign, setPublishedCampaign] = useState<any>(null);
+
+  // Beneficiary intake state
+  const [supportsSpecificPerson, setSupportsSpecificPerson] = useState(false);
+  const [beneficiaryName, setBeneficiaryName] = useState('');
+  const [beneficiaryContact, setBeneficiaryContact] = useState('');
+  const [beneficiarySituation, setBeneficiarySituation] = useState('');
   
   // Donation state
   const [donationAmount, setDonationAmount] = useState(() => Math.round(120000 * 0.1));
@@ -84,6 +91,14 @@ function CreateCampaignContent() {
       formData.append('is_public', isPublic.toString());
       formData.append('status', 'ACTIVE');
       formData.append('is_active', 'true');
+      formData.append('supports_specific_person', supportsSpecificPerson.toString());
+      if (supportsSpecificPerson) {
+        formData.append('beneficiary_name', beneficiaryName);
+        formData.append('beneficiary_contact', beneficiaryContact);
+        if (beneficiarySituation) {
+          formData.append('beneficiary_situation', beneficiarySituation);
+        }
+      }
       if (coverImage) {
         formData.append('cover_image', coverImage);
       }
@@ -188,6 +203,10 @@ function CreateCampaignContent() {
       setEndDate(d.endDate || endDate);
       setIsPublic(d.isPublic ?? true);
       setCoverColor(d.coverColor || COLORS[0]);
+      setSupportsSpecificPerson(d.supportsSpecificPerson ?? false);
+      setBeneficiaryName(d.beneficiaryName || '');
+      setBeneficiaryContact(d.beneficiaryContact || '');
+      setBeneficiarySituation(d.beneficiarySituation || '');
       localStorage.removeItem('pending_campaign_step');
       setStep(4);
     } catch {}
@@ -248,12 +267,16 @@ function CreateCampaignContent() {
 
   const handlePublish = () => {
     if (!session?.user) {
-      try { localStorage.setItem('pending_campaign_step', JSON.stringify({ eventType, title, description, goalAmount, endDate, isPublic, coverColor })); } catch {}
+      try { localStorage.setItem('pending_campaign_step', JSON.stringify({ eventType, title, description, goalAmount, endDate, isPublic, coverColor, supportsSpecificPerson, beneficiaryName, beneficiaryContact, beneficiarySituation })); } catch {}
       router.push(`/login?redirect=/dashboard/donor/campaigns/create?draft=1`);
       return;
     }
     if (!title || !description || !goalAmount || !endDate) {
       alert(t('donor.campaigns.create.fillRequired'));
+      return;
+    }
+    if (supportsSpecificPerson && (!beneficiaryName.trim() || !beneficiaryContact.trim())) {
+      alert(t('donor.campaigns.create.fillBeneficiaryRequired'));
       return;
     }
     setStep(5);
@@ -397,6 +420,64 @@ function CreateCampaignContent() {
                 <input type="checkbox" id="isPublic" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="rounded" />
                 <label htmlFor="isPublic" className="text-sm text-gray-700">{t('donor.campaigns.create.makePublic')}</label>
               </div>
+
+              {/* Beneficiary Intake Toggle */}
+              <div className="border-t border-gray-100 pt-4 mt-2">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="supportsSpecificPerson"
+                    checked={supportsSpecificPerson}
+                    onChange={e => setSupportsSpecificPerson(e.target.checked)}
+                    className="rounded mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="supportsSpecificPerson" className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                      <Users size={14} className="text-gray-400" />
+                      {t('donor.campaigns.create.supportingSpecificPerson')}
+                    </label>
+                    <p className="text-xs text-gray-400 mt-0.5">{t('donor.campaigns.create.specificPersonDesc')}</p>
+                  </div>
+                </div>
+
+                {supportsSpecificPerson && (
+                  <div className="mt-4 space-y-3 ml-6 animate-in slide-in-from-top-2 duration-200">
+                    <p className="text-[11px] text-gray-400 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+                      {t('donor.campaigns.create.beneficiaryPrivacyNote')}
+                    </p>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.beneficiaryName')} *</label>
+                      <input
+                        className="input-field"
+                        placeholder={t('donor.campaigns.create.beneficiaryNamePlaceholder')}
+                        value={beneficiaryName}
+                        onChange={e => setBeneficiaryName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.beneficiaryContact')} *</label>
+                      <InputPhone
+                        className="w-full"
+                        placeholder={t('donor.campaigns.create.beneficiaryContactPlaceholder')}
+                        value={beneficiaryContact || undefined}
+                        onChange={(val) => setBeneficiaryContact(val || '')}
+                        defaultCountry="CM"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.beneficiarySituation')}</label>
+                      <textarea
+                        className="input-field min-h-20 resize-none"
+                        rows={3}
+                        placeholder={t('donor.campaigns.create.beneficiarySituationPlaceholder')}
+                        value={beneficiarySituation}
+                        onChange={e => setBeneficiarySituation(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-3">
                 <button className="btn-outline flex-1 flex items-center justify-center gap-2" onClick={() => setStep(1)}>
                   <ArrowLeft size={16} /> {t('general.back')}
@@ -457,7 +538,13 @@ function CreateCampaignContent() {
             <div className="card p-6">
               <h2 className="font-bold text-xl text-[#1A1A2E] mb-4">{t('donor.campaigns.create.preview')}</h2>
               <div className="rounded-2xl overflow-hidden border border-gray-200 mb-5">
-                <div className="h-8" style={{ background: coverColor }} />
+                {coverImagePreview ? (
+                  <div className="relative h-40 bg-gray-100">
+                    <Image src={coverImagePreview} alt={title} fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="h-8" style={{ background: coverColor }} />
+                )}
                 <div className="p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: coverColor }}>
