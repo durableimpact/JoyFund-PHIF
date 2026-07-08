@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { useI18n } from '@/locales/client';
 import { formatXAF, formatDateTime } from "@/lib/utils";
-import { getCampaign, listCampaignDonations, getCampaignAnalytics } from "@/actions/campaigns";
+import { getCampaign, listCampaignDonations, getCampaignAnalytics, getCampaignStaffDetail } from "@/actions/campaigns";
 import {
   Dialog,
   DialogContent,
@@ -70,6 +70,13 @@ export default function AdminCampaignDetailPage() {
     queryFn: async () => await getCampaign(id as string, token),
     enabled: !!id && sessionStatus !== "loading",
     retry: 1,
+  });
+
+  // Fetch staff-only detail (beneficiary intake fields)
+  const { data: staffDetail } = useQuery({
+    queryKey: ["admin-campaign-staff", id, token],
+    queryFn: async () => await getCampaignStaffDetail(id as string, token),
+    enabled: !!id && !!token && sessionStatus !== "loading",
   });
 
   // Fetch donations
@@ -850,6 +857,68 @@ export default function AdminCampaignDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Beneficiary Intake (private) */}
+          {staffDetail?.supports_specific_person && (
+            <div className="card p-4 md:p-6 border-2 border-emerald-100 bg-emerald-50/30">
+              <h3 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2">
+                <Heart size={18} className="text-emerald-600" />
+                {t('systemAdmin.campaigns.detail.beneficiaryIntake')}
+              </h3>
+              <div className="space-y-3">
+                <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
+                    {t('socialWorker.reviews.beneficiaryName')}
+                  </p>
+                  <p className="text-sm font-bold text-gray-700">{staffDetail.beneficiary_name || "—"}</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
+                    {t('socialWorker.reviews.contact')}
+                  </p>
+                  <p className="text-sm font-bold text-gray-700 font-mono">{staffDetail.beneficiary_contact || "—"}</p>
+                </div>
+                {staffDetail.beneficiary_situation && (
+                  <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
+                      {t('socialWorker.reviews.situation')}
+                    </p>
+                    <p className="text-xs text-gray-600 leading-relaxed">{staffDetail.beneficiary_situation}</p>
+                  </div>
+                )}
+                <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
+                    {t('systemAdmin.campaigns.detail.verificationStatus')}
+                  </p>
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    staffDetail.verification_status === "VERIFIED"
+                      ? "text-green-700 bg-green-100"
+                      : staffDetail.verification_status === "NOT_VERIFIED"
+                        ? "text-red-700 bg-red-100"
+                        : "text-amber-700 bg-amber-100"
+                  }`}>
+                    {staffDetail.verification_status || "PENDING"}
+                  </span>
+                </div>
+                {staffDetail.linked_beneficiary_id && (
+                  <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
+                      {t('systemAdmin.campaigns.detail.linkedBeneficiary')}
+                    </p>
+                    <p className="text-xs font-mono text-gray-600">{staffDetail.linked_beneficiary_id}</p>
+                  </div>
+                )}
+                {staffDetail.assigned_social_worker_name && (
+                  <div className="p-3 bg-white rounded-xl border border-emerald-100">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mb-1">
+                      {t('socialWorker.reviews.assignedTo')}
+                    </p>
+                    <p className="text-sm font-bold text-gray-700">{staffDetail.assigned_social_worker_name}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* View Analytics */}
           <div className="card p-4 md:p-6">
