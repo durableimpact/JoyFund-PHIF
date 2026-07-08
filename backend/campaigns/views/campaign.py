@@ -23,6 +23,7 @@ from campaigns.serializers import (
     CampaignCreateUpdateSerializer,
     CampaignDetailSerializer,
     CampaignListSerializer,
+    CampaignStaffSerializer,
 )
 from core.cache import cache_response
 
@@ -139,6 +140,23 @@ class CampaignViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     @swagger_auto_schema(tags=_TAG)
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated, IsSystemAdmin],
+        url_path="staff-detail",
+    )
+    @swagger_auto_schema(
+        tags=_TAG,
+        responses={200: CampaignStaffSerializer},
+        operation_description="Staff-only campaign detail including private beneficiary intake fields.",
+    )
+    @cache_response(group="campaigns", timeout=5 * 60)
+    def staff_detail(self, request, pk=None):
+        campaign = self.get_object()
+        serializer = CampaignStaffSerializer(campaign, context={"request": request})
+        return Response(serializer.data)
 
     @swagger_auto_schema(tags=_TAG)
     def destroy(self, request, *args, **kwargs):

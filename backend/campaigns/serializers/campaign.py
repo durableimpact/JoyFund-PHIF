@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from campaigns.models import Campaign, CampaignEvent, CampaignTransaction
+from accounts.serializers.donor import DonorMinimalSerializer
 
 
 class CampaignEventSerializer(serializers.ModelSerializer):
@@ -39,6 +40,7 @@ class CampaignListSerializer(serializers.ModelSerializer):
             "total_number_of_successfull_donations",
             "certificate_generated",
             "certificate_url",
+            "supports_specific_person",
         ]
 
     def _is_owner(self, obj):
@@ -109,6 +111,7 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "events",
             "transactions",
             "voucher_fundings",
+            "supports_specific_person",
         ]
 
     def _is_owner(self, obj):
@@ -134,6 +137,43 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
 
     def get_progress_percentage(self, obj):
         return obj.progress_percentage
+
+
+class CampaignStaffSerializer(serializers.ModelSerializer):
+    """Staff-only serializer exposing beneficiary intake fields for review."""
+    donor = DonorMinimalSerializer(read_only=True)
+    linked_beneficiary_id = serializers.UUIDField(
+        source="linked_beneficiary.id", read_only=True
+    )
+    assigned_social_worker_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Campaign
+        fields = [
+            "id",
+            "donor",
+            "title",
+            "slug",
+            "created_at",
+            "supports_specific_person",
+            "beneficiary_name",
+            "beneficiary_contact",
+            "beneficiary_situation",
+            "verification_status",
+            "linked_beneficiary_id",
+            "assigned_social_worker_name",
+            "assigned_social_worker",
+            "status",
+            "is_public",
+        ]
+
+    def get_assigned_social_worker_name(self, obj):
+        if obj.assigned_social_worker:
+            try:
+                return obj.assigned_social_worker.user.get_full_name() or obj.assigned_social_worker.user.email
+            except Exception:
+                return None
+        return None
 
 
 class CampaignBalanceSerializer(serializers.ModelSerializer):
@@ -170,7 +210,25 @@ class CampaignCreateUpdateSerializer(serializers.ModelSerializer):
             "is_public",
             "status",
             "is_active",
+            "supports_specific_person",
+            "beneficiary_name",
+            "beneficiary_contact",
+            "beneficiary_situation",
         ]
+
+    def validate(self, attrs):
+        if attrs.get("supports_specific_person"):
+            beneficiary_name = attrs.get("beneficiary_name", "")
+            beneficiary_contact = attrs.get("beneficiary_contact", "")
+            if not beneficiary_name or not beneficiary_name.strip():
+                raise serializers.ValidationError(
+                    {"beneficiary_name": "This field is required when supporting a specific person."}
+                )
+            if not beneficiary_contact or not beneficiary_contact.strip():
+                raise serializers.ValidationError(
+                    {"beneficiary_contact": "This field is required when supporting a specific person."}
+                )
+        return attrs
 
     def to_representation(self, instance):
         return CampaignDetailSerializer(instance, context=self.context).data
