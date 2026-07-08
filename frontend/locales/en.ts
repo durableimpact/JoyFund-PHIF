@@ -227,7 +227,7 @@ export default {
   'auth.register.firstName': 'First name',
   'auth.register.lastName': 'Last name',
   'auth.register.email': 'Email address',
-  'auth.register.phone': 'Phone (MTN / Orange)',
+  'auth.register.phone': 'Phone',
   'auth.register.password': 'Password',
   'auth.register.confirmPassword': 'Confirm password',
   'auth.register.passwordPlaceholder': 'At least 8 characters',
