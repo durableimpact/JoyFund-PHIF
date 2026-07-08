@@ -61,6 +61,45 @@ class Campaign(models.Model):
         help_text="The generated PDF Impact Certificate."
     )
 
+    supports_specific_person = models.BooleanField(
+        default=False,
+        help_text="True if the donor indicated this campaign helps a specific sick person",
+    )
+    beneficiary_name = models.CharField(max_length=200, null=True, blank=True)
+    beneficiary_contact = models.CharField(
+        max_length=30, null=True, blank=True,
+        help_text="Phone number to reach the person or their family - private, staff-only",
+    )
+    beneficiary_situation = models.TextField(
+        null=True, blank=True,
+        help_text="Donor's description of the medical situation - private, staff-only",
+    )
+
+    class VerificationStatus(models.TextChoices):
+        PENDING = 'PENDING', 'Pending Verification'
+        VERIFIED = 'VERIFIED', 'Beneficiary Verified'
+        NOT_VERIFIED = 'NOT_VERIFIED', 'Beneficiary Not Verified'
+
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VerificationStatus.choices,
+        null=True, blank=True,
+        help_text="Null when supports_specific_person=False. Defaults to PENDING on creation otherwise.",
+    )
+
+    linked_beneficiary = models.ForeignKey(
+        'beneficiaries.Beneficiary',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='campaigns',
+    )
+
+    assigned_social_worker = models.ForeignKey(
+        'accounts.SocialWorker',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='intake_review_campaigns',
+        help_text="Social worker currently reviewing this beneficiary claim",
+    )
+
     currently_allocated = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -165,18 +204,25 @@ class Campaign(models.Model):
         self._initial_status = self.status
         self._initial_is_public = self.is_public
         self._initial_certificate_generated = self.certificate_generated
+        self._initial_verification_status = self.verification_status
 
     def save(self, *args, **kwargs):
-        # Generate slug on creation if not provided
         if self._state.adding and not self.slug:
             base_slug = slugify(self.title)
             slug = base_slug
             counter = 1
-            # Ensure slug uniqueness
             while Campaign.objects.filter(slug=slug).exists():
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
+
+        if self.supports_specific_person and self.verification_status is None:
+            self.verification_status = self.VerificationStatus.PENDING
+
+        if not self.supports_specific_person:
+            self.verification_status = None
+            self.linked_beneficiary = None
+            self.assigned_social_worker = None
 
         is_new = self._state.adding
         super().save(*args, **kwargs)
@@ -191,6 +237,18 @@ class Campaign(models.Model):
                 notes=notes
             )
             self._initial_status = self.status
+
+        if self.verification_status != self._initial_verification_status:
+            if self._initial_verification_status is None:
+                notes = f"Verification status initially set to {self.verification_status}"
+            else:
+                notes = f"Verification status changed from {self._initial_verification_status} to {self.verification_status}"
+            self.events.create(
+                status=self.verification_status or '',
+                notes=notes,
+                changed_by=self.assigned_social_worker.user if self.assigned_social_worker else None,
+            )
+            self._initial_verification_status = self.verification_status
 
         if self.certificate_generated != self._initial_certificate_generated:
             self._initial_certificate_generated = self.certificate_generated
