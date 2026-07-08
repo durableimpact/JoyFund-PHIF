@@ -58,6 +58,18 @@ export const getCampaign = async (id: string, access_token?: string) => {
   }
 };
 
+export const getCampaignStaffDetail = async (id: string, access_token: string) => {
+  try {
+    const { data } = await api.get<CampaignStaffReview>(
+      `/api/campaigns/${id}/staff-detail/`,
+      { headers: { Authorization: `Bearer ${access_token}` } },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
 export const createCampaign = async (access_token: string, data: FormData) => {
   try {
     const { data: campaign } = await api.post<Campaign>(
@@ -307,6 +319,79 @@ export const getCampaignAnalytics = async (
         headers: { Authorization: `Bearer ${accessToken}` },
         params,
       },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
+// ── Beneficiary Verification Review (Staff-only) ──
+
+export const listPendingVerifications = async (
+  accessToken: string,
+  params?: { mine?: boolean; unassigned?: boolean; page?: number; page_size?: number },
+) => {
+  try {
+    const { data } = await api.get<PaginationResponse<CampaignStaffReview>>(
+      "/api/campaigns/reviews/pending-verification/",
+      {
+        params,
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
+export const assignReviewer = async (
+  campaignId: string,
+  accessToken: string,
+  socialWorkerId?: string,
+) => {
+  try {
+    const body: Record<string, string> = {};
+    if (socialWorkerId) body.social_worker_id = socialWorkerId;
+    const { data } = await api.post<CampaignStaffReview>(
+      `/api/campaigns/reviews/${campaignId}/assign-reviewer/`,
+      body,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
+export const verifyBeneficiary = async (
+  campaignId: string,
+  linkedBeneficiaryId: string,
+  accessToken: string,
+) => {
+  try {
+    const { data } = await api.post<CampaignStaffReview>(
+      `/api/campaigns/reviews/${campaignId}/verify-beneficiary/`,
+      { linked_beneficiary_id: linkedBeneficiaryId },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    return data;
+  } catch (e) {
+    handleError(e);
+  }
+};
+
+export const rejectVerification = async (
+  campaignId: string,
+  reason: string,
+  accessToken: string,
+) => {
+  try {
+    const { data } = await api.post<CampaignStaffReview>(
+      `/api/campaigns/reviews/${campaignId}/reject-verification/`,
+      { reason },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
     );
     return data;
   } catch (e) {

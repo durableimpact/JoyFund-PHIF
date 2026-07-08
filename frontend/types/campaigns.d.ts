@@ -27,6 +27,7 @@ declare interface CampaignList {
   total_number_of_successfull_donations: number;
   certificate_generated: boolean;
   certificate_url: string | null;
+  supports_specific_person: boolean;
 }
 
 declare interface Campaign {
@@ -91,6 +92,7 @@ declare interface CampaignDetail {
   events?: CampaignEvent[];
   transactions?: CampaignTransaction[];
   voucher_fundings?: VoucherFundingDetail[];
+  supports_specific_person: boolean;
 }
 
 declare interface CampaignBalance {
@@ -157,6 +159,10 @@ declare interface CampaignCreatePayload {
   is_public?: boolean;
   status?: CampaignStatus;
   is_active?: boolean;
+  supports_specific_person?: boolean;
+  beneficiary_name?: string;
+  beneficiary_contact?: string;
+  beneficiary_situation?: string;
 }
 
 declare interface CampaignUpdatePayload {
@@ -320,4 +326,34 @@ declare interface CampaignAnalytics {
   start_date: string;
   end_date: string;
   timeline: CampaignTimelinePoint[];
+}
+
+// ── Beneficiary Verification Review ──
+
+declare type VerificationStatus = "PENDING" | "VERIFIED" | "NOT_VERIFIED";
+
+declare interface CampaignStaffReview {
+  id: string;
+  donor: {
+    id: string;
+    user: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      profile_picture: string | null;
+    };
+  };
+  title: string;
+  slug: string;
+  created_at: string;
+  supports_specific_person: boolean;
+  beneficiary_name: string | null;
+  beneficiary_contact: string | null;
+  beneficiary_situation: string | null;
+  verification_status: VerificationStatus | null;
+  linked_beneficiary_id: string | null;
+  assigned_social_worker_name: string | null;
+  assigned_social_worker: string | null;
+  status: CampaignStatus;
+  is_public: boolean;
 }
