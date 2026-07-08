@@ -8,6 +8,7 @@ from campaigns.views import (
     NestedDonationViewSet,
     DonationCreateViewSet,
     CampaignAvailableBalanceListView,
+    CampaignReviewViewSet,
 )
 
 app_name = "campaigns"
@@ -47,9 +48,20 @@ nested_donations.register(
     basename="campaign-donate"
 )
 
+# ============================================================================
+# CAMPAIGN REVIEWS - Staff-only endpoints for beneficiary verification
+# GET /api/campaigns/reviews/pending-verification/ - List pending reviews
+# POST /api/campaigns/reviews/{id}/assign-reviewer/ - Self-assign reviewer
+# POST /api/campaigns/reviews/{id}/verify-beneficiary/ - Link and verify
+# POST /api/campaigns/reviews/{id}/reject-verification/ - Reject with reason
+# ============================================================================
+reviews_router = SimpleRouter()
+reviews_router.register(r"reviews", CampaignReviewViewSet, basename="campaign-reviews")
+
 urlpatterns = (
     # Register specific routes FIRST, generic routes LAST
     donations_router.urls
+    + reviews_router.urls
     + nested_donations.urls
     + campaigns_router.urls
     + [

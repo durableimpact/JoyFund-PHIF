@@ -1,5 +1,6 @@
 from .campaign import CampaignViewSet, CampaignAvailableBalanceListView
 from .donation import DonationViewSet, NestedDonationViewSet, DonationCreateViewSet
+from .review import CampaignReviewViewSet
 
 __all__ = [
     "CampaignViewSet",
@@ -7,4 +8,5 @@ __all__ = [
     "NestedDonationViewSet",
     "DonationCreateViewSet",
     "CampaignAvailableBalanceListView",
+    "CampaignReviewViewSet",
 ]
