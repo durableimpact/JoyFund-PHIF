@@ -363,3 +363,116 @@ def auto_delete_empty_campaigns():
     if count > 0:
         logger.info(f"Auto-deleted {count} empty campaigns")
     return f"Auto-deleted {count} empty campaigns"
+
+
+@shared_task(bind=True, max_retries=2)
+def notify_social_workers_of_new_claim(self, campaign_id):
+    """
+    Async task: notify all active social workers and system admins when a
+    campaign with supports_specific_person=True is created.
+    Creates in-app Notification records and sends push notifications.
+    """
+    from accounts.models import SocialWorker, SystemAdmin, User, Role
+    from notifications.models import Notification, NotificationType
+    from notifications.webpush import send_push_notification_to_user
+
+    try:
+        campaign = Campaign.objects.select_related("donor__user").get(id=campaign_id)
+    except Campaign.DoesNotExist:
+        logger.warning(f"Campaign {campaign_id} not found, skipping notification")
+        return
+
+    donor_name = ""
+    try:
+        donor_name = campaign.donor.user.get_full_name() or campaign.donor.user.email
+    except Exception:
+        pass
+
+    action_url = f"/campaigns/{campaign.id}/?src=push"
+
+    # Collect all active social workers and system admins
+    sw_users = User.objects.filter(
+        role=Role.SOCIAL_WORKER,
+        socialworker__is_approved=True,
+    ).distinct()
+    admin_users = User.objects.filter(role=Role.SYSTEM_ADMIN).distinct()
+
+    recipient_users = (sw_users | admin_users).distinct()
+
+    title = "New beneficiary claim needs review"
+    message = (
+        f"A campaign titled '{campaign.title}' by {donor_name} "
+        f"indicates funds are for a specific sick person. "
+        f"Please review the beneficiary claim."
+    )
+
+    count = 0
+    for user in recipient_users.iterator():
+        try:
+            Notification.objects.create(
+                user=user,
+                title=title,
+                message=message,
+                description=f"Campaign '{campaign.title}' has a new beneficiary claim awaiting review.",
+                notification_type=NotificationType.BENEFICIARY_UPDATE,
+                action_url=action_url,
+            )
+            count += 1
+        except Exception as e:
+            logger.error(f"Failed to create notification for user {user.id}: {e}")
+
+    logger.info(f"Sent {count} beneficiary claim notifications for campaign {campaign_id}")
+    return f"Sent {count} beneficiary claim notifications"
+
+
+@shared_task(bind=True, max_retries=2)
+def notify_donor_verification_outcome(self, campaign_id, outcome):
+    """
+    Async task: notify the original donor when their beneficiary claim
+    verification is completed (VERIFIED or NOT_VERIFIED).
+    Keeps the notification generic and reassuring.
+    """
+    from notifications.models import Notification, NotificationType
+    from notifications.webpush import send_push_notification_to_user
+
+    try:
+        campaign = Campaign.objects.select_related("donor__user").get(id=campaign_id)
+    except Campaign.DoesNotExist:
+        logger.warning(f"Campaign {campaign_id} not found, skipping donor notification")
+        return
+
+    donor_user = campaign.donor.user if campaign.donor else None
+    if not donor_user:
+        logger.warning(f"Campaign {campaign_id} has no donor user, skipping notification")
+        return
+
+    action_url = f"/campaigns/{campaign.id}/?src=push"
+
+    if outcome == "VERIFIED":
+        title = "Your campaign's beneficiary claim has been reviewed"
+        message = (
+            f"Good news! The beneficiary claim for your campaign '{campaign.title}' "
+            f"has been reviewed and approved. Your funds will be directed appropriately. "
+            f"Thank you for your generosity!"
+        )
+    else:
+        title = "Your campaign's beneficiary claim has been reviewed"
+        message = (
+            f"The beneficiary claim for your campaign '{campaign.title}' has been "
+            f"reviewed. While we couldn't verify the specific beneficiary, your funds "
+            f"will still help someone in real need through our general pool. "
+            f"Thank you for your generosity!"
+        )
+
+    try:
+        Notification.objects.create(
+            user=donor_user,
+            title=title,
+            message=message,
+            description=f"Beneficiary claim for '{campaign.title}' has been {outcome.lower().replace('_', ' ')}.",
+            notification_type=NotificationType.VERIFICATION_STATUS,
+            action_url=action_url,
+        )
+        logger.info(f"Notified donor {donor_user.email} about verification outcome for campaign {campaign_id}")
+    except Exception as e:
+        logger.error(f"Failed to notify donor for campaign {campaign_id}: {e}")

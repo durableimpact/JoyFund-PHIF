@@ -243,6 +243,21 @@ def notify_certificate_generated(sender, instance, created, **kwargs):
     )
 
 
+@receiver(post_save, sender=Campaign, dispatch_uid="notify_beneficiary_claim_created")
+def notify_beneficiary_claim_created(sender, instance, created, **kwargs):
+    """When a campaign with supports_specific_person=True is created, notify social workers."""
+    if not created:
+        return
+    if not instance.supports_specific_person:
+        return
+
+    from campaigns.tasks import notify_social_workers_of_new_claim
+    notify_social_workers_of_new_claim.apply_async(
+        args=[str(instance.id)],
+        countdown=5,
+    )
+
+
 @receiver(pre_delete, sender=Campaign, dispatch_uid="protect_campaign_from_deletion")
 def protect_campaign_from_deletion(sender, instance, **kwargs):
     """Prevent deletion of campaigns that have at least one successful donation."""
