@@ -771,9 +771,17 @@ export default function CampaignDetailPage() {
           </button>
 
           <div className="space-y-4">
-            <Badge className="bg-[#1DB1DB]/10 text-[#1DB1DB] border-none rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
-              {campaign.event_type || "Social Impact"}
-            </Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-[#1DB1DB]/10 text-[#1DB1DB] border-none rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
+                {campaign.event_type || "Social Impact"}
+              </Badge>
+              {campaign.supports_specific_person && (
+                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
+                  <Heart className="w-3 h-3 mr-1" />
+                  {t("campaignDetail.supportingSomeone")}
+                </Badge>
+              )}
+            </div>
             <h1 className="text-3xl md:text-[52px] font-black text-[#1A1A2E] leading-[1.1] tracking-tight max-w-4xl">
               {campaign.title}
             </h1>
