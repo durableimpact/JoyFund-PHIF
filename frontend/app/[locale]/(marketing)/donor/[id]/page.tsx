@@ -67,13 +67,13 @@ export default function DonorPublicProfilePage() {
               {/* Left Column: Profile Card */}
               <div className="md:col-span-1 space-y-6">
                 <div className="bg-white rounded-3xl p-8 text-center shadow-sm border border-gray-100 relative overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#1DB1DB]/20 to-transparent opacity-50 pointer-events-none" />
+                  <div className="absolute top-0 left-0 w-full h-24 bg-linear-to-b from-[#1DB1DB]/20 to-transparent opacity-50 pointer-events-none" />
                   
                   <Avatar className="w-32 h-32 mx-auto mb-6 border-4 border-white shadow-lg ring-4 ring-gray-50">
                     {summary.donor.user.profile_picture ? (
                       <AvatarImage src={summary.donor.user.profile_picture} alt={donorName} className="object-cover" />
                     ) : null}
-                    <AvatarFallback className="bg-gradient-to-br from-[#1DB1DB] to-[#1D38DB] text-white text-4xl font-black">
+                    <AvatarFallback className="bg-linear-to-br from-[#1DB1DB] to-[#1D38DB] text-white text-4xl font-black">
                       {donorName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -126,7 +126,7 @@ export default function DonorPublicProfilePage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-500 mb-1">Total Impact</p>
-                      <p className="text-xl sm:text-2xl font-black text-[#1A1A2E] break-words">
+                      <p className="text-xl sm:text-2xl font-black text-[#1A1A2E] wrap-break-word">
                         {formatXAF(summary.donations_total_amount)}
                       </p>
                     </div>

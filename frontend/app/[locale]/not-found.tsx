@@ -1,13 +1,19 @@
+import type { Metadata } from 'next'
 import Link from "next/link";
-import { Home, Search, ArrowLeft } from "lucide-react";
+import { Home, Search } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+
+export const metadata: Metadata = {
+  title: '404 - Page Not Found',
+  robots: { index: false, follow: false },
+}
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Navbar />
-      
+
       <main className="flex flex-1 flex-col items-center justify-center px-6 pt-24 pb-16 text-center">
         <div className="relative mb-8">
           <div className="text-[120px] font-black leading-none text-[#1DB1DB]/10 select-none md:text-[180px]">
@@ -23,9 +29,9 @@ export default function NotFound() {
         <h1 className="mb-4 text-3xl font-black text-[#1A1A2E] md:text-4xl">
           Oops! Page Not Found
         </h1>
-        
+
         <p className="mb-10 max-w-md text-gray-500 leading-relaxed">
-          The page you are looking for might have been removed, had its name changed, 
+          The page you are looking for might have been removed, had its name changed,
           or is temporarily unavailable. Let's get you back on track.
         </p>
 
@@ -37,7 +43,7 @@ export default function NotFound() {
             <Home size={20} />
             Back to Home
           </Link>
-          
+
           <Link
             href="/explore"
             className="flex items-center justify-center gap-2 rounded-2xl border-2 border-gray-100 bg-white px-8 py-4 font-bold text-gray-600 transition-all hover:bg-gray-50 hover:border-gray-200"
