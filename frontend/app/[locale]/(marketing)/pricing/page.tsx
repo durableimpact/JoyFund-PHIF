@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import PricingPageClient from './PageClient'
 import { generatePageMetadata } from '@/lib/seo-metadata'
-import { getI18n } from '@/locales/server'
+import { getI18n, setStaticParamsLocale } from '@/locales/server'
 
 export async function generateMetadata({
   params,
@@ -9,6 +9,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
+  setStaticParamsLocale(locale)
   const t = await getI18n()
   return generatePageMetadata(
     {
