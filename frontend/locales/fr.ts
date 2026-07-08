@@ -2975,4 +2975,32 @@ export default {
   'hospitalAdmin.medicalClaim.detail.created': 'Créé',
   'socialWorker.beneficiaryDetail.healthIssues': 'Problèmes de santé',
 
+  // SEO Metadata
+  'seo.home.title': 'JoyFund',
+  'seo.home.description': "Transformez votre anniversaire ou mariage en une fondation communautaire de santé numérique. JoyFund est la plateforme de confiance du Cameroun pour financer les accouchements sûrs et les soins de santé maternelle.",
+
+  'seo.about.title': 'À propos de JoyFund',
+  'seo.about.description': "JoyFund transforme la culture de célébration et d'entraide communautaire du Cameroun en un Fonds Populaire de Santé transparent pour les mères vulnérables et les personnes âgées.",
+
+  'seo.explore.title': 'Explorer les campagnes',
+  'seo.explore.description': "Parcourez les campagnes actives et financez un accouchement sûr au Cameroun aujourd'hui. Dons 100% transparents via MTN MoMo et Orange Money.",
+
+  'seo.pricing.title': 'Tarifs & Frais',
+  'seo.pricing.description': "Comprenez comment fonctionnent les frais de JoyFund. Voyez exactement où va votre don — tarification transparente pour le financement participatif de santé maternelle au Cameroun.",
+
+  'seo.terms.title': "Conditions d'utilisation",
+  'seo.terms.description': "Lisez les conditions d'utilisation de JoyFund — vos droits et responsabilités sur notre plateforme de financement participatif de santé maternelle.",
+
+  'seo.privacy.title': 'Politique de confidentialité',
+  'seo.privacy.description': "Politique de confidentialité de JoyFund — comment nous collectons, utilisons et protégeons vos données personnelles conformément au RGPD et aux lois de protection des données américaines.",
+
+  'seo.countries.title': 'Pays pris en charge',
+  'seo.countries.description': "JoyFund opère actuellement au Cameroun, soutenant les soins de santé maternelle grâce au financement participatif communautaire transparent. Découvrez notre couverture et nos méthodes de paiement.",
+
+  'seo.leaderboard.title': 'Classement des campagnes',
+  'seo.leaderboard.description': "Découvrez les campagnes JoyFund les plus performantes qui ont le plus grand impact sur les soins de santé maternelle au Cameroun.",
+
+  'seo.trust.title': 'Confiance & Transparence',
+  'seo.trust.description': "Découvrez comment JoyFund garantit une transparence de 100%. Notre système de bons anti-fraude assure que vos dons financent directement les soins de santé maternelle au Cameroun.",
+
 } as const;

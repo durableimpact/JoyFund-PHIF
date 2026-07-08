@@ -3166,4 +3166,32 @@ export default {
 
   'systemAdmin.users.totalUsers': 'Total Users',
 
+  // SEO Metadata
+  'seo.home.title': 'JoyFund',
+  'seo.home.description': "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
+
+  'seo.about.title': 'About JoyFund',
+  'seo.about.description': "JoyFund turns Cameroon's culture of celebration and community mutual aid into a transparent People's Health Fund for vulnerable mothers and elderly people.",
+
+  'seo.explore.title': 'Explore Campaigns',
+  'seo.explore.description': 'Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money.',
+
+  'seo.pricing.title': 'Pricing & Fees',
+  'seo.pricing.description': 'Understand how JoyFund fees work. See exactly where your donation goes — transparent pricing for maternal healthcare crowdfunding in Cameroon.',
+
+  'seo.terms.title': 'Terms of Service',
+  'seo.terms.description': 'Read the Terms of Service for JoyFund — your rights and responsibilities on our maternal healthcare crowdfunding platform.',
+
+  'seo.privacy.title': 'Privacy Policy',
+  'seo.privacy.description': "JoyFund's Privacy Policy — how we collect, use, and protect your personal data in compliance with GDPR and US data protection laws.",
+
+  'seo.countries.title': 'Supported Countries',
+  'seo.countries.description': 'JoyFund currently operates in Cameroon, supporting maternal healthcare through transparent community crowdfunding. Learn about our coverage and payment methods.',
+
+  'seo.leaderboard.title': 'Campaign Leaderboard',
+  'seo.leaderboard.description': 'See the top-performing JoyFund campaigns making the biggest impact on maternal healthcare in Cameroon.',
+
+  'seo.trust.title': 'Trust & Transparency',
+  'seo.trust.description': 'Discover how JoyFund guarantees 100% transparency. Our fraud-proof voucher system ensures your donations directly fund maternal healthcare in Cameroon.',
+
 } as const;
