@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 };
 
 const API_URL = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000";
 const BASE_URL = "https://joy-fund.com";
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 
 async function fetchCampaign(id: string) {
   try {
@@ -19,8 +20,14 @@ async function fetchCampaign(id: string) {
   }
 }
 
+function resolveImageUrl(image: string): string {
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+  if (image.startsWith("/")) return `${BASE_URL}${image}`;
+  return `${BASE_URL}/${image}`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+  const { locale, id } = await params;
   const campaign = await fetchCampaign(id);
 
   if (!campaign) {
@@ -34,26 +41,45 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     campaign.description?.slice(0, 160) ||
     `Support "${campaign.title}" on JoyFund — help provide maternal healthcare for vulnerable women in Cameroon.`;
-  const url = `${BASE_URL}/campaign/${id}`;
+  const url = `${BASE_URL}/${locale}/campaign/${id}`;
+  const ogImage = campaign.cover_image
+    ? resolveImageUrl(campaign.cover_image)
+    : DEFAULT_OG_IMAGE;
 
   return {
     title,
     description,
+    metadataBase: new URL(BASE_URL),
     openGraph: {
       title,
       description,
       url,
       siteName: "JoyFund",
       type: "website",
-      ...(campaign.cover_image && { images: [{ url: campaign.cover_image, width: 1200, height: 630, alt: campaign.title }] }),
+      locale: locale === "fr" ? "fr_FR" : "en_US",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: campaign.title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      ...(campaign.cover_image && { images: [campaign.cover_image] }),
+      images: [ogImage],
     },
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: {
+        en: `${BASE_URL}/en/campaign/${id}`,
+        fr: `${BASE_URL}/fr/campaign/${id}`,
+        "x-default": `${BASE_URL}/en/campaign/${id}`,
+      },
+    },
   };
 }
 
@@ -62,9 +88,9 @@ export default async function CampaignLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { locale, id } = await params;
   const campaign = await fetchCampaign(id);
 
   const jsonLd = campaign
@@ -73,8 +99,8 @@ export default async function CampaignLayout({
         "@type": "DonateAction",
         name: campaign.title,
         description: campaign.description || undefined,
-        url: `${BASE_URL}/campaign/${id}`,
-        image: campaign.cover_image || undefined,
+        url: `${BASE_URL}/${locale}/campaign/${id}`,
+        image: campaign.cover_image ? resolveImageUrl(campaign.cover_image) : undefined,
         actionPlatform: "https://joy-fund.com",
         organizer: campaign.organizer_name
           ? { "@type": "Person", name: campaign.organizer_name }
@@ -88,7 +114,7 @@ export default async function CampaignLayout({
           price: campaign.goal_amount,
           priceCurrency: "XAF",
           availability: "https://schema.org/InStock",
-          url: `${BASE_URL}/campaign/${id}/donate/`,
+          url: `${BASE_URL}/${locale}/campaign/${id}/donate/`,
         },
       }
     : null;
