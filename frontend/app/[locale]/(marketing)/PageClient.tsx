@@ -59,7 +59,7 @@ const testimonialData = [
 
 const faqKeys = ["what", "how", "donate", "eligible", "transparent", "goal"] as const;
 
-export default functio0 HomePage() {
+export default function HomePage() {
   const t = useI18n();
   const [feedIdx, setFeedIdx] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
