@@ -34,7 +34,7 @@ export default function ExplorePage() {
       await listCampaigns({
         event_type: filter === "All" ? undefined : (filter as any),
         status: statusFilter === "all" ? undefined : statusFilter,
-        min_progress_percentage: 7,
+        min_progress_percentage: 0,
         is_public: true,
         is_active: true,
       }),

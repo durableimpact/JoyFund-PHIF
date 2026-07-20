@@ -59,7 +59,7 @@ const testimonialData = [
 
 const faqKeys = ["what", "how", "donate", "eligible", "transparent", "goal"] as const;
 
-export default function HomePage() {
+export default functio0 HomePage() {
   const t = useI18n();
   const [feedIdx, setFeedIdx] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -86,7 +86,7 @@ export default function HomePage() {
         status: "ACTIVE",
         is_public: true,
         is_active: true,
-        min_progress_percentage: 3,
+        min_progress_percentage: 0,
       }),
   });
 
