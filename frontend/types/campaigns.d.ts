@@ -232,7 +232,7 @@ declare interface DonationChartData {
 // ── Donations ──
 
 declare type DonationStatus = "PENDING" | "SUCCESS" | "FAILED";
-declare type PaymentMethod = "MTN" | "ORANGE";
+declare type PaymentMethod = "MTN" | "ORANGE" | "BANK";
 declare type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED";
 
 declare interface Donation {

@@ -799,11 +799,11 @@ export default function CampaignDetailPage() {
           <div className="min-w-0 space-y-12">
             {/* Main Image */}
             {campaign.cover_image && (
-              <div className="relative aspect-16/10 w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50">
+              <div className="relative w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50">
                 <img
                   src={campaign.cover_image}
                   alt={campaign.title}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="w-full h-auto object-contain"
                 />
               </div>
             )}

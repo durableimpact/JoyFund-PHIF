@@ -500,20 +500,26 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
             if len(normalized_phone) == 9:
                 normalized_phone = f'237{normalized_phone}'
 
-            if not (normalized_phone.startswith('237') and len(normalized_phone) == 12):
-                return Response(
-                    {'error': 'Invalid Cameroon phone number format. Use 237XXXXXXXXX or local 9-digit format.'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            if payment_method != 'BANK':
+                if not (normalized_phone.startswith('237') and len(normalized_phone) == 12):
+                    return Response(
+                        {'error': 'Invalid Cameroon phone number format. Use 237XXXXXXXXX or local 9-digit format.'},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
             payment_method = payment_method.strip().upper()
             if payment_method in ['MTN_MOMO', 'MTN']:
                 payment_method = 'MTN'
+                campay_payment_options = "MOMO,CARD"
             elif payment_method in ['ORANGE_MONEY', 'ORANGE']:
                 payment_method = 'ORANGE'
+                campay_payment_options = "MOMO,CARD"
+            elif payment_method in ['BANK', 'BANK_TRANSFER']:
+                payment_method = 'BANK'
+                campay_payment_options = "BANK"
             else:
                 return Response(
-                    {'error': 'Unsupported payment method. Use MTN or ORANGE.'},
+                    {'error': 'Unsupported payment method. Use MTN, ORANGE, or BANK.'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -574,8 +580,8 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                     first_name=donor.user.first_name if donor else None,
                     last_name=donor.user.last_name if donor else None,
                     email=donor.user.email if donor else None,
-                    phone=normalized_phone,
-                    payment_options="MOMO,CARD"
+                    phone=normalized_phone if payment_method != 'BANK' else None,
+                    payment_options=campay_payment_options
                 )
                 
                 # Invalidate all relevant caches after successful donation creation

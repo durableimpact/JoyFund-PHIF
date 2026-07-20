@@ -628,10 +628,11 @@ function CreateCampaignContent() {
 
                   <div>
                     <label className="text-xs font-semibold text-gray-500 mb-2 block">{t('donor.campaigns.create.paymentMethod')}</label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-3 gap-3">
                       {[
                         { id: 'MTN', label: t('donor.campaigns.create.mtnMobileMoney'), color: '#FFC107' },
-                        { id: 'ORANGE', label: t('donor.campaigns.create.orangeMoney'), color: '#FF5A00' }
+                        { id: 'ORANGE', label: t('donor.campaigns.create.orangeMoney'), color: '#FF5A00' },
+                        { id: 'BANK', label: 'Bank Transfer', color: '#1DB1DB' }
                       ].map(pm => (
                         <button 
                           key={pm.id} 

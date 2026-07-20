@@ -7,6 +7,7 @@ class Payment(models.Model):
     PAYMENT_METHODS = [
         ('MTN', 'MTN Money'),
         ('ORANGE', 'Orange Money'),
+        ('BANK', 'Bank Transfer'),
     ]
 
     PAYMENT_STATUS = [

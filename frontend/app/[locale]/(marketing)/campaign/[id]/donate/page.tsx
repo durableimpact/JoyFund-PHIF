@@ -26,6 +26,7 @@ const PAYMENT_METHODS = [
     prefix: "67, 65, 68",
   },
   { id: "ORANGE", label: "Orange Money", color: "#FF5A00", prefix: "69, 65" },
+  { id: "BANK", label: "Bank Transfer", color: "#1DB1DB", prefix: "" },
 ];
 
 const AMOUNTS = [5000, 10000, 25000, 50000, 100000];
@@ -36,8 +37,8 @@ const donateSchema = z
     isAnonymous: z.boolean(),
     amount: z.number().min(25, "Minimum donation is 25 XAF"),
     message: z.string().optional(),
-    paymentMethod: z.enum(["MTN", "ORANGE"] as const),
-    phoneNumber: z.string().min(9, "Please enter a valid phone number"),
+    paymentMethod: z.enum(["MTN", "ORANGE", "BANK"] as const),
+    phoneNumber: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -52,6 +53,18 @@ const donateSchema = z
     {
       message: "Please enter your name if you're not donating anonymously",
       path: ["donorName"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.paymentMethod !== "BANK") {
+        return !!data.phoneNumber && data.phoneNumber.length >= 9;
+      }
+      return true;
+    },
+    {
+      message: "Please enter a valid phone number",
+      path: ["phoneNumber"],
     },
   );
 
@@ -159,7 +172,7 @@ function DonatePage() {
       message: data.message || undefined,
       is_anonymous: data.isAnonymous,
       payment_method: data.paymentMethod,
-      phone_number: data.phoneNumber.replace(/\s/g, ""),
+      phone_number: data.paymentMethod === "BANK" ? "" : (data.phoneNumber || "").replace(/\s/g, ""),
       success_url: `${origin}/campaign/${id}/donate/?status=success`,
       failure_url: `${origin}/campaign/${id}/donate/?status=failed`,
     };
@@ -509,13 +522,13 @@ function DonatePage() {
               <label className="text-xs font-semibold text-gray-500 mb-2 block">
                 Payment Method *
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 {PAYMENT_METHODS.map((pm) => (
                   <button
                     key={pm.id}
                     type="button"
                     onClick={() =>
-                      setValue("paymentMethod", pm.id as "MTN" | "ORANGE")
+                      setValue("paymentMethod", pm.id as "MTN" | "ORANGE" | "BANK")
                     }
                     className={`p-3 rounded-xl border-2 text-left transition-all ${paymentMethod === pm.id ? "text-white" : "border-gray-200 bg-white"}`}
                     style={
@@ -532,7 +545,7 @@ function DonatePage() {
                     <div
                       className={`text-xs mt-0.5 ${paymentMethod === pm.id ? "text-white/80" : "text-gray-500"}`}
                     >
-                      Prefixes: {pm.prefix}
+                      {pm.prefix && `Prefixes: ${pm.prefix}`}
                     </div>
                   </button>
                 ))}
@@ -545,6 +558,7 @@ function DonatePage() {
             </div>
 
             {/* Phone number */}
+            {paymentMethod !== "BANK" && (
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block">
                 Mobile Money Number *
@@ -574,6 +588,7 @@ function DonatePage() {
                 You will receive a payment prompt on this number.
               </p>
             </div>
+            )}
 
             <button
               type="submit"
