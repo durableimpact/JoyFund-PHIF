@@ -145,6 +145,6 @@ export const proxy: NextProxy = async (request, event) => {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|monitoring|favicon.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|monitoring|favicon.ico|sitemap\\.xml|robots\\.txt|sw\\.js|manifest\\.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|css|json|woff|woff2|ttf|eot)$).*)",
   ],
 };

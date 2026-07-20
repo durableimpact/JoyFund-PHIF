@@ -93,9 +93,19 @@ self.addEventListener("message", (event) => {
 });
 
 // ── Fetch Event Handler ─────────────────────────────────────────────────
-// Required for PWA installability: pass all requests through to network.
+// Required for PWA installability: pass all requests through to network
+// with a fallback for navigation requests.
 self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request));
+  if (event.request.method !== "GET") return;
+
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      if (event.request.mode === "navigate") {
+        return caches.match("/") || new Response("Offline", { status: 503, headers: { "Content-Type": "text/html" } });
+      }
+      return new Response("Offline", { status: 503 });
+    })
+  );
 });
 
 // ── Periodic Background Sync ───────────────────────────────────────────
