@@ -93,7 +93,7 @@ function Detail({
       <dd
         className={`text-sm font-semibold text-gray-800 ${mono ? "font-mono text-xs" : ""}`}
       >
-        {value || "\u2014"}
+        {value || ""}
       </dd>
     </div>
   );
