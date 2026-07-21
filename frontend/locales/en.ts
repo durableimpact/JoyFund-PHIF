@@ -13,7 +13,7 @@ export default {
   'nav.startCampaign': 'Start a JoyFund',
   'nav.signIn': 'Sign In',
   'nav.createAccount': 'Create Account',
-  'nav.talkWithUs': 'Talk with us',
+  'nav.talkWithUs': 'Contact Support',
   'nav.menuOpen': 'Open menu',
   'nav.menuClose': 'Close menu',
 
@@ -32,6 +32,7 @@ export default {
   'footer.pricingFees': 'Pricing & Fees',
   'footer.supportedCountries': 'Supported Countries',
   'footer.signIn': 'Sign In',
+  'footer.blog': 'Blog',
   'footer.builtFor': 'Built for Cameroon, with love',
 
   // Homepage - Hero
@@ -3262,5 +3263,45 @@ export default {
 
   'seo.trust.title': 'Trust & Transparency',
   'seo.trust.description': 'Discover how JoyFund guarantees 100% transparency. Our fraud-proof voucher system ensures your donations directly fund maternal healthcare in Cameroon.',
+
+  'seo.blog.title': 'How JoyFund Works',
+  'seo.blog.description': 'Learn how JoyFund turns birthdays, weddings, and celebrations into healthcare relief for vulnerable mothers in Cameroon. Six simple steps to launch your campaign.',
+
+  // Blog
+  'blog.hero.eyebrow': 'Njangi tradition, reimagined',
+  'blog.hero.title': 'How JoyFund Works',
+  'blog.hero.lead': 'Every celebration can become an act of solidarity. Turn a birthday, wedding, graduation, or promotion into healthcare relief for someone who needs it.',
+  'blog.intro': 'JoyFund is built on the <strong>Njangi tradition of mutual support</strong>  the everyday practice of communities pooling resources for one another. Instead of gifts that fade, your milestone becomes real medical relief for someone in need. Here\u2019s exactly how a campaign comes together, from idea to impact.',
+  'blog.section.process': 'The process',
+  'blog.section.processTitle': 'Six steps to launch',
+  'blog.section.processDesc': 'Creating a campaign takes just a few minutes. Each step builds on the last, from choosing your occasion to sharing your finished page with the world.',
+  'blog.step1.title': 'Select your occasion',
+  'blog.step1.desc': 'Choose what you\u2019re celebrating  a birthday, wedding, graduation, promotion, or memorial.',
+  'blog.step2.title': 'Tell your story',
+  'blog.step2.desc': 'Add a cover photo, name your campaign, and describe why you\u2019re fundraising.',
+  'blog.step2.note': 'If you already know someone specific who\u2019s sick and needs support, check the box to let us know  you\u2019ll be asked for their name, phone number, and a brief description of their situation. This information stays private and is only used by our social workers to follow up and confirm the need. Even if that connection can\u2019t be confirmed, every donation still goes toward a real, verified medical need.',
+  'blog.step3.title': 'Set your goal',
+  'blog.step3.desc': 'Choose your fundraising target and pick an end date for your campaign.',
+  'blog.step4.title': 'Preview',
+  'blog.step4.desc': 'Review everything before it goes live  you can still make changes at this stage.',
+  'blog.step5.title': 'Publish with a starting contribution',
+  'blog.step5.desc': 'To publish your campaign, you\u2019ll donate at least 10% of your goal yourself.',
+  'blog.step5.highlight': 'This isn\u2019t a fee  it\u2019s what gets your campaign listed on the JoyFund landing page and Explore section, so people can discover and support it without needing a direct link.',
+  'blog.step6.title': 'Share your campaign',
+  'blog.step6.desc': 'Once published, share your campaign URL with friends, family, and your community  on social media, WhatsApp, email, or wherever your circle gathers.',
+  'blog.flow.title': 'Where the money goes',
+  'blog.flow.p1': 'From there, supporters can donate securely using MTN Mobile Money or Orange Money. Funds are held safely and released as vouchers, redeemed directly with our partner hospitals  so donations always go where they\u2019re needed.',
+  'blog.flow.p2': 'Our team of social workers, hospital partners, and support staff are with you every step of the way.',
+  'blog.flow.pill1': 'MTN Mobile Money',
+  'blog.flow.pill2': 'Orange Money',
+  'blog.flow.pill3': 'Voucher-based release',
+  'blog.flow.pill4': 'Partner hospitals',
+  'blog.flow.pill5': 'Social worker follow-up',
+  'blog.cta.title': 'Start your JoyFund campaign today',
+  'blog.cta.desc': 'Turn your next celebration into someone else\u2019s relief.',
+  'blog.cta.button': 'Start a JoyFund',
+  'blog.meta.published': 'Published July 2026',
+  'blog.meta.readTime': '3 min read',
+  'blog.meta.backHome': 'Back to home',
 
 } as const;
