@@ -13,7 +13,7 @@ export default {
   'nav.startCampaign': 'Lancer un JoyFund',
   'nav.signIn': 'Connexion',
   'nav.createAccount': 'Créer un compte',
-  'nav.talkWithUs': 'Parlez avec nous',
+  'nav.talkWithUs': 'Contacter le support',
   'nav.menuOpen': 'Ouvrir le menu',
   'nav.menuClose': 'Fermer le menu',
 
@@ -32,6 +32,7 @@ export default {
   'footer.pricingFees': 'Tarifs & Frais',
   'footer.supportedCountries': 'Pays pris en charge',
   'footer.signIn': 'Connexion',
+  'footer.blog': 'Blog',
   'footer.builtFor': 'Construit pour le Cameroun, avec amour',
 
   // Homepage - Hero
@@ -3071,5 +3072,45 @@ export default {
 
   'seo.trust.title': 'Confiance & Transparence',
   'seo.trust.description': "Découvrez comment JoyFund garantit une transparence de 100%. Notre système de bons anti-fraude assure que vos dons financent directement les soins de santé maternelle au Cameroun.",
+
+  'seo.blog.title': 'Comment JoyFund fonctionne',
+  'seo.blog.description': "Découvrez comment JoyFund transforme les anniversaires, mariages et célébrations en soins de santé pour les mères vulnérables au Cameroun. Six étapes simples pour lancer votre campagne.",
+
+  // Blog
+  'blog.hero.eyebrow': 'La tradition Njangi, réinventée',
+  'blog.hero.title': 'Comment JoyFund fonctionne',
+  'blog.hero.lead': 'Chaque célébration peut devenir un acte de solidarité. Transformez un anniversaire, un mariage, une remise de diplôme ou une promotion en soulagement médical pour quelqu\u2019un qui en a besoin.',
+  'blog.intro': 'JoyFund s\u2019appuie sur la <strong>tradition Njangi d\u2019entraide mutuelle</strong>  la pratique quotidienne des communautés qui mutualisent leurs ressources. Au lieu de cadeaux qui s\u2019oublient, votre moment clé devient un soulagement médical réel pour une personne dans le besoin. Voici exactement comment une campagne se construit, de l\u2019idée à l\u2019impact.',
+  'blog.section.process': 'Le processus',
+  'blog.section.processTitle': 'Six étapes pour lancer',
+  'blog.section.processDesc': 'Créer une campagne ne prend que quelques minutes. Chaque étape s\u2019appuie sur la précédente, du choix de l\u2019occasion au partage de votre page terminée.',
+  'blog.step1.title': 'Choisissez votre occasion',
+  'blog.step1.desc': 'Choisissez ce que vous célébrez  un anniversaire, un mariage, une remise de diplôme, une promotion ou un hommage.',
+  'blog.step2.title': 'Racontez votre histoire',
+  'blog.step2.desc': 'Ajoutez une photo de couverture, nommez votre campagne et décrivez pourquoi vous collectez des fonds.',
+  'blog.step2.note': 'Si vous connaissez déjà une personne malade qui a besoin de soutien, cochez la case pour nous en informer  on vous demandera son nom, son numéro de téléphone et une brève description de sa situation. Ces informations restent privées et sont uniquement utilisées par nos travailleurs sociaux pour suivre et confirmer le besoin. Même si cette connexion ne peut pas être confirmée, chaque don va toujours vers un besoin médical réel et vérifié.',
+  'blog.step3.title': 'Définissez votre objectif',
+  'blog.step3.desc': 'Choisissez votre objectif de collecte et sélectionnez une date de fin pour votre campagne.',
+  'blog.step4.title': 'Aperçu',
+  'blog.step4.desc': 'Vérifiez tout avant la publication  vous pouvez encore faire des modifications à ce stade.',
+  'blog.step5.title': 'Publiez avec une contribution initiale',
+  'blog.step5.desc': 'Pour publier votre campagne, vous devez faire un don d\u2019au moins 10 % de votre objectif.',
+  'blog.step5.highlight': 'Ce n\u2019est pas des frais  c\u2019est ce qui permet d\u2019afficher votre campagne sur la page d\u2019accueil et dans la section Explorer de JoyFund, pour que les gens puissent la découvrir et la soutenir sans avoir besoin d\u2019un lien direct.',
+  'blog.step6.title': 'Partagez votre campagne',
+  'blog.step6.desc': 'Une fois publiée, partagez l\u2019URL de votre campagne avec vos amis, votre famille et votre communauté  sur les réseaux sociaux, WhatsApp, par e-mail ou partout où se réunit votre cercle.',
+  'blog.flow.title': 'Où va l\u2019argent',
+  'blog.flow.p1': 'Ensuite, les supporters peuvent faire des dons en toute sécurité via MTN Mobile Money ou Orange Money. Les fonds sont conservés en toute sécurité et libérés sous forme de bons, directement échangés dans nos hôpitaux partenaires  pour que les dons aillent toujours là où ils sont nécessaires.',
+  'blog.flow.p2': 'Notre équipe de travailleurs sociaux, d\u2019hôpitaux partenaires et de personnel d\u2019accompagnement est à vos côtés à chaque étape.',
+  'blog.flow.pill1': 'MTN Mobile Money',
+  'blog.flow.pill2': 'Orange Money',
+  'blog.flow.pill3': 'Libération par bons',
+  'blog.flow.pill4': 'Hôpitaux partenaires',
+  'blog.flow.pill5': 'Suivi par travailleurs sociaux',
+  'blog.cta.title': 'Lancez votre campagne JoyFund dès aujourd\u2019hui',
+  'blog.cta.desc': 'Transformez votre prochaine célébration en soulagement pour quelqu\u2019un d\u2019autre.',
+  'blog.cta.button': 'Créer un JoyFund',
+  'blog.meta.published': 'Publié en juillet 2026',
+  'blog.meta.readTime': '3 min de lecture',
+  'blog.meta.backHome': "Retour à l\u2019accueil",
 
 } as const;
