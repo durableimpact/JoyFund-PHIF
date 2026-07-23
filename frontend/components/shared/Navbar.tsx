@@ -165,7 +165,7 @@ export default function Navbar({
                 {t("nav.startCampaign")}
               </Link>
               <Link
-                href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+                href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden lg:flex text-sm bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-2.5 rounded-full transition-all items-center gap-2 whitespace-nowrap"
