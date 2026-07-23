@@ -519,7 +519,7 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                 campay_payment_options = "MOMO,CARD"
             elif payment_method in ['BANK', 'BANK_TRANSFER']:
                 payment_method = 'BANK'
-                campay_payment_options = "BANK"
+                campay_payment_options = "MOMO,CARD"
             else:
                 return Response(
                     {'error': 'Unsupported payment method. Use MTN, ORANGE, or BANK.'},
