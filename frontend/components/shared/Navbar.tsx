@@ -135,6 +135,15 @@ export default function Navbar({
                   {t("nav.dashboard")}
                 </Link>
               )}
+              <Link
+                href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden lg:flex text-sm bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-2.5 rounded-full transition-all items-center gap-2 whitespace-nowrap"
+              >
+                {t("nav.talkWithUs")}
+                <HugeiconsIcon icon={WhatsappIcon} size={18} />
+              </Link>
               <button
                 onClick={handleSignOut}
                 className={`text-xs lg:text-sm font-medium transition-colors px-2 lg:px-3 py-2 ${
@@ -227,6 +236,16 @@ export default function Navbar({
                 >
                   {t("nav.signOut")}
                 </button>
+                <a
+                  href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+                  onClick={() => setMobileOpen(false)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-3 rounded-full text-center transition-all"
+                >
+                  {t("nav.talkWithUs")}
+                  <HugeiconsIcon icon={WhatsappIcon} size={18} />
+                </a>
               </>
             ) : (
               <>
@@ -245,7 +264,7 @@ export default function Navbar({
                   {t("nav.createAccount")}
                 </Link>
                 <a
-                  href="https://wa.me/237650537465?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+                  href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
                   onClick={() => setMobileOpen(false)}
                   target="_blank"
                   rel="noopener noreferrer"

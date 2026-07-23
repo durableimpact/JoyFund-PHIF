@@ -83,7 +83,7 @@ class DonationListSerializer(serializers.ModelSerializer):
 class DonationCreateSerializer(serializers.ModelSerializer):
 
     payment_method = serializers.CharField()
-    phone_number = serializers.CharField()
+    phone_number = serializers.CharField(allow_blank=True, required=False)
     
     success_url = serializers.URLField()
     failure_url = serializers.URLField()

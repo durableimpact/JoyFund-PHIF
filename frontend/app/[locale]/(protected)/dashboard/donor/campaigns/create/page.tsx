@@ -646,6 +646,7 @@ function CreateCampaignContent() {
                     </div>
                   </div>
 
+                  {paymentMethod !== 'BANK' && (
                   <div>
                     <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.mobileMoneyNumber')}</label>
                     <div className="relative">
@@ -660,6 +661,7 @@ function CreateCampaignContent() {
                     </div>
                     <p className="text-xs text-gray-400 mt-1">{t('donor.campaigns.create.paymentPromptHint')}</p>
                   </div>
+                  )}
 
                   <div>
                     <label className="text-xs font-semibold text-gray-500 mb-1 block">{t('donor.campaigns.create.messageOptional')}</label>
@@ -679,7 +681,7 @@ function CreateCampaignContent() {
                     <button
                       className="btn-primary flex-1 flex items-center justify-center gap-2"
                       onClick={() => donateMutation.mutate()}
-                      disabled={donateMutation.isPending || !phoneNumber || !donationAmount}
+                      disabled={donateMutation.isPending || (paymentMethod !== 'BANK' && !phoneNumber) || !donationAmount}
                     >
                       {donateMutation.isPending ? (
                         <>
