@@ -482,11 +482,12 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                     donor = None
 
             serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             validated_data = serializer.validated_data
 
             payment_method = validated_data['payment_method']
-            phone_number = validated_data['phone_number']
+            phone_number = validated_data.get('phone_number', '')
             success_url = validated_data['success_url']
             failure_url = validated_data['failure_url']
             donor_name = validated_data.get('donor_name', '')
@@ -494,14 +495,16 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
             message = validated_data.get('message', '')
             is_anonymous = validated_data.get('is_anonymous', False)
 
-            normalized_phone = phone_number.replace('+', '').replace(' ', '').replace('-', '')
-            if normalized_phone.startswith('0') and len(normalized_phone) == 10:
-                normalized_phone = normalized_phone[1:]
-            if len(normalized_phone) == 9:
-                normalized_phone = f'237{normalized_phone}'
+            normalized_phone = ''
+            if phone_number:
+                normalized_phone = phone_number.replace('+', '').replace(' ', '').replace('-', '')
+                if normalized_phone.startswith('0') and len(normalized_phone) == 10:
+                    normalized_phone = normalized_phone[1:]
+                if len(normalized_phone) == 9:
+                    normalized_phone = f'237{normalized_phone}'
 
             if payment_method != 'BANK':
-                if not (normalized_phone.startswith('237') and len(normalized_phone) == 12):
+                if not phone_number or not (normalized_phone.startswith('237') and len(normalized_phone) == 12):
                     return Response(
                         {'error': 'Invalid Cameroon phone number format. Use 237XXXXXXXXX or local 9-digit format.'},
                         status=status.HTTP_400_BAD_REQUEST,
