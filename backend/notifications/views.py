@@ -8,6 +8,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.mixins import CacheInvalidationMixin
 from notifications.models import Notification, NotificationType
 from notifications.serializers import NotificationSerializer, NotificationListSerializer
 
@@ -17,7 +18,7 @@ CACHE_TIMEOUT = 60
 
 @method_decorator(name='list', decorator=swagger_auto_schema(tags=_TAG))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=_TAG))
-class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class NotificationViewSet(CacheInvalidationMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     ViewSet for managing notifications (read-only creation).
     
@@ -78,6 +79,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.save()
         
         self._invalidate_unread_count_cache(request.user.id)
+        self._invalidate_cache()
         
         serializer = self.get_serializer(notification)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -95,6 +97,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.save()
         
         self._invalidate_unread_count_cache(request.user.id)
+        self._invalidate_cache()
         
         serializer = self.get_serializer(notification)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -110,6 +113,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         count = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         
         self._invalidate_unread_count_cache(request.user.id)
+        self._invalidate_cache()
         
         return Response({'message': f'{count} notifications marked as read'}, status=status.HTTP_200_OK)
     
@@ -171,6 +175,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         notification.delete()
         
         self._invalidate_unread_count_cache(user_id)
+        self._invalidate_cache()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
 

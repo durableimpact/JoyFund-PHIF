@@ -50,7 +50,7 @@ export default function Footer() {
               {[
                 [t("footer.exploreCampaigns"), "/explore"],
                 [t("footer.about"), "/about"],
-                [t("footer.blog"), "/blog"],
+                [t("footer.howItWorks"), "/how-to-start"],
                 [t("footer.leaderboard"), "/leaderboard"],
                 [t("footer.pricingFees"), "/pricing"],
                 [t("footer.supportedCountries"), "/countries"],

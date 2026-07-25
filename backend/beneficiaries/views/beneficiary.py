@@ -1,5 +1,7 @@
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import status
 from rest_framework.generics import (

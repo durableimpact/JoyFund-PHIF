@@ -20,7 +20,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https://joy-fund.com https://api.joy-fund.com http://localhost:8000 https://images.unsplash.com",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://joy-fund.com https://api.joy-fund.com wss://api.joy-fund.com http://localhost:8000 ws://localhost:8000 https://www.google-analytics.com https://o4506631748026368.ingest.sentry.io",
-      "frame-src 'self' https://www.googletagmanager.com",
+      "frame-src 'self' https://www.googletagmanager.com https://www.youtube.com",
     ].join('; '),
   },
 ]
