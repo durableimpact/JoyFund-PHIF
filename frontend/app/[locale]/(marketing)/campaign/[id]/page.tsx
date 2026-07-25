@@ -1032,7 +1032,7 @@ export default function CampaignDetailPage() {
                   {/* Progress bar */}
                   <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#1DB1DB] to-[#1CDBC9] transition-all duration-700"
+                      className="h-full rounded-full bg-linear-to-r from-[#1DB1DB] to-[#1CDBC9] transition-all duration-700"
                       style={{ width: `${Math.min(progressPct, 100)}%` }}
                     />
                   </div>
@@ -1040,7 +1040,7 @@ export default function CampaignDetailPage() {
                   {/* Stats row */}
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-bold text-[#1A1A2E]">
-                      {progressPct.toFixed(0)}% funded
+                      {progressPct.toFixed(2)}% funded
                     </span>
                     <span className="text-gray-500">
                       <span className="font-bold text-[#1A1A2E]">
