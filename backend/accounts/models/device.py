@@ -63,6 +63,7 @@ class UserDevice(models.Model):
 
     class Meta:
         ordering = ["-last_active"]
+        unique_together = [("user", "user_agent")]
         indexes = [
             models.Index(fields=["user", "-last_active"]),
             models.Index(fields=["user", "is_blocked"]),

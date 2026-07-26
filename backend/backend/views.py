@@ -218,12 +218,12 @@ def oauth2_token_view(request):
                                 device, created = UserDevice.objects.update_or_create(
                                     user=token_obj.user,
                                     user_agent=user_agent_str,
-                                    ip_address=ip,
                                     defaults={
                                         'device_name': device_info['device_name'],
                                         'device_type': device_info['device_type'],
                                         'browser': device_info['browser'],
                                         'os': device_info['os'],
+                                        'ip_address': ip,
                                         'access_token': token_obj,
                                     },
                                 )
