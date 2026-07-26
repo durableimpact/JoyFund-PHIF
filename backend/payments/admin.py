@@ -1,4 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.db import transaction
+from django.db.models import Sum, F
 from django.utils.html import format_html, mark_safe
 
 from .models import (
@@ -154,24 +156,72 @@ class WebhookEventAdmin(admin.ModelAdmin):
 class EscrowAccountAdmin(admin.ModelAdmin):
     list_display = ["name", "balance", "updated_at"]
     readonly_fields = ["id", "name", "created_at", "updated_at"]
+    actions = ["recalculate_escrow_from_donations"]
 
     def has_add_permission(self, request):
         return False
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    @admin.action(description="Recalculate balance from successful donations")
+    def recalculate_escrow_from_donations(self, request, queryset):
+        from campaigns.models import Donation
+
+        for account in queryset:
+            old_balance = account.balance
+            total_net = (
+                Donation.objects.filter(status="SUCCESS").aggregate(
+                    total=Sum("net_amount")
+                )["total"]
+                or 0
+            )
+            with transaction.atomic():
+                EscrowAccount.objects.filter(pk=account.pk).update(
+                    balance=total_net
+                )
+            self.message_user(
+                request,
+                f"{account.name}: balance updated from {old_balance} to {total_net} "
+                f"(based on {Donation.objects.filter(status='SUCCESS').count()} successful donations).",
+                messages.SUCCESS,
+            )
 
 
 @admin.register(FeeAccount)
 class FeeAccountAdmin(admin.ModelAdmin):
     list_display = ["name", "balance", "updated_at"]
     readonly_fields = ["id", "name", "created_at", "updated_at"]
+    actions = ["recalculate_fee_from_donations"]
 
     def has_add_permission(self, request):
         return False
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    @admin.action(description="Recalculate balance from successful donations")
+    def recalculate_fee_from_donations(self, request, queryset):
+        from campaigns.models import Donation
+
+        for account in queryset:
+            old_balance = account.balance
+            total_fees = (
+                Donation.objects.filter(status="SUCCESS").aggregate(
+                    total=Sum("platform_fee_amount")
+                )["total"]
+                or 0
+            )
+            with transaction.atomic():
+                FeeAccount.objects.filter(pk=account.pk).update(
+                    balance=total_fees
+                )
+            self.message_user(
+                request,
+                f"{account.name}: balance updated from {old_balance} to {total_fees} "
+                f"(based on {Donation.objects.filter(status='SUCCESS').count()} successful donations).",
+                messages.SUCCESS,
+            )
 
 
 @admin.register(Disbursement)
