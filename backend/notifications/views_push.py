@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -13,6 +14,7 @@ from notifications.serializers import (
     PushSubscriptionSerializer,
     TestPushSerializer,
 )
+from core.cache import invalidate_group
 
 User = get_user_model()
 
@@ -62,6 +64,9 @@ def register_push_subscription(request):
             user_agent=data["user_agent"],
         ).exclude(pk=sub.pk).delete()
 
+    invalidate_group("push_subscriptions")
+    if user:
+        cache.delete(f"push_subscriptions:{user.id}")
     return Response(
         PushSubscriptionSerializer(sub).data,
         status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
@@ -122,6 +127,10 @@ def unregister_push_subscription(request):
 
     deleted, _ = PushSubscription.objects.filter(**filters).delete()
 
+    if deleted > 0:
+        invalidate_group("push_subscriptions")
+        if request.user.is_authenticated:
+            cache.delete(f"push_subscriptions:{request.user.id}")
     return Response(
         {"deleted": deleted > 0},
         status=status.HTTP_200_OK,
@@ -139,8 +148,13 @@ def unregister_push_subscription(request):
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def list_push_subscriptions(request):
+    cache_key = f"push_subscriptions:{request.user.id}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return Response(cached, status=status.HTTP_200_OK)
     subs = PushSubscription.objects.filter(user=request.user)
     serializer = PushSubscriptionSerializer(subs, many=True)
+    cache.set(cache_key, serializer.data, timeout=60)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -316,6 +330,10 @@ def test_send_push(request):
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def push_task_status(request, task_id):
+    cache_key = f"push_task_status:{task_id}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return Response(cached, status=status.HTTP_200_OK)
     try:
         task = PushBroadcastTask.objects.get(id=task_id)
     except PushBroadcastTask.DoesNotExist:
@@ -324,7 +342,7 @@ def push_task_status(request, task_id):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    return Response({
+    data = {
         "task_id": str(task.id),
         "status": task.status,
         "total": task.total,
@@ -336,4 +354,6 @@ def push_task_status(request, task_id):
         "url": task.url,
         "image": task.image,
         "actions": task.actions,
-    })
+    }
+    cache.set(cache_key, data, timeout=10)
+    return Response(data, status=status.HTTP_200_OK)

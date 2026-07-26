@@ -11,6 +11,7 @@ from beneficiaries.models import Beneficiary
 from beneficiaries.models.document import BeneficiaryDocument
 from beneficiaries.serializers import BeneficiaryDocumentSerializer
 from .beneficiary import IsSocialWorker, IsSystemAdmin
+from core.cache import cache_response, invalidate_group
 
 _TAG = ["Beneficiaries"]
 
@@ -35,6 +36,7 @@ class BeneficiaryDocumentListCreateView(ListCreateAPIView):
         beneficiary_id = self.kwargs["beneficiary_id"]
         return BeneficiaryDocument.objects.filter(beneficiary_id=beneficiary_id).order_by("-uploaded_at")
 
+    @cache_response(group="beneficiary_documents", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="List all documents for a specific beneficiary.",
@@ -62,6 +64,7 @@ class BeneficiaryDocumentListCreateView(ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         documents = serializer.save(beneficiary=beneficiary)
 
+        invalidate_group("beneficiary_documents")
         output = BeneficiaryDocumentSerializer(documents, many=True).data
         return Response(output, status=status.HTTP_201_CREATED)
 
@@ -88,6 +91,7 @@ class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
         beneficiary_id = self.kwargs["beneficiary_id"]
         return BeneficiaryDocument.objects.filter(beneficiary_id=beneficiary_id)
 
+    @cache_response(group="beneficiary_documents", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: BeneficiaryDocumentSerializer},
@@ -104,7 +108,9 @@ class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
     )
     def patch(self, request, *args, **kwargs):
         kwargs["partial"] = True
-        return super().patch(request, *args, **kwargs)
+        response = super().patch(request, *args, **kwargs)
+        invalidate_group("beneficiary_documents")
+        return response
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -113,7 +119,9 @@ class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
         operation_description="Replace document info entirely (System Admin only).",
     )
     def put(self, request, *args, **kwargs):
-        return super().put(request, *args, **kwargs)
+        response = super().put(request, *args, **kwargs)
+        invalidate_group("beneficiary_documents")
+        return response
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -121,4 +129,6 @@ class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
         operation_description="Delete a beneficiary document (System Admin only).",
     )
     def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
+        response = super().delete(request, *args, **kwargs)
+        invalidate_group("beneficiary_documents")
+        return response

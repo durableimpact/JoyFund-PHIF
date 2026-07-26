@@ -1,7 +1,5 @@
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import status
 from rest_framework.generics import (
@@ -22,6 +20,7 @@ from beneficiaries.serializers import (
     BeneficiaryDetailSerializer,
     BeneficiaryUpdateSerializer,
 )
+from core.cache import cache_response, invalidate_group
 
 _TAG = ["Beneficiaries"]
 
@@ -119,6 +118,7 @@ class BeneficiaryCreateView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         beneficiary = serializer.save()
+        invalidate_group("beneficiaries")
         return Response(
             BeneficiaryDetailSerializer(beneficiary).data,
             status=status.HTTP_201_CREATED,
@@ -159,6 +159,7 @@ class BeneficiaryListView(ListAPIView):
         )
 
 
+    @cache_response(group="beneficiaries", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="List beneficiaries enrolled by the authenticated SOCIAL_WORKER.",
@@ -187,6 +188,7 @@ class BeneficiaryListView(ListAPIView):
         )
         serializer.is_valid(raise_exception=True)
         beneficiary = serializer.save()
+        invalidate_group("beneficiaries")
         return Response(
             BeneficiaryDetailSerializer(beneficiary).data,
             status=status.HTTP_201_CREATED,
@@ -218,6 +220,7 @@ class BeneficiaryDetailView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
             return BeneficiaryUpdateSerializer
         return BeneficiaryDetailSerializer
 
+    @cache_response(group="beneficiaries", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         responses={200: BeneficiaryDetailSerializer},
@@ -233,7 +236,9 @@ class BeneficiaryDetailView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
         operation_description="Update beneficiary info. Only accessible by SYSTEM_ADMIN.",
     )
     def patch(self, request, *args, **kwargs):
-        return super().patch(request, *args, **kwargs)
+        response = super().patch(request, *args, **kwargs)
+        invalidate_group("beneficiaries")
+        return response
 
     @swagger_auto_schema(
         tags=_TAG,
@@ -241,7 +246,9 @@ class BeneficiaryDetailView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
         operation_description="Delete a beneficiary. Only accessible by SYSTEM_ADMIN.",
     )
     def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
+        response = super().delete(request, *args, **kwargs)
+        invalidate_group("beneficiaries")
+        return response
 
 
 class BeneficiaryVerifyView(APIView):
@@ -269,6 +276,7 @@ class BeneficiaryVerifyView(APIView):
         beneficiary.is_verified = True
         beneficiary.save(update_fields=["is_verified", "updated_at"])
 
+        invalidate_group("beneficiaries")
         return Response(
             BeneficiaryDetailSerializer(beneficiary).data,
             status=status.HTTP_200_OK,

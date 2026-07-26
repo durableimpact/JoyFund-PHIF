@@ -27,6 +27,7 @@ from support.serializers.ticket import (
     TicketCloseSerializer,
     TicketStatsSerializer,
 )
+from core.cache import cache_response, invalidate_group
 
 
 class IsSystemAdmin(BasePermission):
@@ -75,6 +76,10 @@ class SupportTicketListView(ListAPIView):
 
         return queryset
 
+    @cache_response(group="support_tickets", timeout=60)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class SupportTicketDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
@@ -91,6 +96,7 @@ class SupportTicketDetailView(RetrieveAPIView):
             "created_by", "assigned_to"
         ).prefetch_related("messages__sender").filter(created_by=user)
 
+    @cache_response(group="support_tickets", timeout=60)
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
@@ -122,6 +128,7 @@ class SupportTicketCreateView(CreateAPIView):
             notes="Ticket created.",
             changed_by=request.user,
         )
+        invalidate_group("support_tickets")
         return Response(
             SupportTicketDetailSerializer(ticket).data,
             status=status.HTTP_201_CREATED,
@@ -155,6 +162,7 @@ class SupportTicketUpdateView(UpdateAPIView):
             notes="Ticket updated.",
             changed_by=request.user,
         )
+        invalidate_group("support_tickets")
         return Response(SupportTicketDetailSerializer(ticket).data)
 
 
@@ -202,6 +210,7 @@ class SupportTicketAssignView(APIView):
             changed_by=request.user,
         )
 
+        invalidate_group("support_tickets")
         return Response(
             SupportTicketDetailSerializer(ticket).data,
             status=status.HTTP_200_OK,
@@ -251,6 +260,7 @@ class SupportTicketStatusView(APIView):
             changed_by=request.user,
         )
 
+        invalidate_group("support_tickets")
         return Response(
             SupportTicketDetailSerializer(ticket).data,
             status=status.HTTP_200_OK,
@@ -291,6 +301,7 @@ class SupportTicketCloseView(APIView):
             changed_by=request.user,
         )
 
+        invalidate_group("support_tickets")
         return Response(
             SupportTicketDetailSerializer(ticket).data,
             status=status.HTTP_200_OK,
@@ -307,6 +318,10 @@ class SupportTicketEventsView(ListAPIView):
             "changed_by"
         )
 
+    @cache_response(group="support_tickets", timeout=60)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class MyTicketsListView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -316,6 +331,10 @@ class MyTicketsListView(ListAPIView):
         return SupportTicket.objects.filter(
             created_by=self.request.user
         ).select_related("created_by", "assigned_to")
+
+    @cache_response(group="support_tickets", timeout=60)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class TicketMessageListCreateView(ListCreateAPIView):
@@ -337,6 +356,10 @@ class TicketMessageListCreateView(ListCreateAPIView):
         if self.request.method == "POST":
             return TicketMessageCreateSerializer
         return TicketMessageSerializer
+
+    @cache_response(group="support_tickets", timeout=60)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         ticket_id = self.kwargs.get("pk")
@@ -387,6 +410,7 @@ class TicketMessageListCreateView(ListCreateAPIView):
             ticket.status = TicketStatus.IN_PROGRESS
             ticket.save(update_fields=["status", "updated_at"])
 
+        invalidate_group("support_tickets")
         return Response(
             TicketMessageSerializer(message).data,
             status=status.HTTP_201_CREATED,
@@ -396,6 +420,7 @@ class TicketMessageListCreateView(ListCreateAPIView):
 class TicketStatsView(APIView):
     permission_classes = [IsSystemAdmin]
 
+    @cache_response(group="support_tickets", timeout=60)
     def get(self, request):
         from django.utils import timezone
         from datetime import timedelta
@@ -445,6 +470,7 @@ class TicketStatsView(APIView):
 class TicketCategoriesView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @cache_response(group="ticket_categories", timeout=60 * 5)
     def get(self, request):
         return Response([
             {"value": choice[0], "label": choice[1]}
@@ -455,6 +481,7 @@ class TicketCategoriesView(APIView):
 class SystemAdminListView(APIView):
     permission_classes = [IsSystemAdmin]
 
+    @cache_response(group="system_admin_list", timeout=60 * 5)
     def get(self, request):
         from accounts.models import User
         admins = User.objects.filter(role="SYSTEM_ADMIN", is_active=True).values(

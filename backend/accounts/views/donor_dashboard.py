@@ -9,6 +9,7 @@ from beneficiaries.models import HealthIssue
 from accounts.models import Donor
 from accounts.serializers import DonorDashboardSerializer
 from accounts.utils import IsOwnerOrSystemAdmin
+from core.cache import cache_response
 
 
 class DonorDashboardView(APIView):
@@ -30,6 +31,7 @@ class DonorDashboardView(APIView):
                         message=getattr(permission, 'message', None),
                     )
 
+    @cache_response(group="donor_dashboard_detail", timeout=60)
     @swagger_auto_schema(
         operation_description="Get donor dashboard metrics",
         operation_summary="Donor Dashboard",

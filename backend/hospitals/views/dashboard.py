@@ -11,6 +11,7 @@ from vouchers.models.Voucher import Voucher
 from accounts.models import HospitalAdmin, Receptionist, Role
 from hospitals.models import Hospital
 from rest_framework import serializers
+from core.cache import cache_response
 
 
 class HospitalDashboardSerializer(serializers.Serializer):
@@ -35,6 +36,7 @@ class HospitalDashboardView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @cache_response(group="hospital_dashboard", timeout=60)
     @swagger_auto_schema(
         operation_description="Get hospital dashboard metrics",
         operation_summary="Hospital Dashboard",
@@ -98,6 +100,7 @@ class HospitalRedeemedDailyView(APIView):
         format='date',
     )
 
+    @cache_response(group="hospital_dashboard", timeout=60)
     @swagger_auto_schema(
         operation_description="Get vouchers redeemed per day for a hospital",
         operation_summary="Hospital Redeemed Daily",

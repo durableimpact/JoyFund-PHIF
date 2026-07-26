@@ -3,8 +3,7 @@ from datetime import date, timedelta
 from django.db.models import Count, Sum, Q, Value, IntegerField
 from django.db.models.functions import TruncDate, TruncMonth, Coalesce
 from django.core.cache import cache
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
+from core.cache import cache_response
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
@@ -180,10 +179,10 @@ def _financial_growth(current_val, previous_val):
 # 1. Overview Dashboard
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminOverviewView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Global KPIs with growth indicators comparing current month to previous month.",
@@ -262,10 +261,10 @@ class AdminOverviewView(APIView):
 # 2. Financial Dashboard
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminFinancialView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Financial summary and monthly trends.",
@@ -329,7 +328,6 @@ class AdminFinancialView(APIView):
 # 3. Donation Trends
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminDonationTrendsView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
@@ -338,6 +336,7 @@ class AdminDonationTrendsView(APIView):
     start_param = openapi.Parameter("start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
     end_param = openapi.Parameter("end_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Donation counts over time for line charts.",
@@ -377,7 +376,6 @@ class AdminDonationTrendsView(APIView):
 # 4. User Analytics Dashboard
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminUserAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
@@ -386,6 +384,7 @@ class AdminUserAnalyticsView(APIView):
     start_param = openapi.Parameter("start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
     end_param = openapi.Parameter("end_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="User growth trends and registrations over time.",
@@ -436,7 +435,6 @@ class AdminUserAnalyticsView(APIView):
 # 5. Beneficiary & Voucher Dashboard
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminBeneficiaryVoucherView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
@@ -445,6 +443,7 @@ class AdminBeneficiaryVoucherView(APIView):
     start_param = openapi.Parameter("start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
     end_param = openapi.Parameter("end_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Beneficiary and voucher statistics with growth indicators.",
@@ -503,10 +502,10 @@ class AdminBeneficiaryVoucherView(APIView):
 # 6. Organization Dashboard
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminOrganizationView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Organization overview: hospitals, staff, top hospitals.",
@@ -580,7 +579,6 @@ class AdminOrganizationView(APIView):
 # 7. Trends & Reports Dashboard
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminTrendsReportView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
@@ -589,6 +587,7 @@ class AdminTrendsReportView(APIView):
     start_param = openapi.Parameter("start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
     end_param = openapi.Parameter("end_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Comprehensive trends and report data for the selected period.",
@@ -695,10 +694,10 @@ class AdminTrendsReportView(APIView):
 # 8. User Role Summary
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminUserRoleSummaryView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="User count breakdown by role for the users page chart.",
@@ -738,7 +737,6 @@ class AdminUserRoleSummaryView(APIView):
 # 9. Comprehensive Analytics Dashboard
 # ---------------------------------------------------------------------------
 
-@method_decorator(cache_page(60), name='dispatch')
 class AdminComprehensiveAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, IsSystemAdmin]
 
@@ -747,6 +745,7 @@ class AdminComprehensiveAnalyticsView(APIView):
     start_param = openapi.Parameter("start_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
     end_param = openapi.Parameter("end_date", openapi.IN_QUERY, type=openapi.TYPE_STRING, format="date")
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Comprehensive analytics dashboard combining all platform metrics.",
@@ -1165,6 +1164,7 @@ class AdminUserDetailView(APIView):
     user_param = openapi.Parameter("user_id", openapi.IN_PATH, type=openapi.TYPE_STRING,
                                     description="Profile UUID of the user")
 
+    @cache_response(group="admin_dashboard", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="Comprehensive user detail: profile, role-specific stats, activity, devices.",

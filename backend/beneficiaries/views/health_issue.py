@@ -23,6 +23,7 @@ from beneficiaries.views.beneficiary import (
     IsSystemAdmin,
     _TAG,
 )
+from core.cache import cache_response, invalidate_group
 
 
 class HealthIssueListCreateView(ListCreateAPIView):
@@ -48,6 +49,7 @@ class HealthIssueListCreateView(ListCreateAPIView):
             return [IsAuthenticated(), IsSocialWorker()]
         return [IsAuthenticated()]
 
+    @cache_response(group="health_issues", timeout=60)
     @swagger_auto_schema(
         tags=_TAG,
         operation_description="List health issues with optional filtering."
@@ -72,6 +74,7 @@ class HealthIssueListCreateView(ListCreateAPIView):
             notes="Health issue reported.",
             changed_by=self.request.user,
         )
+        invalidate_group("health_issues")
 
 
 class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
@@ -96,6 +99,7 @@ class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
             return [IsAuthenticated(), IsSystemAdmin()]
         return [IsAuthenticated()]
 
+    @cache_response(group="health_issues", timeout=60)
     @swagger_auto_schema(tags=_TAG, responses={200: HealthIssueDetailSerializer},
                          operation_description="Retrieve full details of a health issue.")
     def get(self, request, *args, **kwargs):
@@ -130,10 +134,13 @@ class HealthIssueDetailView(RetrieveUpdateDestroyAPIView):
                 notes=f"Health issue status updated from {old_status} to {health_issue.status}.",
                 changed_by=self.request.user,
             )
+        invalidate_group("health_issues")
 
     @swagger_auto_schema(tags=_TAG, operation_description="Delete a health issue record (System Admin only).")
     def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
+        response = super().delete(request, *args, **kwargs)
+        invalidate_group("health_issues")
+        return response
 
 
 class HealthIssueVerifyView(APIView):
@@ -171,6 +178,7 @@ class HealthIssueVerifyView(APIView):
             changed_by=request.user,
         )
 
+        invalidate_group("health_issues")
         return Response(
             HealthIssueDetailSerializer(health_issue).data,
             status=status.HTTP_200_OK,
@@ -217,6 +225,7 @@ class HealthIssueRejectView(APIView):
             changed_by=request.user,
         )
 
+        invalidate_group("health_issues")
         return Response(
             HealthIssueDetailSerializer(health_issue).data,
             status=status.HTTP_200_OK,
@@ -277,4 +286,5 @@ class HealthIssueStatusActionView(GenericAPIView):
             changed_by=request.user,
         )
 
+        invalidate_group("health_issues")
         return Response(self.get_serializer(health_issue).data)

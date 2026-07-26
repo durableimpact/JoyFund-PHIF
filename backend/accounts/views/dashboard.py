@@ -6,6 +6,7 @@ from django.db.models import Sum
 from campaigns.models import Donation, Campaign
 from beneficiaries.models import HealthIssue, Beneficiary
 from accounts.serializers.dashboard import DonorDashboardSerializer, MatchedBeneficiarySerializer, DonationContributionSerializer, DonationContributionSerializer
+from core.cache import cache_response
 
 
 class DonorDashboardView(APIView):
@@ -15,6 +16,7 @@ class DonorDashboardView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @cache_response(group="donor_dashboard", timeout=60)
     @swagger_auto_schema(
         operation_description="Get donor dashboard metrics",
         operation_summary="Donor Dashboard",

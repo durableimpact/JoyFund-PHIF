@@ -5,6 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 from beneficiaries.models import Beneficiary, HealthIssue
 from vouchers.models.Voucher import Voucher
 from accounts.serializers.dashboard import SocialWorkerDashboardSerializer
+from core.cache import cache_response
 
 
 class SocialWorkerDashboardView(APIView):
@@ -14,6 +15,7 @@ class SocialWorkerDashboardView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @cache_response(group="social_worker_dashboard", timeout=60)
     @swagger_auto_schema(
         operation_description="Get social worker dashboard metrics",
         operation_summary="Social Worker Dashboard",

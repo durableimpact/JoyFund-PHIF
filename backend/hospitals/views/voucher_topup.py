@@ -24,6 +24,7 @@ from hospitals.services.voucher_topup import (
 )
 from hospitals.filters import VoucherTopUpRequestFilter
 from .medical_claim import IsReceptionist, IsSystemAdmin
+from core.cache import cache_response, invalidate_group
 
 
 class VoucherTopUpRequestCreateView(CreateAPIView):
@@ -51,6 +52,7 @@ class VoucherTopUpRequestCreateView(CreateAPIView):
             changed_by=request.user,
             notes=f"Voucher top-up request created. Amount: {top_up_request.requested_amount} XAF. Reason: {top_up_request.reason}",
         )
+        invalidate_group("voucher_topups")
         return Response(
             VoucherTopUpRequestSerializer(top_up_request).data,
             status=status.HTTP_201_CREATED,
@@ -111,6 +113,7 @@ class VoucherTopUpRequestApproveView(APIView):
             notes=f"Voucher top-up request approved. Review notes: {serializer.validated_data.get('review_notes', '')}",
         )
 
+        invalidate_group("voucher_topups")
         return Response(
             VoucherTopUpRequestSerializer(top_up_request).data,
             status=status.HTTP_200_OK,
@@ -170,6 +173,7 @@ class VoucherTopUpRequestRejectView(APIView):
             notes=f"Voucher top-up request rejected. Reason: {serializer.validated_data.get("review_notes")}",
         )
 
+        invalidate_group("voucher_topups")
         return Response(
             VoucherTopUpRequestSerializer(top_up_request).data,
             status=status.HTTP_200_OK,
@@ -187,6 +191,7 @@ class VoucherTopUpRequestListView(ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = VoucherTopUpRequestFilter
 
+    @cache_response(group="voucher_topups", timeout=60)
     @swagger_auto_schema(
         tags=["Voucher Top-Up"],
         operation_description="List all voucher top-up requests.",
@@ -205,6 +210,7 @@ class VoucherTopUpRequestDetailView(RetrieveAPIView):
     lookup_field = "id"
     lookup_url_kwarg = "top_up_request_id"
 
+    @cache_response(group="voucher_topups", timeout=60)
     @swagger_auto_schema(
         tags=["Voucher Top-Up"],
         operation_description="Retrieve details of a specific voucher top-up request.",

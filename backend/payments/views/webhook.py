@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.utils.permissions import IsSystemAdmin
+from core.cache import cache_response, invalidate_group
 from ..filters import WebhookEventFilter
 from ..models import WebhookEvent, PaymentGateway, Transaction
 from ..serializers.webhook import WebhookEventListSerializer, WebhookEventSerializer
@@ -59,6 +60,14 @@ class WebhookEventViewSet(
     search_fields = ["event_type"]
     ordering_fields = ["event_type", "received_at"]
     ordering = ["-received_at"]
+
+    @cache_response(group="webhook_events", timeout=60)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @cache_response(group="webhook_events", timeout=60)
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -149,6 +158,7 @@ class PaymentWebhookView(APIView):
                 event_type="payment_notification", 
                 payload=webhook_data
             )
+            invalidate_group("webhook_events")
             
             # 2. Determine target task (Donation or Disbursement)
             ext_ref = webhook_data.get("external_reference")
