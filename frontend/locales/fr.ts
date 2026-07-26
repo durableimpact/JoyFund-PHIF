@@ -3110,7 +3110,7 @@ export default {
 
   'howItWorks.step6.title': 'Partagez votre campagne',
   'howItWorks.step6.desc': 'Une fois publiée, partagez l\u2019URL de votre campagne avec vos amis, votre famille et votre communauté \u2014 sur les réseaux sociaux, WhatsApp, par e-mail ou partout où se réunit votre cercle.',
-  'howItWorks.step6.bullets': 'Partagez votre lien avec vos proches en premier|Publiez sur les réseaux sociaux pour une portée plus large|Continuez à partager chaque jour pour maintenir l\u2019élan|Ajoutez des membres d\u2019équipe pour aider à diffusion le message',
+  'howItWorks.step6.bullets': 'Partagez votre lien avec vos proches en premier|Publiez sur les réseaux sociaux pour une portée plus large|Continuez à partager chaque jour pour maintenir l\u2019élan',
 
   'howItWorks.flow.title': 'Où va l\u2019argent',
   'howItWorks.flow.desc': 'Ensuite, les supporters peuvent faire des dons en toute sécurité via MTN Mobile Money ou Orange Money. Les fonds sont conservés en toute sécurité et libérés sous forme de bons, directement échangés dans nos hôpitaux partenaires \u2014 pour que les dons aillent toujours là où ils sont nécessaires.',

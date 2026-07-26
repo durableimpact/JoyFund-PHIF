@@ -3301,7 +3301,7 @@ export default {
 
   'howItWorks.step6.title': 'Share your campaign',
   'howItWorks.step6.desc': 'Once published, share your campaign URL with friends, family, and your community \u2014 on social media, WhatsApp, email, or wherever your circle gathers.',
-  'howItWorks.step6.bullets': 'Share your link with close friends and family first|Post on social media for wider reach|Continue sharing each day to maintain momentum|Add team members to help spread the word',
+  'howItWorks.step6.bullets': 'Share your link with close friends and family first|Post on social media for wider reach|Continue sharing each day to maintain momentum',
 
   'howItWorks.flow.title': 'Where the money goes',
   'howItWorks.flow.desc': 'From there, supporters can donate securely using MTN Mobile Money or Orange Money. Funds are held safely and released as vouchers, redeemed directly with our partner hospitals \u2014 so donations always go where they\u2019re needed.',
