@@ -35,8 +35,10 @@ export default function Navbar({
 
   const navLinks = [
     { label: t("nav.home"), href: "/" },
-    { label: t("nav.impact"), href: "/#make-an-impact" },
+    { label: t("nav.howItWorks"), href: "/#make-an-impact" },
     { label: t("nav.about"), href: "/about" },
+    { label: t("nav.getSupport"), href: "/get-support" },
+    { label: t("nav.resources"), href: "/resources" },
     { label: t("nav.explore"), href: "/explore" },
   ];
 
@@ -124,7 +126,6 @@ export default function Navbar({
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
-          <LocaleSwitcher dark={useDark} />
           {isLoggedIn ? (
             <>
               {userRole && (
@@ -135,15 +136,6 @@ export default function Navbar({
                   {t("nav.dashboard")}
                 </Link>
               )}
-              <Link
-                href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden lg:flex text-sm bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-2.5 rounded-full transition-all items-center gap-2 whitespace-nowrap"
-              >
-                {t("nav.talkWithUs")}
-                <HugeiconsIcon icon={WhatsappIcon} size={18} />
-              </Link>
               <button
                 onClick={handleSignOut}
                 className={`text-xs lg:text-sm font-medium transition-colors px-2 lg:px-3 py-2 ${
@@ -173,21 +165,38 @@ export default function Navbar({
               >
                 {t("nav.startCampaign")}
               </Link>
-              <Link
-                href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden lg:flex text-sm bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-2.5 rounded-full transition-all items-center gap-2 whitespace-nowrap"
-              >
-                {t("nav.talkWithUs")}
-                <HugeiconsIcon icon={WhatsappIcon} size={18} />
-              </Link>
             </>
           )}
+
+          <a
+            href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group/btn hidden md:flex items-center bg-[#25D366] hover:bg-[#1fb855] text-white rounded-full transition-all shadow-md hover:shadow-lg overflow-hidden"
+          >
+            <span className="flex items-center justify-center w-10 h-10 md:w-9 md:h-9 lg:w-10 lg:h-10 shrink-0">
+              <HugeiconsIcon icon={WhatsappIcon} size={18} />
+            </span>
+            <span className="max-w-0 group-hover/btn:max-w-[180px] overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out text-sm font-semibold pr-0 group-hover/btn:pr-5">
+              {t("nav.talkWithUs")}
+            </span>
+          </a>
+
+          <LocaleSwitcher dark={useDark} />
         </div>
 
         {/* Mobile hamburger */}
         <div className="flex md:hidden items-center gap-2">
+          <a
+            href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white text-xs font-semibold px-3 py-2 rounded-full transition-all"
+          >
+            <HugeiconsIcon icon={WhatsappIcon} size={16} />
+            <span>{t("nav.talkWithUs")}</span>
+          </a>
+
           <LocaleSwitcher dark={useDark} />
 
           <button
@@ -203,7 +212,6 @@ export default function Navbar({
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-6 px-6 flex flex-col gap-4 border-t border-gray-100">
-          {/* <LocaleSwitcher dark={false} /> */}
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -236,16 +244,6 @@ export default function Navbar({
                 >
                   {t("nav.signOut")}
                 </button>
-                <a
-                  href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
-                  onClick={() => setMobileOpen(false)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-3 rounded-full text-center transition-all"
-                >
-                  {t("nav.talkWithUs")}
-                  <HugeiconsIcon icon={WhatsappIcon} size={18} />
-                </a>
               </>
             ) : (
               <>
@@ -263,16 +261,6 @@ export default function Navbar({
                 >
                   {t("nav.createAccount")}
                 </Link>
-                <a
-                  href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
-                  onClick={() => setMobileOpen(false)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-3 rounded-full text-center transition-all"
-                >
-                  {t("nav.talkWithUs")}
-                  <HugeiconsIcon icon={WhatsappIcon} size={18} />
-                </a>
               </>
             )}
           </div>
