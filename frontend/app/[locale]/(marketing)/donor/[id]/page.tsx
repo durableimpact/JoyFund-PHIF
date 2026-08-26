@@ -31,6 +31,7 @@ export default function DonorPublicProfilePage() {
       <Helmet>
         <title>{summary ? `${donorName}'s Impact | JoyFund` : 'Donor Profile | JoyFund'}</title>
         <meta name="description" content={`View ${donorName}'s public impact and contributions on JoyFund.`} />
+        <meta property="og:site_name" content="JoyFund" />
       </Helmet>
       
       <Navbar />

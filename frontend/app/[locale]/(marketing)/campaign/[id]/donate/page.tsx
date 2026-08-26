@@ -225,6 +225,7 @@ function DonatePage() {
           rel="canonical"
           href={`https://joy-fund.com/campaign/${id}/donate`}
         />
+        <meta property="og:site_name" content="JoyFund" />
         <meta property="og:title" content={`Donate to ${campaignTitle}`} />
         <meta property="og:description" content={campaignDesc} />
         <meta

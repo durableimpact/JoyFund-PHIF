@@ -717,6 +717,7 @@ export default function CampaignDetailPage() {
         <title>{`${campaignTitle} | JoyFund`}</title>
         <meta name="description" content={campaignDesc} />
         <link rel="canonical" href={`https://joy-fund.com/campaign/${id}`} />
+        <meta property="og:site_name" content="JoyFund" />
         <meta property="og:title" content={`${campaignTitle} | JoyFund`} />
         <meta property="og:description" content={campaignDesc} />
         <meta

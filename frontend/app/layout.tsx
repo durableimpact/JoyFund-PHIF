@@ -31,8 +31,9 @@ const jsonLd = {
       "@type": "NonprofitOrganization",
       "@id": "https://joy-fund.com/#organization",
       name: "JoyFund",
+      alternateName: ["Joy fund", "joy-fund.com"],
       description:
-        "A transparent crowdfunding platform pooling community resources for maternal healthcare and safe deliveries for vulnerable women across Cameroon. Also known as Joy fund.",
+        "A transparent crowdfunding platform pooling community resources for maternal healthcare and safe deliveries for vulnerable women across Cameroon.",
       url: "https://joy-fund.com",
       logo: "https://joy-fund.com/assets/joyfund-logo-half-removebg-preview.png",
       foundingLocation: {
@@ -46,6 +47,8 @@ const jsonLd = {
       "@id": "https://joy-fund.com/#website",
       url: "https://joy-fund.com",
       name: "JoyFund",
+      alternateName: "joy-fund.com",
+      inLanguage: ["en", "fr"],
       publisher: {
         "@id": "https://joy-fund.com/#organization",
       },
@@ -54,6 +57,7 @@ const jsonLd = {
 };
 
 export const metadata: Metadata = {
+  applicationName: "JoyFund",
   title: {
     default: "JoyFund",
     template: "%s | JoyFund",
