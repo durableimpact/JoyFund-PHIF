@@ -25,7 +25,7 @@ import { listCampaigns, getPlatformStats } from "@/actions/campaigns";
 import { useEffect, useState } from "react";
 
 const stepIcons = [Cake, Gift, Hospital] as const;
-const stepKeys = ["step1", "step2", "step3"] as const;
+const stepKeys = ["step1", "step2", "step3", "step4", "step5", "step6"] as const;
 
 const featureIcons = [
   Sparkles, ShieldCheck, Smartphone, TrendingUp,
@@ -34,6 +34,39 @@ const featureIcons = [
 const featureKeys = [
   "easy", "verified", "momo", "transparency",
   "diaspora", "hospital", "pooling", "reach", "partnerships",
+] as const;
+
+const whyJoyFundFeatures = [
+  {
+    title: "Built on Local Philanthropy",
+    description:
+      "JoyFund transforms everyday giving and moments of celebration into organised support for vulnerable mothers and newborns.",
+  },
+  {
+    title: "Verified Support",
+    description:
+      "Women seeking support are screened against defined eligibility criteria, with healthcare needs verified through participating health facilities.",
+  },
+  {
+    title: "Direct-to-Provider Payments",
+    description:
+      "Where healthcare costs are supported, funds are paid directly to participating providers rather than handed to beneficiaries.",
+  },
+  {
+    title: "Transparent & Traceable",
+    description:
+      "Contributions, approved support and payments are digitally documented to strengthen accountability from giving to care.",
+  },
+  {
+    title: "Community-Focused",
+    description:
+      "JoyFund addresses not only healthcare costs, but verified last-mile barriers such as transportation to care and referral facilities.",
+  },
+  {
+    title: "Targeted Support",
+    description:
+      "JoyFund targets verified gaps that can remain even where public maternal and newborn health programmes already exist.",
+  },
 ] as const;
 
 const testimonialData = [
@@ -118,7 +151,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0 bg-transparent bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('/assets/images/joyfund-hero-image.webp')",
+            backgroundImage: "url('/assets/images/hero-image-preg-joyfund.jpeg')",
           }}
         />
 
@@ -152,6 +185,12 @@ export default function HomePage() {
               <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
           </div>
 
+          <div className="inline-flex items-center justify-center border border-white/60 bg-white/15 backdrop-blur-[2px] px-5 py-3 text-center mb-8">
+            <span className="text-[0.72rem] sm:text-xs font-semibold uppercase tracking-[0.22em] text-white">
+              {t("hero.eyebrow")}
+            </span>
+          </div>
+
           {/* Headline */}
           <h1
             className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md"
@@ -164,10 +203,6 @@ export default function HomePage() {
           <p className="text-white/80 text-base sm:text-lg max-w-4xl mx-auto mb-10 leading-relaxed drop-shadow">
             {t("hero.subtitle")}
           </p>
-
-          {/* <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed drop-shadow">
-             No one should be denied healthcare because they cannot afford it
-          </p> */}
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
@@ -208,7 +243,6 @@ export default function HomePage() {
                 key={s.l}
                 className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20 flex flex-col items-center text-center"
               >
-                {/* <s.icon size={28} className={`${s.color} mb-2`} /> */}
                 <div className="text-lg font-black">{s.v}</div>
                 <div className="text-xs opacity-70">{s.l}</div>
               </div>
@@ -240,16 +274,14 @@ export default function HomePage() {
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {stepKeys.map((key, i) => (
+            {stepKeys.map((key) => (
               <div key={key} className="flex flex-col gap-4">
-                {[t(`how.${key}.desc1`), t(`how.${key}.desc2`)].map((point, pi) => (
-                  <div
-                    key={pi}
-                    className="card p-5 text-sm text-gray-600 leading-relaxed"
-                  >
-                    {point}
+                <div className="card p-5 text-sm text-gray-600 leading-relaxed">
+                  <div className="font-black text-base text-[#1A1A2E] mb-2">
+                    {t(`how.${key}.title`)}
                   </div>
-                ))}
+                  <p>{t(`how.${key}.desc1`)}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -302,10 +334,14 @@ export default function HomePage() {
             <h2 className="text-3xl font-black text-[#1A1A2E]">
               {t("features.title")}
             </h2>
+            {/*
             <p className="text-gray-500 mt-3 max-w-lg mx-auto text-sm">
               {t("features.subtitle")}
             </p>
+            */}
           </div>
+
+          {/*
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {featureKeys.map((key, i) => {
               const Icon = featureIcons[i];
@@ -329,6 +365,23 @@ export default function HomePage() {
                 </div>
               );
             })}
+          </div>
+          */}
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {whyJoyFundFeatures.map((feature, index) => (
+              <div
+                key={feature.title}
+                className="flex flex-col gap-4 p-6 border border-gray-200 bg-white"
+              >
+                <div className="bg-[#cfe1c9] px-4 py-3 text-center font-black text-[#111827] text-base leading-snug">
+                  {feature.title}
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed text-left">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
