@@ -9,7 +9,7 @@ import { Menu, X } from "lucide-react";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { useI18n } from "@/locales/client";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { WhatsappIcon } from "@hugeicons/core-free-icons";
+import { WhatsappIcon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 const roleDashboardMap: Record<string, string> = {
   DONOR: "/dashboard/donor",
@@ -27,11 +27,15 @@ export default function Navbar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session, status } = useSession();
   const t = useI18n();
+
+  const activePath = pathname.replace(/^\/(en|fr)\/?/, "/") || "/";
 
   const navLinks = [
     { label: t("nav.home"), href: "/" },
@@ -41,6 +45,21 @@ export default function Navbar({
     { label: t("nav.resources"), href: "/resources" },
     { label: t("nav.explore"), href: "/explore" },
   ];
+
+  const aboutSections = [
+    { label: t("nav.aboutMenu1"), href: "/about#our-story" },
+    { label: t("nav.aboutMenu2"), href: "/about#why-joyfund-matters" },
+    { label: t("nav.aboutMenu3"), href: "/about#why-we-evolved" },
+    { label: t("nav.aboutMenu4"), href: "/about#our-philosophy" },
+    { label: t("nav.aboutMenu5"), href: "/about#our-approach" },
+    { label: t("nav.aboutMenu6"), href: "/about#who-we-are" },
+    { label: t("nav.aboutVision"), href: "/about#our-vision" },
+  ];
+
+  const isActiveLink = (href: string) => {
+    const target = href.split("#")[0];
+    return activePath === target;
+  };
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -105,23 +124,75 @@ export default function Navbar({
 
         {/* Desktop links */}
         <div className="hidden xl:flex flex-1 justify-center items-center gap-5 min-w-0">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm font-medium transition-colors whitespace-nowrap ${
-                useDark
-                  ? "text-white/85 hover:text-white"
-                  : "text-gray-600 hover:text-[#3D77B9]"
-              } ${
-                pathname === link.href
-                  ? "font-semibold underline underline-offset-4"
-                  : ""
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.href === "/about" ? (
+              <div
+                key={link.href}
+                className="relative"
+                onMouseEnter={() => setAboutOpen(true)}
+                onMouseLeave={() => setAboutOpen(false)}
+              >
+                <button
+                  type="button"
+                  aria-haspopup="true"
+                  aria-expanded={aboutOpen}
+                  onClick={() => setAboutOpen((v) => !v)}
+                  className={`flex items-center gap-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
+                    useDark ? "text-white/85 hover:text-white" : "text-gray-600 hover:text-[#3D77B9]"
+                  } ${
+                    isActiveLink(link.href)
+                      ? "font-semibold underline underline-offset-4"
+                      : ""
+                  }`}
+                >
+                  {t("nav.about")}
+                  <HugeiconsIcon
+                    icon={ArrowDown01Icon}
+                    size={14}
+                    className={`transition-transform duration-200 ${
+                      aboutOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown panel */}
+                <div
+                  className={`absolute left-1/2 -translate-x-1/2 top-full pt-3 ${
+                    aboutOpen ? "visible opacity-100" : "invisible opacity-0"
+                  } transition-all duration-200`}
+                >
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-3 w-80 text-left">
+                    {aboutSections.map((section) => (
+                      <Link
+                        key={section.href}
+                        href={section.href}
+                        onClick={() => setAboutOpen(false)}
+                        className="block px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-[#F3F9F9] hover:text-[#0B7B63] transition-colors"
+                      >
+                        {section.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                  useDark
+                    ? "text-white/85 hover:text-white"
+                    : "text-gray-600 hover:text-[#3D77B9]"
+                } ${
+                  isActiveLink(link.href)
+                    ? "font-semibold underline underline-offset-4"
+                    : ""
+                }`}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </div>
 
         {/* Desktop actions */}
@@ -202,18 +273,57 @@ export default function Navbar({
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="xl:hidden absolute top-full left-0 w-full bg-white shadow-lg py-6 px-6 flex flex-col gap-4 border-t border-gray-100">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className={`text-gray-700 hover:text-[#3D77B9] font-medium transition-colors ${
-                pathname === link.href ? "font-semibold text-[#3D77B9]" : ""
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.href === "/about" ? (
+              <div key={link.href}>
+                <button
+                  type="button"
+                  onClick={() => setMobileAboutOpen((v) => !v)}
+                  className={`flex items-center justify-between w-full text-left font-medium transition-colors ${
+                    isActiveLink(link.href)
+                      ? "font-semibold text-[#3D77B9]"
+                      : "text-gray-700 hover:text-[#3D77B9]"
+                  }`}
+                >
+                  {t("nav.aboutDropdown")}
+                  <HugeiconsIcon
+                    icon={ArrowDown01Icon}
+                    size={16}
+                    className={`transition-transform duration-200 ${
+                      mobileAboutOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {mobileAboutOpen && (
+                  <div className="mt-3 pl-4 flex flex-col gap-1 border-l-2 border-gray-100">
+                    {aboutSections.map((section) => (
+                      <Link
+                        key={section.href}
+                        href={section.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="block text-sm text-gray-600 hover:text-[#0B7B63] py-1.5 transition-colors"
+                      >
+                        {section.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`font-medium transition-colors ${
+                  isActiveLink(link.href)
+                    ? "font-semibold text-[#3D77B9]"
+                    : "text-gray-700 hover:text-[#3D77B9]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
 
           <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
             {isLoggedIn ? (

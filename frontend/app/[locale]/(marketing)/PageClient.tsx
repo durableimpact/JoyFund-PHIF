@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import Image from "next/image";
 import { useI18n } from "@/locales/client";
 import {  Heart,
   ArrowRight,
@@ -21,6 +22,7 @@ import {  Heart,
 } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import CampaignCard from "@/components/shared/CampaignCard";
+import Reveal from "@/components/shared/Reveal";
 import { listCampaigns, getPlatformStats } from "@/actions/campaigns";
 import { useEffect, useState } from "react";
 
@@ -142,146 +144,142 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex flex-col overflow-hidden">
-        {/* Background photo */}
-        {/* "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?w=1600&auto=format&fit=crop')", */}
+<section className="relative min-h-screen flex flex-col overflow-hidden bg-[#1ea2a0]">
+  {/* Background photo — fully visible (no crop) on mobile/tablet, full-bleed cover on desktop */}
+  <div
+    className="absolute inset-0 bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat"
+    style={{
+      backgroundImage: "url('/assets/images/joyfund-hero-image.png')",
+      filter: "brightness(1.2) saturate(1.05)",
+    }}
+  />
+
+  {/* Soft gradient overlay: dark at top, fades to page bg at bottom */}
+  <div
+    className="absolute inset-0"
+    style={{
+      background:
+        "linear-gradient(to bottom, rgba(10,20,60,0.10) 0%, rgba(10,20,60,0.05) 35%, rgba(255,255,255,0.02) 65%, rgba(249,250,251,0.50) 90%, #F9FAFB 100%)",
+    }}
+  />
+
+  {/* Navbar sits on top of everything */}
+  <Navbar transparent />
+
+  {/* Hero content */}
+  <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-24">
+    {/* Live toast pill */}
+    <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
+    <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
+      {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" /> */}
+      {/* <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
+        <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
+    </div>
+
+    <div className="inline-flex items-center justify-center border border-white/60 bg-white/15 backdrop-blur-[2px] px-5 py-3 text-center mb-8">
+      <span className="text-[0.72rem] sm:text-xs font-semibold uppercase tracking-[0.22em] text-white">
+        {t("hero.eyebrow")}
+      </span>
+    </div>
+
+    {/* Headline */}
+    <h1
+      className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md"
+      style={{ letterSpacing: "-1px" }}
+    >
+      {t("hero.title")}
+    </h1>
+
+    {/* Subtext */}
+    <p className="text-white/80 text-base sm:text-lg max-w-4xl mx-auto mb-10 leading-relaxed drop-shadow">
+      {t("hero.subtitle")}
+    </p>
+
+    {/* CTAs */}
+    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
+      <Link
+        href="/dashboard/donor/campaigns/create"
+        className="btn-primary text-base px-8 py-4 inline-flex items-center gap-2"
+      >
+        {t("hero.startCampaign")} <Sparkles size={18} className="fill-current" />
+      </Link>
+      <Link
+        href="/explore"
+        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-white border-2 border-white/40 hover:bg-white/10 transition-all"
+      >
+        {t("hero.exploreCampaigns")} <ArrowRight size={16} />
+      </Link>
+    </div>
+
+    {/* Stats */}
+    <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
+      {[
+        {
+          v: stats?.lives_supported,
+          l: t("hero.stats.livesSupported"),
+          color: "text-rose-300",
+        },
+        {
+          v: stats?.active_campaigns,
+          l: t("hero.stats.activeCampaigns"),
+          color: "text-amber-300",
+        },
+        {
+          v: stats?.total_raised,
+          l: t("hero.stats.totalRaised"),
+          color: "text-emerald-300",
+        },
+      ].map((s) => (
         <div
-          className="absolute inset-0 bg-transparent bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/assets/images/hero-image-preg-joyfund.jpeg')",
-            filter: "brightness(1.2) saturate(1.05)",
-          }}
-        />
-
-        {/* Soft gradient overlay: dark at top, fades to page bg at bottom */}
-        {/* <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(10,20,60,0.58) 0%, rgba(15,30,90,0.38) 38%, rgba(249,250,251,0.90) 80%, #F9FAFB 100%)",
-          }}
-        /> */}
-
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(10,20,60,0.10) 0%, rgba(10,20,60,0.05) 35%, rgba(255,255,255,0.02) 65%, rgba(249,250,251,0.50) 90%, #F9FAFB 100%)",
-          }}
-        />
-
-        {/* Navbar sits on top of everything */}
-        <Navbar transparent />
-
-        {/* Hero content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-8 pb-24">
-          {/* Live toast pill */}
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8"></div>
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs mb-8">
-            {/* <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" /> */}
-            {/* <span className="opacity-90 truncate max-w-xs">{activityFeed[feedIdx].message}</span>
-              <span className="opacity-60 hidden sm:inline">{activityFeed[feedIdx].timeAgo}</span> */}
-          </div>
-
-          <div className="inline-flex items-center justify-center border border-white/60 bg-white/15 backdrop-blur-[2px] px-5 py-3 text-center mb-8">
-            <span className="text-[0.72rem] sm:text-xs font-semibold uppercase tracking-[0.22em] text-white">
-              {t("hero.eyebrow")}
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1
-            className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md"
-            style={{ letterSpacing: "-1px" }}
-          >
-            {t("hero.title")}
-          </h1>
-
-          {/* Subtext */}
-          <p className="text-white/80 text-base sm:text-lg max-w-4xl mx-auto mb-10 leading-relaxed drop-shadow">
-            {t("hero.subtitle")}
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
-            <Link
-              href="/dashboard/donor/campaigns/create"
-              className="btn-primary text-base px-8 py-4 inline-flex items-center gap-2"
-            >
-              {t("hero.startCampaign")} <Sparkles size={18} className="fill-current" />
-            </Link>
-            <Link
-              href="/explore"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold text-white border-2 border-white/40 hover:bg-white/10 transition-all"
-            >
-              {t("hero.exploreCampaigns")} <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-            {[
-              {
-                v: stats?.lives_supported,
-                l: t("hero.stats.livesSupported"),
-                color: "text-rose-300",
-              },
-              {
-                v: stats?.active_campaigns,
-                l: t("hero.stats.activeCampaigns"),
-                color: "text-amber-300",
-              },
-              {
-                v: stats?.total_raised,
-                l: t("hero.stats.totalRaised"),
-                color: "text-emerald-300",
-              },
-            ].map((s) => (
-              <div
-                key={s.l}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20 flex flex-col items-center text-center"
-              >
-                <div className="text-lg font-black">{s.v}</div>
-                <div className="text-xs opacity-70">{s.l}</div>
-              </div>
-            ))}
-          </div>
+          key={s.l}
+          className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-white border border-white/20 flex flex-col items-center text-center"
+        >
+          <div className="text-lg font-black">{s.v}</div>
+          <div className="text-xs opacity-70">{s.l}</div>
         </div>
+      ))}
+    </div>
+  </div>
 
-        {/* Smooth wave into next section */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg
-            viewBox="0 0 1440 80"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M0 40C360 80 1080 0 1440 40V80H0V40Z" fill="#F9FAFB" />
-          </svg>
-        </div>
-      </section>
+  {/* Smooth wave into next section */}
+  <div className="absolute bottom-0 left-0 right-0">
+    <svg
+      viewBox="0 0 1440 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M0 40C360 80 1080 0 1440 40V80H0V40Z" fill="#F9FAFB" />
+    </svg>
+  </div>
+</section>
 
       {/* ── Launch a JoyFund ── */}
       <section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2
-              className="text-3xl font-bold uppercase tracking-widest mb-2"
-              style={{ color: "var(--primary)" }}
-            >
-              {t("how.title")}
-            </h2>
-          </div>
+          <Reveal>
+            <div className="text-center mb-14">
+              <h2
+                className="text-3xl font-bold uppercase tracking-widest mb-2"
+                style={{ color: "var(--primary)" }}
+              >
+                {t("how.title")}
+              </h2>
+            </div>
+          </Reveal>
           <div className="grid md:grid-cols-3 gap-6">
-            {stepKeys.map((key) => (
-              <div key={key} className="flex flex-col gap-4">
-                <div className="card p-5 text-sm text-gray-600 leading-relaxed">
-                  <div className="font-black text-base text-[#1A1A2E] mb-2">
-                    {t(`how.${key}.title`)}
+            {stepKeys.map((key, i) => (
+              <Reveal key={key} delay={i * 90}>
+                <div className="flex flex-col gap-4">
+                  <div className="card p-5 text-sm text-gray-600 leading-relaxed">
+                    <div className="font-black text-base text-[#1A1A2E] mb-2">
+                      {t(`how.${key}.title`)}
+                    </div>
+                    <p>{t(`how.${key}.desc1`)}</p>
                   </div>
-                  <p>{t(`how.${key}.desc1`)}</p>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -329,16 +327,18 @@ export default function HomePage() {
       {/* ── Why JoyFund ── */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-black text-[#1A1A2E]">
-              {t("features.title")}
-            </h2>
-            {/*
+          <Reveal>
+            <div className="text-center mb-14">
+              <h2 className="text-3xl font-black text-[#1A1A2E]">
+                {t("features.title")}
+              </h2>
+              {/*
             <p className="text-gray-500 mt-3 max-w-lg mx-auto text-sm">
               {t("features.subtitle")}
             </p>
             */}
-          </div>
+            </div>
+          </Reveal>
 
           {/*
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -369,17 +369,16 @@ export default function HomePage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {whyJoyFundFeatures.map((feature, index) => (
-              <div
-                key={feature.title}
-                className="flex flex-col gap-4 p-6 border border-gray-200 bg-white"
-              >
-                <div className="bg-[#cfe1c9] px-4 py-3 text-center font-black text-[#111827] text-base leading-snug">
-                  {feature.title}
+              <Reveal key={feature.title} delay={index * 80}>
+                <div className="flex flex-col gap-4 p-6 border border-gray-200 bg-white">
+                  <div className="bg-[#cfe1c9] px-4 py-3 text-center font-black text-[#111827] text-base leading-snug">
+                    {feature.title}
+                  </div>
+                  <p className="text-gray-700 text-sm leading-relaxed text-left">
+                    {feature.description}
+                  </p>
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed text-left">
-                  {feature.description}
-                </p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -388,26 +387,30 @@ export default function HomePage() {
       {/* ── Featured Campaigns ── */}
       <section className="py-16 px-4 bg-[#F9FAFB]">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <h2 className="text-2xl font-black text-[#1A1A2E]">
-                {t("campaigns.activeTitle")}
-              </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                {t("campaigns.activeSubtitle")}
-              </p>
+          <Reveal>
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <h2 className="text-2xl font-black text-[#1A1A2E]">
+                  {t("campaigns.activeTitle")}
+                </h2>
+                <p className="text-gray-500 text-sm mt-1">
+                  {t("campaigns.activeSubtitle")}
+                </p>
+              </div>
+              <Link
+                href="/explore"
+                className="text-sm font-semibold flex items-center gap-1"
+                style={{ color: "var(--primary)" }}
+              >
+                {t("campaigns.seeAll")} <ChevronRight size={16} />
+              </Link>
             </div>
-            <Link
-              href="/explore"
-              className="text-sm font-semibold flex items-center gap-1"
-              style={{ color: "var(--primary)" }}
-            >
-              {t("campaigns.seeAll")} <ChevronRight size={16} />
-            </Link>
-          </div>
+          </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeCampaigns.map((c) => (
-              <CampaignCard key={c.id} campaign={c} />
+            {activeCampaigns.map((c, i) => (
+              <Reveal key={c.id} delay={i * 90}>
+                <CampaignCard campaign={c} />
+              </Reveal>
             ))}
           </div>
         </div>
@@ -416,35 +419,38 @@ export default function HomePage() {
       {/* ── Impact Model / About ── */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <p
-              className="text-xs font-bold uppercase tracking-widest mb-2"
-              style={{ color: "var(--primary)" }}
-            >
-              {t("model.label")}
-            </p>
-            <h2 className="text-3xl font-black text-[#1A1A2E] mb-4">
-              {t("model.title")}
-            </h2>
-            <p className="text-gray-500 text-sm leading-relaxed mb-4">
-              {t("model.desc1")}
-            </p>
-            <p className="text-gray-500 text-sm leading-relaxed mb-6">
-              {t("model.desc2")}
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <span className="px-4 py-2 rounded-full bg-[#F9FAFB] border border-gray-100 text-xs font-semibold text-[#1A1A2E]">
-                {t("model.badge.momo")}
-              </span>
-              <span className="px-4 py-2 rounded-full bg-[#F9FAFB] border border-gray-100 text-xs font-semibold text-[#1A1A2E]">
-                {t("model.badge.vouchers")}
-              </span>
-              <span className="px-4 py-2 rounded-full bg-[#F9FAFB] border border-gray-100 text-xs font-semibold text-[#1A1A2E]">
-                {t("model.badge.transparency")}
-              </span>
+          <Reveal>
+            <div>
+              <p
+                className="text-xs font-bold uppercase tracking-widest mb-2"
+                style={{ color: "var(--primary)" }}
+              >
+                {t("model.label")}
+              </p>
+              <h2 className="text-3xl font-black text-[#1A1A2E] mb-4">
+                {t("model.title")}
+              </h2>
+              <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                {t("model.desc1")}
+              </p>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                {t("model.desc2")}
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <span className="px-4 py-2 rounded-full bg-[#F9FAFB] border border-gray-100 text-xs font-semibold text-[#1A1A2E]">
+                  {t("model.badge.momo")}
+                </span>
+                <span className="px-4 py-2 rounded-full bg-[#F9FAFB] border border-gray-100 text-xs font-semibold text-[#1A1A2E]">
+                  {t("model.badge.vouchers")}
+                </span>
+                <span className="px-4 py-2 rounded-full bg-[#F9FAFB] border border-gray-100 text-xs font-semibold text-[#1A1A2E]">
+                  {t("model.badge.transparency")}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          </Reveal>
+          <Reveal delay={130}>
+            <div className="grid grid-cols-2 gap-4">
             <div className="card p-6 text-center">
               <ClipboardCheck
                 size={28}
@@ -498,6 +504,7 @@ export default function HomePage() {
               </p>
             </div>
           </div>
+          </Reveal>
         </div>
       </section>
 
@@ -551,40 +558,44 @@ export default function HomePage() {
       {/* ── FAQ ── */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-black text-[#1A1A2E]">
-              {t("faq.title")}
-            </h2>
-            <p className="text-gray-500 mt-3 text-sm">
-              {t("faq.subtitle")}
-            </p>
-          </div>
+          <Reveal>
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-black text-[#1A1A2E]">
+                {t("faq.title")}
+              </h2>
+              <p className="text-gray-500 mt-3 text-sm">
+                {t("faq.subtitle")}
+              </p>
+            </div>
+          </Reveal>
           <div className="space-y-3">
             {faqKeys.map((key, i) => (
-              <div key={key} className="card overflow-hidden">
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between gap-4 p-5 text-left"
-                >
-                  <span className="font-semibold text-[#1A1A2E] text-sm sm:text-base">
-                    {t(`faq.${key}.q`)}
-                  </span>
-                  <ChevronDown
-                    size={18}
-                    className={`flex-shrink-0 transition-transform ${
-                      openFaq === i ? "rotate-180" : ""
-                    }`}
-                    style={{ color: "var(--primary)" }}
-                  />
-                </button>
-                {openFaq === i && (
-                  <div className="px-5 pb-5 -mt-1">
-                    <p className="text-gray-500 text-sm leading-relaxed">
-                      {t(`faq.${key}.a`)}
-                    </p>
-                  </div>
-                )}
-              </div>
+              <Reveal key={key} delay={i * 60}>
+                <div className="card overflow-hidden">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between gap-4 p-5 text-left"
+                  >
+                    <span className="font-semibold text-[#1A1A2E] text-sm sm:text-base">
+                      {t(`faq.${key}.q`)}
+                    </span>
+                    <ChevronDown
+                      size={18}
+                      className={`flex-shrink-0 transition-transform ${
+                        openFaq === i ? "rotate-180" : ""
+                      }`}
+                      style={{ color: "var(--primary)" }}
+                    />
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-5 pb-5 -mt-1">
+                      <p className="text-gray-500 text-sm leading-relaxed">
+                        {t(`faq.${key}.a`)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -596,19 +607,25 @@ export default function HomePage() {
         style={{ background: "linear-gradient(135deg, #1D38DB, #1DB1DB)" }}
       >
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-black text-white mb-4">
-            {t("cta.title")}
-          </h2>
-          <p className="text-white/80 mb-8">
-            {t("cta.subtitle")}
-          </p>
-          <Link
-            href="/dashboard/donor/campaigns/create"
-            className="inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-full hover:opacity-90 transition-all"
-            style={{ color: "var(--secondary)" }}
-          >
-            {t("cta.button")} <Heart size={18} className="fill-current" />
-          </Link>
+          <Reveal>
+            <h2 className="text-3xl font-black text-white mb-4">
+              {t("cta.title")}
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="text-white/80 mb-8">
+              {t("cta.subtitle")}
+            </p>
+          </Reveal>
+          <Reveal delay={240}>
+            <Link
+              href="/dashboard/donor/campaigns/create"
+              className="inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-full hover:opacity-90 transition-all"
+              style={{ color: "var(--secondary)" }}
+            >
+              {t("cta.button")} <Heart size={18} className="fill-current" />
+            </Link>
+          </Reveal>
         </div>
       </section>
     </div>
