@@ -142,8 +142,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <Navbar transparent />
-
       {/* ── Hero ── */}
       <section className="relative min-h-screen flex flex-col overflow-hidden">
         {/* Background photo */}
@@ -152,6 +150,7 @@ export default function HomePage() {
           className="absolute inset-0 bg-transparent bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/assets/images/hero-image-preg-joyfund.jpeg')",
+            filter: "brightness(1.2) saturate(1.05)",
           }}
         />
 
@@ -168,7 +167,7 @@ export default function HomePage() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(10,20,60,0.25) 0%, rgba(10,20,60,0.12) 35%, rgba(255,255,255,0.08) 65%, rgba(249,250,251,0.55) 90%, #F9FAFB 100%)",
+              "linear-gradient(to bottom, rgba(10,20,60,0.10) 0%, rgba(10,20,60,0.05) 35%, rgba(255,255,255,0.02) 65%, rgba(249,250,251,0.50) 90%, #F9FAFB 100%)",
           }}
         />
 

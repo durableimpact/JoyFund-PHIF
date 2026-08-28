@@ -104,7 +104,7 @@ export default function Navbar({
         </button>
 
         {/* Desktop links */}
-        <div className="hidden lg:flex items-center gap-6 shrink-0">
+        <div className="hidden xl:flex flex-1 justify-center items-center gap-5 min-w-0">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -172,12 +172,12 @@ export default function Navbar({
             href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
             target="_blank"
             rel="noopener noreferrer"
-            className="group/btn hidden md:flex items-center bg-[#25D366] hover:bg-[#1fb855] text-white rounded-full transition-all shadow-md hover:shadow-lg overflow-hidden"
+            className="group hidden md:flex items-center bg-[#25D366] hover:bg-[#1fb855] text-white rounded-full transition-all shadow-md hover:shadow-lg overflow-hidden"
           >
             <span className="flex items-center justify-center w-10 h-10 md:w-9 md:h-9 lg:w-10 lg:h-10 shrink-0">
               <HugeiconsIcon icon={WhatsappIcon} size={18} />
             </span>
-            <span className="max-w-0 group-hover/btn:max-w-[180px] overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out text-sm font-semibold pr-0 group-hover/btn:pr-5">
+            <span className="max-w-0 group-hover:max-w-[180px] overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out text-sm font-semibold pr-0 group-hover:pr-5">
               {t("nav.talkWithUs")}
             </span>
           </a>
@@ -186,21 +186,11 @@ export default function Navbar({
         </div>
 
         {/* Mobile hamburger */}
-        <div className="flex md:hidden items-center gap-2">
-          <a
-            href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white text-xs font-semibold px-3 py-2 rounded-full transition-all"
-          >
-            <HugeiconsIcon icon={WhatsappIcon} size={16} />
-            <span>{t("nav.talkWithUs")}</span>
-          </a>
-
+        <div className="flex xl:hidden items-center gap-2">
           <LocaleSwitcher dark={useDark} />
 
           <button
-            className={`md:hidden ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
+            className={`xl:hidden ${useDark ? "text-white" : "text-[#1A1A2E]"}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? t("nav.menuClose") : t("nav.menuOpen")}
           >
@@ -211,7 +201,7 @@ export default function Navbar({
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-6 px-6 flex flex-col gap-4 border-t border-gray-100">
+        <div className="xl:hidden absolute top-full left-0 w-full bg-white shadow-lg py-6 px-6 flex flex-col gap-4 border-t border-gray-100">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -263,6 +253,16 @@ export default function Navbar({
                 </Link>
               </>
             )}
+            <a
+              href="https://wa.me/237681065173?text=Hi%2C%20I%20am%20from%20the%20joyfund%20app%2C%20I%20have%20an%20issue"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-semibold px-5 py-3 rounded-full text-center transition-colors"
+            >
+              <HugeiconsIcon icon={WhatsappIcon} size={16} />
+              {t("nav.talkWithUs")}
+            </a>
           </div>
         </div>
       )}
