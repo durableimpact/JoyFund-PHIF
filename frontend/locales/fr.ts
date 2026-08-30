@@ -93,6 +93,20 @@ export default {
   'features.partnerships.title': 'Partenariats de confiance',
   'features.partnerships.desc': 'Appuyé par des accords formels avec des hôpitaux, des cliniques et des structures communautaires à travers le Cameroun.',
 
+  // Homepage - Why JoyFund
+  'why.philanthropy.title': 'Construit sur la philanthropie locale',
+  'why.philanthropy.desc': 'JoyFund transforme les dons et les moments de célébration du quotidien en un soutien organisé pour les mères et les nouveau-nés vulnérables.',
+  'why.verified.title': 'Soutien vérifié',
+  'why.verified.desc': 'Les femmes qui demandent de l\'aide sont sélectionnées selon des critères d\'éligibilité définis, et leurs besoins de santé sont vérifiés dans les structures de santé participantes.',
+  'why.provider.title': 'Paiement direct au prestataire',
+  'why.provider.desc': 'Lorsque les coûts de santé sont soutenus, les fonds sont versés directement aux prestataires participants, jamais remis en espèces aux participantes.',
+  'why.transparent.title': 'Transparent et traçable',
+  'why.transparent.desc': 'Les contributions, le soutien approuvé et les paiements sont documentés numériquement pour renforcer la responsabilité, du don aux soins.',
+  'why.community.title': 'Axé sur la communauté',
+  'why.community.desc': 'JoyFund s\'attaque non seulement aux coûts de santé, mais aussi aux obstacles de dernière ligne vérifiés, comme le transport vers les soins et les structures de référence.',
+  'why.targeted.title': 'Soutien ciblé',
+  'why.targeted.desc': 'JoyFund cible les lacunes vérifiées qui peuvent subsister même là où des programmes publics de santé maternelle et néonatale existent déjà.',
+
   // Homepage - Testimonials
   'testimonials.title': 'Histoires vraies, impact réel',
   'testimonials.birthday': 'Donateur anniversaire',
