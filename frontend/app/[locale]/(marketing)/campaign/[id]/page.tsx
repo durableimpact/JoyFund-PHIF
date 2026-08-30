@@ -49,7 +49,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useI18n } from "@/locales/client";
+import { useI18n, useCurrentLocale } from "@/locales/client";
 
 const VISIBLE_DONORS = 8;
 
@@ -65,6 +65,7 @@ function DonorListDialog({
   campaignTitle: string;
 }) {
   const t = useI18n();
+  const locale = useCurrentLocale();
   const [pages, setPages] = useState<PaginationResponse<Donation>[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -131,12 +132,15 @@ function DonorListDialog({
       <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
           <DialogTitle className="text-lg font-bold text-[#1A1A2E]">
-            All donors
+            {t("campaignDetail.allDonors")}
           </DialogTitle>
           <DialogDescription>
             {allDonations.length > 0
-              ? `${allDonations.length} donor${allDonations.length !== 1 ? "s" : ""} have contributed to ${campaignTitle}`
-              : "No donors yet"}
+              ? t("campaignDetail.donorsContributed", {
+                  count: allDonations.length,
+                  campaign: campaignTitle,
+                })
+              : t("campaignDetail.noDonorsYet")}
           </DialogDescription>
         </DialogHeader>
 
@@ -157,7 +161,7 @@ function DonorListDialog({
                   <div className="flex justify-between items-start gap-2">
                     <p className="text-sm font-bold text-[#1A1A2E] truncate">
                       {donation.is_anonymous
-                        ? "Anonymous"
+                        ? t("campaignDetail.anonymous")
                         : donation.donor_name}
                     </p>
                     <span className="text-sm font-bold text-[#1DB1DB] whitespace-nowrap">
@@ -167,14 +171,14 @@ function DonorListDialog({
                   <p className="text-xs text-gray-400 mt-0.5">
                     {donation.created_at
                       ? new Date(donation.created_at).toLocaleDateString(
-                          "en-US",
+                          locale,
                           {
                             month: "short",
                             day: "numeric",
                             year: "numeric",
                           },
                         )
-                      : "Just now"}
+                      : t("campaignDetail.justNow")}
                   </p>
                   {donation.message && (
                     <p className="text-sm text-gray-500 mt-1.5 leading-relaxed line-clamp-3 italic">
@@ -188,7 +192,7 @@ function DonorListDialog({
             <div className="py-16 text-center">
               <HandHeart className="mx-auto text-gray-200 mb-3 w-10 h-10" />
               <p className="text-gray-400 text-sm font-medium">
-                Be the first to donate!
+                {t("campaignDetail.beFirst")}
               </p>
             </div>
           )}
@@ -204,7 +208,7 @@ function DonorListDialog({
 
           {!hasNextPage && allDonations.length > 0 && (
             <p className="py-4 text-center text-xs text-gray-300 font-medium">
-              That&apos;s everyone!
+              {t("campaignDetail.thatsEveryone")}
             </p>
           )}
         </div>
@@ -216,7 +220,7 @@ function DonorListDialog({
             onClick={() => onOpenChange(false)}
           >
             <Button className="w-full h-12 text-base font-bold bg-[#1DB1DB] hover:bg-[#1a9fc5] text-white rounded-full shadow-lg shadow-[#1DB1DB]/20 transition-all active:scale-[0.98]">
-              Donate now
+              {t("campaignDetail.donateNow")}
             </Button>
           </Link>
         </div>
@@ -243,6 +247,7 @@ function DonorList({
   campaignTitle: string;
 }) {
   const t = useI18n();
+  const locale = useCurrentLocale();
   const [dialogOpen, setDialogOpen] = useState(false);
   const visible = donations.slice(0, VISIBLE_DONORS);
 
@@ -272,7 +277,7 @@ function DonorList({
                   <div className="flex justify-between items-start gap-2">
                     <p className="text-sm font-bold text-[#1A1A2E] truncate">
                       {donation.is_anonymous
-                        ? "Anonymous"
+                        ? t("campaignDetail.anonymous")
                         : donation.donor_name}
                     </p>
                     <span className="text-xs font-bold text-[#1DB1DB] whitespace-nowrap">
@@ -282,10 +287,10 @@ function DonorList({
                   <p className="text-[11px] text-gray-400 mt-0.5">
                     {donation.created_at
                       ? new Date(donation.created_at).toLocaleDateString(
-                          "en-US",
+                          locale,
                           { month: "short", day: "numeric" },
                         )
-                      : "Just now"}
+                      : t("campaignDetail.justNow")}
                   </p>
                   {donation.message && (
                     <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2 italic">
@@ -309,7 +314,7 @@ function DonorList({
               className="w-full text-xs text-gray-500 font-semibold py-2.5 hover:text-[#1DB1DB] transition-colors flex items-center justify-center gap-1 rounded-xl hover:bg-gray-50"
               onClick={() => setDialogOpen(true)}
             >
-              View all {totalDonors} donors
+              {t("campaignDetail.viewAll", { count: totalDonors })}
               <ChevronRight className="w-3 h-3" />
             </button>
           )}
@@ -355,6 +360,7 @@ function getTimelineColors(type: string) {
 }
 
 function TimelineRow({ item }: { item: TimelineItem }) {
+  const locale = useCurrentLocale();
   return (
     <div className="flex gap-4 group">
       <div className="flex flex-col items-center">
