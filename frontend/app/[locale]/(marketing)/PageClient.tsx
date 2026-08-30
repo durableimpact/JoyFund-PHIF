@@ -147,21 +147,25 @@ export default function HomePage() {
       
       {/* ── Hero ── */}
 <section className="relative min-h-screen flex flex-col overflow-hidden bg-[#1ea2a0]">
-  {/* Background photo — fully visible (no crop) on mobile/tablet, full-bleed cover on desktop */}
-  <div
-    className="absolute inset-0 bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat"
+  {/* Background photo — bottom-flush, ~90% of the hero's height on all screens.
+      Mobile/tablet: zoomed in (object-cover + scale), anchored bottom-center.
+      Desktop (lg): fully visible (object-contain, no zoom), right-aligned. */}
+  <img
+    src="/assets/images/joyfund-hero-image.png"
+    alt=""
+    aria-hidden
+    className="absolute bottom-0 left-0 right-0 h-[90%] w-full object-cover object-bottom scale-[1.1] sm:scale-[1.15] md:scale-[1.2] origin-bottom lg:scale-100 lg:object-contain lg:object-right-bottom lg:origin-bottom-right"
     style={{
-      backgroundImage: "url('/assets/images/joyfund-hero-image.png')",
       filter: "brightness(1.2) saturate(1.05)",
     }}
   />
 
-  {/* Soft gradient overlay: dark at top, fades to page bg at bottom */}
+  {/* Soft gradient overlay: dark at top, fades to page bg at bottom (kept subtle so it doesn't wash out the image) */}
   <div
     className="absolute inset-0"
     style={{
       background:
-        "linear-gradient(to bottom, rgba(10,20,60,0.10) 0%, rgba(10,20,60,0.05) 35%, rgba(255,255,255,0.02) 65%, rgba(249,250,251,0.50) 90%, #F9FAFB 100%)",
+        "linear-gradient(to bottom, rgba(10,20,60,0.14) 0%, rgba(10,20,60,0.08) 25%, rgba(10,20,60,0.03) 55%, rgba(255,255,255,0.04) 70%, rgba(249,250,251,0.18) 90%, rgba(249,250,251,0.32) 100%)",
     }}
   />
 
