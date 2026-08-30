@@ -154,7 +154,7 @@ export default function HomePage() {
     src="/assets/images/joyfund-hero-image.png"
     alt=""
     aria-hidden
-    className="absolute bottom-0 left-0 right-0 h-[90%] w-full object-cover object-bottom scale-[1.1] sm:scale-[1.15] md:scale-[1.2] origin-bottom lg:scale-100 lg:object-contain lg:object-right-bottom lg:origin-bottom-right lg:translate-x-32"
+    className="absolute bottom-0 left-0 right-0 h-[93%] w-full object-cover object-bottom scale-[1.1] sm:scale-[1.15] md:scale-[1.2] origin-bottom lg:scale-100 lg:object-contain lg:object-right-bottom lg:origin-bottom-right lg:translate-x-48"
     style={{
       filter: "brightness(1.2) saturate(1.05)",
     }}
@@ -167,6 +167,12 @@ export default function HomePage() {
       background:
         "linear-gradient(to bottom, rgba(10,20,60,0.14) 0%, rgba(10,20,60,0.08) 25%, rgba(10,20,60,0.03) 55%, rgba(255,255,255,0.04) 70%, rgba(249,250,251,0.18) 90%, rgba(249,250,251,0.32) 100%)",
     }}
+  />
+
+  {/* Dark legibility overlay — tablet & mobile only (hidden on desktop so the right-aligned photo stays clean) */}
+  <div
+    className="absolute inset-0 lg:hidden"
+    style={{ background: "rgba(10,20,60,0.40)" }}
   />
 
   {/* Navbar sits on top of everything */}
