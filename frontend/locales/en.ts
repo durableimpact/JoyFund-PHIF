@@ -1624,7 +1624,6 @@ export default {
   'donor.campaigns.create.beneficiarySituation': 'Brief description of their situation (optional)',
   'donor.campaigns.create.beneficiarySituationPlaceholder': 'Describe the medical situation, condition, or what kind of help is needed...',
   'donor.campaigns.create.fillBeneficiaryRequired': 'Please fill in the beneficiary name and contact number.',
-  'campaignDetail.supportingSomeone': 'Supporting someone in need',
 
   // Social Worker - Beneficiaries
   'socialWorker.beneficiaries.title': 'Beneficiaries',

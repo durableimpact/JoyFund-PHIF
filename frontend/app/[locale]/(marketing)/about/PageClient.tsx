@@ -302,8 +302,19 @@ export default function AboutPage() {
       {/* ════════════════════════════════════════════════════════════════
           02 - WHY JOYFUND MATTERS (the numbers)
           ════════════════════════════════════════════════════════════════ */}
-      <section id="why-joyfund-matters" className="py-20 px-4 bg-[#F3F9F9]">
-        <div className="max-w-5xl mx-auto">
+      <section id="why-joyfund-matters" className="relative overflow-hidden py-20 px-4 bg-[#F3F9F9]">
+        {/* Decorative background image - right side */}
+        <div aria-hidden className="absolute right-0 top-2 sm:top-4 md:top-8 w-[92vw] sm:w-3/4 md:w-3/5 lg:w-2/3 max-w-3xl pointer-events-none translate-x-[16%]">
+          <Image
+            src="/assets/images/about-why-joyfund-matters.png"
+            alt=""
+            width={1264}
+            height={842}
+            sizes="(min-width: 1024px) 66vw, (min-width: 640px) 75vw, 92vw"
+            className="w-full h-auto"
+          />
+        </div>
+        <div className="relative max-w-5xl mx-auto">
           <Reveal>
             <div className="text-center mb-12">
               <p
