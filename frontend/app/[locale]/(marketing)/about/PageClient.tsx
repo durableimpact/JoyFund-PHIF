@@ -615,7 +615,7 @@ export default function AboutPage() {
           <Reveal delay={80}>
             <div className="my-10 rounded-3xl overflow-hidden relative h-64 sm:h-80 bg-white shadow-sm">
               <Image
-                src="/assets/images/our-philosophy-pic-2.png"
+                src="/assets/images/joyfund-philosophy.jpeg"
                 alt="JoyFund Health Financing Model - local philanthropy within a shared health-financing ecosystem"
                 fill
                 className="object-contain p-2"
@@ -661,7 +661,7 @@ export default function AboutPage() {
           <Reveal delay={80}>
             <div className="my-10 rounded-3xl overflow-hidden relative h-64 sm:h-80 bg-white shadow-sm">
               <Image
-                src="/assets/images/our-philosophy-pic-1.jpg"
+                src="/assets/images/joyfund-philosophy-1.jpeg"
                 alt="Three #ShiftThePower principles that shape JoyFund"
                 fill
                 className="object-contain p-2"
@@ -809,7 +809,7 @@ export default function AboutPage() {
           <Reveal delay={90}>
             <div className="rounded-3xl overflow-hidden relative w-full aspect-[3/2] sm:aspect-[16/10] bg-[#F9FAFB] shadow-sm">
               <Image
-                src="/assets/images/our-approach-pic.jpg"
+                src="/assets/images/our-approach-pic.jpeg"
                 alt="The JoyFund Cycle - from celebration to care and back to community"
                 fill
                 className="object-contain"
@@ -968,7 +968,7 @@ export default function AboutPage() {
           <Reveal>
             <div className="relative rounded-3xl overflow-hidden h-48 sm:h-56 flex items-center">
               <Image
-                src="/assets/images/elderly-hospital-image-gemini.webp"
+                src="/assets/images/hero-img_-removebg-preview.png"
                 alt="Community members supporting maternal and newborn care through JoyFund"
                 fill
                 className="object-cover"
