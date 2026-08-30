@@ -3241,7 +3241,7 @@ export default {
 
   // How It Works
   'seo.howItWorks.title': 'Comment JoyFund fonctionne',
-  'seo.howItWorks.description': 'Découvrez comment JoyFund transforme les célébrations en soulagement médical. Étapes simples pour lancer votre campagne.',
+  'seo.howItWorks.description': 'Découvrez comment JoyFund organise la philanthropie locale en soutien vérifié pour la santé maternelle et néonatale. Étapes simples pour transformer une célébration en soins pour une mère et un nouveau-né dans le besoin.',
 
   'howItWorks.hero.eyebrow': 'Comment ça marche',
   'howItWorks.hero.title': 'Comment fonctionne JoyFund',
@@ -3253,33 +3253,33 @@ export default {
 
   'howItWorks.stepLabel': 'Étape',
 
-  'howItWorks.step1.title': 'Suivez les instructions pour configurer votre collecte',
-  'howItWorks.step1.desc': 'Cliquez sur le bouton \u00ab Créer un JoyFund \u00bb et répondez à quelques questions pour commencer. Ajoutez une photo ou une vidéo et racontez votre histoire.',
-  'howItWorks.step1.bullets': 'Choisissez pour qui vous collectez \u2014 pour vous-même ou pour quelqu\u2019un d\u2019autre|Sélectionnez votre occasion : anniversaire, mariage, remise de diplôme, hommage ou autre|Ajoutez une photo de couverture qui représente votre cause',
+  'howItWorks.step1.title': 'Suivez les instructions pour configurer votre JoyFund',
+  'howItWorks.step1.desc': 'Cliquez sur le bouton \u00ab Créer un JoyFund \u00bb et répondez à quelques questions pour commencer. Ajoutez une photo pour votre JoyFund et racontez votre histoire.',
+  'howItWorks.step1.bullets': 'Choisissez la célébration que vous honorez \u2014 anniversaire, mariage, remise de diplôme, promotion, hommage ou autre|Sélectionnez l\u2019étape que vous voulez transformer en soutien|Ajoutez une photo de couverture qui représente votre célébration',
 
   'howItWorks.step2.title': 'Racontez votre histoire',
-  'howItWorks.step2.desc': 'Dans la description de votre collecte, partagez la raison pour laquelle vous collectez des fonds en 1 à 3 paragraphes. Ajoutez des détails sur qui ou quoi vous collectez et comment les fonds seront utilisés.',
-  'howItWorks.step2.bullets': 'Rédigez une histoire captivante qui touche les donateurs|Expliquez comment les fonds seront utilisés|Soyez précis sur le besoin que vous adressez',
-  'howItWorks.step2.note': 'Si vous connaissez déjà une personne malade qui a besoin de soutien, cochez la case pour nous en informer \u2014 on vous demandera son nom, son numéro de téléphone et une brève description de sa situation. Ces informations restent privées et sont uniquement utilisées par nos travailleurs sociaux.',
+  'howItWorks.step2.desc': 'Dans la description de votre JoyFund, partagez la raison de votre don en 1 à 3 paragraphes, et comment le soutien que vous mobilisez aidera une mère et un nouveau-né à rester connectés aux soins essentiels.',
+  'howItWorks.step2.bullets': 'Rédigez une histoire qui connecte avec votre communauté|Expliquez comment le soutien sera utilisé|Soyez précis sur le besoin que vous adressez',
+  'howItWorks.step2.note': 'Si vous connaissez déjà une personne qui a besoin de soutien, cochez la case pour nous en informer \u2014 on vous demandera son nom, son numéro de téléphone et une brève description de sa situation. Ces informations restent privées et sont uniquement utilisées par nos travailleurs sociaux pour assurer le suivi et vérifier le besoin.',
 
   'howItWorks.step3.title': 'Définissez votre objectif',
-  'howItWorks.step3.desc': 'Choisissez votre objectif de collecte et sélectionnez une date de fin pour votre campagne. Nous vous suggérerons un objectif basé sur des campagnes similaires réussies, mais vous pouvez toujours choisir un montant différent.',
-  'howItWorks.step3.bullets': 'Fixez un objectif réaliste basé sur vos besoins|Choisissez une date de fin qui laisse assez de temps|Vous pouvez modifier votre objectif à tout moment',
+  'howItWorks.step3.desc': 'Choisissez un objectif de don et une date de fin pour votre JoyFund. Nous vous suggérerons un objectif basé sur ce que collectent des JoyFunds similaires, mais vous pouvez toujours choisir un montant différent.',
+  'howItWorks.step3.bullets': 'Fixez un objectif réaliste basé sur votre don|Choisissez une date de fin qui laisse assez de temps|Vous pouvez modifier votre objectif à tout moment',
 
-  'howItWorks.step4.title': 'Aperçu de votre campagne',
+  'howItWorks.step4.title': 'Aperçu de votre JoyFund',
   'howItWorks.step4.desc': 'Vérifiez tout avant la publication. Consultez votre histoire, vos photos et votre objectif. Vous pouvez encore faire des modifications à ce stade.',
-  'howItWorks.step4.bullets': 'Voyez comment votre campagne apparaîtra aux donateurs|Faites les dernières modifications à votre histoire|Assurez-vous que tous les détails sont corrects',
+  'howItWorks.step4.bullets': 'Voyez comment votre JoyFund apparaîtra aux soutiens|Faites les dernières modifications à votre histoire|Assurez-vous que tous les détails sont corrects',
 
   'howItWorks.step5.title': 'Publiez avec une contribution initiale',
-  'howItWorks.step5.desc': 'Pour publier votre campagne, vous devez faire un don d\u2019au moins 10 % de votre objectif. Ce n\u2019est pas des frais \u2014 c\u2019est ce qui permet d\u2019afficher votre campagne sur la page d\u2019accueil et dans la section Explorer.',
-  'howItWorks.step5.highlight': 'Cette contribution initiale montre aux donateurs que vous êtes engagé dans la cause et aide à établir la confiance avec les supporters potentiels.',
+  'howItWorks.step5.desc': 'Pour publier votre JoyFund, vous devez contribuer au moins 10 % de votre objectif vous-même. Ce n\u2019est pas des frais \u2014 c\u2019est ce qui permet d\u2019afficher votre JoyFund sur la page d\u2019accueil et dans la section Explorer.',
+  'howItWorks.step5.highlight': 'Cette contribution initiale montre aux autres que vous êtes engagé et aide à établir la confiance avec votre communauté.',
 
-  'howItWorks.step6.title': 'Partagez votre campagne',
-  'howItWorks.step6.desc': 'Une fois publiée, partagez l\u2019URL de votre campagne avec vos amis, votre famille et votre communauté \u2014 sur les réseaux sociaux, WhatsApp, par e-mail ou partout où se réunit votre cercle.',
+  'howItWorks.step6.title': 'Partagez votre JoyFund',
+  'howItWorks.step6.desc': 'Une fois publié, partagez votre JoyFund avec vos amis, votre famille et votre communauté \u2014 sur les réseaux sociaux, WhatsApp, par e-mail ou partout où se réunit votre cercle.',
   'howItWorks.step6.bullets': 'Partagez votre lien avec vos proches en premier|Publiez sur les réseaux sociaux pour une portée plus large|Continuez à partager chaque jour pour maintenir l\u2019élan',
 
   'howItWorks.flow.title': 'Où va l\u2019argent',
-  'howItWorks.flow.desc': 'Ensuite, les supporters peuvent faire des dons en toute sécurité via MTN Mobile Money ou Orange Money. Les fonds sont conservés en toute sécurité et libérés sous forme de bons, directement échangés dans nos hôpitaux partenaires \u2014 pour que les dons aillent toujours là où ils sont nécessaires.',
+  'howItWorks.flow.desc': 'Ensuite, les soutiens peuvent donner en toute sécurité via MTN Mobile Money ou Orange Money. Les besoins sont vérifiés dans les structures de santé participantes, et lorsque les soins sont soutenus, les fonds sont versés directement aux prestataires \u2014 pour que les contributions aillent toujours là où elles sont nécessaires.',
 
   'howItWorks.flow.feePlatform': 'Frais de plateforme',
   'howItWorks.flow.feePlatformDesc': 'Couvre les opérations et la vérification',
@@ -3295,14 +3295,14 @@ export default {
   'howItWorks.flow.item4.title': 'Travailleurs sociaux',
   'howItWorks.flow.item4.desc': 'Notre équipe suit pour confirmer les besoins et assurer des soins appropriés.',
   'howItWorks.flow.item5.title': 'Transparence totale',
-  'howItWorks.flow.item5.desc': 'Suivez chaque don de la source à l\u2019hôpital avec une visibilité complète.',
+  'howItWorks.flow.item5.desc': 'Suivez chaque contribution du don aux soins avec une responsabilité complète.',
   'howItWorks.flow.item6.title': 'Impact réel',
-  'howItWorks.flow.item6.desc': '100 % des dons vont directement aux soins de santé pour ceux qui en ont besoin.',
+  'howItWorks.flow.item6.desc': 'Chaque contribution soutient des soins vérifiés pour les mères et les nouveau-nés qui en ont besoin.',
 
-  'howItWorks.cta.title': 'Lancez votre campagne JoyFund dès aujourd\u2019hui',
-  'howItWorks.cta.desc': 'Transformez votre prochaine célébration en soulagement pour quelqu\u2019un d\u2019autre.',
+  'howItWorks.cta.title': 'Lancez votre JoyFund dès aujourd\u2019hui',
+  'howItWorks.cta.desc': 'Transformez votre prochaine célébration en soutien organisé pour une mère et un nouveau-né de votre communauté.',
   'howItWorks.cta.button': 'Créer un JoyFund',
-  'howItWorks.cta.secondary': 'Explorer les campagnes',
+  'howItWorks.cta.secondary': 'Soutenir une mère',
 
   // SEO
   'seo.getSupport.title': 'Obtenir de l\'aide',

@@ -3432,7 +3432,7 @@ export default {
 
   // How It Works
   'seo.howItWorks.title': 'How JoyFund Works',
-  'seo.howItWorks.description': 'Learn how JoyFund turns celebrations into healthcare relief. Simple steps to launch your campaign and help those in need.',
+  'seo.howItWorks.description': 'Learn how JoyFund organises local philanthropy into verified support for maternal and newborn health. Simple steps to turn a celebration into care for a mother and newborn in need.',
 
   'howItWorks.hero.eyebrow': 'How it works',
   'howItWorks.hero.title': 'How JoyFund works',
