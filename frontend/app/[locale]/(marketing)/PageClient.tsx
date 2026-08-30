@@ -259,7 +259,7 @@ export default function HomePage() {
               <div className="overflow-hidden rounded-2xl shadow-lg bg-white">
                 <img
                   src="/assets/images/how-joyfund-works-pic.jpeg"
-                  alt="How JoyFund Works"
+                  alt={t("how.title")}
                   className="w-full h-full object-cover"
                 />
               </div>
