@@ -140,9 +140,7 @@ export default function Navbar({
                   className={`flex items-center gap-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
                     useDark ? "text-white/85 hover:text-white" : "text-gray-600 hover:text-[#3D77B9]"
                   } ${
-                    isActiveLink(link.href)
-                      ? "font-semibold underline underline-offset-4"
-                      : ""
+                    isActiveLink(link.href) ? "font-semibold" : ""
                   }`}
                 >
                   {t("nav.about")}
@@ -184,9 +182,7 @@ export default function Navbar({
                     ? "text-white/85 hover:text-white"
                     : "text-gray-600 hover:text-[#3D77B9]"
                 } ${
-                  isActiveLink(link.href)
-                    ? "font-semibold underline underline-offset-4"
-                    : ""
+                  isActiveLink(link.href) ? "font-semibold" : ""
                 }`}
               >
                 {link.label}

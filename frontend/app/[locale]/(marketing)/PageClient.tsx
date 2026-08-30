@@ -267,7 +267,7 @@ export default function HomePage() {
 
       {/* ── Launch a JoyFund ── */}
       <section id="make-an-impact" className="py-20 px-4 bg-[#F9FAFB]">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-14">
               <h2
@@ -278,19 +278,28 @@ export default function HomePage() {
               </h2>
             </div>
           </Reveal>
-          <div className="grid md:grid-cols-3 gap-6">
-            {stepKeys.map((key, i) => (
-              <Reveal key={key} delay={i * 90}>
-                <div className="flex flex-col gap-4">
-                  <div className="card p-5 text-sm text-gray-600 leading-relaxed">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <Reveal>
+              <div className="overflow-hidden rounded-2xl shadow-lg bg-white">
+                <img
+                  src="/assets/images/how-joyfund-works-pic.jpeg"
+                  alt="How JoyFund Works"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </Reveal>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {stepKeys.map((key, i) => (
+                <Reveal key={key} delay={i * 90}>
+                  <div className="card p-5 text-sm text-gray-600 leading-relaxed h-full">
                     <div className="font-black text-base text-[#1A1A2E] mb-2">
                       {t(`how.${key}.title`)}
                     </div>
                     <p>{t(`how.${key}.desc1`)}</p>
                   </div>
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
       </section>
