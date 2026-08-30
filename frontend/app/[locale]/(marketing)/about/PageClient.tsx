@@ -1029,4 +1029,3 @@ export default function AboutPage() {
   );
 }
 
-
