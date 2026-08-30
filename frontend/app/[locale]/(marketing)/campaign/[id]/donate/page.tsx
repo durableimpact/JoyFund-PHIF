@@ -21,12 +21,22 @@ import { useI18n } from "@/locales/client";
 const PAYMENT_METHODS = [
   {
     id: "MTN",
-    label: "MTN Mobile Money",
+    labelKey: "donate.paymentMtn",
     color: "#FFC107",
     prefix: "67, 65, 68",
   },
-  { id: "ORANGE", label: "Orange Money", color: "#FF5A00", prefix: "69, 65" },
-  { id: "BANK", label: "Bank Transfer", color: "#1DB1DB", prefix: "" },
+  {
+    id: "ORANGE",
+    labelKey: "donate.paymentOrange",
+    color: "#FF5A00",
+    prefix: "69, 65",
+  },
+  {
+    id: "BANK",
+    labelKey: "donate.paymentBank",
+    color: "#1DB1DB",
+    prefix: "",
+  },
 ];
 
 const AMOUNTS = [5000, 10000, 25000, 50000, 100000];
@@ -35,7 +45,7 @@ const donateSchema = z
   .object({
     donorName: z.string().optional(),
     isAnonymous: z.boolean(),
-    amount: z.number().min(25, "Minimum donation is 25 XAF"),
+    amount: z.number().min(25, "donate.minDonation"),
     message: z.string().optional(),
     paymentMethod: z.enum(["MTN", "ORANGE", "BANK"] as const),
     phoneNumber: z.string().optional(),
@@ -51,7 +61,7 @@ const donateSchema = z
       return true;
     },
     {
-      message: "Please enter your name if you're not donating anonymously",
+      message: "donate.nameRequired",
       path: ["donorName"],
     },
   )
@@ -63,7 +73,7 @@ const donateSchema = z
       return true;
     },
     {
-      message: "Please enter a valid phone number",
+      message: "donate.phoneRequired",
       path: ["phoneNumber"],
     },
   );
@@ -74,6 +84,7 @@ function DonatePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const t = useI18n();
+  const translateKey = (key: string) => t(key as Parameters<typeof t>[0]);
   const searchParams = useSearchParams();
   const confettiRef = useRef<{ fire: (opts: { particleCount: number; spread: number; origin: { y: number } }) => void } | null>(null);
   const { data: session } = useSession();
@@ -156,11 +167,11 @@ function DonatePage() {
       if (response?.payment_link) {
         window.location.href = response.payment_link;
       } else {
-        toast.error("Payment link not available");
+        toast.error(t("donate.paymentLinkUnavailable"));
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Payment failed. Please try again.");
+      toast.error(error.message || t("donate.paymentFailedRetry"));
     },
   });
 
@@ -180,10 +191,9 @@ function DonatePage() {
     donateMutation.mutate(payload);
   };
 
-  const campaignTitle = campaign?.title || "Campaign";
+  const campaignTitle = campaign?.title || t("general.campaign");
   const campaignDesc =
-    campaign?.description?.slice(0, 160) ||
-    "Support this campaign and help provide maternal healthcare for vulnerable women in Cameroon.";
+    campaign?.description?.slice(0, 160) || t("donate.metaFallback");
 
   if (isLoading) {
     return (
@@ -203,12 +213,12 @@ function DonatePage() {
         style={{ background: "var(--background)" }}
       >
         <div className="text-center card p-10 max-w-sm">
-          <p className="text-gray-500 mb-4">Campaign not found</p>
+          <p className="text-gray-500 mb-4">{t("donate.campaignNotFound")}</p>
           <button
             onClick={() => router.push("/explore")}
             className="btn-primary"
           >
-            Explore Campaigns
+            {t("donate.exploreCampaigns")}
           </button>
         </div>
       </div>
@@ -219,14 +229,14 @@ function DonatePage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <Helmet>
-        <title>{`Donate to ${campaignTitle} | JoyFund`}</title>
+        <title>{`${t("donate.pageTitle", { title: campaignTitle })} | JoyFund`}</title>
         <meta name="description" content={campaignDesc} />
         <link
           rel="canonical"
           href={`https://joy-fund.com/campaign/${id}/donate`}
         />
         <meta property="og:site_name" content="JoyFund" />
-        <meta property="og:title" content={`Donate to ${campaignTitle}`} />
+        <meta property="og:title" content={t("donate.pageTitle", { title: campaignTitle })} />
         <meta property="og:description" content={campaignDesc} />
         <meta
           property="og:url"
@@ -240,7 +250,7 @@ function DonatePage() {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "DonateAction",
-            name: `Donate to ${campaignTitle}`,
+            name: t("donate.pageTitle", { title: campaignTitle }),
             description: campaignDesc,
             url: `https://joy-fund.com/campaign/${id}/donate`,
             action: {
@@ -287,7 +297,7 @@ function DonatePage() {
                   {campaign.title}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {formatXAF(campaign.total_net_raised || 0)} raised of{" "}
+                  {formatXAF(campaign.total_net_raised || 0)} {t("campaignDetail.raisedOf")}{" "}
                   {formatXAF(campaign.goal_amount || 0)}
                 </p>
               </div>
@@ -312,8 +322,8 @@ function DonatePage() {
                   }`}
                 >
                   {paymentStatus === "success"
-                    ? "✓ Payment Successful!"
-                    : "✗ Payment Failed"}
+                    ? t("donate.paymentSuccessful")
+                    : t("donate.paymentFailed")}
                 </p>
                 <p
                   className={`text-xs mt-1 ${
@@ -323,8 +333,8 @@ function DonatePage() {
                   }`}
                 >
                   {paymentStatus === "success"
-                    ? "Thank you for your donation! Your contribution has been received successfully."
-                    : "Your payment could not be processed. Please try again or use a different payment method."}
+                    ? t("donate.paymentSuccessMsg")
+                    : t("donate.paymentFailedMsg")}
                 </p>
               </div>
               <button
@@ -335,7 +345,7 @@ function DonatePage() {
                     : "text-red-600 hover:bg-red-100"
                 }`}
               >
-                Dismiss
+                {t("donate.dismiss")}
               </button>
             </div>
           )}
@@ -351,23 +361,23 @@ function DonatePage() {
             {/* Donor name */}
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                Your Name *
+                {t("donate.yourName")}
               </label>
               <input
                 {...register("donorName")}
                 className={`input-field ${errors.donorName ? "border-red-500" : ""}`}
-                placeholder="e.g. Jean-Pierre Mbarga"
+                placeholder={t("donate.namePlaceholder")}
                 disabled={isAnonymous}
               />
               {errors.donorName && (
                 <p className="text-red-500 text-[10px] mt-1">
-                  {errors.donorName.message}
+                  {errors.donorName.message && translateKey(errors.donorName.message)}
                 </p>
               )}
               <div className="flex items-center gap-2 mt-2">
                 <input type="checkbox" id="anon" {...register("isAnonymous")} />
                 <label htmlFor="anon" className="text-xs text-gray-500">
-                  Donate anonymously
+                  {t("donate.donateAnonymously")}
                 </label>
               </div>
             </div>
@@ -375,7 +385,7 @@ function DonatePage() {
             {/* Amount */}
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-2 block">
-                Amount (XAF) *
+                {t("donate.amountLabel")}
               </label>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {AMOUNTS.map((a) => (
@@ -412,7 +422,7 @@ function DonatePage() {
                       : {}
                   }
                 >
-                  Custom
+                  {t("donate.custom")}
                 </button>
               </div>
               {useCustom && (
@@ -421,22 +431,23 @@ function DonatePage() {
                   type="number"
                   min={25}
                   step={25}
-                  placeholder="Enter amount in XAF (min 1,000)"
+                  placeholder={t("donate.customPlaceholder")}
                   value={amount}
                   onChange={(e) => setValue("amount", Number(e.target.value))}
                 />
               )}
               {errors.amount && (
                 <p className="text-red-500 text-[10px] mt-1">
-                  {errors.amount.message}
+                  {errors.amount.message && translateKey(errors.amount.message)}
                 </p>
               )}
 
               {amount > 0 && (
                 <p className="text-xs text-emerald-600 font-medium mt-1">
-                  = {Math.round((amount / 60000) * 10) / 10} safe{" "}
-                  {Math.round(amount / 60000) === 1 ? "delivery" : "deliveries"}{" "}
-                  funded
+                  = {Math.round((amount / 60000) * 10) / 10}{" "}
+                  {Math.round(amount / 60000) === 1
+                    ? t("donate.safeDeliveries")
+                    : t("donate.safeDeliveriesPlural")}
                 </p>
               )}
 
@@ -444,12 +455,12 @@ function DonatePage() {
                 <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                      Donation breakdown
+                      {t("donate.donationBreakdown")}
                     </p>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-600">
-                          Payment aggregator fee (2%)
+                          {t("donate.paymentAggregatorFee")}
                         </span>
                         <span className="font-semibold text-slate-900">
                           {formatXAF(paymentAggregatorFee)}
@@ -457,7 +468,7 @@ function DonatePage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-600">
-                          Operation management ({platformFeePct}%)
+                          {t("donate.operationsFee", { pct: platformFeePct })}
                         </span>
                         <span className="font-semibold text-slate-900">
                           {formatXAF(operationsFee)}
@@ -465,7 +476,7 @@ function DonatePage() {
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t border-slate-200">
                         <span className="font-semibold text-slate-700">
-                          Total fees
+                          {t("donate.totalFees")}
                         </span>
                         <span className="font-bold text-slate-900">
                           {formatXAF(totalFees)}
@@ -476,12 +487,12 @@ function DonatePage() {
 
                   <div className="rounded-xl bg-white border border-emerald-100 p-3">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 mb-1">
-                      What your donation really supports
+                      {t("donate.whatSupports")}
                     </p>
                     <div className="flex items-end justify-between gap-4">
                       <div>
                         <p className="text-sm text-slate-600">
-                          Net amount sent to healthcare
+                          {t("donate.netAmount")}
                         </p>
                         <p className="text-2xl font-black text-emerald-700">
                           {formatXAF(netContribution)}
@@ -491,11 +502,11 @@ function DonatePage() {
                         <p className="text-xs text-slate-500">
                           {amount > 0
                             ? Math.round((netContribution / amount) * 100)
-                            : 0}
-                          % of your donation
+                            : 0}{" "}
+                          {t("donate.ofYourDonation")}
                         </p>
                         <p className="text-xs text-slate-500">
-                          {formatXAF(amount)} total donation
+                          {formatXAF(amount)} {t("donate.totalDonation")}
                         </p>
                       </div>
                     </div>
@@ -507,21 +518,23 @@ function DonatePage() {
             {/* Message */}
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                Message{" "}
-                <span className="font-normal text-gray-400">(optional)</span>
+                {t("donate.messageLabel")}{" "}
+                <span className="font-normal text-gray-400">
+                  {t("donate.messageOptional")}
+                </span>
               </label>
               <textarea
                 {...register("message")}
                 className="input-field resize-none"
                 rows={2}
-                placeholder="Wishing you all the best on your special day!"
+                placeholder={t("donate.messagePlaceholder")}
               />
             </div>
 
             {/* Payment method */}
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-2 block">
-                Payment Method *
+                {t("donate.paymentMethod")}
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {PAYMENT_METHODS.map((pm) => (
@@ -541,19 +554,19 @@ function DonatePage() {
                     <div
                       className={`font-bold text-sm ${paymentMethod === pm.id ? "text-white" : "text-gray-900"}`}
                     >
-                      {pm.label}
+                      {translateKey(pm.labelKey)}
                     </div>
                     <div
                       className={`text-xs mt-0.5 ${paymentMethod === pm.id ? "text-white/80" : "text-gray-500"}`}
                     >
-                      {pm.prefix && `Prefixes: ${pm.prefix}`}
+                      {pm.prefix && t("donate.paymentPrefixes", { prefix: pm.prefix })}
                     </div>
                   </button>
                 ))}
               </div>
               {errors.paymentMethod && (
                 <p className="text-red-500 text-[10px] mt-1">
-                  {errors.paymentMethod.message}
+                  {errors.paymentMethod.message && translateKey(errors.paymentMethod.message)}
                 </p>
               )}
             </div>
@@ -562,7 +575,7 @@ function DonatePage() {
             {paymentMethod !== "BANK" && (
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block">
-                Mobile Money Number *
+                {t("donate.mobileMoneyNumber")}
               </label>
               <Controller
                 name="phoneNumber"
@@ -573,8 +586,8 @@ function DonatePage() {
                     defaultCountry="CM"
                     placeholder={
                       paymentMethod === "MTN"
-                        ? "67X XXX XXX (MTN)"
-                        : "69X XXX XXX (Orange)"
+                        ? t("donate.phonePlaceholderMTN")
+                        : t("donate.phonePlaceholderOrange")
                     }
                     className={errors.phoneNumber ? "border-red-500" : ""}
                   />
@@ -582,11 +595,11 @@ function DonatePage() {
               />
               {errors.phoneNumber && (
                 <p className="text-red-500 text-[10px] mt-1">
-                  {errors.phoneNumber.message}
+                  {errors.phoneNumber.message && translateKey(errors.phoneNumber.message)}
                 </p>
               )}
               <p className="text-xs text-gray-400 mt-1">
-                You will receive a payment prompt on this number.
+                {t("donate.phoneHint")}
               </p>
             </div>
             )}
@@ -598,17 +611,19 @@ function DonatePage() {
             >
               {donateMutation.isPending ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" /> Initiating
-                  Payment…
+                  <Loader2 size={16} className="animate-spin" />{" "}
+                  {t("donate.initiatingPayment")}
                 </>
               ) : (
-                `Donate ${formatXAF(amount || 0)}`
+                t("donate.donateAmount", { amount: formatXAF(amount || 0) })
               )}
             </button>
 
             <p className="text-center text-xs text-gray-400 leading-relaxed">
-              2% goes to Campay, {platformFeePct}% to operations (on post-aggregator amount), and {100 - 2 - platformFeePct}%
-              goes to healthcare.
+              {t("donate.feeBreakdown", {
+                pct: platformFeePct,
+                remaining: 100 - 2 - platformFeePct,
+              })}
             </p>
           </form>
         </div>

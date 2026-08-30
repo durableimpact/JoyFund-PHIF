@@ -394,7 +394,7 @@ function TimelineRow({ item }: { item: TimelineItem }) {
         )}
         <div className="flex items-center gap-2 mt-1">
           <time className="text-xs text-gray-400">
-            {new Date(item.date).toLocaleDateString("en-US", {
+            {new Date(item.date).toLocaleDateString(locale, {
               month: "short",
               day: "numeric",
               year: "numeric",
@@ -423,16 +423,16 @@ function TransparencyDialog({
   onOpenChange: (v: boolean) => void;
   timeline: TimelineItem[];
 }) {
+  const t = useI18n();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
           <DialogTitle className="text-lg font-bold text-[#1A1A2E]">
-            Full financial trail
+            {t("campaignDetail.fullTrail")}
           </DialogTitle>
           <DialogDescription>
-            {timeline.length} item{timeline.length !== 1 ? "s" : ""} showing
-            money in and money out
+            {timeline.length} {t("campaignDetail.showingItems")}
           </DialogDescription>
         </DialogHeader>
 
@@ -455,6 +455,7 @@ function TransparencyTimeline({
   donations: Donation[];
   transactions: CampaignTransaction[];
 }) {
+  const t = useI18n();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>("all");
 
@@ -475,8 +476,8 @@ function TransparencyTimeline({
         type: "donation" as const,
         amount: d.net_amount,
         label: d.is_anonymous
-          ? "Anonymous donation"
-          : `${d.donor_name} donated`,
+          ? t("campaignDetail.anonymousDonation")
+          : t("campaignDetail.donorContributed", { name: d.donor_name }),
         description: d.message || null,
         date: d.created_at,
       })),
@@ -498,14 +499,14 @@ function TransparencyTimeline({
       return items.filter((item) => item.type === filterType);
     }
     return items;
-  }, [donations, transactions, filterType]);
+  }, [donations, transactions, filterType, t]);
 
   if (donations.length === 0 && transactions.length === 0) {
     return (
       <div className="bg-gray-50 rounded-3xl p-14 text-center border-2 border-dashed border-gray-200">
         <History className="mx-auto mb-4 text-gray-300 w-10 h-10" />
         <p className="text-gray-500 font-medium text-sm">
-          No activity recorded yet.
+          {t("campaignDetail.noActivity")}
         </p>
       </div>
     );
@@ -538,7 +539,7 @@ function TransparencyTimeline({
       <div className="space-y-0">
         {timeline.length === 0 ? (
           <div className="py-8 text-center text-sm text-gray-500 italic">
-            No items match this filter.
+            {t("campaignDetail.noItemsMatch")}
           </div>
         ) : (
           inline.map((item) => <TimelineRow key={item.id} item={item} />)
@@ -550,7 +551,10 @@ function TransparencyTimeline({
           className="w-full text-xs text-gray-500 font-semibold py-3 hover:text-[#1DB1DB] transition-colors flex items-center justify-center gap-1 rounded-xl hover:bg-gray-50 mt-2"
           onClick={() => setDialogOpen(true)}
         >
-          See all {timeline.length} items ({remaining} more)
+          {t("campaignDetail.seeAll", {
+            count: timeline.length,
+            remaining,
+          })}
           <ChevronRight className="w-3 h-3" />
         </button>
       )}
@@ -565,7 +569,7 @@ function TransparencyTimeline({
 }
 
 export default function CampaignDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id, locale } = useParams<{ id: string; locale: string }>();
   const router = useRouter();
   const t = useI18n();
   const [copied, setCopied] = useState(false);
@@ -709,13 +713,15 @@ export default function CampaignDetailPage() {
   const voucherFundings = campaign.voucher_fundings || [];
   const transactions = campaign.transactions || [];
   const organizerName =
-    campaign.organizer_name || campaign.donor_name || "Campaign Organizer";
+    campaign.organizer_name ||
+    campaign.donor_name ||
+    t("campaignDetail.campaignOrganizer");
   const organizerInitial = organizerName.charAt(0).toUpperCase();
 
-  const campaignTitle = campaign.title || "Campaign";
+  const campaignTitle = campaign.title || t("general.campaign");
   const campaignDesc =
     campaign.description?.slice(0, 160) ||
-    `Support "${campaignTitle}" on JoyFund — help provide maternal healthcare for vulnerable women in Cameroon.`;
+    t("campaignDetail.metaDescriptionFallback", { title: campaignTitle });
 
   return (
     <div className="min-h-screen bg-white">
@@ -780,7 +786,7 @@ export default function CampaignDetailPage() {
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="bg-[#1DB1DB]/10 text-[#1DB1DB] border-none rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
-                {campaign.event_type || "Social Impact"}
+                {campaign.event_type || t("campaignDetail.socialImpact")}
               </Badge>
               {campaign.supports_specific_person && (
                 <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
@@ -863,11 +869,11 @@ export default function CampaignDetailPage() {
                     </div>
                     <div>
                       <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                        Started
+                        {t("campaignDetail.started")}
                       </p>
                       <p className="text-sm font-bold text-[#1A1A2E]">
                         {new Date(campaign.created_at).toLocaleDateString(
-                          "en-US",
+                          locale,
                           { month: "long", day: "numeric", year: "numeric" },
                         )}
                       </p>
@@ -879,10 +885,11 @@ export default function CampaignDetailPage() {
                     </div>
                     <div>
                       <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                        Category
+                        {t("campaignDetail.category")}
                       </p>
                       <p className="text-sm font-bold text-[#1A1A2E] capitalize">
-                        {campaign.event_type?.toLowerCase() || "General"}
+                        {campaign.event_type?.toLowerCase() ||
+                          t("campaignDetail.generalCategory")}
                       </p>
                     </div>
                   </div>
@@ -893,11 +900,11 @@ export default function CampaignDetailPage() {
                       </div>
                       <div>
                         <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                          Ends
+                          {t("campaignDetail.ends")}
                         </p>
                         <p className="text-sm font-bold text-[#1A1A2E]">
                           {new Date(campaign.end_date).toLocaleDateString(
-                            "en-US",
+                            locale,
                             { month: "long", day: "numeric", year: "numeric" },
                           )}
                         </p>
@@ -916,14 +923,14 @@ export default function CampaignDetailPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-bold text-[#1A1A2E] font-heading">
-                        Vouchers Funded
+                        {t("campaignDetail.vouchersFunded")}
                       </h2>
                       <p className="text-sm text-gray-500 mt-1">
-                        Real-time tracking of how your donations help.
+                        {t("campaignDetail.vouchersFundedDesc")}
                       </p>
                     </div>
                     <Badge className="bg-[#1DB1DB]/10 text-[#1DB1DB] rounded-full px-3 py-1 text-xs font-bold">
-                      {voucherFundings.length} total
+                      {voucherFundings.length} {t("campaignDetail.total")}
                     </Badge>
                   </div>
 
@@ -941,14 +948,14 @@ export default function CampaignDetailPage() {
                             <p className="font-bold text-[#1A1A2E] text-sm truncate">
                               {funding.beneficiary_name ||
                                 funding.voucher?.beneficiary?.full_name ||
-                                "Vulnerable Beneficiary"}
+                                t("campaignDetail.vulnerableBeneficiary")}
                             </p>
                             <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5">
                               <span className="text-xs text-gray-500 flex items-center gap-1">
                                 <Building2 size={11} />{" "}
                                 {funding.hospital_name ||
                                   funding.voucher?.hospital?.name ||
-                                  "Local Facility"}
+                                  t("campaignDetail.localFacility")}
                               </span>
                               <span className="text-xs text-gray-400 flex items-center gap-1">
                                 <CreditCard size={11} />{" "}
@@ -976,7 +983,7 @@ export default function CampaignDetailPage() {
                             >
                               {funding.status ||
                                 funding.voucher?.status ||
-                                "Allocated"}
+                                t("campaignDetail.allocated")}
                             </Badge>
                           </div>
                         </div>
@@ -986,8 +993,7 @@ export default function CampaignDetailPage() {
                     <div className="bg-gray-50 rounded-3xl p-14 text-center border-2 border-dashed border-gray-200">
                       <HandHeart className="mx-auto mb-4 text-gray-300 w-10 h-10" />
                       <p className="text-gray-500 font-medium text-sm">
-                        No vouchers funded yet. Donations will appear here as
-                        they are allocated.
+                        {t("campaignDetail.noVouchersYet")}
                       </p>
                     </div>
                   )}
@@ -1002,10 +1008,10 @@ export default function CampaignDetailPage() {
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-xl font-bold text-[#1A1A2E] font-heading">
-                      Financial Transparency
+                      {t("campaignDetail.financialTransparency")}
                     </h2>
                     <p className="text-sm text-gray-500 mt-1">
-                      Complete trail of money in and money out.
+                      {t("campaignDetail.financialTransparencyDesc")}
                     </p>
                   </div>
 
@@ -1029,11 +1035,11 @@ export default function CampaignDetailPage() {
                     {formatXAF(raisedXAF)}
                   </p>
                   <p className="text-sm text-gray-500 font-medium">
-                    raised of{" "}
+                    {t("campaignDetail.raisedOf")}{" "}
                     <span className="font-bold text-[#1A1A2E]">
                       {formatXAF(goalXAF)}
                     </span>{" "}
-                    goal
+                    {t("campaignDetail.goal")}
                   </p>
 
                   {/* Progress bar */}
@@ -1047,13 +1053,17 @@ export default function CampaignDetailPage() {
                   {/* Stats row */}
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-bold text-[#1A1A2E]">
-                      {progressPct.toFixed(2)}% funded
+                      {progressPct.toFixed(2)}% {t("campaignDetail.funded")}
                     </span>
                     <span className="text-gray-500">
                       <span className="font-bold text-[#1A1A2E]">
                         {donations.length}
                       </span>{" "}
-                      donor{donations.length !== 1 ? "s" : ""}
+                      {t(
+                        donations.length === 1
+                          ? "campaignDetail.donors"
+                          : "campaignDetail.donorsPlural",
+                      )}
                     </span>
                   </div>
                 </div>
@@ -1085,13 +1095,13 @@ export default function CampaignDetailPage() {
                       )}
                     </PopoverTrigger>
                     <PopoverContent align="start" sideOffset={8} className="w-64 p-3">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Share via</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("campaignDetail.shareVia")}</p>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { label: "Facebook", src: "fb", color: "bg-blue-600", url: "https://www.facebook.com/sharer/sharer.php?u=" },
-                          { label: "Twitter / X", src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?url=&text=" },
-                          { label: "WhatsApp", src: "whatsapp", color: "bg-green-500", url: "https://wa.me/?text=" },
-                          { label: "LinkedIn", src: "linkedin", color: "bg-blue-700", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
+                          { label: t("dashboard.donor.shareFacebook"), src: "fb", color: "bg-blue-600", url: "https://www.facebook.com/sharer/sharer.php?u=" },
+                          { label: t("dashboard.donor.shareTwitter"), src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?url=&text=" },
+                          { label: t("dashboard.donor.shareWhatsApp"), src: "whatsapp", color: "bg-green-500", url: "https://wa.me/?text=" },
+                          { label: t("dashboard.donor.shareLinkedIn"), src: "linkedin", color: "bg-blue-700", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
                         ].map((s) => (
                           <a
                             key={s.src}
@@ -1113,7 +1123,7 @@ export default function CampaignDetailPage() {
                         }}
                         className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200 transition-colors mt-2"
                       >
-                        <Copy size={12} /> Copy Link
+                        <Copy size={12} /> {t("dashboard.donor.copyLink")}
                       </button>
                     </PopoverContent>
                   </Popover>
@@ -1208,15 +1218,15 @@ export default function CampaignDetailPage() {
             <div className="flex items-center justify-center gap-6 py-2">
               <div className="flex items-center gap-1.5 text-xs text-gray-400">
                 <ShieldCheck className="w-4 h-4" />
-                <span className="font-medium">Secure</span>
+                <span className="font-medium">{t("campaignDetail.secure")}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-gray-400">
                 <CircleDollarSign className="w-4 h-4" />
-                <span className="font-medium">100% to cause</span>
+                <span className="font-medium">{t("campaignDetail.toCause")}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-gray-400">
                 <HandHeart className="w-4 h-4" />
-                <span className="font-medium">Verified</span>
+                <span className="font-medium">{t("campaignDetail.verified")}</span>
               </div>
             </div>
           </div>
