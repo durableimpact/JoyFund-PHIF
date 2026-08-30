@@ -101,14 +101,14 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* ════════════════════════════════════════════════════════════════
-          HERO — redesigned to match the reference layout:
+          HERO - redesigned to match the reference layout:
           full-bleed photo, dark-left gradient, left-aligned copy block,
           curved white base, small "Durable Impact initiative" tag.
           ════════════════════════════════════════════════════════════════ */}
       <section className="relative h-[620px] sm:h-[680px] lg:h-[720px] flex flex-col overflow-hidden">
         <Image
           src="/assets/images/about-us-joyfund-image.jpeg"
-          alt="JoyFund team — local generosity organised for maternal and newborn health"
+          alt="JoyFund team - local generosity organised for maternal and newborn health"
           fill
           priority
           className="object-cover"
@@ -442,7 +442,7 @@ export default function AboutPage() {
             <div className="my-10 rounded-3xl overflow-hidden relative h-64 sm:h-72">
               <Image
                 src="/assets/images/why-we-evolved-pic.jpg"
-                alt="Your Joy Saves Lives — JoyFund community moment"
+                alt="Your Joy Saves Lives - JoyFund community moment"
                 fill
                 className="object-cover"
               />
@@ -516,7 +516,7 @@ export default function AboutPage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          04 - OUR PHILOSOPHY — FROM RESEARCH TO PRACTICE
+          04 - OUR PHILOSOPHY - FROM RESEARCH TO PRACTICE
           ════════════════════════════════════════════════════════════════ */}
       <section id="our-philosophy" className="py-20 px-4" style={{ background: "#F3F9F9" }}>
         <div className="max-w-4xl mx-auto">
@@ -593,7 +593,7 @@ export default function AboutPage() {
             <div className="my-10 rounded-3xl overflow-hidden relative h-64 sm:h-80 bg-white shadow-sm">
               <Image
                 src="/assets/images/our-philosophy-pic-2.png"
-                alt="JoyFund Health Financing Model — local philanthropy within a shared health-financing ecosystem"
+                alt="JoyFund Health Financing Model - local philanthropy within a shared health-financing ecosystem"
                 fill
                 className="object-contain p-2"
               />
@@ -771,7 +771,7 @@ export default function AboutPage() {
             ))}
           </div>
 
-          {/* The JoyFund Cycle — five-stage infographic + supporting copy */}
+          {/* The JoyFund Cycle - five-stage infographic + supporting copy */}
           <Reveal delay={80}>
             <div className="mt-20 text-center">
               <h3 className="text-xl sm:text-2xl font-black text-[#1A1A2E] mb-4">
@@ -787,7 +787,7 @@ export default function AboutPage() {
             <div className="rounded-3xl overflow-hidden relative w-full aspect-[3/2] sm:aspect-[16/10] bg-[#F9FAFB] shadow-sm">
               <Image
                 src="/assets/images/our-approach-pic.jpg"
-                alt="The JoyFund Cycle — from celebration to care and back to community"
+                alt="The JoyFund Cycle - from celebration to care and back to community"
                 fill
                 className="object-contain"
               />
