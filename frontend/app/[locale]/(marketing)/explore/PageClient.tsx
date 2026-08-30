@@ -10,11 +10,11 @@ import { useI18n } from "@/locales/client";
 // Display labels for event types
 const getEventLabels = (t: any) => [
   { value: "All", label: t("explore.allTypes") },
-  { value: "BIRTHDAY", label: "Birthday" },
-  { value: "WEDDING", label: "Wedding" },
-  { value: "GRADUATION", label: "Graduation" },
-  { value: "PROMOTION", label: "Promotion" },
-  { value: "MEMORIAL", label: "Memorial" },
+  { value: "BIRTHDAY", label: t("donor.campaigns.create.eventType.birthday") },
+  { value: "WEDDING", label: t("donor.campaigns.create.eventType.wedding") },
+  { value: "GRADUATION", label: t("donor.campaigns.create.eventType.graduation") },
+  { value: "PROMOTION", label: t("donor.campaigns.create.eventType.promotion") },
+  { value: "MEMORIAL", label: t("donor.campaigns.create.eventType.memorial") },
 ];
 
 export default function ExplorePage() {

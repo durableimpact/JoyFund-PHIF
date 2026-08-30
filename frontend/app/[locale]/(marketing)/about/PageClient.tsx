@@ -969,7 +969,7 @@ export default function AboutPage() {
             <div className="relative rounded-3xl overflow-hidden h-48 sm:h-56 flex items-center">
               <Image
                 src="/assets/images/elderly-hospital-image-gemini.webp"
-                alt="Donors supporting a JoyFund campaign"
+                alt="Community members supporting maternal and newborn care through JoyFund"
                 fill
                 className="object-cover"
               />
@@ -995,7 +995,7 @@ export default function AboutPage() {
             <div className="relative rounded-3xl overflow-hidden h-48 sm:h-56 flex items-center">
               <Image
                 src="https://images.unsplash.com/photo-1584515933487-779824d29309?w=1200&auto=format&fit=crop"
-                alt="Person celebrating a milestone"
+                alt="A celebration turned into support for a mother and newborn"
                 fill
                 className="object-cover"
               />
@@ -1029,12 +1029,12 @@ export default function AboutPage() {
         <div className="max-w-2xl mx-auto text-center">
           <Reveal>
             <h2 className="text-3xl font-black text-white mb-4">
-              Your celebration could save a life
+              {t("cta.title")}
             </h2>
           </Reveal>
           <Reveal delay={110}>
             <p className="text-white/80 mb-8">
-              It takes 2 minutes to create a JoyFund. Your network does the rest.
+              {t("cta.subtitle")}
             </p>
           </Reveal>
           <Reveal delay={220}>
@@ -1043,7 +1043,7 @@ export default function AboutPage() {
               className="inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-full hover:opacity-90 transition-all"
               style={{ color: "var(--secondary)" }}
             >
-              Start Your JoyFund <Heart size={18} className="fill-current" />
+              {t("cta.button")} <Heart size={18} className="fill-current" />
             </Link>
           </Reveal>
         </div>

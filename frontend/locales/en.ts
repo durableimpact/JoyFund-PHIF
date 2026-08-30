@@ -765,6 +765,18 @@ export default {
   'campaignDetail.toCause': '100% to cause',
   'campaignDetail.verified': 'Verified',
   'campaignDetail.socialImpact': 'Social Impact',
+  'campaignDetail.justNow': 'Just now',
+  'campaignDetail.noDonorsYet': 'No donors yet',
+  'campaignDetail.donorsContributed': '{count} donor(s) have contributed to {campaign}',
+  'campaignDetail.donorContributed': '{name} contributed',
+  'campaignDetail.supportingSomeone': 'Supporting someone',
+  'campaignDetail.metaDescriptionFallback': 'Support "{title}" on JoyFund — help provide maternal healthcare for vulnerable women in Cameroon.',
+  'campaignDetail.campaignOrganizer': 'Campaign Organizer',
+  'campaignDetail.generalCategory': 'General',
+  'campaignDetail.vulnerableBeneficiary': 'Vulnerable Beneficiary',
+  'campaignDetail.localFacility': 'Local Facility',
+  'campaignDetail.allocated': 'Allocated',
+  'campaignDetail.shareVia': 'Share via',
 
   // Donate
   'donate.back': 'Back',
@@ -3421,10 +3433,10 @@ export default {
   'seo.home.description': "Turn your birthday or wedding into a digital community health fund. JoyFund is Cameroon's trusted platform to fund safe deliveries and maternal healthcare.",
 
   'seo.about.title': 'About JoyFund',
-  'seo.about.description': "JoyFund turns Cameroon's culture of celebration and community mutual aid into a transparent People's Health Fund for vulnerable mothers and elderly people.",
+  'seo.about.description': 'Learn how JoyFund organises community philanthropy into verified maternal and newborn health support - helping vulnerable women and their newborns overcome financial and last-mile barriers to essential care in Cameroon.',
 
   'seo.explore.title': 'Explore Campaigns',
-  'seo.explore.description': 'Browse active campaigns and fund a safe delivery in Cameroon today. 100% transparent donations via MTN MoMo and Orange Money.',
+  'seo.explore.description': 'Browse active campaigns and support verified maternal and newborn care in Cameroon - transparent giving via MTN MoMo and Orange Money.',
 
   'seo.pricing.title': 'Pricing & Fees',
   'seo.pricing.description': 'Understand how JoyFund fees work. See exactly where your donation goes - transparent pricing for maternal healthcare crowdfunding in Cameroon.',

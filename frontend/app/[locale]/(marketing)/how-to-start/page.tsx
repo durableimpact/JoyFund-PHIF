@@ -26,7 +26,7 @@ const jsonLd = {
   '@type': 'HowTo',
   name: 'How JoyFund Works',
   description:
-    'Learn how JoyFund turns birthdays, weddings, and celebrations into healthcare relief for vulnerable mothers in Cameroon. Simple steps to launch your campaign.',
+    'Learn how JoyFund organises local philanthropy into verified support for maternal and newborn health. Simple steps to turn a celebration - a birthday, wedding, graduation or promotion - into care for a mother and newborn in need.',
   author: {
     '@type': 'Organization',
     name: 'JoyFund',
@@ -47,38 +47,38 @@ const jsonLd = {
     {
       '@type': 'HowToStep',
       position: 1,
-      name: 'Select your occasion',
-      text: 'Choose what you are celebrating - a birthday, wedding, graduation, promotion, or memorial.',
+      name: 'Select your celebration',
+      text: 'Choose the milestone you are honouring - a birthday, wedding, graduation, promotion, or memorial.',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Tell your story',
-      text: 'Add a cover photo, name your campaign, and describe why you are fundraising.',
+      text: 'Add a cover photo, name your JoyFund, and describe how the support you mobilise will help a mother and newborn access essential care.',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Set your goal',
-      text: 'Choose your fundraising target and pick an end date for your campaign.',
+      text: 'Choose a giving target and pick an end date for your JoyFund.',
     },
     {
       '@type': 'HowToStep',
       position: 4,
-      name: 'Preview your campaign',
+      name: 'Preview your JoyFund',
       text: 'Review everything before it goes live - you can still make changes at this stage.',
     },
     {
       '@type': 'HowToStep',
       position: 5,
       name: 'Publish with a starting contribution',
-      text: 'To publish your campaign, donate at least 10% of your goal yourself.',
+      text: 'To publish your JoyFund, contribute at least 10% of your goal yourself.',
     },
     {
       '@type': 'HowToStep',
       position: 6,
-      name: 'Share your campaign',
-      text: 'Share your campaign URL with friends, family, and your community.',
+      name: 'Share your JoyFund',
+      text: 'Share your JoyFund link with friends, family, and your community.',
     },
   ],
 }

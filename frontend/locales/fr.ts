@@ -765,6 +765,18 @@ export default {
   'campaignDetail.toCause': '100% à la cause',
   'campaignDetail.verified': 'Vérifié',
   'campaignDetail.socialImpact': 'Impact social',
+  'campaignDetail.justNow': 'À l\'instant',
+  'campaignDetail.noDonorsYet': 'Aucun donateur pour l\'instant',
+  'campaignDetail.donorsContributed': '{count} donateur(s) ont contribué à {campaign}',
+  'campaignDetail.donorContributed': '{name} a contribué',
+  'campaignDetail.supportingSomeone': 'Soutient quelqu\'un',
+  'campaignDetail.metaDescriptionFallback': 'Soutenez « {title} » sur JoyFund — aidez à fournir des soins de santé maternelle aux femmes vulnérables au Cameroun.',
+  'campaignDetail.campaignOrganizer': 'Organisateur de la campagne',
+  'campaignDetail.generalCategory': 'Général',
+  'campaignDetail.vulnerableBeneficiary': 'Bénéficiaire vulnérable',
+  'campaignDetail.localFacility': 'Établissement local',
+  'campaignDetail.allocated': 'Alloué',
+  'campaignDetail.shareVia': 'Partager via',
 
   // Donate
   'donate.back': 'Retour',
@@ -3230,10 +3242,10 @@ export default {
   'seo.home.description': "Transformez votre anniversaire ou mariage en une fondation communautaire de santé numérique. JoyFund est la plateforme de confiance du Cameroun pour financer les accouchements sûrs et les soins de santé maternelle.",
 
   'seo.about.title': 'À propos de JoyFund',
-  'seo.about.description': "JoyFund transforme la culture de célébration et d'entraide communautaire du Cameroun en un Fonds Populaire de Santé transparent pour les mères vulnérables et les personnes âgées.",
+  'seo.about.description': 'Découvrez comment JoyFund organise la philanthropie communautaire en un soutien vérifié pour la santé maternelle et néonatale - en aidant les femmes vulnérables et leurs nouveau-nés à surmonter les obstacles financiers et de dernière ligne pour accéder aux soins essentiels au Cameroun.',
 
   'seo.explore.title': 'Explorer les campagnes',
-  'seo.explore.description': "Parcourez les campagnes actives et financez un accouchement sûr au Cameroun aujourd'hui. Dons 100% transparents via MTN MoMo et Orange Money.",
+  'seo.explore.description': 'Parcourez les campagnes actives et soutenez les soins maternels et néonatals vérifiés au Cameroun - dons transparents via MTN MoMo et Orange Money.',
 
   'seo.pricing.title': 'Tarifs & Frais',
   'seo.pricing.description': "Comprenez comment fonctionnent les frais de JoyFund. Voyez exactement où va votre don - tarification transparente pour le financement participatif de santé maternelle au Cameroun.",
