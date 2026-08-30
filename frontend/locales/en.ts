@@ -661,7 +661,7 @@ export default {
   'about.researchP1': 'Can the trust, relationships, networks, generosity and resources already present within communities be organised into a transparent and accountable mechanism that helps remove barriers to essential maternal and newborn care? JoyFund is testing that proposition in practice.',
   'about.researchClosing': 'The ambition extends beyond mobilising donations. It is to demonstrate what becomes possible when communities are recognised not only for what they need, but also for the power they already possess.',
 
-  // About - Our Approach
+  // About - Our Approach 
   'about.approachKicker': 'Our Approach',
   'about.approachTitle': 'A practical model for community-powered maternal and newborn health',
   'about.approachLead': 'JoyFund combines celebration, community mobilisation, verification and direct provider payment into a single, transparent flow.',

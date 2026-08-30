@@ -28,7 +28,7 @@ export default {
   'nav.aboutMenu6': 'Qui Nous Sommes',
   'nav.aboutVision': 'Notre Vision',
 
-  // Footer
+  // Footer 
   'footer.tagline': 'Votre Joie Sauve des Vies - une plateforme de financement participatif transparente qui transforme les célébrations en soins de santé maternelle à travers le Cameroun.',
   'footer.about': 'À propos de JoyFund',
   'footer.privacy': 'Politique de confidentialité',
