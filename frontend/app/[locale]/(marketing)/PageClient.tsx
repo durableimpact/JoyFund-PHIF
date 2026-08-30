@@ -154,7 +154,7 @@ export default function HomePage() {
     src="/assets/images/joyfund-hero-image.png"
     alt=""
     aria-hidden
-    className="absolute bottom-0 left-0 right-0 h-[90%] w-full object-cover object-bottom scale-[1.1] sm:scale-[1.15] md:scale-[1.2] origin-bottom lg:scale-100 lg:object-contain lg:object-right-bottom lg:origin-bottom-right"
+    className="absolute bottom-0 left-0 right-0 h-[90%] w-full object-cover object-bottom scale-[1.1] sm:scale-[1.15] md:scale-[1.2] origin-bottom lg:scale-100 lg:object-contain lg:object-right-bottom lg:origin-bottom-right lg:translate-x-32"
     style={{
       filter: "brightness(1.2) saturate(1.05)",
     }}
