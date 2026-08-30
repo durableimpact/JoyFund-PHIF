@@ -38,37 +38,13 @@ const featureKeys = [
   "diaspora", "hospital", "pooling", "reach", "partnerships",
 ] as const;
 
-const whyJoyFundFeatures = [
-  {
-    title: "Built on Local Philanthropy",
-    description:
-      "JoyFund transforms everyday giving and moments of celebration into organised support for vulnerable mothers and newborns.",
-  },
-  {
-    title: "Verified Support",
-    description:
-      "Women seeking support are screened against defined eligibility criteria, with healthcare needs verified through participating health facilities.",
-  },
-  {
-    title: "Direct-to-Provider Payments",
-    description:
-      "Where healthcare costs are supported, funds are paid directly to participating providers rather than handed to beneficiaries.",
-  },
-  {
-    title: "Transparent & Traceable",
-    description:
-      "Contributions, approved support and payments are digitally documented to strengthen accountability from giving to care.",
-  },
-  {
-    title: "Community-Focused",
-    description:
-      "JoyFund addresses not only healthcare costs, but verified last-mile barriers such as transportation to care and referral facilities.",
-  },
-  {
-    title: "Targeted Support",
-    description:
-      "JoyFund targets verified gaps that can remain even where public maternal and newborn health programmes already exist.",
-  },
+const whyJoyFundFeatureKeys = [
+  "philanthropy",
+  "verified",
+  "provider",
+  "transparent",
+  "community",
+  "targeted",
 ] as const;
 
 const testimonialData = [
@@ -387,14 +363,14 @@ export default function HomePage() {
           */}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {whyJoyFundFeatures.map((feature, index) => (
-              <Reveal key={feature.title} delay={index * 80}>
+            {whyJoyFundFeatureKeys.map((key, index) => (
+              <Reveal key={key} delay={index * 80}>
                 <div className="flex flex-col gap-4 p-6 border border-gray-200 bg-white">
                   <div className="bg-[#cfe1c9] px-4 py-3 text-center font-black text-[#111827] text-base leading-snug">
-                    {feature.title}
+                    {t(`why.${key}.title`)}
                   </div>
                   <p className="text-gray-700 text-sm leading-relaxed text-left">
-                    {feature.description}
+                    {t(`why.${key}.desc`)}
                   </p>
                 </div>
               </Reveal>

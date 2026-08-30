@@ -93,6 +93,20 @@ export default {
   'features.partnerships.title': 'Trusted Partnerships',
   'features.partnerships.desc': 'Backed by formal agreements with hospitals, clinics and community structures across Cameroon.',
 
+  // Homepage - Why JoyFund
+  'why.philanthropy.title': 'Built on Local Philanthropy',
+  'why.philanthropy.desc': 'JoyFund transforms everyday giving and moments of celebration into organised support for vulnerable mothers and newborns.',
+  'why.verified.title': 'Verified Support',
+  'why.verified.desc': 'Women seeking support are screened against defined eligibility criteria, with healthcare needs verified through participating health facilities.',
+  'why.provider.title': 'Direct-to-Provider Payments',
+  'why.provider.desc': 'Where healthcare costs are supported, funds are paid directly to participating providers rather than handed to participants.',
+  'why.transparent.title': 'Transparent & Traceable',
+  'why.transparent.desc': 'Contributions, approved support and payments are digitally documented to strengthen accountability from giving to care.',
+  'why.community.title': 'Community-Focused',
+  'why.community.desc': 'JoyFund addresses not only healthcare costs, but verified last-mile barriers such as transportation to care and referral facilities.',
+  'why.targeted.title': 'Targeted Support',
+  'why.targeted.desc': 'JoyFund targets verified gaps that can remain even where public maternal and newborn health programmes already exist.',
+
   // Homepage - Testimonials
   'testimonials.title': 'Real Stories, Real Impact',
   'testimonials.birthday': 'Birthday Donor',
