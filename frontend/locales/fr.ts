@@ -29,7 +29,7 @@ export default {
   'nav.aboutVision': 'Notre Vision',
 
   // Footer 
-  'footer.tagline': 'Votre Joie Sauve des Vies - une plateforme de financement participatif transparente qui transforme les célébrations en soins de santé maternelle à travers le Cameroun.',
+  'footer.tagline': 'Votre Joie Sauve des Vies - une plateforme de financement de la santé maternelle et néonatale portée par la communauté, qui mobilise la philanthropie locale pour aider les femmes et les nouveau-nés vulnérables à accéder aux soins essentiels à travers le Cameroun.',
   'footer.about': 'À propos de JoyFund',
   'footer.privacy': 'Politique de confidentialité',
   'footer.terms': 'Conditions d\'utilisation',
@@ -110,15 +110,15 @@ export default {
   // Model section
   'model.label': 'Notre Modèle',
   'model.title': 'De l\'argent de célébration à un Fonds de Santé Populaire',
-  'model.desc1': 'Les Camerounais ont toujours mutualisé leurs ressources à travers des groupes de pooling communautaire et les dons des anciens. JoyFund apporte ce même esprit en ligne - canalisant les contributions de célébration des amis, de la famille et de la diaspora vers un fonds commun qui paie directement les factures d\'hôpital.',
-  'model.desc2': 'Les bénéficiaires sont des femmes enceintes vulnérables, des mères indigentes et des personnes âgées identifiées par des travailleurs sociaux et vérifiées par nos hôpitaux partenaires. Pas d\'argent liquide - chaque contribution devient un bon de soins échangeable, et chaque bon est suivi du don à l\'accouchement.',
+  'model.desc1': 'Les Camerounais ont toujours mutualisé leurs ressources à travers des groupes de pooling communautaire et les dons des anciens. JoyFund apporte ce même esprit en ligne - canalisant les contributions de célébration des amis, de la famille et de la diaspora vers un fonds commun qui relie les mères et les nouveau-nés vulnérables aux soins essentiels.',
+  'model.desc2': 'Nous nous concentrons principalement sur les femmes enceintes à faible revenu et vulnérables et leurs nouveau-nés, de la grossesse aux 42 premiers jours après la naissance. Les participantes sont sélectionnées par des travailleurs sociaux selon des critères d\'éligibilité, et les besoins sont vérifiés via les structures de santé participantes. Pas d\'argent liquide - lorsque les soins sont soutenus, les fonds sont versés directement aux prestataires, et chaque étape est suivie du don aux soins.',
   'model.badge.momo': 'MTN MoMo & Orange Money',
   'model.badge.vouchers': 'Bons de soins vérifiés',
   'model.badge.transparency': 'Transparence en temps réel',
-  'model.card.verified': 'Bénéficiaires vérifiés',
-  'model.card.verifiedDesc': 'Examinés par des travailleurs sociaux et des hôpitaux partenaires',
-  'model.card.hospital': 'Paiement direct à l\'hôpital',
-  'model.card.hospitalDesc': 'Bons payés directement aux factures médicales',
+  'model.card.verified': 'Soutien vérifié',
+  'model.card.verifiedDesc': 'Examinés par des travailleurs sociaux et des structures partenaires',
+  'model.card.hospital': 'Paiement direct au prestataire',
+  'model.card.hospitalDesc': 'Fonds versés directement aux prestataires - jamais en espèces',
   'model.card.diaspora': 'Prêt pour la diaspora',
   'model.card.diasporaDesc': 'Donnez au Cameroun depuis n\'importe où dans le monde',
   'model.card.impact': 'Rapports d\'impact publics',
@@ -126,19 +126,19 @@ export default {
 
   // Homepage - FAQ
   'faq.title': 'Questions fréquentes',
-  'faq.subtitle': 'Tout ce que vous devez savoir sur la transformation de votre célébration en accouchement sûr pour quelqu\'un.',
+  'faq.subtitle': 'Tout ce que vous devez savoir pour transformer votre célébration en soins sûrs et soutenus pour une mère.',
   'faq.what.q': 'Qu\'est-ce que JoyFund ?',
-  'faq.what.a': 'JoyFund est une plateforme de mutualisation communautaire - un système qui transforme les célébrations quotidiennes comme les anniversaires, mariages, remises de diplômes et promotions en un fonds commun qui finance les accouchements sûrs et les soins d\'urgence pour les femmes enceintes vulnérables et les personnes âgées à travers le Cameroun.',
-  'faq.how.q': 'Comment les dons atteignent-ils les bénéficiaires ?',
-  'faq.how.a': 'Les contributions sont mutualisées dans JoyFund et converties en bons de soins. Ces bons sont échangés directement dans les hôpitaux partenaires, donc les fonds vont directement aux factures médicales - jamais en espèces à un individu.',
-  'faq.donate.q': 'Comment faire un don ?',
-  'faq.donate.a': 'Vous pouvez contribuer à n\'importe quelle campagne JoyFund via MTN Mobile Money, Orange Money ou virement bancaire. Tout le processus prend moins d\'une minute sur votre téléphone.',
+  'faq.what.a': 'JoyFund est une plateforme de financement de la santé maternelle et néonatale portée par la communauté. Elle organise la générosité qui existe déjà à travers le Cameroun - familles, associations d\'anciens, églises, groupes njangi, entreprises et réseaux de la diaspora - en un fonds transparent et vérifié qui aide les femmes enceintes et les nouveau-nés vulnérables à surmonter les obstacles financiers et de dernière ligne pour accéder aux soins essentiels, de la grossesse aux 42 premiers jours après la naissance.',
+  'faq.how.q': 'Comment les contributions atteignent-elles les soins ?',
+  'faq.how.a': 'Les besoins sont identifiés et vérifiés dans les structures de santé participantes. Lorsque les soins sont soutenus, les fonds sont versés directement aux prestataires - jamais en espèces à un individu - et chaque contribution, vérification et paiement est documenté numériquement, du don aux soins.',
+  'faq.donate.q': 'Comment faire une contribution ?',
+  'faq.donate.a': 'Vous pouvez donner à n\'importe quel JoyFund via MTN Mobile Money, Orange Money ou virement bancaire. Tout le processus prend moins d\'une minute sur votre téléphone.',
   'faq.eligible.q': 'Qui est éligible pour recevoir de l\'aide ?',
-  'faq.eligible.a': 'Les bénéficiaires sont des femmes enceintes vulnérables, des mères indigentes et des personnes âgées identifiées et vérifiées par des travailleurs sociaux en partenariat avec notre réseau d\'hôpitaux et de structures communautaires.',
+  'faq.eligible.a': 'Le soutien se concentre principalement sur les femmes enceintes à faible revenu et vulnérables et leurs nouveau-nés, de la grossesse aux 42 premiers jours après la naissance. Les participantes sont sélectionnées par des travailleurs sociaux selon des critères d\'éligibilité définis, et les besoins sont vérifiés via les structures de santé participantes.',
   'faq.transparent.q': 'JoyFund est-il transparent ?',
-  'faq.transparent.a': 'Oui. Chaque don et chaque bon est suivi en temps réel sur notre tableau de bord de transparence, et nous publions régulièrement des rapports d\'impact publics afin que les donateurs puissent voir exactement comment leur célébration a créé du changement.',
+  'faq.transparent.a': 'Oui. Chaque contribution, soutien approuvé et paiement est documenté et traçable numériquement, et nous publions des rapports publics afin que les participantes, les donateurs et les partenaires puissent voir exactement comment le don local a créé du changement.',
   'faq.goal.q': 'Que se passe-t-il si je n\'atteins pas mon objectif ?',
-  'faq.goal.a': 'Chaque contribution va toujours dans le fonds de santé commun et aide un bénéficiaire - il n\'y a pas d\'exigence de tout-ou-rien. Votre célébration crée un impact quel que soit le total final.',
+  'faq.goal.a': 'Chaque contribution va toujours dans le fonds commun et aide aux soins d\'une participante - il n\'y a pas d\'exigence de tout-ou-rien. Votre célébration crée un impact quel que soit le total final.',
 
   // Homepage - CTA
   'cta.title': 'Votre célébration pourrait sauver une vie',
@@ -3244,12 +3244,12 @@ export default {
   'seo.howItWorks.description': 'Découvrez comment JoyFund transforme les célébrations en soulagement médical. Étapes simples pour lancer votre campagne.',
 
   'howItWorks.hero.eyebrow': 'Comment ça marche',
-  'howItWorks.hero.title': 'Comment fonctionne le financement sur JoyFund',
-  'howItWorks.hero.lead': 'JoyFund est l\u2019endroit de confiance pour collecter des fonds pour ce qui vous tient à cœur. Sans pression pour atteindre votre objectif, mais avec des outils utiles pour vous aider, vous pouvez lancer votre collecte en toute confiance.',
+  'howItWorks.hero.title': 'Comment fonctionne JoyFund',
+  'howItWorks.hero.lead': 'JoyFund est une plateforme de financement de la santé maternelle et néonatale portée par la communauté. En quelques étapes simples, vous pouvez transformer une célébration - anniversaire, mariage, remise de diplôme ou promotion - en un soutien organisé qui aide une mère et un nouveau-né vulnérables à accéder aux soins essentiels. Il n\u2019y a aucune pression pour atteindre un objectif : chaque contribution fait la différence.',
   'howItWorks.hero.cta': 'Créer un JoyFund',
 
-  'howItWorks.section.title': 'Voici ce à quoi vous pouvez vous attendre :',
-  'howItWorks.section.desc': 'Découvrez étape par étape ce qui vous attend \u2014 de la rédaction de votre histoire au partage de votre collecte.',
+  'howItWorks.section.title': 'Voici ce à quoi vous pouvez vous attendre lorsque vous lancez un JoyFund :',
+  'howItWorks.section.desc': 'Découvrez étape par étape ce qui vous attend \u2014 de la rédaction de votre histoire et du partage de votre JoyFund jusqu\u2019à voir comment votre don soutient les soins.',
 
   'howItWorks.stepLabel': 'Étape',
 
