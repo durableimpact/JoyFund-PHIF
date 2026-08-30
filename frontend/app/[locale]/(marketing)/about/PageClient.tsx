@@ -99,13 +99,13 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-justify">
       {/* ════════════════════════════════════════════════════════════════
           HERO - redesigned to match the reference layout:
           full-bleed photo, dark-left gradient, left-aligned copy block,
           curved white base, small "Durable Impact initiative" tag.
           ════════════════════════════════════════════════════════════════ */}
-      <section className="relative h-[620px] sm:h-[680px] lg:h-[720px] flex flex-col overflow-hidden">
+      <section className="relative h-[620px] sm:h-[680px] lg:h-[720px] flex flex-col overflow-hidden text-left">
         <Image
           src="/assets/images/about-us-joyfund-image.jpeg"
           alt="JoyFund team - local generosity organised for maternal and newborn health"
@@ -218,76 +218,84 @@ export default function AboutPage() {
             </div>
           </Reveal>
 
-          <Reveal>
-            <p className="font-bold text-[#1A1A2E] mb-4 leading-relaxed">
-              {t("about.storyLead")}
-            </p>
-          </Reveal>
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.storyP1")}
-            </p>
-          </Reveal>
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.storyP2")}
-            </p>
-          </Reveal>
+          <div className="grid md:grid-cols-2 gap-10 items-start">
+            {/* Story photo - left */}
+            <Reveal>
+              <div className="rounded-3xl overflow-hidden relative h-80 sm:h-[480px]">
+                <Image
+                  src="/assets/images/about-us-our-story-pic.jpg"
+                  alt="JoyFund founder presenting the JoyFund initiative"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </Reveal>
 
-          {/* Story photo */}
-          <Reveal delay={80}>
-            <div className="my-10 rounded-3xl overflow-hidden relative h-64 sm:h-80">
-              <Image
-                src="/assets/images/about-us-our-story-pic.jpg"
-                alt="JoyFund founder presenting the JoyFund initiative"
-                fill
-                className="object-cover"
-              />
+            {/* Story text - right (first part, beside the image) */}
+            <div>
+              <Reveal>
+                <p className="font-bold text-[#1A1A2E] mb-4 leading-relaxed">
+                  {t("about.storyLead")}
+                </p>
+              </Reveal>
+              <Reveal delay={70}>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                  {t("about.storyP1")}
+                </p>
+              </Reveal>
+              <Reveal delay={70}>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                  {t("about.storyP2")}
+                </p>
+              </Reveal>
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.storyP3")}
-            </p>
-          </Reveal>
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.storyP4")}
-            </p>
-          </Reveal>
-
-          <Reveal delay={90}>
-            <div className="my-12 py-10 px-6 sm:px-10 rounded-3xl" style={{ background: "#F2F8F8" }}>
-              <p className="text-gray-500 italic leading-relaxed mb-3">
-                {t("about.storyQuoteLead")}
+          {/* Story text - continues full width below the image */}
+          <div className="max-w-3xl mx-auto mt-10">
+            <Reveal delay={70}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                {t("about.storyP3")}
               </p>
-              <p className="text-2xl sm:text-3xl font-black leading-snug" style={{ color: TEAL }}>
-                &ldquo;{t("about.storyQuote")}&rdquo;
+            </Reveal>
+            <Reveal delay={70}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                {t("about.storyP4")}
               </p>
-            </div>
-          </Reveal>
+            </Reveal>
 
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.storyP5")}
-            </p>
-          </Reveal>
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.storyP6")}
-            </p>
-          </Reveal>
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.storyP7")}
-            </p>
-          </Reveal>
-          <Reveal delay={70}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-              {t("about.storyP8")}
-            </p>
-          </Reveal>
+            <Reveal delay={90}>
+              <div className="my-8 py-8 px-6 sm:px-8 rounded-3xl" style={{ background: "#F2F8F8" }}>
+                <p className="text-gray-500 italic leading-relaxed mb-3">
+                  {t("about.storyQuoteLead")}
+                </p>
+                <p className="text-xl sm:text-2xl font-black leading-snug" style={{ color: TEAL }}>
+                  &ldquo;{t("about.storyQuote")}&rdquo;
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={70}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                {t("about.storyP5")}
+              </p>
+            </Reveal>
+            <Reveal delay={70}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                {t("about.storyP6")}
+              </p>
+            </Reveal>
+            <Reveal delay={70}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                {t("about.storyP7")}
+              </p>
+            </Reveal>
+            <Reveal delay={70}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                {t("about.storyP8")}
+              </p>
+            </Reveal>
+          </div>
         </div>
       </section>
 
@@ -386,7 +394,7 @@ export default function AboutPage() {
           03 - WHY WE EVOLVED
           ════════════════════════════════════════════════════════════════ */}
       <section id="why-we-evolved" className="py-20 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <Reveal>
             <div className="text-center mb-12">
               <p
@@ -401,63 +409,78 @@ export default function AboutPage() {
             </div>
           </Reveal>
 
-          <Reveal>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-3">
-              {t("about.evolvedP1")}
-            </p>
-          </Reveal>
-          <Reveal delay={60}>
-            <p className="font-bold text-[#1A1A2E] mb-4">{t("about.evolvedP1End")}</p>
-          </Reveal>
-          <Reveal delay={60}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
-              {t("about.evolvedP2")}
-            </p>
-          </Reveal>
+          <div className="grid md:grid-cols-2 gap-10 items-start">
+            {/* Why we evolved photo - left */}
+            <Reveal>
+              <div className="rounded-3xl overflow-hidden relative h-80 sm:h-[480px]">
+                <Image
+                  src="/assets/images/why-we-evolved-pic.jpg"
+                  alt="Your Joy Saves Lives - JoyFund community moment"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </Reveal>
 
-          <Reveal delay={70}>
-            <div
-              className="my-10 rounded-r-3xl border-l-4 bg-[#F3F9F9] px-6 sm:px-8 py-6"
-              style={{ borderColor: TEAL }}
-            >
-              <p className="text-xl sm:text-2xl font-black text-[#1A1A2E] leading-snug">
-                {t("about.evolvedHighlight")}
+            {/* Why we evolved text - right (first part, beside the image) */}
+            <div>
+              <Reveal>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-3">
+                  {t("about.evolvedP1")}
+                </p>
+              </Reveal>
+              <Reveal delay={60}>
+                <p className="font-bold text-[#1A1A2E] mb-4">{t("about.evolvedP1End")}</p>
+              </Reveal>
+              <Reveal delay={60}>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
+                  {t("about.evolvedP2")}
+                </p>
+              </Reveal>
+              <Reveal delay={70}>
+              <div
+                className="mb-8 rounded-r-3xl border-l-4 bg-[#F3F9F9] px-6 sm:px-8 py-6"
+                style={{ borderColor: TEAL }}
+              >
+                <p className="text-xl sm:text-2xl font-black text-[#1A1A2E] leading-snug">
+                  {t("about.evolvedHighlight")}
+                </p>
+              </div>
+            </Reveal>
+            </div>
+          </div>
+
+          {/* Why we evolved text - continues full width below the image */}
+          <div className="max-w-3xl mx-auto mt-10">
+
+            <Reveal delay={60}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                {t("about.evolvedP3")}
               </p>
-            </div>
-          </Reveal>
+            </Reveal>
+            <Reveal delay={60}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
+                {t("about.evolvedP4")}
+              </p>
+            </Reveal>
 
-          <Reveal delay={60}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-              {t("about.evolvedP3")}
-            </p>
-          </Reveal>
-          <Reveal delay={60}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
-              {t("about.evolvedP4")}
-            </p>
-          </Reveal>
+            <Reveal delay={60}>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-3">
+                {t("about.evolvedP5")}
+              </p>
+            </Reveal>
+            <Reveal delay={60}>
+              <p className="font-bold text-[#1A1A2E]">{t("about.evolvedP5End")}</p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
 
-          {/* Why we evolved photo */}
-          <Reveal delay={80}>
-            <div className="my-10 rounded-3xl overflow-hidden relative h-64 sm:h-72">
-              <Image
-                src="/assets/images/why-we-evolved-pic.jpg"
-                alt="Your Joy Saves Lives - JoyFund community moment"
-                fill
-                className="object-cover"
-              />
-            </div>
-          </Reveal>
-
-          <Reveal delay={60}>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-3">
-              {t("about.evolvedP5")}
-            </p>
-          </Reveal>
-          <Reveal delay={60}>
-            <p className="font-bold text-[#1A1A2E] mb-12">{t("about.evolvedP5End")}</p>
-          </Reveal>
-
+      {/* ════════════════════════════════════════════════════════════════
+           HOW JOYFUND IS EVOLVING (separate section)
+          ════════════════════════════════════════════════════════════════ */}
+      <section id="how-joyfund-is-evolving" className="py-20 px-4 bg-[#F9FAFB]">
+        <div className="max-w-4xl mx-auto">
           {/* Then / Now */}
           <Reveal>
             <h3 className="text-xl sm:text-2xl font-black text-[#1A1A2E] text-center mb-8">
