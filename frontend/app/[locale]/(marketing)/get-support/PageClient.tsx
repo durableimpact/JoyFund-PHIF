@@ -146,27 +146,27 @@ export default function GetSupportPage() {
           </div>
 
           {/* Right: hero image */}
-          <div className="relative hidden md:flex justify-end items-end h-full">
+          <div className="hidden md:block absolute right-0 bottom-0 w-1/2 md:w-[55%] lg:w-1/2 h-[62%] md:h-[62%] lg:h-[85%] pointer-events-none z-0 md:z-20">
             <Image
               src="/assets/images/get-support-hero-image.png"
               alt={t("support.page.hero.imageAlt")}
-              width={700}
-              height={820}
+              width={1264}
+              height={842}
               priority
-              className="w-full max-w-lg h-auto object-contain object-bottom"
+              className="w-full h-full object-cover object-right object-bottom"
             />
           </div>
         </div>
 
         {/* Mobile image */}
-        <div className="md:hidden mt-6 flex justify-center">
+        <div className="md:hidden flex justify-center px-6 mt-6 pb-10">
           <Image
             src="/assets/images/get-support-hero-image.png"
             alt={t("support.page.hero.imageAlt")}
-            width={500}
-            height={580}
+            width={632}
+            height={421}
             priority
-            className="w-full max-w-xs h-auto object-contain"
+            className="w-[85%] sm:w-2/3 max-w-[340px] h-auto object-contain"
           />
         </div>
       </section>
