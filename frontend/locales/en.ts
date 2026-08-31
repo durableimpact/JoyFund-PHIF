@@ -534,7 +534,7 @@ export default {
   // About
   'about.title': 'About Us',
   'about.heroKicker': 'About JoyFund',
-  'about.heroTitleLine1': 'Local Generosity.',
+  'about.heroTitleLine1': 'Local Giving.',
   'about.heroTitleLine2': 'Organised for Health.',
   'about.heroTagline': 'A Durable Impact Maternal & Newborn Health Initiative',
   'about.heroDesc': 'JoyFund mobilises community philanthropy to help low-income pregnant women overcome financial and last-mile barriers to essential maternal and newborn care-from pregnancy through the first 42 days after birth.',
@@ -661,7 +661,7 @@ export default {
   'about.shiftClosing1': 'Not simply beneficiary, but participant.',
   'about.shiftClosing2': 'Not simply recipient, but resource-holder.',
   'about.shiftClosing3': 'Not simply a place of need, but a source of agency and possibility.',
-  'about.shiftTranslate': 'JoyFund translates this philosophy into a practical mechanism by combining local generosity and community assets with technology, verification, transparency and accountability - turning dispersed acts of giving into more organised health solidarity.',
+  'about.shiftTranslate': 'JoyFund translates this philosophy into a practical mechanism by combining local giving and community assets with technology, verification, transparency and accountability - turning dispersed acts of giving into more organised health solidarity.',
 
   'about.financingKicker': 'Why Local Financing Matters Now',
   'about.financingP1': 'Maternal and newborn health in Cameroon depends on a combination of public, household and external resources. Uncertainty in external financing demonstrates the vulnerability of systems that depend too heavily on any single source of support.',
@@ -679,7 +679,7 @@ export default {
   'about.approachKicker': 'Our Approach',
   'about.approachTitle': 'A practical model for community-powered maternal and newborn health',
   'about.approachLead': 'JoyFund combines celebration, community mobilisation, verification and direct provider payment into a single, transparent flow.',
-  'about.approachIntroTitle': 'From Local Generosity to Continuity of Care',
+  'about.approachIntroTitle': 'From Local Giving to Continuity of Care',
   'about.approachIntroP1': 'JoyFund takes a different starting point to financing maternal and newborn health: mobilise resources before financial hardship becomes a health crisis.',
   'about.approachIntroP2': 'Birthdays, weddings, baptisms, graduations and other milestones are moments when people already plan to spend, give and bring their networks together. JoyFund creates a voluntary pathway for individuals to dedicate a portion of those resources to maternal and newborn health - or invite family, friends and colleagues to give through their celebration.',
   'about.approachIntroP3': 'Celebration-based giving is JoyFund\'s distinctive entry point, but it is not the only source of support. The approach also brings together corporate giving, diaspora giving, alumni giving and wider community philanthropy to build and continually replenish a pool of resources for maternal and newborn health.',

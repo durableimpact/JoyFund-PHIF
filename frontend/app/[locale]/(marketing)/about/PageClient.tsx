@@ -108,7 +108,7 @@ export default function AboutPage() {
       <section className="relative h-[620px] sm:h-[680px] lg:h-[720px] flex flex-col overflow-hidden text-left">
         <Image
           src="/assets/images/about-us-joyfund-image.jpeg"
-          alt="JoyFund team - local generosity organised for maternal and newborn health"
+          alt="JoyFund team - local giving organised for maternal and newborn health"
           fill
           priority
           className="object-cover"
@@ -763,7 +763,7 @@ export default function AboutPage() {
             </div>
           </Reveal>
 
-          {/* Intro from doc: From Local Generosity to Continuity of Care */}
+          {/* Intro from doc: From Local Giving to Continuity of Care */}
           <Reveal delay={60}>
             <div className="max-w-3xl mx-auto text-center mb-12">
               <h3 className="text-xl sm:text-2xl font-black text-[#1A1A2E] mb-4">

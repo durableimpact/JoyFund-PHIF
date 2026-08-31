@@ -35,6 +35,8 @@ export default function Navbar({
   const { data: session, status } = useSession();
   const t = useI18n();
 
+  const localeMatch = pathname.match(/^\/(en|fr)/);
+  const locale = localeMatch ? localeMatch[1] : "en";
   const activePath = pathname.replace(/^\/(en|fr)\/?/, "/") || "/";
 
   const navLinks = [
@@ -132,26 +134,36 @@ export default function Navbar({
                 onMouseEnter={() => setAboutOpen(true)}
                 onMouseLeave={() => setAboutOpen(false)}
               >
-                <button
-                  type="button"
-                  aria-haspopup="true"
-                  aria-expanded={aboutOpen}
-                  onClick={() => setAboutOpen((v) => !v)}
-                  className={`flex items-center gap-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
-                    useDark ? "text-white/85 hover:text-white" : "text-gray-600 hover:text-[#3D77B9]"
-                  } ${
-                    isActiveLink(link.href) ? "font-semibold" : ""
-                  }`}
-                >
-                  {t("nav.about")}
-                  <HugeiconsIcon
-                    icon={ArrowDown01Icon}
-                    size={14}
-                    className={`transition-transform duration-200 ${
-                      aboutOpen ? "rotate-180" : ""
+                <div className="flex items-center gap-1.5">
+                  <Link
+                    href={`/${locale}/about`}
+                    onClick={() => setAboutOpen(false)}
+                    className={`text-sm font-medium whitespace-nowrap transition-colors ${
+                      useDark ? "text-white/85 hover:text-white" : "text-gray-600 hover:text-[#3D77B9]"
+                    } ${
+                      isActiveLink(link.href) ? "font-semibold" : ""
                     }`}
-                  />
-                </button>
+                  >
+                    {t("nav.about")}
+                  </Link>
+                  <button
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded={aboutOpen}
+                    onClick={() => setAboutOpen((v) => !v)}
+                    className={`p-0.5 rounded transition-colors ${
+                      useDark ? "text-white/85 hover:text-white" : "text-gray-600 hover:text-[#3D77B9]"
+                    }`}
+                  >
+                    <HugeiconsIcon
+                      icon={ArrowDown01Icon}
+                      size={14}
+                      className={`transition-transform duration-200 ${
+                        aboutOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                </div>
 
                 {/* Dropdown panel */}
                 <div
@@ -272,24 +284,32 @@ export default function Navbar({
           {navLinks.map((link) =>
             link.href === "/about" ? (
               <div key={link.href}>
-                <button
-                  type="button"
-                  onClick={() => setMobileAboutOpen((v) => !v)}
-                  className={`flex items-center justify-between w-full text-left font-medium transition-colors ${
-                    isActiveLink(link.href)
-                      ? "font-semibold text-[#3D77B9]"
-                      : "text-gray-700 hover:text-[#3D77B9]"
-                  }`}
-                >
-                  {t("nav.aboutDropdown")}
-                  <HugeiconsIcon
-                    icon={ArrowDown01Icon}
-                    size={16}
-                    className={`transition-transform duration-200 ${
-                      mobileAboutOpen ? "rotate-180" : ""
+                <div className="flex items-center justify-between w-full">
+                  <Link
+                    href={`/${locale}/about`}
+                    onClick={() => setMobileOpen(false)}
+                    className={`font-medium transition-colors ${
+                      isActiveLink(link.href)
+                        ? "font-semibold text-[#3D77B9]"
+                        : "text-gray-700 hover:text-[#3D77B9]"
                     }`}
-                  />
-                </button>
+                  >
+                    {t("nav.aboutDropdown")}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setMobileAboutOpen((v) => !v)}
+                    className="p-1 text-gray-600"
+                  >
+                    <HugeiconsIcon
+                      icon={ArrowDown01Icon}
+                      size={16}
+                      className={`transition-transform duration-200 ${
+                        mobileAboutOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                </div>
                 {mobileAboutOpen && (
                   <div className="mt-3 pl-4 flex flex-col gap-1 border-l-2 border-gray-100">
                     {aboutSections.map((section) => (

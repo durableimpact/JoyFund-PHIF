@@ -534,7 +534,7 @@ export default {
   // About
   'about.title': 'À propos de nous',
   'about.heroKicker': 'À propos de JoyFund',
-  'about.heroTitleLine1': 'Une générosité locale.',
+  'about.heroTitleLine1': 'Un don local.',
   'about.heroTitleLine2': 'Organisée pour la santé.',
   'about.heroTagline': 'Une initiative de Durable Impact pour la santé maternelle et néonatale',
   'about.heroDesc': 'JoyFund mobilise la philanthropie communautaire pour aider les femmes enceintes à faible revenu à surmonter les barrières financières et d\'accès aux soins maternels et néonatals essentiels - de la grossesse jusqu\'aux 42 premiers jours après la naissance.',
@@ -661,7 +661,7 @@ export default {
   'about.shiftClosing1': 'Pas seulement un bénéficiaire, mais un participant.',
   'about.shiftClosing2': 'Pas seulement un destinataire, mais un détenteur de ressources.',
   'about.shiftClosing3': 'Pas seulement un lieu de besoin, mais une source d\'action et de possibilités.',
-  'about.shiftTranslate': 'JoyFund traduit cette philosophie en un mécanisme concret en combinant la générosité locale et les atouts communautaires avec la technologie, la vérification, la transparence et la redevabilité - transformant des actes de don dispersés en une solidarité sanitaire plus organisée.',
+  'about.shiftTranslate': 'JoyFund traduit cette philosophie en un mécanisme concret en combinant le don local et les atouts communautaires avec la technologie, la vérification, la transparence et la redevabilité - transformant des actes de don dispersés en une solidarité sanitaire plus organisée.',
 
   'about.financingKicker': 'Pourquoi le financement local compte aujourd\'hui',
   'about.financingP1': 'La santé maternelle et néonatale au Cameroun dépend d\'une combinaison de ressources publiques, des ménages et externes. L\'incertitude du financement externe démontre la vulnérabilité des systèmes trop dépendants d\'une seule source de soutien.',
@@ -679,7 +679,7 @@ export default {
   'about.approachKicker': 'Notre Approche',
   'about.approachTitle': 'Un modèle pratique pour une santé maternelle et néonatale portée par la communauté',
   'about.approachLead': 'JoyFund combine célébration, mobilisation communautaire, vérification et paiement direct aux prestataires dans un flux unique et transparent.',
-  'about.approachIntroTitle': 'De la générosité locale à la continuité des soins',
+  'about.approachIntroTitle': 'Du don local à la continuité des soins',
   'about.approachIntroP1': 'JoyFund adopte un point de départ différent pour le financement de la santé maternelle et néonatale : mobiliser les ressources avant que la difficulté financière ne devienne une crise sanitaire.',
   'about.approachIntroP2': 'Les anniversaires, mariages, baptêmes, remises de diplômes et autres étapes de vie sont des moments où les gens prévoient déjà de dépenser, de donner et de rassembler leurs réseaux. JoyFund crée un moyen volontaire de consacrer une partie de ces ressources à la santé maternelle et néonatale - ou d\'inviter famille, amis et collègues à donner à travers sa célébration.',
   'about.approachIntroP3': 'Le don lié aux célébrations est le point d\'entrée distinctif de JoyFund, mais ce n\'est pas la seule source de soutien. L\'approche rassemble aussi le don d\'entreprise, le don de la diaspora, le don des anciens élèves et la philanthropie communautaire plus large pour constituer et renouveler continuellement un fonds pour la santé maternelle et néonatale.',
