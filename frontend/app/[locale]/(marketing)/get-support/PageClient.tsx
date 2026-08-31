@@ -89,7 +89,7 @@ export default function GetSupportPage() {
       >
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-end">
           {/* Left: copy */}
-          <div className="relative z-10 pb-14 md:pb-20">
+          <div className="relative z-20 pb-14 md:pb-20">
             <h1 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-2">
               {t("support.page.hero.titleLine1")}
               <br />
@@ -146,7 +146,7 @@ export default function GetSupportPage() {
           </div>
 
           {/* Right: hero image */}
-          <div className="hidden md:block absolute right-0 bottom-0 w-1/2 md:w-[55%] lg:w-1/2 h-[62%] md:h-[62%] lg:h-[85%] pointer-events-none z-0 md:z-20">
+          <div className="absolute right-0 bottom-0 w-full sm:w-3/4 md:w-[55%] lg:w-1/2 h-[45%] sm:h-[55%] md:h-[62%] lg:h-[85%] pointer-events-none z-0">
             <Image
               src="/assets/images/get-support-hero-image.png"
               alt={t("support.page.hero.imageAlt")}
@@ -158,17 +158,14 @@ export default function GetSupportPage() {
           </div>
         </div>
 
-        {/* Mobile image */}
-        <div className="md:hidden flex justify-center px-6 mt-6 pb-10">
-          <Image
-            src="/assets/images/get-support-hero-image.png"
-            alt={t("support.page.hero.imageAlt")}
-            width={632}
-            height={421}
-            priority
-            className="w-[85%] sm:w-2/3 max-w-[340px] h-auto object-contain"
-          />
-        </div>
+        {/* Dark overlay for readability - mobile & tablet only */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none lg:hidden"
+          style={{
+            background:
+              "linear-gradient(100deg, rgba(4,10,9,0.55) 0%, rgba(4,10,9,0.35) 50%, rgba(4,10,9,0.5) 100%)",
+          }}
+        />
       </section>
 
       {/* ---------- WHAT HAPPENS NEXT ---------- */}
