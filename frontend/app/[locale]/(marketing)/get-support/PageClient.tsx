@@ -31,6 +31,7 @@ export default function GetSupportPage() {
       title: t("support.page.hero.pillarTransportTitle"),
       description: t("support.page.hero.pillarTransportDesc"),
     },
+    
     {
       title: t("support.page.hero.pillarReferralTitle"),
       description: t("support.page.hero.pillarReferralDesc"),

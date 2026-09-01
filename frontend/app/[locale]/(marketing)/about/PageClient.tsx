@@ -71,7 +71,6 @@ export default function AboutPage() {
       source: t("about.statSourceNha"),
     },
   ];
-
   const newbornStats: { icon: LucideIcon; value: string; label: string }[] = [
     {
       icon: Baby,
