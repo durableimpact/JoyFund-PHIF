@@ -23,4 +23,5 @@ urlpatterns = [
     path("notifications/", include("notifications.urls")),
     path("logs/", include("logs.urls")),
     path("support/", include("support.urls")),
+    path("newsletter/", include("newsletter.urls")),
 ] + router.urls

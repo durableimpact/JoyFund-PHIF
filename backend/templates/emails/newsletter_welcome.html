@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the JoyFund Newsletter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1D38DB, #1DB1DB);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .header .tagline {
+            margin: 10px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .message {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #1D38DB, #1DB1DB);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #ececec;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to JoyFund</h1>
+            <p class="tagline">Thank you for joining our newsletter community</p>
+        </div>
+        <div class="content">
+            <p class="greeting">Hello,</p>
+            <p class="message">
+                Thank you for subscribing to the <strong>{{ app_name }}</strong> newsletter!
+                You are now part of a growing community turning celebrations into life-saving
+                support for mothers and newborns.
+            </p>
+            <p class="message">
+                As a subscriber, you'll get updates on new campaigns, inspiring stories from
+                the community, and news about how your support is making a real difference.
+            </p>
+            <p class="message">
+                If you ever want to share your own campaign story or get involved, don't hesitate
+                to get in touch with our team.
+            </p>
+            <a class="cta-button" href="https://joy-fund.com/explore">Explore Campaigns</a>
+        </div>
+        <div class="footer">
+            <p>You are receiving this email because you subscribed to the {{ app_name }} newsletter.</p>
+            <p>&copy; {{ year }} {{ app_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -19,6 +19,7 @@ export default {
   'nav.howItWorks': 'Comment ça marche',
   'nav.getSupport': 'Obtenir de l\'aide',
   'nav.resources': 'Ressources',
+  'nav.newsroom': 'Salle de presse',
   'nav.aboutDropdown': 'À propos',
   'nav.aboutMenu1': 'Notre Histoire',
   'nav.aboutMenu2': 'Pourquoi JoyFund compte',
@@ -3346,6 +3347,8 @@ export default {
   'seo.getSupport.description': 'Obtenez de l\'aide pour vos campagnes JoyFund, vos dons et votre compte. Notre équipe de support est là pour vous aider.',
   'seo.resources.title': 'Ressources',
   'seo.resources.description': 'Guides, outils et informations pour tirer le meilleur parti de JoyFund.',
+  'seo.newsroom.title': 'Salle de presse',
+  'seo.newsroom.description': 'Actualités, campagnes et histoires récentes de la communauté JoyFund.',
 
 // Get Support page
   'support.page.hero.titleLine1': "Chaque mère",
@@ -3501,5 +3504,36 @@ export default {
   'resources.page.finalCtaTitle': 'Prêt à faire la différence ?',
   'resources.page.finalCtaDesc': 'Rejoignez des milliers de membres de la communauté qui transforment des célébrations en un soutien qui sauve des vies pour les mères et nouveau-nés.',
   'resources.page.finalCtaButton': 'Lancez votre JoyFund',
+
+  // Newsroom page
+  'newsroom.page.heroKicker': 'Salle de presse',
+  'newsroom.page.heroTitleLine1': 'Des histoires',
+  'newsroom.page.heroTitleLine2': 'qui diffusent la joie',
+  'newsroom.page.heroDesc':
+    'Suivez l\'actualité, les lancements de campagnes et les histoires touchantes de la communauté JoyFund.',
+  'newsroom.page.heroCta': 'Découvrir nos histoires',
+
+  'newsroom.page.newsKicker': 'Dernières nouvelles',
+  'newsroom.page.newsTitle': 'Quoi de neuf chez JoyFund',
+  'newsroom.page.newsDesc':
+    'Annonces, jalons et mises à jour de notre plateforme et de notre communauté.',
+
+  'newsroom.page.blogsKicker': 'Blog & Histoires',
+  'newsroom.page.blogsTitle': 'Lisez nos dernières histoires',
+  'newsroom.page.blogsDesc':
+    'Témoignages de première main sur la façon dont les dons communautaires transforment les soins maternels et néonatals.',
+  'newsroom.page.readMore': 'Lire la suite',
+
+  'newsroom.page.newsletterKicker': 'Restez informé',
+  'newsroom.page.newsletterTitle': 'Rejoignez notre newsletter',
+  'newsroom.page.newsletterDesc':
+    'Abonnez-vous pour recevoir les actualités JoyFund, les lancements de campagnes et les histoires de la communauté directement dans votre boîte mail.',
+  'newsroom.page.emailPlaceholder': 'Entrez votre adresse e-mail',
+  'newsroom.page.subscribe': "S'abonner",
+  'newsroom.page.subscribing': 'Abonnement...',
+  'newsroom.page.subscribeSuccessTitle': 'Vous êtes abonné !',
+  'newsroom.page.subscribeSuccessDesc':
+    'Merci de rejoindre la newsletter JoyFund. Veuillez vérifier votre boîte de réception pour confirmer.',
+  'newsroom.page.subscribeError': 'Une erreur est survenue. Veuillez réessayer.',
 
 } as const;

@@ -19,6 +19,7 @@ export default {
   'nav.howItWorks': 'How It Works',
   'nav.getSupport': 'Get Support',
   'nav.resources': 'Resources',
+  'nav.newsroom': 'Newsroom',
   'nav.aboutDropdown': 'About Us',
   'nav.aboutMenu1': 'Our Story',
   'nav.aboutMenu2': 'Why JoyFund Matters',
@@ -3537,6 +3538,8 @@ export default {
   'seo.getSupport.description': 'Get help with your JoyFund campaigns, donations, and account. Our support team is here to help.',
   'seo.resources.title': 'Resources',
   'seo.resources.description': 'Guides, tools, and information to help you make the most of JoyFund.',
+  'seo.newsroom.title': 'Newsroom',
+  'seo.newsroom.description': 'Latest news, campaigns, and stories from the JoyFund community.',
 
 // Get Support page
   'support.page.hero.titleLine1': "Every Mother",
@@ -3684,4 +3687,34 @@ export default {
   'resources.page.finalCtaDesc': 'Join thousands of community members turning celebrations into life-saving support for mothers and newborns.',
   'resources.page.finalCtaButton': 'Start Your JoyFund',
 
+  // Newsroom page
+  'newsroom.page.heroKicker': 'Newsroom',
+  'newsroom.page.heroTitleLine1': 'Stories That',
+  'newsroom.page.heroTitleLine2': 'Spread Joy',
+  'newsroom.page.heroDesc':
+    'Follow the latest news, campaign launches, and heartfelt stories from the JoyFund community.',
+  'newsroom.page.heroCta': 'Explore Stories',
+
+  'newsroom.page.newsKicker': 'Latest News',
+  'newsroom.page.newsTitle': "What's New at JoyFund",
+  'newsroom.page.newsDesc':
+    'Announcements, milestones, and updates from across our platform and community.',
+
+  'newsroom.page.blogsKicker': 'Blog & Stories',
+  'newsroom.page.blogsTitle': 'Read Our Latest Stories',
+  'newsroom.page.blogsDesc':
+    'First-person accounts of how community donations are transforming maternal and newborn care.',
+  'newsroom.page.readMore': 'Read More',
+
+  'newsroom.page.newsletterKicker': 'Stay in the Loop',
+  'newsroom.page.newsletterTitle': 'Join Our Newsletter',
+  'newsroom.page.newsletterDesc':
+    "Subscribe to receive JoyFund news, campaign launches, and community stories straight to your inbox.",
+  'newsroom.page.emailPlaceholder': 'Enter your email address',
+  'newsroom.page.subscribe': 'Subscribe',
+  'newsroom.page.subscribing': 'Subscribing...',
+  'newsroom.page.subscribeSuccessTitle': "You're subscribed!",
+  'newsroom.page.subscribeSuccessDesc':
+    'Thank you for joining the JoyFund newsletter. Please check your inbox to confirm.',
+  'newsroom.page.subscribeError': 'Something went wrong. Please try again.',
 } as const;

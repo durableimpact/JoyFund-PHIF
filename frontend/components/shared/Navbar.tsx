@@ -45,6 +45,7 @@ export default function Navbar({
     { label: t("nav.about"), href: "/about" },
     { label: t("nav.getSupport"), href: "/get-support" },
     { label: t("nav.resources"), href: "/resources" },
+    { label: t("nav.newsroom"), href: "/newsroom" },
     { label: t("nav.explore"), href: "/explore" },
   ];
 
