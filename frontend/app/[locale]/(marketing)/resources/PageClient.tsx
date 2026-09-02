@@ -113,13 +113,13 @@ export default function ResourcesPage() {
       title: "Clevia & Marcel: Our Wedding, Their Healthy Beginning",
       excerpt:
         "As we begin our journey as husband and wife, we wanted our joy to create a meaningful beginning for someone else. So we're turning our wedding into a JoyFund campaign to pre-fund prenatal consultations for five vulnerable pregnant women.",
-      href: "/explore",
+      href: "/campaign/b05b40af-607d-4572-bd7e-556f9d4d7428",
     },
     {
       title: "Help 'Human Calculator Genesis' Fight Seizures",
       excerpt:
         "Known across Cameroon for his gift of mental mathematics, Nkeh Genesis Ngwagoh now faces a difficult battle with recurrent seizures. He's using JoyFund to cover his medical care - and asking his community for support.",
-      href: "/explore",
+      href: "/campaign/acc67483-aef9-44a3-ba0a-af19ae048b21",
     },
   ];
 
