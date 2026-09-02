@@ -93,7 +93,7 @@ export default function ResourcesPage() {
       // https://youtu.be/kGhbdEKpPMk?si=4pK5_HfCRhh7eXCZ
       videoId: "kGhbdEKpPMk",
       title: "06 Steps you can follow to Start a Joyfund Campaign",
-      desc: "Watch how a celebration becomes life-saving support for mothers and newborns.",
+      desc: "A simple 6-step guide to turn your celebration into life-saving support for mothers and newborns.",
     },
     {
       // https://youtu.be/3zGfX54RpLM?si=5lLrA_t2CL9GpG6S
