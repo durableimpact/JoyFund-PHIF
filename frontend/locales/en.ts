@@ -3645,4 +3645,43 @@ export default {
   'resources.page.legal2Desc': 'How we collect, use, and protect your personal data.',
   'resources.page.legal2Link': 'Read Privacy Policy',
 
+  // Resources hero
+  'resources.page.heroKicker': 'Knowledge Centre',
+  'resources.page.heroTitleLine1': 'Everything You Need',
+  'resources.page.heroTitleLine2': 'to Get Started',
+  'resources.page.heroDesc': 'Guides, tutorials, and answers to help you launch a campaign, understand our impact model, and make every donation count.',
+  'resources.page.heroCta': 'Explore Resources',
+
+  // How it works section
+  'resources.page.howItWorksKicker': 'How It Works',
+  'resources.page.howItWorksTitle': 'From Celebration to Care in 4 Steps',
+  'resources.page.howItWorksDesc': 'Turning a milestone into life-saving support is simple. Here is the journey from your first click to real-world impact.',
+  'resources.page.step1Title': 'Create Your JoyFund',
+  'resources.page.step1Desc': 'Choose a celebration - birthday, wedding, graduation - and set up your campaign in minutes.',
+  'resources.page.step2Title': 'Share with Your Network',
+  'resources.page.step2Desc': 'Invite friends and family to donate via mobile money, card, or other payment methods.',
+  'resources.page.step3Title': 'Funds Are Verified',
+  'resources.page.step3Desc': 'Every donation is logged transparently and verified through our fraud-proof voucher system.',
+  'resources.page.step4Title': 'Care Is Delivered',
+  'resources.page.step4Desc': 'Verified mothers and newborns receive safe delivery support, transport, and postnatal care.',
+
+  // FAQ section
+  'resources.page.faqKicker': 'Frequently Asked Questions',
+  'resources.page.faqTitle': 'Got Questions?',
+  'resources.page.faqQ1': 'How do I create a JoyFund campaign?',
+  'resources.page.faqA1': 'Click "Start a Campaign" from the Getting Started section above. You will be guided through choosing a celebration type, setting a goal, and personalising your page - it takes less than 5 minutes.',
+  'resources.page.faqQ2': 'Where does the money go?',
+  'resources.page.faqA2': 'Donations fund safe deliveries for mothers and newborns in Cameroon. Every franc is tracked transparently through our voucher system, and you can see exactly how your contributions create impact on our Trust & Transparency page.',
+  'resources.page.faqQ3': 'Is JoyFund available in my country?',
+  'resources.page.faqA3': 'JoyFund currently operates in Cameroon. We are actively working to expand across Africa. Check our Supported Countries page for the latest updates on availability.',
+  'resources.page.faqQ4': 'How is JoyFund different from other donation platforms?',
+  'resources.page.faqA4': 'JoyFund is specifically designed for maternal and newborn health. Unlike general donation platforms, every campaign directly funds verified healthcare through our fraud-proof voucher system, ensuring your money reaches those who need it most.',
+  'resources.page.faqQ5': 'Can I track my donation impact?',
+  'resources.page.faqA5': 'Yes. Our Trust & Transparency page provides real-time visibility into how donations are used. You can see the number of mothers supported, deliveries funded, and the geographic reach of community contributions.',
+
+  // Final CTA
+  'resources.page.finalCtaTitle': 'Ready to Make a Difference?',
+  'resources.page.finalCtaDesc': 'Join thousands of community members turning celebrations into life-saving support for mothers and newborns.',
+  'resources.page.finalCtaButton': 'Start Your JoyFund',
+
 } as const;
