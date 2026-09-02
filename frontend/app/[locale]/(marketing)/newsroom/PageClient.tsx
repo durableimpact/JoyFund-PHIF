@@ -34,7 +34,7 @@ const newsItems = [
     title: "Presentation of JoyFund at the 2026 International Philanthropy Conference in Ghana on Maternal and Newborn Health",
     excerpt:
       "JoyFund was presented at the 2026 International Philanthropy Conference in Ghana, where we shared our vision and approach to mobilising local philanthropy for maternal and newborn health.",
-    href: "/explore",
+    href: "#",
     featured: false,
   },
   {
