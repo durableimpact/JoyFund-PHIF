@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/shared/Navbar";
 import Reveal from "@/components/shared/Reveal";
 import { useI18n } from "@/locales/client";
@@ -19,7 +20,7 @@ const TEAL = "#0B7B63";
 
 const newsItems = [
   {
-    date: "18 Aug 2026",
+    date: "27th June 2026",
     tag: "Launch Announcement",
     title: "Launching of JoyFund",
     excerpt:
@@ -28,11 +29,11 @@ const newsItems = [
     featured: true,
   },
   {
-    date: "05 Sep 2026",
+    date: "01st - 04th Sep 2026",
     tag: "Milestone",
-    title: "Your Joy Saves Lives Campaign Goes Live",
+    title: "Presentation of JoyFund at the 2026 International Philanthropy Conference in Ghana on Maternal and Newborn Health",
     excerpt:
-      "Our flagship campaign is empowering communities to turn celebrations like weddings, birthdays, and milestones into life-saving maternal and newborn care.",
+      "JoyFund was presented at the 2026 International Philanthropy Conference in Ghana, where we shared our vision and approach to mobilising local philanthropy for maternal and newborn health.",
     href: "/explore",
     featured: false,
   },
@@ -93,11 +94,31 @@ export default function NewsroomPage() {
       {/* ════════════════════════════════════════════════════════════════
           HERO
           ════════════════════════════════════════════════════════════════ */}
-      <section
-        className="relative z-0 pt-28 md:pt-36 overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #1EA2A0, #0B7B63)" }}
-      >
-        <div className="relative z-20 max-w-4xl mx-auto px-6 pb-20 sm:pb-24 text-center">
+      <section className="relative z-0 pt-28 md:pt-36 overflow-hidden">        <div
+          className="absolute inset-0 -z-10"
+          style={{ background: "#1EA2A0" }}
+        />
+        {/* Full-bleed background image covering the entire hero */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/assets/images/newsroom-hero-image.jpeg"
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover object-center"
+          />
+        </div>
+        {/* Dark overlay for readability on all screen sizes */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(100deg, rgba(4,10,9,0.6) 0%, rgba(4,10,9,0.4) 50%, rgba(4,10,9,0.5) 100%)",
+          }}
+        />
+
+        <div className="relative z-20 max-w-4xl mx-auto px-6 pb-16 sm:pb-20 text-center">
           <Reveal>
             <div className="flex items-center justify-center gap-3 text-xs uppercase tracking-widest text-white/80 mb-6">
               <span className="h-px w-7 bg-white/50" />
@@ -301,7 +322,7 @@ export default function NewsroomPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("newsroom.page.emailPlaceholder")}
-                    className="flex-1 rounded-full px-5 py-3.5 text-sm text-[#1A1A2E] placeholder-gray-400 outline-none focus:ring-2 focus:ring-white/60"
+                    className="flex-1 rounded-full px-5 py-3.5 text-sm text-[#1A1A2E] placeholder-gray-500 border-2 border-white/80 bg-white shadow-md outline-none focus:border-white focus:ring-4 focus:ring-white/40 transition-all"
                   />
                   <button
                     type="submit"
