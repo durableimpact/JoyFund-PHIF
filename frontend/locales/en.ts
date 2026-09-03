@@ -3717,4 +3717,27 @@ export default {
   'newsroom.page.subscribeSuccessDesc':
     'Thank you for joining the JoyFund newsletter. Please check your inbox to confirm.',
   'newsroom.page.subscribeError': 'Something went wrong. Please try again.',
+
+  // Newsroom - Launch of JoyFund blog
+  'newsroom.launch.title': 'Launching of JoyFund',
+  'newsroom.launch.kicker': 'Launch Announcement',
+  'newsroom.launch.date': 'Saturday, 27 June 2026',
+  'newsroom.launch.description':
+    'On Saturday, 27 June 2026, we proudly launched JoyFund - our latest health innovation designed to strengthen social health protection through digital solidarity.',
+  'newsroom.launch.heroTitle': 'Launching of JoyFund',
+  'newsroom.launch.heroDateLine': 'Celebrating a new era of digital solidarity',
+  'newsroom.launch.body1':
+    "On Saturday, 27 June 2026, we proudly launched JoyFund, our latest health innovation designed to strengthen social health protection through digital solidarity.",
+  'newsroom.launch.body2':
+    'JoyFund transforms celebrations into opportunities to finance healthcare for vulnerable mothers, pregnant and abandoned mothers with emergencies through a transparent digital platform.',
+  'newsroom.launch.body3':
+    'We are grateful to everyone who joined us—our keynote speaker, panelists, partners, healthcare professionals, government representatives, civil society organizations, businesses, volunteers, Glorious Voices, and every participant who believes that local solutions can address local challenges.',
+  'newsroom.launch.body4':
+    'The launch marks another important milestone in our mission of fostering a more empowered, innovative, just, and sustainable Cameroon.',
+  'newsroom.launch.body5': 'Thank you for believing in this vision.',
+  'newsroom.launch.galleryTitle': 'Glimpses from the Launch',
+  'newsroom.launch.galleryDesc':
+    'A few moments from an inspiring day of solidarity, partnership, and shared hope.',
+  'newsroom.launch.backTitle': 'Back to the Newsroom',
+  'newsroom.launch.backButton': 'Back to Newsroom',
 } as const;

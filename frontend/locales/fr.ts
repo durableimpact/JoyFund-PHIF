@@ -3536,4 +3536,27 @@ export default {
     'Merci de rejoindre la newsletter JoyFund. Veuillez vérifier votre boîte de réception pour confirmer.',
   'newsroom.page.subscribeError': 'Une erreur est survenue. Veuillez réessayer.',
 
+  // Newsroom - Lancement de JoyFund blog
+  'newsroom.launch.title': 'Lancement de JoyFund',
+  'newsroom.launch.kicker': 'Annonce de lancement',
+  'newsroom.launch.date': 'Samedi 27 juin 2026',
+  'newsroom.launch.description':
+    'Le samedi 27 juin 2026, nous avons fièrement lancé JoyFund, notre toute dernière innovation en matière de santé, conçue pour renforcer la protection sociale en santé grâce à la solidarité numérique.',
+  'newsroom.launch.heroTitle': 'Lancement de JoyFund',
+  'newsroom.launch.heroDateLine': 'Célébrer une nouvelle ère de solidarité numérique',
+  'newsroom.launch.body1':
+    "Le samedi 27 juin 2026, nous avons fièrement lancé JoyFund, notre toute dernière innovation en matière de santé, conçue pour renforcer la protection sociale en santé grâce à la solidarité numérique.",
+  'newsroom.launch.body2':
+    'JoyFund transforme les célébrations en occasions de financer les soins de santé des mères vulnérables, des mères enceintes et abandonnées confrontées à des urgences, grâce à une plateforme numérique transparente.',
+  'newsroom.launch.body3':
+    'Nous remercions tous ceux qui se sont joints à nous—notre conférencier principal, les panélistes, les partenaires, les professionnels de santé, les représentants du gouvernement, les organisations de la société civile, les entreprises, les bénévoles, Glorious Voices, et chaque participant qui croit que des solutions locales peuvent relever des défis locaux.',
+  'newsroom.launch.body4':
+    'Ce lancement marque une étape importante dans notre mission de favoriser un Cameroun plus autonome, innovant, juste et durable.',
+  'newsroom.launch.body5': 'Merci de croire en cette vision.',
+  'newsroom.launch.galleryTitle': 'Aperçus du lancement',
+  'newsroom.launch.galleryDesc':
+    'Quelques instants d\'une journée inspirante de solidarité, de partenariat et d\'espoir partagé.',
+  'newsroom.launch.backTitle': 'Retour à la salle de presse',
+  'newsroom.launch.backButton': 'Retour à la salle de presse',
+
 } as const;

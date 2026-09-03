@@ -25,7 +25,7 @@ const newsItems = [
     title: "Launching of JoyFund",
     excerpt:
       "We are proud to announce the official launch of JoyFund - a community-powered platform that mobilises local philanthropy to help vulnerable women and newborns access essential care across Cameroon.",
-    href: "/about#our-story",
+    href: "/newsroom/launch-of-joyfund",
     featured: true,
   },
   {
@@ -94,7 +94,8 @@ export default function NewsroomPage() {
       {/* ════════════════════════════════════════════════════════════════
           HERO
           ════════════════════════════════════════════════════════════════ */}
-      <section className="relative z-0 pt-28 md:pt-36 overflow-hidden">        <div
+      <section className="relative z-0 pt-28 md:pt-36 overflow-hidden">
+        <div
           className="absolute inset-0 -z-10"
           style={{ background: "#1EA2A0" }}
         />
