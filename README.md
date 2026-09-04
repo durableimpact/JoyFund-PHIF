@@ -4,7 +4,6 @@
 > **Platform for Healthcare Impact Funding** — A solidarity-driven healthcare crowdfunding system built by [Durable Impact](https://durableimpact.org), digitising the spirit of communal giving to save lives and support those in need.
 
 ---
-
 ## Table of Contents
 
 - [Overview](#overview)
