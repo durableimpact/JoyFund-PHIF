@@ -227,7 +227,7 @@ export default function ResourcesPage() {
           </Reveal>
         </div>
 
-        {/* Hero image - anchored right/bottom,laps down past the hero end,
+        {/* Hero image - anchored right/bottom, laps down past the hero end,
             sized larger and zoomed in slightly */}
         <div className="absolute right-0 -bottom-[14%] translate-x-[16%] w-full sm:w-4/5 md:w-[62%] lg:w-3/5 h-[60%] sm:h-[75%] md:h-[85%] lg:h-[112%] pointer-events-none z-0">
           <Image

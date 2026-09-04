@@ -162,7 +162,7 @@ export default function GetSupportPage() {
             </Reveal>
           </div>
 
-          {/* Right: hero image */}
+          {/*Right: hero image*/}
           <div className="absolute right-0 bottom-0 w-full sm:w-3/4 md:w-[55%] lg:w-1/2 h-[45%] sm:h-[55%] md:h-[62%] lg:h-[85%] pointer-events-none z-0">
             <Image
               src="/assets/images/get-support-hero-image.png"
