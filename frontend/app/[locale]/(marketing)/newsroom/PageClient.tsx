@@ -61,6 +61,7 @@ const blogItems = [
       "A step-by-step look at how a simple celebration becomes a lifeline for a family that cannot afford essential maternal care.",
     href: "/resources#getting-started",
   },
+
   {
     title: "Help 'Human Calculator Genesis' Fight Seizures",
     excerpt:
@@ -89,6 +90,7 @@ export default function NewsroomPage() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      
       <Navbar />
 
       {/* ════════════════════════════════════════════════════════════════
