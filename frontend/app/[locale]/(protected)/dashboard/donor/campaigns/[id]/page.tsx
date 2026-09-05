@@ -380,7 +380,7 @@ export default function CampaignDetailPage() {
                     <div className="space-y-0.5">
                       {[
                         { label: t("dashboard.donor.shareFacebook"), src: "fb", url: "https://www.facebook.com/sharer/sharer.php?u=" },
-                        { label: t("dashboard.donor.shareTwitter"), src: "tw", url: "https://twitter.com/intent/tweet?url=&text=" },
+                        { label: t("dashboard.donor.shareTwitter"), src: "tw", url: "https://twitter.com/intent/tweet?text=" },
                         { label: t("dashboard.donor.shareWhatsApp"), src: "whatsapp", url: "https://wa.me/?text=" },
                         { label: t("dashboard.donor.shareLinkedIn"), src: "linkedin", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
                       ].map((s) => (

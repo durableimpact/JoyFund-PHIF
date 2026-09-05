@@ -1099,7 +1099,7 @@ export default function CampaignDetailPage() {
                       <div className="grid grid-cols-2 gap-2">
                         {[
                           { label: t("dashboard.donor.shareFacebook"), src: "fb", color: "bg-blue-600", url: "https://www.facebook.com/sharer/sharer.php?u=" },
-                          { label: t("dashboard.donor.shareTwitter"), src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?url=&text=" },
+                          { label: t("dashboard.donor.shareTwitter"), src: "tw", color: "bg-black", url: "https://twitter.com/intent/tweet?text=" },
                           { label: t("dashboard.donor.shareWhatsApp"), src: "whatsapp", color: "bg-green-500", url: "https://wa.me/?text=" },
                           { label: t("dashboard.donor.shareLinkedIn"), src: "linkedin", color: "bg-blue-700", url: "https://www.linkedin.com/sharing/share-offsite/?url=" },
                         ].map((s) => (
