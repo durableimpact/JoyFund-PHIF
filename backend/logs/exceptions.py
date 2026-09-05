@@ -44,9 +44,8 @@ def custom_exception_handler(exc, context):
         
         # Return a generic 500 response with both 'error' and 'detail'
         # for frontend compatibility (DRF convention uses 'detail')
-        error_msg = str(exc) if str(exc) else 'An unexpected error occurred'
         return Response(
-            {'error': error_msg, 'detail': error_msg},
+            {'error': 'An unexpected error occurred', 'detail': 'An unexpected error occurred'},
             status=500,
         )
 

@@ -345,7 +345,10 @@ class TicketMessageListCreateView(ListCreateAPIView):
         ticket_id = self.kwargs.get("pk")
         user = self.request.user
 
-        ticket = SupportTicket.objects.get(pk=ticket_id)
+        try:
+            ticket = SupportTicket.objects.get(pk=ticket_id)
+        except SupportTicket.DoesNotExist:
+            return TicketMessage.objects.none()
         if user.role == "SYSTEM_ADMIN" or ticket.created_by == user:
             return TicketMessage.objects.filter(ticket_id=ticket_id).select_related(
                 "sender"

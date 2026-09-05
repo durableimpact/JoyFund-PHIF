@@ -115,20 +115,23 @@ def invalidate_user_info_cache_on_user_update(sender, instance, created, **kwarg
     """
     if not created:  # Only invalidate on update, not on initial creation
         from django.core.cache import cache
-        user_id = instance.id
-        
-        # Invalidate all possible user info caches for this user
-        cache_keys = [
-            f'donor_info_{user_id}',
-            f'hospital_admin_info_{user_id}',
-            f'receptionist_info_{user_id}',
-            f'social_worker_info_{user_id}',
-            f'system_admin_info_{user_id}',
+
+        # Invalidate all possible user info caches for this user.
+        # Cache keys are view_cache:{prefix}:view_cache:{md5}, where the
+        # user id is part of the md5 hash — so match on the prefix only.
+        cache_prefixes = [
+            "view_cache:donor_info:*",
+            "view_cache:hospital_admin_info:*",
+            "view_cache:receptionist_info:*",
+            "view_cache:social_worker_info:*",
+            "view_cache:system_admin_info:*",
         ]
         
-        for cache_key in cache_keys:
-            cache.delete(f"view_cache:{cache_key}")
-            cache.delete(cache_key)
+        for prefix in cache_prefixes:
+            try:
+                cache.delete_pattern(prefix)
+            except AttributeError:
+                cache.delete(f"view_cache:{prefix}")
         
         logger.debug(f"Invalidated user info caches for user {user_id}")
 
@@ -139,10 +142,11 @@ def invalidate_user_info_cache_on_user_update(sender, instance, created, **kwarg
 def invalidate_donor_info_cache(sender, instance, **kwargs):
     """Invalidate donor info cache when donor profile is updated"""
     from django.core.cache import cache
-    user_id = instance.user.id
-    cache.delete(f'view_cache:donor_info:{user_id}')
-    cache.delete(f'donor_info_{user_id}')
-    logger.debug(f"Invalidated donor info cache for user {user_id}")
+    try:
+        cache.delete_pattern('view_cache:donor_info:*')
+    except AttributeError:
+        cache.delete('view_cache:donor_info')
+    logger.debug(f"Invalidated donor info cache for user {instance.user.id}")
 
 
 @receiver(post_save, sender=HospitalAdmin, dispatch_uid='invalidate_hospital_admin_info_cache')
