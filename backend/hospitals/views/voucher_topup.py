@@ -95,7 +95,7 @@ class VoucherTopUpRequestApproveView(APIView):
 
         success, message = approve_top_up_request_and_allocate_funds(
             top_up_request=top_up_request,
-            system_admin=request.user.system_admin,
+            system_admin=request.user.systemadmin,
             campaign_allocations=serializer.validated_data.get("campaign_allocations"),
             review_notes=serializer.validated_data.get("review_notes", ""),
         )
@@ -156,7 +156,7 @@ class VoucherTopUpRequestRejectView(APIView):
 
         success, message = reject_top_up_request(
             top_up_request=top_up_request,
-            system_admin=request.user.system_admin,
+            system_admin=request.user.systemadmin,
             review_notes=serializer.validated_data.get("review_notes"),
         )
 

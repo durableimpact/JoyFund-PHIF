@@ -23,10 +23,10 @@ class SocialWorkerDashboardView(APIView):
         responses={200: SocialWorkerDashboardSerializer()},
     )
     def get(self, request, *args, **kwargs):
-        if not hasattr(request.user, 'social_worker'):
+        if not hasattr(request.user, 'socialworker'):
             return Response({"error": "User is not a social worker"}, status=403)
 
-        social_worker = request.user.social_worker
+        social_worker = request.user.socialworker
 
         enrolled = Beneficiary.objects.filter(enrolled_by=social_worker).count()
 

@@ -364,7 +364,7 @@ class MedicalClaimProofVerifyView(APIView):
             )
 
         proof.verification_status = "VERIFIED"
-        proof.verified_by = request.user.system_admin
+        proof.verified_by = request.user.systemadmin
         proof.verified_at = timezone.now()
         proof.rejection_reason = None
         proof.save()
@@ -416,7 +416,7 @@ class MedicalClaimProofRejectView(APIView):
             )
 
         proof.verification_status = "REJECTED"
-        proof.verified_by = request.user.system_admin
+        proof.verified_by = request.user.systemadmin
         proof.verified_at = timezone.now()
         proof.rejection_reason = serializer.validated_data.get("rejection_reason")
         proof.save()
@@ -468,7 +468,7 @@ class MedicalClaimProofFlagView(APIView):
             )
 
         proof.verification_status = "FLAGGED"
-        proof.verified_by = request.user.system_admin
+        proof.verified_by = request.user.systemadmin
         proof.verified_at = timezone.now()
         proof.rejection_reason = serializer.validated_data.get("rejection_reason")
         proof.save()
@@ -589,7 +589,7 @@ class MedicalClaimApproveView(APIView):
             medical_claim=medical_claim,
             status=medical_claim.claim_status,
             notes=f"MedicalClaim status changed from {old_status} to {medical_claim.claim_status}",
-            changed_by=request.user.system_admin,
+            changed_by=request.user,
         )
 
         invalidate_group(CLAIMS_CACHE_GROUP)
@@ -655,7 +655,7 @@ class MedicalClaimRejectView(APIView):
             medical_claim=medical_claim,
             status=medical_claim.claim_status,
             notes=f"MedicalClaim status changed from PENDING to REJECTED. Reason: {medical_claim.rejection_reason}",
-            changed_by=request.user.system_admin,
+            changed_by=request.user,
         )
         invalidate_group(CLAIMS_CACHE_GROUP)
         return Response(
