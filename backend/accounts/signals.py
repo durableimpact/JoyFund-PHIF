@@ -186,7 +186,8 @@ def invalidate_social_worker_info_cache(sender, instance, **kwargs):
 def invalidate_system_admin_info_cache(sender, instance, **kwargs):
     """Invalidate system admin info cache when system admin profile is updated"""
     from django.core.cache import cache
-    user_id = instance.user.id
-    cache.delete(f'view_cache:system_admin_info:{user_id}')
-    cache.delete(f'system_admin_info_{user_id}')
+    try:
+        cache.delete_pattern('view_cache:system_admin_info:*')
+    except AttributeError:
+        cache.delete('view_cache:system_admin_info')
     logger.debug(f"Invalidated system admin info cache for user {user_id}")
