@@ -1,5 +1,6 @@
 'use client';
 import { useI18n } from '@/locales/client';
+import { getErrorMessage } from '@/lib/errors';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -101,9 +102,7 @@ export default function DisbursementsPage() {
       resetForm();
     },
     onError: (err: any) => {
-      const msg = err?.message || 'Failed to record disbursement';
-      try { const parsed = JSON.parse(err); setFormError(parsed.message || parsed.detail || msg); }
-      catch { setFormError(msg); }
+      setFormError(getErrorMessage(err, 'Failed to record disbursement'));
     }
   });
 

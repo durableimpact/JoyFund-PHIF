@@ -6,6 +6,7 @@ import { Loader2, Pencil, X, Check, Eye, EyeOff, KeyRound, Mail, CheckCircle2, A
 import { toast } from "sonner";
 import { updateProfile, changePassword, sendVerificationCode, verifyEmailCode } from "@/actions/profile";
 import { useI18n } from "@/locales/client";
+import { getErrorMessage } from "@/lib/errors";
 
 function getInitials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
@@ -122,8 +123,7 @@ export default function UserProfile() {
       setVerificationStep("code");
       toast.success(t("dashboard.donor.verificationCodeSent"));
     } catch (e) {
-      const errorData = typeof e === "string" ? JSON.parse(e) : e;
-      const msg = errorData?.detail || errorData?.error || t("dashboard.donor.failedSendVerificationCode");
+      const msg = getErrorMessage(e, t("dashboard.donor.failedSendVerificationCode"));
       setVerificationError(msg);
       toast.error(msg);
     } finally { setVerificationLoading(false); }
@@ -142,8 +142,7 @@ export default function UserProfile() {
       setVerificationCode("");
       await update({});
     } catch (e) {
-      const errorData = typeof e === "string" ? JSON.parse(e) : e;
-      const msg = errorData?.detail || errorData?.error || t("dashboard.donor.invalidVerificationCode");
+      const msg = getErrorMessage(e, t("dashboard.donor.invalidVerificationCode"));
       setVerificationError(msg);
       toast.error(msg);
       setVerificationCode("");

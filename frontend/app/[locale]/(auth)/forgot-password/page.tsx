@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { requestPasswordReset } from '@/actions/accounts';
+import { getErrorMessage } from '@/lib/errors';
 import { Heart, Loader2, ArrowLeft, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -35,14 +36,9 @@ export default function ForgotPasswordPage() {
         router.push(`/reset-password?email=${encodeURIComponent(email)}`);
       }, 3000);
     } catch (err) {
-      const errorData = typeof err === 'string' ? JSON.parse(err) : err;
-      console.error('[forgot password error]', errorData);
-      
       const errorMessage =
-        errorData?.detail ||
-        errorData?.message ||
-        'Connection error. Please try again.';
-      
+        getErrorMessage(err) || 'Connection error. Please try again.';
+
       setError(errorMessage);
       toast.error(errorMessage);
       setStep('form');

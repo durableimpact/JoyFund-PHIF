@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, AlertCircle, MapPin } from 'lucide-react';
 import { createHospital } from '@/actions/hospital';
+import { getErrorMessage } from '@/lib/errors';
 
 const LocationPickerMap = dynamic(() => import('@/components/shared/LocationPickerMap'), {
   ssr: false,
@@ -93,13 +94,7 @@ export default function CreateHospitalModal({ open, onClose }: Props) {
       onClose();
     },
     onError: (err: any) => {
-      const msg = err?.message || 'Failed to create hospital';
-      try {
-        const parsed = JSON.parse(err?.toString?.() || '{}');
-        setError(parsed.detail || parsed.name?.[0] || msg);
-      } catch {
-        setError(msg);
-      }
+      setError(getErrorMessage(err, 'Failed to create hospital'));
     },
   });
 

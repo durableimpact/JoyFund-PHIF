@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getCampayBalance, campayDisburse, getCampayTransactionStatus } from '@/actions/campay';
 import { listHospitals } from '@/actions/hospital';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function CampayPage() {
   const t = useI18n();
@@ -57,9 +58,7 @@ export default function CampayPage() {
       setTimeout(() => setFormSuccess(''), 6000);
     },
     onError: (err: any) => {
-      const msg = err?.message || 'Disbursement failed';
-      try { const parsed = JSON.parse(err); setFormError(parsed.error || parsed.message || parsed.detail || msg); }
-      catch { setFormError(msg); }
+      setFormError(getErrorMessage(err, 'Disbursement failed'));
     }
   });
 
@@ -90,9 +89,7 @@ export default function CampayPage() {
       const result = await getCampayTransactionStatus(token, txRef.trim());
       setTxStatus(result);
     } catch (err: any) {
-      const msg = err?.message || 'Lookup failed';
-      try { const parsed = JSON.parse(err); setTxLookupError(parsed.error || parsed.message || msg); }
-      catch { setTxLookupError(msg); }
+      setTxLookupError(getErrorMessage(err, 'Lookup failed'));
     } finally { setTxLoading(false); }
   }
 

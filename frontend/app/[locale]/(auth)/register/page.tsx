@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { createDonorAccount } from "@/actions/accounts";
+import { getErrorMessage } from "@/lib/errors";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
@@ -126,55 +127,13 @@ export default function RegisterPage() {
       }
       reset();
     } catch (err) {
-      let errorData: unknown = err;
-      try {
-        if (typeof err === "string") errorData = JSON.parse(err);
-      } catch {}
+      const errorMessage = getErrorMessage(
+        err,
+        t("auth.register.registrationError"),
+      );
 
-      console.error("[register error]", errorData);
-
-      if (errorData && typeof errorData === "object") {
-        for (const key of Object.keys(errorData)) {
-          const val = (errorData as Record<string, unknown>)[key];
-          const message = Array.isArray(val) ? val.join(" ") : String(val);
-          // Map backend keys to form field names (phone_number -> phone)
-          if (key === "phone_number") {
-            setFieldError("phone", { type: "server", message });
-          } else if (key === "non_field_errors" || key === "detail") {
-            setGeneralError(message);
-          } else if (
-            [
-              "first_name",
-              "last_name",
-              "email",
-              "phone",
-              "password",
-              "confirmPassword",
-            ].includes(key)
-          ) {
-            setFieldError(key as keyof RegisterInput, {
-              type: "server",
-              message,
-            });
-          } else {
-            // unknown key -> show general banner
-            setGeneralError(message);
-          }
-        }
-      } else {
-        setGeneralError(t("auth.register.registrationError"));
-      }
-
-      const banner =
-        (errorData &&
-          typeof errorData === "object" &&
-          ("message" in errorData
-            ? (errorData as Record<string, unknown>).message
-            : Array.isArray(errorData)
-              ? errorData[0]
-              : null)) ||
-        t("auth.register.registrationError");
-      toast.error(String(banner));
+      setGeneralError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

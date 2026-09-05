@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { formatXAF } from '@/lib/utils';
 import { InputPhone } from '@/components/ui/input-phone';
 import { createCampaign, donateToCampaign } from '@/actions/campaigns';
+import { getErrorMessage } from '@/lib/errors';
 import { useForm } from 'react-hook-form';
 import { useI18n } from '@/locales/client';
 
@@ -109,12 +110,7 @@ function CreateCampaignContent() {
       setCampaignCreatedForDonation(data);
     },
     onError: (error: any) => {
-      try {
-        const errorData = JSON.parse(error);
-        alert(errorData?.error || t('donor.campaigns.create.createFailed'));
-      } catch {
-        alert(error?.message || t('donor.campaigns.create.createFailed'));
-      }
+      alert(getErrorMessage(error, t('donor.campaigns.create.createFailed')));
     },
   });
 
@@ -150,12 +146,7 @@ function CreateCampaignContent() {
       }
     },
     onError: (error: any) => {
-      try {
-        const errorData = JSON.parse(error);
-        alert(errorData?.error || t('donor.campaigns.create.paymentInitFailed'));
-      } catch {
-        alert(error?.message || t('donor.campaigns.create.paymentInitFailed'));
-      }
+      alert(getErrorMessage(error, t('donor.campaigns.create.paymentInitFailed')));
     },
   });
 

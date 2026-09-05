@@ -74,15 +74,21 @@ function DonorListDialog({
 
   const fetchDonations = useCallback(
     async (page: number) => {
+      setIsFetching(true);
       try {
-        setIsFetching(true);
         const res = await listCampaignDonations(campaignId, {
           status: "SUCCESS",
           page: page.toString(),
         });
         const pageData = res as PaginationResponse<Donation>;
+        if (!pageData?.results) {
+          setHasNextPage(false);
+          return;
+        }
         setPages((prev) => [...prev, pageData]);
-        setHasNextPage(!!pageData?.next);
+        setHasNextPage(!!pageData.next);
+      } catch {
+        setHasNextPage(false);
       } finally {
         setIsFetching(false);
       }
@@ -232,17 +238,11 @@ function DonorListDialog({
 function DonorList({
   donations,
   totalDonors,
-  hasNextPage,
-  isFetchingNextPage,
-  fetchNextPage,
   campaignId,
   campaignTitle,
 }: {
   donations: Donation[];
   totalDonors: number;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
   campaignId: string;
   campaignTitle: string;
 }) {
@@ -1152,8 +1152,8 @@ export default function CampaignDetailPage() {
                     </p>
                     {campaign.donor && (
                       <p className="text-sm font-bold text-[#1A1A2E] truncate">
-                        {campaign.donor.user.first_name}{" "}
-                        {campaign.donor.user.last_name}
+                        {campaign.donor?.user?.first_name}{" "}
+                        {campaign.donor?.user?.last_name}
                       </p>
                     )}
                   </div>
@@ -1165,9 +1165,6 @@ export default function CampaignDetailPage() {
             <DonorList
               donations={donations}
               totalDonors={campaign.donor_count || donations.length}
-              hasNextPage={hasNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-              fetchNextPage={fetchNextPage}
               campaignId={campaign.id}
               campaignTitle={campaign.title}
             />

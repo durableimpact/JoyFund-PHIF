@@ -1,5 +1,6 @@
 'use client';
 import { confirmPasswordReset } from '@/actions/accounts';
+import { getErrorMessage } from '@/lib/errors';
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -82,14 +83,9 @@ function ResetPasswordPageContent() {
       setStep('password');
       toast.success(t('auth.resetPassword.codeConfirmed'));
     } catch (err) {
-      const errorData = typeof err === 'string' ? JSON.parse(err) : err;
-      console.error('[verify code error]', errorData);
-      
       const errorMessage =
-        errorData?.detail ||
-        errorData?.message ||
-        'Invalid code. Please try again.';
-      
+        getErrorMessage(err) || 'Invalid code. Please try again.';
+
       setError(errorMessage);
       toast.error(errorMessage);
       setCode(['', '', '', '', '', '']);
@@ -132,14 +128,9 @@ function ResetPasswordPageContent() {
       setStep('done');
       toast.success('Password reset successfully.');
     } catch (err) {
-      const errorData = typeof err === 'string' ? JSON.parse(err) : err;
-      console.error('[reset password error]', errorData);
-      
       const errorMessage =
-        errorData?.detail ||
-        errorData?.message ||
-        'Could not reset password. Please request a new code.';
-      
+        getErrorMessage(err) || 'Could not reset password. Please request a new code.';
+
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

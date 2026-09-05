@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Loader2, Upload, UserPlus, MapPin, Navigation, X } from 'lucide-react';
 import { z } from 'zod';
 import { createBeneficiary } from '@/actions/beneficiaries';
+import { getErrorMessage } from '@/lib/errors';
 import { useI18n } from '@/locales/client';
 
 const LocationPickerMap = dynamic(() => import('@/components/shared/LocationPickerMap'), {
@@ -169,8 +170,7 @@ export default function CreateBeneficiaryPage() {
     },
     onSuccess: (result: any) => router.push(`/dashboard/social-worker/beneficiaries/${result.id}`),
     onError: (err: any) => {
-      const msg = err?.message || 'Failed to create beneficiary';
-      try { setApiError(JSON.parse(err)); } catch { setApiError(msg); }
+      setApiError(getErrorMessage(err, 'Failed to create beneficiary'));
     },
   });
 

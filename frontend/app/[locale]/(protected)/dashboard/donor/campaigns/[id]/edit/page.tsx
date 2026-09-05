@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Loader2, ImagePlus, X } from "lucide-react";
 import { getCampaign, updateCampaign } from "@/actions/campaigns";
+import { getErrorMessage } from "@/lib/errors";
 import { DetailPageSkeleton } from "@/components/shared/PageSkeletons";
 import { useI18n } from "@/locales/client";
 
@@ -91,12 +92,7 @@ export default function EditCampaignPage() {
       router.push(`/dashboard/donor/campaigns/${id}`);
     },
     onError: (error: any) => {
-      try {
-        const errorData = JSON.parse(error);
-        alert(errorData?.error || t('donor.campaigns.edit.updateFailed'));
-      } catch {
-        alert(error?.message || t('donor.campaigns.edit.updateFailed'));
-      }
+      alert(getErrorMessage(error, t('donor.campaigns.edit.updateFailed')));
     },
   });
 

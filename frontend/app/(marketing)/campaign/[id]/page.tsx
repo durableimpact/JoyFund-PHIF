@@ -67,15 +67,21 @@ function DonorListDialog({
 
   const fetchDonations = useCallback(
     async (page: number) => {
+      setIsFetching(true);
       try {
-        setIsFetching(true);
         const res = await listCampaignDonations(campaignId, {
           status: "SUCCESS",
           page: page.toString(),
         });
         const pageData = (res as any)?.json || res;
+        if (!pageData?.results) {
+          setHasNextPage(false);
+          return;
+        }
         setPages((prev) => [...prev, pageData]);
-        setHasNextPage(!!pageData?.next);
+        setHasNextPage(!!pageData.next);
+      } catch {
+        setHasNextPage(false);
       } finally {
         setIsFetching(false);
       }
@@ -1063,8 +1069,8 @@ export default function CampaignPage() {
                     </p>
                     {campaign.donor && (
                       <p className="text-sm font-bold text-[#1A1A2E] truncate">
-                        {campaign.donor.user.first_name}{" "}
-                        {campaign.donor.user.last_name}
+                        {campaign.donor?.user?.first_name}{" "}
+                        {campaign.donor?.user?.last_name}
                       </p>
                     )}
                   </div>

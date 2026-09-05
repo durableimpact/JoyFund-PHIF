@@ -7,6 +7,12 @@ import CampaignCard from "@/components/shared/CampaignCard";
 import { listCampaigns } from "@/actions/campaigns";
 import { useI18n } from "@/locales/client";
 
+// Maps filter values to backend campaign statuses (uppercase choices).
+const CAMPAIGN_STATUS_MAP: Record<string, string> = {
+  active: "ACTIVE",
+  completed: "CLOSED",
+};
+
 // Display labels for event types
 const getEventLabels = (t: any) => [
   { value: "All", label: t("explore.allTypes") },
@@ -33,7 +39,8 @@ export default function ExplorePage() {
     queryFn: async () =>
       await listCampaigns({
         event_type: filter === "All" ? undefined : (filter as any),
-        status: statusFilter === "all" ? undefined : statusFilter,
+        status:
+          statusFilter === "all" ? undefined : CAMPAIGN_STATUS_MAP[statusFilter],
         min_progress_percentage: 0,
         is_public: true,
         is_active: true,

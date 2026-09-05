@@ -74,7 +74,7 @@ export default function LeaderboardPage() {
   };
 
   const getDonorName = (campaign: CampaignLeaderboardEntry) => {
-    return campaign.donor.user.first_name || 'Anonymous';
+    return campaign.donor?.user?.first_name || 'Anonymous';
   };
 
   const totalRaised = leaderboard.length > 0
@@ -87,7 +87,9 @@ export default function LeaderboardPage() {
 
   const handleDonorClick = (e: React.MouseEvent, campaign: CampaignLeaderboardEntry) => {
     e.stopPropagation();
-    router.push(`/donor/${campaign.donor.id}`);
+    if (campaign.donor?.id) {
+      router.push(`/donor/${campaign.donor.id}`);
+    }
   };
 
   return (
