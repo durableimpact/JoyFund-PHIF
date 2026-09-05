@@ -1099,7 +1099,7 @@ export default function CampaignDetailPage() {
                   {campaign.donor ? (
                     <Avatar className="w-10 h-10 bg-[#1DB1DB]">
                       <AvatarImage
-                        src={campaign.donor?.user?.profile_picture}
+                        src={campaign.donor?.user?.profile_picture ?? undefined}
                       />
                       <AvatarFallback>{organizerInitial}</AvatarFallback>
                     </Avatar>

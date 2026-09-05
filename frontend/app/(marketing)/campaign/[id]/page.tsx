@@ -43,7 +43,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 
 const VISIBLE_DONORS = 8;
@@ -63,11 +62,9 @@ function DonorListDialog({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
 
   const fetchDonations = useCallback(
     async (page: number) => {
-      setIsFetching(true);
       try {
         const res = await listCampaignDonations(campaignId, {
           status: "SUCCESS",
@@ -82,8 +79,6 @@ function DonorListDialog({
         setHasNextPage(!!pageData.next);
       } catch {
         setHasNextPage(false);
-      } finally {
-        setIsFetching(false);
       }
     },
     [campaignId],
