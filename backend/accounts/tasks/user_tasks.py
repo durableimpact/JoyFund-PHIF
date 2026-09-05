@@ -39,12 +39,12 @@ def notify_admin_user_created(
         message_data = {
             'type': 'notification_event',
             'data': {
-                'id': user.id,
+                'id': str(user.id),
                 'title': 'New User Registration',
                 'message': f'New {user.get_role_display()} account created: {user.full_name} ({user.email})',
                 'notification_type': 'USER_CREATED',
                 'object': {
-                    'user_id': user.id,
+                    'user_id': str(user.id),
                     'email': user.email,
                     'full_name': user.full_name,
                     'role': user.role,

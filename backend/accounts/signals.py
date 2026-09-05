@@ -86,7 +86,7 @@ def send_welcome_email_on_user_creation(sender, instance, created, **kwargs):
         if user_role == 'DONOR':
             try:
                 notify_admin_user_created.delay(
-                    user_id=instance.id,
+                    user_id=str(instance.id),
                     user_data={
                         'email': instance.email,
                         'full_name': f"{instance.first_name} {instance.last_name}".strip(),

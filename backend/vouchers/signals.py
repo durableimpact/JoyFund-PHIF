@@ -14,7 +14,7 @@ def trigger_voucher_sms(sender, instance, created, **kwargs):
     if created:
         try:
             # Trigger the task asynchronously
-            send_voucher_sms_task.delay(instance.id)
+            send_voucher_sms_task.delay(str(instance.id))
             logger.info(f"Triggered SMS task for voucher {instance.id}")
         except Exception as e:
             # We don't want to break the main flow if Celery task triggering fails
