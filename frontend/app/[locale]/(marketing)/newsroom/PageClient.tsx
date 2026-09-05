@@ -90,12 +90,12 @@ export default function NewsroomPage() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
-      
+
       <Navbar />
 
-      {/* ════════════════════════════════════════════════════════════════
+      {/* ═══════════════════════════════════════════════════════════════
           HERO
-          ════════════════════════════════════════════════════════════════ */}
+          ═══════════════════════════════════════════════════════════════ */}
       <section className="relative z-0 pt-28 md:pt-36 overflow-hidden">
         <div
           className="absolute inset-0 -z-10"

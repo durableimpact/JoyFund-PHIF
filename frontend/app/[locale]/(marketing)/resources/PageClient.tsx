@@ -184,11 +184,11 @@ export default function ResourcesPage() {
     <div className="min-h-screen bg-white overflow-x-hidden">
       <Navbar />
 
-      {/* ════════════════════════════════════════════════════════════════
+      {/* ═══════════════════════════════════════════════════════════════
           HERO - solid teal background with hero image (same pattern as
           the get-support page: image anchored right/bottom, dark overlay
           for mobile & tablet readability).
-          ════════════════════════════════════════════════════════════════ */}
+          ═══════════════════════════════════════════════════════════════ */}
       <section
         className="relative z-0 pt-28 md:pt-36"
         style={{ background: "#1EA2A0" }}
