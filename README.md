@@ -1,7 +1,7 @@
 # JoyFund-PHIF
 [![wakatime](https://wakatime.com/badge/user/7a03d500-b310-4adb-9229-1bb6044d565d/project/3712d8f8-4eaa-4033-922b-ec678de36e0c.svg)](https://wakatime.com/badge/user/7a03d500-b310-4adb-9229-1bb6044d565d/project/3712d8f8-4eaa-4033-922b-ec678de36e0c)
 
-> **Platform for Healthcare Impact Funding** — A solidarity-driven healthcare crowdfunding system built by [Durable Impact](https://durableimpact.org), digitising the spirit of communal giving to save lives and support those in need.
+> **Platform for Healthcare Impact Funding** - A solidarity-driven healthcare crowdfunding system built by [Durable Impact](https://durableimpact.org), digitising the spirit of communal giving to save lives and support those in need.
 
 ---
 
