@@ -190,4 +190,4 @@ def invalidate_system_admin_info_cache(sender, instance, **kwargs):
         cache.delete_pattern('view_cache:system_admin_info:*')
     except AttributeError:
         cache.delete('view_cache:system_admin_info')
-    logger.debug(f"Invalidated system admin info cache for user {user_id}")
+    logger.debug(f"Invalidated system admin info cache for user {instance.user.id}")
