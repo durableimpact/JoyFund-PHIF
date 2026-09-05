@@ -175,10 +175,11 @@ def invalidate_receptionist_info_cache(sender, instance, **kwargs):
 def invalidate_social_worker_info_cache(sender, instance, **kwargs):
     """Invalidate social worker info cache when social worker profile is updated"""
     from django.core.cache import cache
-    user_id = instance.user.id
-    cache.delete(f'view_cache:social_worker_info:{user_id}')
-    cache.delete(f'social_worker_info_{user_id}')
-    logger.debug(f"Invalidated social worker info cache for user {user_id}")
+    try:
+        cache.delete_pattern('view_cache:social_worker_info:*')
+    except AttributeError:
+        cache.delete('view_cache:social_worker_info')
+    logger.debug(f"Invalidated social worker info cache for user {instance.user.id}")
 
 
 @receiver(post_save, sender=SystemAdmin, dispatch_uid='invalidate_system_admin_info_cache')
