@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
+import logging
 
 from django.conf import settings
 from django.core.cache import cache
@@ -30,6 +31,7 @@ from utils.campay import CamPayManager
 
 _TAG = ['Donations']
 CACHE_TIMEOUT = 30
+logger = logging.getLogger(__name__)
 
 
 class NestedDonationViewSet(
