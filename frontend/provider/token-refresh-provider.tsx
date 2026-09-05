@@ -42,23 +42,15 @@ export default function TokenRefreshProvider({
 
     if (timeUntilExpiry >= tenMinutesInMs) return;
 
-    console.log(
-      `[TokenRefreshProvider] Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, refreshing...`,
-    );
-
     isRefreshingRef.current = true;
     try {
       const refreshed = await apiRefreshToken(refreshToken);
       if (refreshed && refreshed.access_token) {
-        console.log(
-          "[TokenRefreshProvider] Refresh successful, updating session...",
-        );
         await update({
           accessToken: refreshed.access_token,
           refreshToken: refreshed.refresh_token,
           expiresAt: Date.now() + refreshed.expires_in * 1000,
         });
-        console.log("[TokenRefreshProvider] Session updated successfully");
       } else {
         console.warn("[TokenRefreshProvider] Refresh returned empty token");
       }

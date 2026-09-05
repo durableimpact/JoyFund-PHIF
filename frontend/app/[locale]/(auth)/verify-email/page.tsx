@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { resendVerificationEmail, verifyEmail } from "@/actions/accounts";
+import { getErrorMessage } from "@/lib/errors";
 import {
   InputOTP,
   InputOTPGroup,
@@ -66,13 +67,8 @@ export default function VerifyEmailPage() {
         setResendSuccess(false);
       }, 3000);
     } catch (err) {
-      const errorData = typeof err === "string" ? JSON.parse(err) : err;
-      console.error("[resend verification error]", errorData);
-
       const errorMessage =
-        errorData?.detail ||
-        errorData?.message ||
-        "Failed to resend verification code. Please try again.";
+        getErrorMessage(err) || "Failed to resend verification code. Please try again.";
 
       setResendError(errorMessage);
       toast.error(errorMessage);
@@ -143,13 +139,8 @@ export default function VerifyEmailPage() {
         }, 2000);
       }
     } catch (err) {
-      const errorData = typeof err === "string" ? JSON.parse(err) : err;
-      console.error("[verify email error]", errorData);
-
       const errorMessage =
-        errorData?.detail ||
-        errorData?.message ||
-        "Verification failed. Please check your code and try again.";
+        getErrorMessage(err) || "Verification failed. Please check your code and try again.";
 
       setError(errorMessage);
       toast.error(errorMessage);

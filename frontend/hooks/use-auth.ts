@@ -26,11 +26,11 @@ export function useAuth() {
     if (status === "authenticated" && session) {
       // Check if token expires within 5 minutes
       const now = Date.now()
-      const expiresAt = session.expiresAt || 0
+      const expiresAt = session.expiresAt
+      if (!expiresAt) return
       const fiveMinutesInMs = 5 * 60 * 1000
 
       if (expiresAt - now < fiveMinutesInMs) {
-        console.log("[useAuth] Token expiring soon, updating session...")
         await update()
       }
     }
