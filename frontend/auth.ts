@@ -9,8 +9,6 @@ async function fetchFromAPI<T>(
     process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000";
   const url = `${baseUrl}${endpoint}`;
 
-  console.log(`[fetchFromAPI] Making request to: ${url}`);
-
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -18,8 +16,6 @@ async function fetchFromAPI<T>(
       ...options.headers,
     },
   });
-
-  console.log(`[fetchFromAPI] Response status: ${response.status}`);
 
   if (!response.ok) {
     let errorData: any;
@@ -39,8 +35,6 @@ async function fetchFromAPI<T>(
 
 // Refresh token helper function
 async function refreshAccessToken(refreshToken: string): Promise<AuthResponse> {
-  console.log("[auth] Refreshing access token");
-
   // Call server-side refresh endpoint instead of exposing secrets to client
   const response = await fetch("/api/auth/refresh", {
     method: "POST",
@@ -53,20 +47,13 @@ async function refreshAccessToken(refreshToken: string): Promise<AuthResponse> {
   });
 
   if (!response.ok) {
-    let errorData: any;
-    try {
-      errorData = await response.json();
-      console.error("[auth] Refresh error response:", errorData);
-    } catch {
-      const text = await response.text();
-      console.error("[auth] Refresh error (text):", text);
-      errorData = { error: text || `HTTP ${response.status}` };
-    }
+    const errorData = await response.json().catch(() => ({
+      error: `HTTP ${response.status}`,
+    }));
     throw new Error(JSON.stringify(errorData));
   }
 
   const data = (await response.json()) as AuthResponse;
-  console.log("[auth] Token refreshed successfully");
   return data;
 }
 
@@ -88,14 +75,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       },
       async authorize(credentials) {
-        console.log("[auth] authorize called with credentials:", {
-          email: (credentials as any)?.email,
-          password: (credentials as any)?.password ? "***" : undefined,
-          credentialsKeys: Object.keys(credentials || {}),
-        });
-
         if (!credentials?.email || !credentials?.password) {
-          console.error("[auth] Missing email or password in credentials");
           return null;
         }
 
@@ -120,8 +100,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 process.env.NEXT_PUBLIC_DJANGO_OAUTH_CLIENT_SECRET || "",
             }),
           });
-
-          console.log("[auth] Login successful for:", credentials.email);
 
           // Fetch user info based on role
           let userInfo:
@@ -201,7 +179,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             refreshToken: response.refresh_token,
             role: response.role as USER_ROLE,
             userInfo,
-            expiresAt: Date.now() + response.expires_in * 1000, // Convert seconds to milliseconds
+            expiresAt:
+              Date.now() +
+              (response.expires_in ?? 3600) * 1000, // Convert seconds to milliseconds
           };
         } catch (error) {
           console.error("[auth] Login failed:", error);
@@ -220,7 +200,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, trigger, session }) {
       // Handle client-side session update
       if (trigger === "update" && session) {
-        console.log("[auth] Handling session update from client", session);
         if (session.accessToken) token.accessToken = session.accessToken;
         if (session.refreshToken) token.refreshToken = session.refreshToken;
         if (session.expiresAt) token.expiresAt = session.expiresAt;
@@ -247,7 +226,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             });
             if (freshUserInfo) {
               token.userInfo = freshUserInfo;
-              console.log("[auth] Re-fetched userInfo after session update");
             }
           }
         } catch (err) {
@@ -258,17 +236,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Initial login
       if (user) {
-        console.log("[auth] JWT: Initial login for user:", (user as any).email);
         token.id = (user as any).id;
         token.accessToken = (user as any).accessToken;
         token.refreshToken = (user as any).refreshToken;
         token.role = (user as any).role;
         token.userInfo = (user as any).userInfo;
         token.expiresAt = (user as any).expiresAt;
-        console.log(
-          "[auth] JWT: Token set to expire at:",
-          new Date(token.expiresAt as number),
-        );
         return token;
       }
 
@@ -294,20 +267,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const timeUntilExpiry = expiresAt - now;
       const bufferTimeMs = 5 * 60 * 1000; // Refresh 5 minutes before expiry (more aggressive)
 
-      console.log(
-        `[auth] JWT check - Now: ${new Date(now).toISOString()}, Expires: ${new Date(expiresAt).toISOString()}, TTL: ${Math.round(timeUntilExpiry / 1000)}s`,
-      );
-
       // If token is already expired or expiring within 5 minutes, refresh it
       if (timeUntilExpiry < bufferTimeMs) {
-        console.log(
-          `[auth] JWT: Token expiring in ${Math.round(timeUntilExpiry / 1000)}s, attempting refresh...`,
-        );
-
         if (!token.refreshToken) {
-          console.error(
-            "[auth] JWT: No refresh token available, cannot refresh",
-          );
           return { ...token, error: "NoRefreshToken" };
         }
 
@@ -316,10 +278,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.refreshToken as string,
           );
 
-          const newExpiresAt = now + refreshedResponse.expires_in * 1000;
-          console.log(
-            `[auth] JWT: Refresh successful. New expiry: ${new Date(newExpiresAt).toISOString()}`,
-          );
+          const newExpiresAt =
+            now + (refreshedResponse.expires_in ?? 3600) * 1000;
 
           return {
             ...token,
