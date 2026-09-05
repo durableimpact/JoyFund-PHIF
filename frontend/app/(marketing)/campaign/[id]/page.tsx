@@ -231,17 +231,11 @@ function DonorListDialog({
 function DonorList({
   donations,
   totalDonors,
-  hasNextPage,
-  isFetchingNextPage,
-  fetchNextPage,
   campaignId,
   campaignTitle,
 }: {
   donations: any[];
   totalDonors: number;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
   campaignId: string;
   campaignTitle: string;
 }) {
@@ -1081,10 +1075,7 @@ export default function CampaignPage() {
             {/* ── Recent Donors ── */}
             <DonorList
               donations={donations}
-              totalDonors={campaign.donor_count || donations.length}x 
-              hasNextPage={hasNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-              fetchNextPage={fetchNextPage}
+              totalDonors={campaign.donor_count || donations.length}
               campaignId={campaign.id}
               campaignTitle={campaign.title}
             />
