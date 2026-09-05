@@ -8,7 +8,7 @@ from drf_yasg import openapi
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import HospitalAdmin, Receptionist, Role
@@ -284,7 +284,7 @@ class HospitalViewSet(CacheInvalidationMixin, viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=["get"],
-        permission_classes=[AllowAny],
+        permission_classes=[IsAuthenticated, IsSystemOrHospitalAdmin],
         url_path="dashboard",
     )
     @swagger_auto_schema(

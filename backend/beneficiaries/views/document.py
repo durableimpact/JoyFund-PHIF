@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from beneficiaries.models import Beneficiary
 from beneficiaries.models.document import BeneficiaryDocument
 from beneficiaries.serializers import BeneficiaryDocumentSerializer
-from .beneficiary import IsSocialWorker, IsSystemAdmin
+from .beneficiary import IsSocialWorker, IsSystemAdmin, CanViewBeneficiaries
 from core.cache import cache_response, invalidate_group
 
 _TAG = ["Beneficiaries"]
@@ -28,7 +28,7 @@ class BeneficiaryDocumentListCreateView(ListCreateAPIView):
     def get_permissions(self):
         if self.request.method == "POST":
             return [IsAuthenticated(), IsSocialWorker()]
-        return [IsAuthenticated()]
+        return [IsAuthenticated(), CanViewBeneficiaries()]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -83,7 +83,7 @@ class BeneficiaryDocumentDetailView(RetrieveUpdateDestroyAPIView):
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH", "DELETE"]:
             return [IsAuthenticated(), IsSystemAdmin()]
-        return [IsAuthenticated()]
+        return [IsAuthenticated(), CanViewBeneficiaries()]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):

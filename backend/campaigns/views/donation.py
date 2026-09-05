@@ -526,6 +526,13 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # Check demo mode limits (before any DB writes)
+            if settings.CAMPAY_ENVIRONMENT == "DEV" and float(amount) > 25.00:
+                return Response(
+                    {'error': 'In demo mode, maximum amount is limited to 25.00 XAF'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             # Create payment record
             # app_amount set equal to amount as placeholder; webhook will update it with the actual net amount
             payment = Payment.objects.create(
@@ -556,13 +563,6 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                 is_anonymous=is_anonymous,
                 payment=payment,
             )
-
-            # Check demo mode limits
-            if settings.CAMPAY_ENVIRONMENT == "DEV" and float(amount) > 25.00:
-                return Response(
-                    {'error': 'In demo mode, maximum amount is limited to 25.00 XAF'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
 
             # Initialize CamPay payment
             campay = CamPayManager(
@@ -605,7 +605,6 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                 )
 
             except Exception as campay_error:
-                print(f"CamPay Error: {str(campay_error)}")
                 error_message = campay_error['message'] if isinstance(campay_error, dict) and 'message' in campay_error else str(campay_error)
                 return Response(
                     {'error': f"Payment service error: {error_message}", 'campay_error': True},
@@ -613,4 +612,5 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                 )
 
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.exception("Unexpected error creating donation")
+            return Response({'error': 'An unexpected error occurred'}, status=status.HTTP_400_BAD_REQUEST)

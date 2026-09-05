@@ -42,6 +42,23 @@ class IsSystemAdmin(BasePermission):
         )
 
 
+class CanViewVouchers(BasePermission):
+    message = "Only staff members can view vouchers."
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role
+            in {
+                Role.SYSTEM_ADMIN,
+                Role.HOSPITAL_ADMIN,
+                Role.RECEPTIONIST,
+                Role.SOCIAL_WORKER,
+            }
+        )
+
+
 class VoucherCheckView(APIView):
     """
     Check if a voucher is active by its code.
@@ -147,7 +164,7 @@ class VoucherListView(ListAPIView):
     System Admin sees all, Receptionists simplified list.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanViewVouchers]
     serializer_class = VoucherListSerializer
 
     def get_queryset(self):
@@ -216,7 +233,7 @@ class VoucherDetailView(RetrieveAPIView):
     Retrieve full voucher details.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanViewVouchers]
     queryset = Voucher.objects.select_related(
         "beneficiary", "hospital", "health_issue", "medical_claim"
     ).prefetch_related("events", "funding_records")

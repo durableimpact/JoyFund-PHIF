@@ -15,6 +15,7 @@ from notifications.serializers import (
     TestPushSerializer,
 )
 from core.cache import invalidate_group
+from accounts.utils.permissions import IsSystemAdmin
 
 User = get_user_model()
 
@@ -199,7 +200,7 @@ def list_push_subscriptions(request):
     },
 )
 @api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.IsAuthenticated, IsSystemAdmin])
 def test_send_push(request):
     serializer = TestPushSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
