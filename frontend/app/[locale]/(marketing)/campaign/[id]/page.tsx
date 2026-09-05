@@ -47,7 +47,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { useI18n, useCurrentLocale } from "@/locales/client";
 
@@ -70,11 +69,9 @@ function DonorListDialog({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
 
   const fetchDonations = useCallback(
     async (page: number) => {
-      setIsFetching(true);
       try {
         const res = await listCampaignDonations(campaignId, {
           status: "SUCCESS",
@@ -89,8 +86,6 @@ function DonorListDialog({
         setHasNextPage(!!pageData.next);
       } catch {
         setHasNextPage(false);
-      } finally {
-        setIsFetching(false);
       }
     },
     [campaignId],
@@ -578,9 +573,6 @@ export default function CampaignDetailPage() {
   const [donationPages, setDonationPages] = useState<
     PaginationResponse<Donation>[]
   >([]);
-  const [currentDonationPage, setCurrentDonationPage] = useState(1);
-  const [hasNextPage, setHasNextPage] = useState(false);
-  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const hasFetchedCampaign = useRef(false);
 
   // Track campaign page view with source attribution
@@ -615,8 +607,6 @@ export default function CampaignDetailPage() {
           page: "1",
         })) as PaginationResponse<Donation>;
         setDonationPages([pageData]);
-        setHasNextPage(!!pageData?.next);
-        setCurrentDonationPage(1);
       } catch (error) {
         console.error("Error fetching donations:", error);
       }
@@ -625,36 +615,9 @@ export default function CampaignDetailPage() {
     fetchDonations();
   }, [id]);
 
-  const fetchNextDonationPage = useCallback(async () => {
-    const nextPage = currentDonationPage + 1;
-    setIsFetchingNextPage(true);
-    try {
-      const pageData = (await listCampaignDonations(id as string, {
-        status: "SUCCESS",
-        page: nextPage.toString(),
-      })) as PaginationResponse<Donation>;
-      setDonationPages((prev) => [...prev, pageData]);
-      setHasNextPage(!!pageData?.next);
-      setCurrentDonationPage(nextPage);
-    } finally {
-      setIsFetchingNextPage(false);
-    }
-  }, [id, currentDonationPage]);
-
   const campaign = campaignData;
   const donations: Donation[] =
     donationPages.flatMap((page) => page.results || []) || [];
-
-  const fetchNextPage = fetchNextDonationPage;
-  const handleCopy = () => {
-    const url =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/campaign/${campaign?.id}`
-        : "";
-    navigator.clipboard.writeText(url).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const getShareUrl = (platform: string) => {
     const base =

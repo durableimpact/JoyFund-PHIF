@@ -557,9 +557,6 @@ export default function CampaignPage() {
   const [campaignData, setCampaignData] = useState<any>(null);
   const [isCampaignLoading, setIsCampaignLoading] = useState(true);
   const [donationPages, setDonationPages] = useState<any[]>([]);
-  const [currentDonationPage, setCurrentDonationPage] = useState(1);
-  const [hasNextPage, setHasNextPage] = useState(false);
-  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const hasFetchedCampaign = useRef(false);
 
   // Fetch campaign
@@ -593,8 +590,6 @@ export default function CampaignPage() {
         });
         const pageData = (res as any)?.json || res;
         setDonationPages([pageData]);
-        setHasNextPage(!!pageData?.next);
-        setCurrentDonationPage(1);
       } catch (error) {
         console.error("Error fetching donations:", error);
       }
@@ -603,23 +598,6 @@ export default function CampaignPage() {
     fetchDonations();
   }, [id]);
 
-  const fetchNextDonationPage = useCallback(async () => {
-    const nextPage = currentDonationPage + 1;
-    setIsFetchingNextPage(true);
-    try {
-      const res = await listCampaignDonations(id as string, {
-        status: "SUCCESS",
-        page: nextPage.toString(),
-      });
-      const pageData = (res as any)?.json || res;
-      setDonationPages((prev) => [...prev, pageData]);
-      setHasNextPage(!!pageData?.next);
-      setCurrentDonationPage(nextPage);
-    } finally {
-      setIsFetchingNextPage(false);
-    }
-  }, [id, currentDonationPage]);
-
   const campaign = campaignData;
   const donations =
     donationPages.flatMap((page) => {
@@ -627,7 +605,6 @@ export default function CampaignPage() {
       return results;
     }) || [];
 
-  const fetchNextPage = fetchNextDonationPage;
   const handleCopy = () => {
     const url =
       typeof window !== "undefined"

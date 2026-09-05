@@ -8,7 +8,6 @@ import {
   CheckCircle,
   Landmark,
   Loader2,
-  Phone,
   Smartphone,
   Wallet,
 } from 'lucide-react';

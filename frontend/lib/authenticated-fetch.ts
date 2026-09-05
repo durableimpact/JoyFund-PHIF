@@ -33,7 +33,7 @@ async function updateSession(patch: Record<string, unknown>): Promise<void> {
   })
 }
 
-export async function authenticatedFetch<T = any>(
+export async function authenticatedFetch(
   url: string,
   options: RequestInit = {}
 ): Promise<Response> {
@@ -62,23 +62,21 @@ export async function authenticatedFetch<T = any>(
         // Session storage now holds the fresh token; use it for this request.
         const freshSession = await getSession()
         const freshToken = freshSession?.accessToken || refreshed.access_token
-        const freshExpiresAt = freshSession?.expiresAt || expiresAt
-        return performFetch(url, options, freshToken, freshExpiresAt)
+        return performFetch(url, options, freshToken)
       }
-    } catch (_) {
+    } catch {
       // Refresh failed — fall through and attempt the request with the
       // existing token. A 401 will be handled by the caller/error boundary.
     }
   }
 
-  return performFetch(url, options, session.accessToken, session.expiresAt)
+  return performFetch(url, options, session.accessToken)
 }
 
 async function performFetch(
   url: string,
   options: RequestInit,
-  accessToken: string,
-  _expiresAt?: number
+  accessToken: string
 ): Promise<Response> {
   const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://localhost:8000"
   const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url}`
