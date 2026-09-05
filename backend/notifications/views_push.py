@@ -223,7 +223,7 @@ def test_send_push(request):
         target_value = list(roles)
     elif user_ids:
         target = "user_ids"
-        target_value = list(user_ids)
+        target_value = [str(uid) for uid in user_ids]
     else:
         target = "self"
         target_value = []
