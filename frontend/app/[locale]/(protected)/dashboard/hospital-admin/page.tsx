@@ -22,9 +22,6 @@ export default function HospitalAdminDashboard() {
   const currentUser = (session?.user as any)?.userInfo;
   const hospitalId = currentUser?.hospital?.id;
 
-  console.log('Hospital Dashboard - Current User:', currentUser);
-  console.log('Hospital Dashboard - Hospital ID:', hospitalId);
-
   const { data: profile } = useQuery({
     queryKey: ['ha-profile', token],
     queryFn: () => getHospitalAdminInfo(token),
