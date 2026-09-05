@@ -44,7 +44,7 @@ export default function DonorDashboardPage() {
       try {
         const data = await getMyCampaigns(token);
         if (!off) setCampaigns(Array.isArray(data) ? data : []);
-      } catch {}
+      } catch (err) { if (!off) console.warn("Failed to load my campaigns", err); }
       finally {
         if (!off) setCampaignsLoading(false);
       }
@@ -69,7 +69,7 @@ export default function DonorDashboardPage() {
                   : []),
           );
         }
-      } catch {}
+      } catch (err) { if (!off) console.warn("Failed to load my donations", err); }
       finally {
         if (!off) setDonationsLoading(false);
       }
@@ -84,7 +84,7 @@ export default function DonorDashboardPage() {
       try {
         const data = await getDonorDashboard(donorProfileId, token);
         if (!off) setDashboardData(data);
-      } catch {}
+      } catch (err) { if (!off) console.warn("Failed to load donor dashboard", err); }
       finally {
         if (!off) setDashboardLoading(false);
       }

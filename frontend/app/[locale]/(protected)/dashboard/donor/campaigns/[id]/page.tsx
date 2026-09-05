@@ -79,7 +79,7 @@ export default function CampaignDetailPage() {
       try {
         const d = await listCampaignDonations(id as string, { status: "SUCCESS" });
         if (!off) setDonations((d as any)?.json?.results || (d as any)?.results || []);
-      } catch {}
+      } catch (err) { console.warn("Failed to load campaign donations", err); }
     })();
     return () => { off = true; };
   }, [token, id]);
@@ -88,7 +88,7 @@ export default function CampaignDetailPage() {
     if (!id) return;
     let off = false;
     (async () => {
-      try { const d = await getCampaignDonationChart(id as string, chartPeriod); if (!off) setChartData(d as DonationChartData); } catch {}
+      try { const d = await getCampaignDonationChart(id as string, chartPeriod); if (!off) setChartData(d as DonationChartData); } catch (err) { console.warn("Failed to load donation chart", err); }
     })();
     return () => { off = true; };
   }, [id, chartPeriod]);
@@ -97,7 +97,7 @@ export default function CampaignDetailPage() {
     if (!token || !id) return;
     let off = false;
     (async () => {
-      try { const d = await getCampaignAnalytics(id as string, token, { period: analyticsPeriod }); if (!off) setAnalytics(d as CampaignAnalytics); } catch {}
+      try { const d = await getCampaignAnalytics(id as string, token, { period: analyticsPeriod }); if (!off) setAnalytics(d as CampaignAnalytics); } catch (err) { console.warn("Failed to load campaign analytics", err); }
     })();
     return () => { off = true; };
   }, [token, id, analyticsPeriod]);
