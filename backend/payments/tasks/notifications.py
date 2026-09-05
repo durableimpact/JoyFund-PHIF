@@ -57,14 +57,14 @@ def notify_donation_made(self, donation_id: int, donor_id: int|None, campaign_id
             'event': 'donation_created',
             'timestamp': donation.created_at.isoformat() if hasattr(donation, 'created_at') else datetime.now().isoformat(),
             'data': {
-                'id': donation.id,
+                'id': str(donation.id),
                 'title': f'New Donation to {campaign.title}',
                 'message': f'{donation.donor_name or "A donor"} donated {donation.net_amount} XAF to {campaign.title}',
                 'object': {
-                    'donation_id': donation.id,
-                    'campaign_id': campaign.id,
+                    'donation_id': str(donation.id),
+                    'campaign_id': str(campaign.id),
                     'campaign_name': campaign.title,
-                    'donor_id': donor_id,
+                    'donor_id': str(donor_id) if donor_id else None,
                     'donor_name': donation.donor_name,
                     'amount': donation.net_amount,
                     'currency': "XAF",

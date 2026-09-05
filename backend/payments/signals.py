@@ -135,9 +135,9 @@ def create_transactions_on_successful_donation(sender, instance: Donation, **kwa
     # After successful transaction processing, notify stakeholders via WebSocket
     try:
         notify_donation_made.delay(
-            donation_id=instance.id,
-            donor_id=instance.donor_id if instance.donor else None,
-            campaign_id=instance.campaign_id
+            donation_id=str(instance.id),
+            donor_id=str(instance.donor_id) if instance.donor else None,
+            campaign_id=str(instance.campaign_id)
         )
         logger.info(f"Queued donation notification task for donation: {instance.id}")
     except Exception as e:
