@@ -10,7 +10,6 @@ import {
   Clock,
   Loader2,
   Plus,
-  React,
   Search,
   TrendingUp,
   XCircle
