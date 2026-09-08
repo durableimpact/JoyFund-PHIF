@@ -68,7 +68,7 @@ const testimonialData = [
   },
 ];
 
-const faqKeys = ["what", "how", "donate", "eligible", "transparent", "goal"] as const;
+const faqCount = 10;
 
 export default function HomePage() {
   const t = useI18n();
@@ -556,23 +556,23 @@ export default function HomePage() {
           <Reveal>
             <div className="text-center mb-12">
               <h2 className="text-2xl font-black text-[#1A1A2E]">
-                {t("faq.title")}
+                {t("support.page.faq.title")}
               </h2>
               <p className="text-gray-500 mt-3 text-sm">
-                {t("faq.subtitle")}
+                {t("support.page.faq.subtitle")}
               </p>
             </div>
           </Reveal>
           <div className="space-y-3">
-            {faqKeys.map((key, i) => (
-              <Reveal key={key} delay={i * 60}>
+            {Array.from({ length: faqCount }, (_, i) => (
+              <Reveal key={i} delay={i * 60}>
                 <div className="card overflow-hidden">
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     className="w-full flex items-center justify-between gap-4 p-5 text-left"
                   >
                     <span className="font-semibold text-[#1A1A2E] text-sm sm:text-base">
-                      {t(`faq.${key}.q`)}
+                      {t(`support.page.faq.q${i + 1}` as any)}
                     </span>
                     <ChevronDown
                       size={18}
@@ -585,7 +585,7 @@ export default function HomePage() {
                   {openFaq === i && (
                     <div className="px-5 pb-5 -mt-1">
                       <p className="text-gray-500 text-sm leading-relaxed">
-                        {t(`faq.${key}.a`)}
+                        {t(`support.page.faq.a${i + 1}` as any)}
                       </p>
                     </div>
                   )}

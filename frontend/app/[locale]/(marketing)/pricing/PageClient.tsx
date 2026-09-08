@@ -10,13 +10,10 @@ import Link from 'next/link';
 const EXAMPLE_AMOUNTS = [1000, 2500, 5000, 10000, 25000, 50000];
 
 function getFaqItems(t: any) {
-  return [
-    { q: t("pricing.faq1Q"), a: t("pricing.faq1A") },
-    { q: t("pricing.faq2Q"), a: t("pricing.faq2A") },
-    { q: t("pricing.faq3Q"), a: t("pricing.faq3A") },
-    { q: t("pricing.faq4Q"), a: t("pricing.faq4A") },
-    { q: t("pricing.faq5Q"), a: t("pricing.faq5A") },
-  ];
+  return Array.from({ length: 10 }, (_, i) => ({
+    q: t(`support.page.faq.q${i + 1}` as any),
+    a: t(`support.page.faq.a${i + 1}` as any),
+  }));
 }
 
 function formatXaf(n: number) {
@@ -165,7 +162,7 @@ export default function PricingPage() {
 
         {/* ── FAQ ── */}
         <section className="mb-16">
-          <h2 className="text-lg font-black text-[#1A1A2E] mb-6">{t('pricing.faqTitle')}</h2>
+          <h2 className="text-lg font-black text-[#1A1A2E] mb-6">{t('support.page.faq.title')}</h2>
           <div className="space-y-0">
             {getFaqItems(t).map((item, i) => (
               <div key={i}>

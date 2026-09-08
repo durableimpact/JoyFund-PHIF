@@ -157,13 +157,10 @@ export default function ResourcesPage() {
     },
   ];
 
-  const faqs = [
-    { q: t("resources.page.faqQ1"), a: t("resources.page.faqA1") },
-    { q: t("resources.page.faqQ2"), a: t("resources.page.faqA2") },
-    { q: t("resources.page.faqQ3"), a: t("resources.page.faqA3") },
-    { q: t("resources.page.faqQ4"), a: t("resources.page.faqA4") },
-    { q: t("resources.page.faqQ5"), a: t("resources.page.faqA5") },
-  ];
+  const faqs = Array.from({ length: 10 }, (_, i) => ({
+    q: t(`support.page.faq.q${i + 1}` as any),
+    a: t(`support.page.faq.a${i + 1}` as any),
+  }));
 
   const legalResources = [
     {
@@ -426,10 +423,10 @@ export default function ResourcesPage() {
                 className="text-xs font-black uppercase tracking-[0.25em] mb-3"
                 style={{ color: TEAL }}
               >
-                {t("resources.page.faqKicker")}
+                {t("support.page.faq.title")}
               </p>
               <h2 className="text-2xl sm:text-3xl font-black text-[#1A1A2E]">
-                {t("resources.page.faqTitle")}
+                {t("support.page.faq.subtitle")}
               </h2>
             </div>
           </Reveal>
