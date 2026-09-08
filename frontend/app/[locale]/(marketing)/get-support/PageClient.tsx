@@ -12,7 +12,10 @@ import {
   ClipboardList,
   HeartHandshake,
   Phone,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
+import { useState } from "react";
 
 const GET_SUPPORT_FORM_URL = "https://forms.gle/R9vxmx9g9jrYVbtC7";
 const SUPPORT_PHONE_DISPLAY = "681 065 173";
@@ -21,6 +24,7 @@ const SUPPORT_WHATSAPP_LINK =
 
 export default function GetSupportPage() {
   const t = useI18n();
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const supportPillars = [
     {
@@ -295,20 +299,35 @@ export default function GetSupportPage() {
                     className={i < faqs.length - 1 ? "pb-6 border-b" : ""}
                     style={i < faqs.length - 1 ? { borderColor: "#CFE6E4" } : undefined}
                   >
-                    <h3
-                      className="font-black text-sm sm:text-base mb-2"
-                      style={{ color: "#2F8F6C" }}
+                    <button
+                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                      className="w-full flex items-center justify-between gap-4 text-left"
+                      aria-expanded={openFaq === i}
                     >
-                      {i + 1}. {item.q}
-                    </h3>
-                    {item.a.split("\n\n").map((para, j) => (
-                      <p
-                        key={j}
-                        className="text-xs sm:text-sm text-gray-700 leading-relaxed mb-2 last:mb-0"
+                      <h3
+                        className="font-black text-sm sm:text-base mb-0"
+                        style={{ color: "#2F8F6C" }}
                       >
-                        {para}
-                      </p>
-                    ))}
+                        {i + 1}. {item.q}
+                      </h3>
+                      {openFaq === i ? (
+                        <ChevronUp size={18} className="shrink-0" style={{ color: "#2F8F6C" }} />
+                      ) : (
+                        <ChevronDown size={18} className="shrink-0" style={{ color: "#2F8F6C" }} />
+                      )}
+                    </button>
+                    {openFaq === i && (
+                      <div className="mt-3">
+                        {item.a.split("\n\n").map((para, j) => (
+                          <p
+                            key={j}
+                            className="text-xs sm:text-sm text-gray-700 leading-relaxed mb-2 last:mb-0"
+                          >
+                            {para}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </Reveal>
               ))}
