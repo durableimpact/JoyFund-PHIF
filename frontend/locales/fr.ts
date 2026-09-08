@@ -3547,7 +3547,7 @@ export default {
   'newsroom.launch.body1':
     "Le samedi 27 juin 2026, nous avons fièrement lancé JoyFund, notre toute dernière innovation en matière de santé, conçue pour renforcer la protection sociale en santé grâce à la solidarité numérique.",
   'newsroom.launch.body2':
-    'JoyFund transforme les célébrations en occasions de financer les soins de santé des mères vulnérables, des mères enceintes et abandonnées confrontées à des urgences, grâce à une plateforme numérique transparente.',
+    'mobilise la philanthropie locale pour aider les femmes enceintes vulnérables à surmonter les obstacles financiers et de dernière ligne pour accéder aux soins essentiels maternels et néonatals, de la grossesse aux 42 premiers jours après l\'accouchement.',
   'newsroom.launch.body3':
     'Nous remercions tous ceux qui se sont joints à nous—notre conférencier principal, les panélistes, les partenaires, les professionnels de santé, les représentants du gouvernement, les organisations de la société civile, les entreprises, les bénévoles, Glorious Voices, et chaque participant qui croit que des solutions locales peuvent relever des défis locaux.',
   'newsroom.launch.body4':

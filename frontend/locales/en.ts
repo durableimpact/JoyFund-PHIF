@@ -3729,7 +3729,7 @@ export default {
   'newsroom.launch.body1':
     "On Saturday, 27 June 2026, we proudly launched JoyFund, our latest health innovation designed to strengthen social health protection through digital solidarity.",
   'newsroom.launch.body2':
-    'JoyFund transforms celebrations into opportunities to finance healthcare for vulnerable mothers, pregnant and abandoned mothers with emergencies through a transparent digital platform.',
+    'mobilises local philanthropy to help vulnerable pregnant women overcome financial and last-mile barriers to essential maternal and newborn care - from pregnancy through the first 42 days after birth.',
   'newsroom.launch.body3':
     'We are grateful to everyone who joined us—our keynote speaker, panelists, partners, healthcare professionals, government representatives, civil society organizations, businesses, volunteers, Glorious Voices, and every participant who believes that local solutions can address local challenges.',
   'newsroom.launch.body4':
