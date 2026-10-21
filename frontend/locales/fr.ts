@@ -2856,7 +2856,7 @@ export default {
   'systemAdmin.beneficiaries.edit.address': 'Adresse',
   'systemAdmin.beneficiaries.edit.cancel': 'Annuler',
   'systemAdmin.beneficiaries.edit.category': 'Catégorie',
-  'systemAdmin.beneficiaries.edit.city': 'Ville',
+  'systemAdmin.beneficiaries.edit.cit': 'Ville',
   'systemAdmin.beneficiaries.edit.region': 'Région',
   'systemAdmin.beneficiaries.edit.dateOfBirth': 'Date de naissance',
   'systemAdmin.beneficiaries.edit.ecName': "Nom du contact d'urgence",
