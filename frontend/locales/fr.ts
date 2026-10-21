@@ -60,11 +60,9 @@ export default {
   // Homepage - How it works
   'how.title': 'Comment JoyFund fonctionne',
   'how.step1.title': '1. Mobiliser les dons locaux',
-  // 'how.step1.desc1': 'Aidez les femmes enceintes à faible revenu à surmonter les obstacles financiers vérifiés pour accéder aux soins maternels et néonatals essentiels.',
-  'how.step1.desc1': 'Bientôt disponible',
+  'how.step1.desc1': 'Aidez les femmes enceintes à faible revenu à surmonter les obstacles financiers vérifiés pour accéder aux soins maternels et néonatals essentiels.',
   'how.step2.title': '2. Identifier le besoin',
-  // 'how.step2.desc1': 'Aidez les femmes enceintes à faible revenu à surmonter les obstacles financiers vérifiés pour accéder aux soins maternels et néonatals essentiels.',
-  'how.step2.desc1': 'Bientôt disponible',
+  'how.step2.desc1': 'Aidez les femmes enceintes à faible revenu à surmonter les obstacles financiers vérifiés pour accéder aux soins maternels et néonatals essentiels.',
   'how.step3.title': '3. Faciliter l\'accès',
   'how.step3.desc1': 'Soutenez le transport vers les structures de santé participantes et les hôpitaux de référence lorsque la distance et le coût entravent les soins.',
   'how.step4.title': '4. Poursuivre les soins',
