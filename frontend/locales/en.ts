@@ -60,9 +60,11 @@ export default {
   // Homepage - How it works
   'how.title': 'How JoyFund Works',
   'how.step1.title': '1. Mobilize Local Giving',
-  'how.step1.desc1': 'Help low-income pregnant women overcome verified financial barriers to essential maternal and newborn care.',
+  // 'how.step1.desc1': 'Help low-income pregnant women overcome verified financial barriers to essential maternal and newborn care.',
+  'how.step1.desc1': 'Coming Soon',
   'how.step2.title': '2. Identify Need',
-  'how.step2.desc1': 'Help low-income pregnant women overcome verified financial barriers to essential maternal and newborn care.',
+  // 'how.step2.desc1': 'Help low-income pregnant women overcome verified financial barriers to essential maternal and newborn care.',
+  'how.step2.desc1': 'Coming Soon',
   'how.step3.title': '3. Enable Access',
   'how.step3.desc1': 'Support transportation to participating health facilities and referral hospitals when distance and cost stand in the way of care.',
   'how.step4.title': '4. Continue Care',
