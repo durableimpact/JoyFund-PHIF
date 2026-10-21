@@ -576,15 +576,31 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
             description = f"Donate {amount} XAF for {campaign.title}"
 
             try:
+                def _clean_str(v):
+                    if v is None:
+                        return None
+                    if isinstance(v, str):
+                        s = v.strip()
+                        if s.lower() in ("none", "null", "undefined", ""):
+                            return None
+                        return s
+                    try:
+                        s = str(v).strip()
+                        if s.lower() in ("none", "null", "undefined", ""):
+                            return None
+                        return s
+                    except Exception:
+                        return None
+
                 first_name = None
                 last_name = None
                 email = None
                 if donor and getattr(donor, 'user', None):
-                    first_name = getattr(donor.user, 'first_name', None)
-                    last_name = getattr(donor.user, 'last_name', None)
-                    email = getattr(donor.user, 'email', None)
+                    first_name = _clean_str(getattr(donor.user, 'first_name', None))
+                    last_name = _clean_str(getattr(donor.user, 'last_name', None))
+                    email = _clean_str(getattr(donor.user, 'email', None))
                 else:
-                    name = (donor_name or '').strip()
+                    name = _clean_str(donor_name)
                     if name and name.lower() != 'anonymous':
                         parts = name.split()
                         if len(parts) == 1:
@@ -599,9 +615,9 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
                     external_reference=str(donation.id),
                     redirect_url=success_url,
                     failure_redirect_url=failure_url,
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=email,
+                    first_name=first_name if first_name is not None else "",
+                    last_name=last_name if last_name is not None else "",
+                    email=email if email is not None else "",
                     phone=normalized_phone if payment_method != 'BANK' else None,
                     payment_options=campay_payment_options
                 )
