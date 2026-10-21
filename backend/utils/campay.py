@@ -107,26 +107,6 @@ class CamPayManager:
                           currency: str = "XAF") -> Dict:
         """
         Create a payment link for customer checkout.
-        
-        Args:
-            amount: Amount to collect
-            description: Payment description
-            external_reference: External reference for tracking (must be a valid UUID)
-            redirect_url: Success redirect URL
-            phone: Optional phone number
-            first_name: Customer's first name
-            last_name: Customer's last name
-            email: Customer's email
-            failure_redirect_url: Failure redirect URL
-            payment_options: Available payment options
-            currency: Currency code
-            
-        Returns:
-            Dict: Payment link response
-            
-        Raises:
-            ValueError: For invalid phone number or amount
-            Exception: For CamPay API errors
         """
         if phone and not self.validate_phone_number(phone):
             raise ValueError("Invalid phone number format. Must start with 237 followed by 9 digits")
@@ -135,7 +115,58 @@ class CamPayManager:
             amount = str(float(amount))
         except ValueError:
             raise ValueError("Invalid amount provided")
-            
+
+        def _clean_str(value):
+            if value is None:
+                return ""
+            if isinstance(value, str):
+                v = value.strip()
+                if v.lower() in ("none", "null", "undefined"):
+                    return ""
+                return v
+            try:
+                v = str(value).strip()
+                if v.lower() in ("none", "null", "undefined"):
+                    return ""
+                return v
+            except Exception:
+                return ""
+
+        first_name_clean = _clean_str(first_name)
+        last_name_clean = _clean_str(last_name)
+        email_clean = _clean_str(email)
+
+        # Validate email format if provided; if invalid, treat as empty to avoid CamPay rejecting
+        if email_clean:
+            email_pattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$'
+            if not re.match(email_pattern, email_clean):
+                email_clean = ""
+
+        def _clean_str(value):
+            if value is None:
+                return ""
+            if isinstance(value, str):
+                v = value.strip()
+                if v.lower() in ("none", "null", "undefined"):
+                    return ""
+                return v
+            try:
+                v = str(value).strip()
+                if v.lower() in ("none", "null", "undefined"):
+                    return ""
+                return v
+            except Exception:
+                return ""
+
+        first_name_clean = _clean_str(first_name)
+        last_name_clean = _clean_str(last_name)
+        email_clean = _clean_str(email)
+
+        if email_clean:
+            email_pattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$'
+            if not re.match(email_pattern, email_clean):
+                email_clean = ""
+
         if self.mock_mode:
             mock_url = redirect_url
             separator = '&' if '?' in mock_url else '?'
@@ -151,9 +182,9 @@ class CamPayManager:
                 "description": description,
                 "external_reference": external_reference,
                 "from": phone if phone else "",
-                "first_name": first_name,
-                "last_name": last_name,
-                "email": email,
+                "first_name": first_name_clean,
+                "last_name": last_name_clean,
+                "email": email_clean,
                 "redirect_url": redirect_url,
                 "failure_redirect_url": failure_redirect_url,
                 "payment_options": payment_options

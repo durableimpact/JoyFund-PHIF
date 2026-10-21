@@ -576,15 +576,32 @@ class DonationCreateViewSet(viewsets.GenericViewSet):
             description = f"Donate {amount} XAF for {campaign.title}"
 
             try:
+                first_name = None
+                last_name = None
+                email = None
+                if donor and getattr(donor, 'user', None):
+                    first_name = getattr(donor.user, 'first_name', None)
+                    last_name = getattr(donor.user, 'last_name', None)
+                    email = getattr(donor.user, 'email', None)
+                else:
+                    name = (donor_name or '').strip()
+                    if name and name.lower() != 'anonymous':
+                        parts = name.split()
+                        if len(parts) == 1:
+                            first_name = parts[0]
+                        elif len(parts) >= 2:
+                            first_name = parts[0]
+                            last_name = ' '.join(parts[1:])
+
                 payment_link = campay.create_payment_link(
                     amount=str(amount),
                     description=description,
                     external_reference=str(donation.id),
                     redirect_url=success_url,
                     failure_redirect_url=failure_url,
-                    first_name=donor.user.first_name if donor else None,
-                    last_name=donor.user.last_name if donor else None,
-                    email=donor.user.email if donor else None,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
                     phone=normalized_phone if payment_method != 'BANK' else None,
                     payment_options=campay_payment_options
                 )
