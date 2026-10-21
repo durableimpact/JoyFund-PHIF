@@ -1,6 +1,6 @@
 export default {
   // Navbar
-  'nav.home': 'Home',
+  'nav.home': 'Hey',
   'nav.impact': 'Impact',
   'nav.explore': 'Explore',
   'nav.about': 'About',
