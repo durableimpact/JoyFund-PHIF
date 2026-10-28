@@ -1,5 +1,4 @@
 # JoyFund-PHIF
-
 This is a full-stack platform built with Django REST Framework (backend) and Next.js (frontend). It manages campaigns, donations, beneficiaries, hospitals, and payment integrations (CamPay).
 
 ## Architecture
